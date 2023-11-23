@@ -123,9 +123,7 @@ def create_teams_table(df: pd.DataFrame) -> pd.DataFrame:
     df = df.rename({"home_team_id": "name"})
     only_new_teams_df = remove_duplicate_rows(CONNECTOR, df, ["name"], "team")
     only_new_teams_df = only_new_teams_df.drop_duplicates(subset="name", keep="first")
-    
-    # TODO - CHECK IF TEAM EXISTS, ALREADY HAS AN ID, BEFORE ASSIGNING A NEW ONE
-
+    only_new_teams_df = only_new_teams_df[only_new_teams_df.apply(lambda row: get_team_id(CONNECTOR, row["name"]), axis=1).astype(bool)].reset_index()
     only_new_teams_df["id"] = only_new_teams_df.apply(lambda row: create_id("team", CONNECTOR, row.index), axis=1)
     return only_new_teams_df
 
@@ -161,7 +159,7 @@ if __name__ == "__main__":
 
         for year in sorted(data):
             season = re.findall("\d{4}", year)[0]
-            season = season[:2]+"/"+season[-2:]
+            season = season+"-"+season[-2:]
 
             path = data_folder_path+"/"+year
             df = pd.read_csv(path)
