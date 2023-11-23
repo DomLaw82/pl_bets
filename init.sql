@@ -1,0 +1,11 @@
+CREATE DATABASE pl_stats;
+
+CREATE TABLE country (
+	id VARCHAR(5) PRIMARY KEY,
+	name VARCHAR UNIQUE NOT NULL
+);
+
+CREATE TABLE competition (
+	id VARCHAR
+)
+
