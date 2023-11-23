@@ -8,7 +8,7 @@ def collect(connector) -> None:
 
 	match_facts = {}
 
-	match_id = unique_id.create_match_id(connector)
+	match_id = unique_id.create_id("match", connector)
 	match_facts['match_id'] = match_id
 
 	# TODO - Competition

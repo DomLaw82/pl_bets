@@ -13,7 +13,7 @@ def collect(connector, **kwargs) -> None:
 	players_added = 0
 	
 	while players_to_add > players_added:
-		player_id = unique_id.create_player_id(connector, offset = players_added)
+		player_id = unique_id.create_id("player", connector, players_added)
 		first_name = validation.validate("text",
 			input("\nPlayer first name/s: "), "Player first name/s: ").title()
 		last_name = validation.validate("text",

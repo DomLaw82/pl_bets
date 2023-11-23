@@ -13,7 +13,7 @@ def collect(connector) -> None:
 	cl_output.print_dict_table(countries)
 	print("\n")
 
-	country_id = unique_id.create_country_id(connector)
+	country_id = unique_id.create_id("country", connector)
 	# TODO - Select competition(league) for match
 
 	country_id = validation.validate("in_list", input("\nWhat country is this competition in by id: "), "What country is this competition in by id: ", var_list=countries_ids)

@@ -4,7 +4,7 @@ from datetime import datetime
 from pandas import DataFrame
 from utilities.db_connector import pl_stats_connector
 from utilities.remove_duplicates import remove_duplicate_rows
-from utilities.unique_id import create_player_id, convert_team_name_to_team_id, get_player_id
+from utilities.unique_id import create_id, convert_team_name_to_team_id, get_player_id
 from utilities.string_manipulation import escape_single_quote
 
 CONNECTOR = pl_stats_connector
@@ -73,7 +73,7 @@ def player_df_to_db(df:DataFrame) -> DataFrame:
 	df.loc[:, "first_name"] = df.apply(lambda row: escape_single_quote(row.first_name), axis=1)
 	df.loc[:, "last_name"] = df.apply(lambda row: escape_single_quote(row.last_name), axis=1)
 	rows_not_in_db_df = remove_duplicate_rows(CONNECTOR, df, ["first_name", "last_name", "birth_date"], "player")
-	rows_not_in_db_df["id"] = rows_not_in_db_df.apply(lambda row: create_player_id(CONNECTOR, offset=row.name), axis=1)
+	rows_not_in_db_df["id"] = rows_not_in_db_df.apply(lambda row: create_id("player", CONNECTOR, row.name), axis=1)
 	ordered_player_df = rows_not_in_db_df[["id", "first_name", "last_name", "birth_date"]]
 	ordered_player_df.to_sql("player", CONNECTOR.conn, if_exists="append", index=False)
 

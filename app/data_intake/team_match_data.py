@@ -112,7 +112,7 @@ def select_match_columns(df: pd.DataFrame) -> pd.DataFrame:
     new_df.loc[:, "home_team_id"] = new_df.apply(lambda row: get_team_id(CONNECTOR, row.home_team_id), axis=1)
     new_df.loc[:, "away_team_id"] = new_df.apply(lambda row: get_team_id(CONNECTOR, row.away_team_id), axis=1)
     
-    new_df["id"] = new_df.apply(lambda row: create_match_id(CONNECTOR, row.name), axis=1)
+    new_df["id"] = new_df.apply(lambda row: create_id("match", CONNECTOR, row.name), axis=1)
     new_df.loc[:, "referee_id"] = new_df.apply(lambda row: get_referee_id(CONNECTOR, row.referee_id), axis=1)
     
     columns_to_compare = ["season", "competition_id", "home_team_id", "away_team_id"]
@@ -124,14 +124,16 @@ def create_teams_table(df: pd.DataFrame) -> pd.DataFrame:
     only_new_teams_df = remove_duplicate_rows(CONNECTOR, df, ["name"], "team")
     only_new_teams_df = only_new_teams_df.drop_duplicates(subset="name", keep="first")
     
-    only_new_teams_df["id"] = only_new_teams_df.apply(lambda row: create_team_id(CONNECTOR, row["name"], row.index), axis=1)
+    # TODO - CHECK IF TEAM EXISTS, ALREADY HAS AN ID, BEFORE ASSIGNING A NEW ONE
+
+    only_new_teams_df["id"] = only_new_teams_df.apply(lambda row: create_id("team", CONNECTOR, row.index), axis=1)
     return only_new_teams_df
 
 def create_referee_table(df: pd.DataFrame) -> pd.DataFrame:
     df = df.rename({"referee_id": "name"})
     df = remove_duplicate_rows(CONNECTOR, df, ["name"], "referee")
     referee_df = df[["name"]]
-    referee_df["id"] = referee_df.apply(lambda row: create_referee_id(CONNECTOR, row.index), axis=1)
+    referee_df["id"] = referee_df.apply(lambda row: create_id("referee", CONNECTOR, row.index), axis=1)
     return referee_df
 
 def create_team_competition_df(df: pd.DataFrame, season: str, competition_id: str) -> pd.DataFrame:
