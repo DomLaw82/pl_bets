@@ -2,7 +2,7 @@ from  database.utilities  import unique_id, validation
 from database.table_functions import add_match, add_performance, add_player, add_team, add_competition, add_country
 from database.data_intake import squad_data, team_match_data
 from database.cli import cl_output
-import subprocess, os, sys
+import os, sys
 
 from . import db_connector
 
