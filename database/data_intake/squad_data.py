@@ -7,7 +7,7 @@ from database.utilities.unique_id import create_id, convert_team_name_to_team_id
 from database.utilities.string_manipulation import escape_single_quote
 
 PLAYERS_WEBSITE_ROOT = "https://www.footballsquads.co.uk/eng/"
-SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2020, 2025, 1)]
+SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2017, 2025, 1)]
 LEAGUE_NAMES = ["faprem.htm", "engprem.htm"]
 
 def get_page_soup(html_text):

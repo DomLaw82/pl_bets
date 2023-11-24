@@ -5,8 +5,8 @@ from database.utilities.remove_duplicates import remove_duplicate_rows
 from database.utilities.unique_id import *
 from database.utilities.string_manipulation import escape_single_quote
 
-SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2020, 2025, 1)]
-TABLE_SEASONS = [f"{str(year-1)}-{str(year)[-2:]}" for year in range(2020, 2025, 1)]
+SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2017, 2025, 1)]
+TABLE_SEASONS = [f"{str(year-1)}-{str(year)[-2:]}" for year in range(2017, 2025, 1)]
 
 def download_csv_for_season(season):
     try:
