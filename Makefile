@@ -26,11 +26,11 @@ enter_shell:
 	PGPASSWORD=$(PASSWORD) psql -h localhost -p 5432 -U $(USERNAME) -d $(DATABASE)
 
 sleep:
-	sleep 0.1
+	sleep 2
 
 start_postgres: 
 	docker start $(PSQL_CONTAINER_NAME)
 
-rebuild_postgres: remove_postgres build_postgres run_postgres sleep enter_hell
+rebuild_postgres: remove_postgres build_postgres run_postgres sleep enter_shell
 
 restart_postgres: stop_postgres start_postgres sleep enter_shell

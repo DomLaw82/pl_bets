@@ -2,14 +2,14 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from pandas import DataFrame
-from utilities.db_connector import pl_stats_connector
-from utilities.remove_duplicates import remove_duplicate_rows
-from utilities.unique_id import create_id, convert_team_name_to_team_id, get_player_id
-from utilities.string_manipulation import escape_single_quote
+from database.utilities.db_connector import local_pl_stats_connector
+from database.utilities.remove_duplicates import remove_duplicate_rows
+from database.utilities.unique_id import create_id, convert_team_name_to_team_id, get_player_id
+from database.utilities.string_manipulation import escape_single_quote
 
-CONNECTOR = pl_stats_connector
+CONNECTOR = local_pl_stats_connector
 PLAYERS_WEBSITE_ROOT = "https://www.footballsquads.co.uk/eng/"
-SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2006, 2025, 1)]
+SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2020, 2025, 1)]
 LEAGUE_NAMES = ["faprem.htm", "engprem.htm"]
 
 def get_page_soup(html_text):
@@ -68,15 +68,18 @@ def format_player_entries(player: list[str]) -> list[str]:
 
 	return formatted_name + [player[1]] + new_dob + [player[3]]
 
-def player_df_to_db(df:DataFrame) -> DataFrame:
-	df = df[["first_name", "last_name", "birth_date"]]
+def player_df_to_db(df:DataFrame):
+	df = df[["first_name", "last_name", "birth_date", "position"]]
 	df.loc[:, "first_name"] = df.apply(lambda row: escape_single_quote(row.first_name), axis=1)
 	df.loc[:, "last_name"] = df.apply(lambda row: escape_single_quote(row.last_name), axis=1)
-	rows_not_in_db_df = remove_duplicate_rows(CONNECTOR, df, ["first_name", "last_name", "birth_date"], "player")
-	rows_not_in_db_df["id"] = rows_not_in_db_df.apply(lambda row: create_id("player", CONNECTOR, row.name), axis=1)
-	ordered_player_df = rows_not_in_db_df[["id", "first_name", "last_name", "birth_date"]]
+	rows_not_in_db_df = remove_duplicate_rows(CONNECTOR, df, ["first_name", "last_name", "birth_date", "position"], "player")
+	if rows_not_in_db_df.empty:
+		return
+	rows_not_in_db_df.loc[:, "id"] = rows_not_in_db_df.apply(lambda row: create_id("player", CONNECTOR, row.name), axis=1)
+	ordered_player_df = rows_not_in_db_df[["id", "first_name", "last_name", "birth_date", "position"]]
 	ordered_player_df.to_sql("player", CONNECTOR.conn, if_exists="append", index=False)
 
+# TODO - Fix error "index out of range" concerning below function
 def player_team_df_to_db(df: DataFrame, season: str):
 	df.loc[:, "player_id"] = df.apply(lambda row: get_player_id(CONNECTOR, row), axis=1)
 	df.loc[:, "team_id"] = df.apply(lambda row: convert_team_name_to_team_id(CONNECTOR, row.team_id), axis=1)
@@ -85,7 +88,7 @@ def player_team_df_to_db(df: DataFrame, season: str):
 	player_team_df = remove_duplicate_rows(CONNECTOR, player_team_df, ["player_id", "team_id", "season"], "player_team")
 	player_team_df.to_sql("player_team", CONNECTOR.conn, if_exists="append", index=False)
 
-if __name__ == "__main___":
+def main():
 	for SEASON in SEASONS_ARRAY:
 		faprem_url = PLAYERS_WEBSITE_ROOT+SEASON+LEAGUE_NAMES[0]
 		engprem_url = PLAYERS_WEBSITE_ROOT+SEASON+LEAGUE_NAMES[1]
@@ -107,7 +110,7 @@ if __name__ == "__main___":
 				team = team_link[0]
 				link = team_link[1]
 				
-				squad = get_team_squad(link, SEASON)
+				squad = get_team_squad(link, SEASON, PLAYERS_WEBSITE_ROOT)
 				squad_no_blanks = [player for player in squad if not_blank_entry(player)]
 				squad_with_team = [player + [team] for player in squad_no_blanks]
 				complete_squad = [format_player_entries(player) for player in squad_with_team]

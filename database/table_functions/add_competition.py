@@ -1,6 +1,6 @@
-from app.cli import cl_output
-from utilities import unique_id, validation
-from app.table_functions import add_performance
+from database.cli import cl_output
+from database.utilities import unique_id, validation
+from database.table_functions import add_performance
 from pandas import DataFrame
 
 def collect(connector) -> None:

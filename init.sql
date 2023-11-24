@@ -1,5 +1,7 @@
 CREATE DATABASE pl_stats;
 
+\c pl_stats;
+
 CREATE TABLE country (
 	id VARCHAR(5) PRIMARY KEY,
 	name VARCHAR UNIQUE NOT NULL
@@ -16,12 +18,17 @@ CREATE TABLE player (
 	first_name VARCHAR,
 	last_name VARCHAR,
 	birth_date DATE NOT NULL,
-	role VARCHAR NOT NULL
+	position VARCHAR NOT NULL
 );
 
-CREATE TABLE TEAM (
+CREATE TABLE team (
 	id VARCHAR(5) PRIMARY KEY,
 	name VARCHAR UNIQUE NOT NULL
+);
+
+CREATE TABLE referee (
+	id VARCHAR(7) PRIMARY KEY,
+	name VARCHAR NOT NULL
 );
 
 CREATE TABLE schedule (
@@ -38,34 +45,27 @@ CREATE TABLE player_team (
 	season VARCHAR(7) NOT NULL
 );
 
-CREATE TABLE competition_team (
-	competition_id VARCHAR(4) REFERENCES competition(id),
-	team_id VARCHAR(5) REFERENCES team(id),
-	season VARCHAR(7) NOT NULL
-);
-
 CREATE TABLE match (
 	id VARCHAR(8) PRIMARY KEY,
 	season VARCHAR(7) NOT NULL,
 	competition_id VARCHAR(4) NOT NULL,
 	home_team_id VARCHAR(5) REFERENCES team(id) NOT NULL,
 	away_team_id VARCHAR(5) REFERENCES team(id) NOT NULL,
+	referee_id VARCHAR(7) REFERENCES referee(id) NOT NULL,
 	home_goals INTEGER NOT NULL,
 	away_goals INTEGER NOT NULL,
 	home_shots INTEGER NOT NULL,
-	home_shots_on_target INTEGER NOT NULL,
 	away_shots INTEGER NOT NULL,
+	home_shots_on_target INTEGER NOT NULL,
 	away_shots_on_target INTEGER NOT NULL,
 	home_corners INTEGER NOT NULL,
 	away_corners INTEGER NOT NULL,
 	home_fouls INTEGER NOT NULL,
-	home_yellow_cards INTEGER NOT NULL,
-	home_red_cards INTEGER NOT NULL,
-	home_corners INTEGER NOT NULL,
 	away_fouls INTEGER NOT NULL,
+	home_yellow_cards INTEGER NOT NULL,
 	away_yellow_cards INTEGER NOT NULL,
-	away_red_cards INTEGER NOT NULL,
-	away_corners INTEGER NOT NULL
+	home_red_cards INTEGER NOT NULL,
+	away_red_cards INTEGER NOT NULL
 );
 
 CREATE TABLE historic_player_per_ninety (

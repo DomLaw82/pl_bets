@@ -1,6 +1,6 @@
-from app.cli import cl_output
-from utilities import validation
-from app.table_functions import add_player
+from database.cli import cl_output
+from database.utilities import validation
+from database.table_functions import add_player
 from pandas import DataFrame
 
 

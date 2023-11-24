@@ -1,7 +1,7 @@
-from app.utilities import db_connector, unique_id, validation
-from app.table_functions import add_match, add_performance, add_player, add_team, add_competition, add_country
-from app.data_intake import squad_data, team_match_data
-from app.cli import cl_output
+from  database.utilities  import db_connector, unique_id, validation
+from database.table_functions import add_match, add_performance, add_player, add_team, add_competition, add_country
+from database.data_intake import squad_data, team_match_data
+from database.cli import cl_output
 import subprocess, os, sys
 
 if __name__ == "__main__":
@@ -23,9 +23,11 @@ if __name__ == "__main__":
     while in_progress:
         main_menu_option = validation.validate("int", input(cl_output.main_menu), "Select an option: ")
         if main_menu_option == "7":
-            subprocess.run(["python", "data_intake/squad_data.py"])
+            squad_data.main()
+            break
         elif main_menu_option == "8":
-            subprocess.run(["python", "data_intake/team_match_data.py"])
+            team_match_data.main()
+            break
         elif main_menu_option == '9':
             break
         data_to_add = options[main_menu_option].collect(connector)

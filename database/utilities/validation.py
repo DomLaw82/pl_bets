@@ -1,5 +1,5 @@
 import datetime, re
-from app.cli import cl_output
+from database.cli import cl_output
 
 def validate(check_type: str, value: str, prompt: str, **kwargs) -> str:
     var_list = kwargs.get("var_list") or []

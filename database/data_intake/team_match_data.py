@@ -1,17 +1,18 @@
-import pandas as pd
 import os, sys, re
+import pandas as pd
 import requests
-from utilities.db_connector import pl_stats_connector
-from utilities.remove_duplicates import remove_duplicate_rows
-from utilities.unique_id import *
-from utilities.string_manipulation import escape_single_quote
+from database.utilities.db_connector import local_pl_stats_connector
+from database.utilities.remove_duplicates import remove_duplicate_rows
+from database.utilities.unique_id import *
+from database.utilities.string_manipulation import escape_single_quote
 
-CONNECTOR = pl_stats_connector
-ALL_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2006, 2025, 1)]
+CONNECTOR = local_pl_stats_connector
+SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2020, 2025, 1)]
+TABLE_SEASONS = [f"{str(year-1)}-{str(year)[-2:]}" for year in range(2020, 2025, 1)]
 
 def download_csv_for_season(season):
     try:
-        save_path = f"football-data-csv/E0 - {season}.csv"
+        save_path = f"game_data/E0 - {season}.csv"
         url = f'https://www.football-data.co.uk/mmz4281/{season}/E0.csv'
         response = requests.get(url)
         if response.status_code == 200:
@@ -80,8 +81,8 @@ def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> 
         }, 
         axis=1
     )
-    df["season"] = season
-    df["competition_id"] = competition_id
+    df.loc[:, "season"] = season
+    df.loc[:, "competition_id"] = competition_id
 
     return df
 
@@ -112,7 +113,7 @@ def select_match_columns(df: pd.DataFrame) -> pd.DataFrame:
     new_df.loc[:, "home_team_id"] = new_df.apply(lambda row: get_team_id(CONNECTOR, row.home_team_id), axis=1)
     new_df.loc[:, "away_team_id"] = new_df.apply(lambda row: get_team_id(CONNECTOR, row.away_team_id), axis=1)
     
-    new_df["id"] = new_df.apply(lambda row: create_id("match", CONNECTOR, row.name), axis=1)
+    new_df.loc[:, "id"] = new_df.apply(lambda row: create_id("match", CONNECTOR, row.name), axis=1)
     new_df.loc[:, "referee_id"] = new_df.apply(lambda row: get_referee_id(CONNECTOR, row.referee_id), axis=1)
     
     columns_to_compare = ["season", "competition_id", "home_team_id", "away_team_id"]
@@ -120,25 +121,26 @@ def select_match_columns(df: pd.DataFrame) -> pd.DataFrame:
     return final_df
 
 def create_teams_table(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.rename({"home_team_id": "name"})
-    only_new_teams_df = remove_duplicate_rows(CONNECTOR, df, ["name"], "team")
-    only_new_teams_df = only_new_teams_df.drop_duplicates(subset="name", keep="first")
-    only_new_teams_df = only_new_teams_df[only_new_teams_df.apply(lambda row: get_team_id(CONNECTOR, row["name"]), axis=1).astype(bool)].reset_index()
-    only_new_teams_df["id"] = only_new_teams_df.apply(lambda row: create_id("team", CONNECTOR, row.index), axis=1)
-    return only_new_teams_df
+    df = df.rename(columns={"home_team_id": "name"})
+    only_new_teams_df = df.drop_duplicates(subset="name", keep="first")
+    only_new_teams_df = remove_duplicate_rows(CONNECTOR, only_new_teams_df, ["name"], "team").reset_index()
+    if only_new_teams_df.empty:
+        return only_new_teams_df
+    only_new_teams_df.loc[:, "id"] = only_new_teams_df.apply(lambda row: create_id("team", CONNECTOR, int(row.name)), axis=1)
+    return only_new_teams_df[["id", "name"]]
 
 def create_referee_table(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.rename({"referee_id": "name"})
+    df = df.rename(columns={"referee_id": "name"})
     df = remove_duplicate_rows(CONNECTOR, df, ["name"], "referee")
     referee_df = df[["name"]]
-    referee_df["id"] = referee_df.apply(lambda row: create_id("referee", CONNECTOR, row.index), axis=1)
-    return referee_df
+    referee_df.loc[:, "id"] = referee_df.apply(lambda row: create_id("referee", CONNECTOR, int(row.name)), axis=1)
+    return referee_df[["id", "name"]]
 
 def create_team_competition_df(df: pd.DataFrame, season: str, competition_id: str) -> pd.DataFrame:
     df = df.drop_duplicates(subset="home_team_id", keep="first")
-    df = df.rename({'home_team_id': "team_id"})
-    df["competition_id"] = competition_id
-    df["season"] = season
+    df = df.rename(columns={'home_team_id': "team_id"})
+    df.loc[:, "competition_id"] = competition_id
+    df.loc[:, "season"] = season
     df = df[["team_id", "competition_id", "season"]]
     return remove_duplicate_rows(CONNECTOR, df, ["team_id", "competition_id", "season"], "team_competition")
 
@@ -147,39 +149,32 @@ def create_referee_match_df(match_df:pd.DataFrame) -> pd.DataFrame:
     ref_match_df = ref_match_df.rename(columns = {"id": "match_id"})
     return remove_duplicate_rows(CONNECTOR, ref_match_df, ["id", "referee_id"], "referee_match")
 
-if __name__ == "__main__":
-    os.chdir(sys.path[0])
-    data = os.listdir("./football-data-csv")
+def main():
 
-    for season in ALL_SEASONS:
+    data_folder_path = "./app/data_intake/game_data"
+
+    for season in SITE_SEASONS:
         download_csv_for_season(season)
+    
+    data = sorted(os.listdir(data_folder_path))
 
-        data_folder_path = "./football-data-csv"
-        data = os.listdir(data_folder_path)
+    for year in data:
+        season = re.findall("\d{4}", year)[0]
+        season = season[:2]+"-"+season[-2:]
+        full_season = TABLE_SEASONS[data.index(year)]
+        path = data_folder_path+"/"+year
+        df = pd.read_csv(path)
 
-        for year in sorted(data):
-            season = re.findall("\d{4}", year)[0]
-            season = season+"-"+season[-2:]
+        year_df = rename_table_columns(df, full_season, '001')
+        year_df.loc[:, "referee_id"] = year_df.apply(lambda row: escape_single_quote(row.referee_id), axis=1)
+        year_df.loc[:, "home_team_id"] = year_df.apply(lambda row: rename_team_name(row.home_team_id), axis=1)
+        year_df.loc[:, "away_team_id"] = year_df.apply(lambda row: rename_team_name(row.away_team_id), axis=1)
+        
+        team_df = create_teams_table(year_df)
+        team_df.to_sql("team", CONNECTOR.conn, if_exists="append", index=False) if not team_df.empty else None
+        
+        referee_df = create_referee_table(year_df)
+        referee_df.to_sql("referee", CONNECTOR.conn, if_exists="append", index=False) if not referee_df.empty else None
 
-            path = data_folder_path+"/"+year
-            df = pd.read_csv(path)
-
-            year_df = rename_table_columns(df, season, '001')
-            year_df.loc[:, "referee_id"] = year_df.apply(lambda row: escape_single_quote(row.referee_id), axis=1)
-            year_df.loc[:, "home_team_id"] = year_df.apply(lambda row: rename_team_name(row.home_team_id), axis=1)
-            year_df.loc[:, "away_team_id"] = year_df.apply(lambda row: rename_team_name(row.away_team_id), axis=1)
-            
-            team_df = create_teams_table(year_df)
-            team_df.to_sql("team", CONNECTOR.conn, if_exists="append", index=False)
-            
-            referee_df = create_referee_table(year_df)
-            referee_df.to_sql("referee", CONNECTOR.conn, if_exists="append", index=False)
-
-            match_df = select_match_columns(year_df)
-            match_df.to_sql("match", CONNECTOR.conn, if_exists="append", index=False)
-
-            referee_match_df = create_referee_match_df(match_df)
-            referee_match_df.to_sql("referee_match", CONNECTOR.conn, if_exists="append", index=False)
-
-            team_competition_df = create_team_competition_df(match_df, season, '001')
-            team_competition_df.to_sql("team_competition", CONNECTOR.conn, if_exists="append", index=False)
+        match_df = select_match_columns(year_df)
+        match_df.to_sql("match", CONNECTOR.conn, if_exists="append", index=False)
