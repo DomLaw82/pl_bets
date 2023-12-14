@@ -1,4 +1,4 @@
-Player,Pos,Squad,MP,Starts,Min,90s,Gls,Ast,G+A,G-PK,PK,PKatt,CrdY,CrdR,xG,npxG,xAG,npxG+xAG,PrgC,PrgP,PrgR
+player,position,team,matches_played,starts,minutes_played,90s,goals,assists,goals+assists,non_penalty_goals,penalties_scored,penalties_attempted,yellow_cards,red_cards,expected_goals,non_penalty_expected_goals,expected_assisted_goals,non_penalty_expected_goals+expected_assisted_goals,progressive_carries,progressive_passes,progressive_passes_recieved
 Patrick van Aanholt,DF,Crystal Palace,28,25,2184,24.3,5,1,6,5,0,0,7,0,3.1,3.1,2.1,5.2,46,92,86
 Rolando Aarons,"MF,FW",Newcastle Utd,4,1,139,1.5,0,0,0,0,0,0,0,0,0.1,0.1,0,0.1,7,3,4
 Tammy Abraham,FW,Swansea City,31,15,1726,19.2,5,1,6,5,0,0,0,0,6.8,6.8,1.6,8.4,19,20,104

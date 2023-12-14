@@ -4,3 +4,7 @@ sqlalchemy
 beautifulsoup4
 tabulate
 python-dotenv
+marshmellow
+flask
+flask_rebar
+python-json-logger

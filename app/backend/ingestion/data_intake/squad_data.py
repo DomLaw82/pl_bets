@@ -10,42 +10,6 @@ PLAYERS_WEBSITE_ROOT = "https://www.footballsquads.co.uk/eng/"
 SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2017, 2025, 1)]
 LEAGUE_NAMES = ["faprem.htm", "engprem.htm"]
 
-def get_page_soup(html_text):
-	return BeautifulSoup(html_text, "html.parser")
-
-def get_all_teams_for_season(soup) -> list:
-	h5_elements = soup.find_all("h5")
-	team_names = [ele.text for ele in h5_elements]
-	a_elements = [ele.a for ele in h5_elements]
-	hrefs = [ele.get("href") for ele in a_elements]
-	return list(zip(team_names, hrefs))
-
-def get_team_squad(endpoint: str, SEASON: str, site_root: str):
-	squad_url = site_root+SEASON+endpoint
-	page_content = requests.get(squad_url).text
-	soup = get_page_soup(page_content)
-	rows = soup.find_all("tr")[1:]
-	
-	all_columns = soup.find_all("tr")[0]
-	all_column_names = all_columns.find_all("td")
-	all_column_names = [elem.text.strip("\n") for elem in all_column_names]
-
-	for idx, row in enumerate(rows):
-		if "Players no longer at this club" in str(row):
-			rows = rows[:idx]
-			break
-	
-	squad = []
-	for row in rows:
-		row = row.find_all("td")
-		required_cols = [all_column_names.index("Name"), all_column_names.index("Pos"),all_column_names.index("Date of Birth")]
-		try:
-			squad.append([row[i].text for i in required_cols])
-		except:
-			
-			continue
-	return squad
-
 def not_blank_entry(player: list) -> bool:
 	player = [player[0].strip("\r\n-").strip(), player[1].strip("\r\n-").strip(), player[2].strip("\r\n-").strip()]
 	return all(player)

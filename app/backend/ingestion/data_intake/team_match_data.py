@@ -8,24 +8,6 @@ from database.utilities.string_manipulation import escape_single_quote
 SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2017, 2025, 1)]
 TABLE_SEASONS = [f"{str(year-1)}-{str(year)[-2:]}" for year in range(2017, 2025, 1)]
 
-def download_csv_for_season(season):
-    try:
-        save_path = f"game_data/E0 - {season}.csv"
-        url = f'https://www.football-data.co.uk/mmz4281/{season}/E0.csv'
-        response = requests.get(url)
-        if response.status_code == 200:
-            csv_data = response.text
-            with open(save_path, 'w') as file:
-                file.write(csv_data)
-            print(f'CSV file for season {season} downloaded and saved to {save_path}')
-            return True
-        else:
-            print(f'Failed to download the CSV file for season {season}. Status code:', response.status_code)
-            return False
-    except Exception as e:
-        print(f'An error occurred while downloading season {season}:', str(e))
-        return False
-
 def rename_team_name(team_name:str) -> str:
     rename_teams = {
         "Leeds": "Leeds United",

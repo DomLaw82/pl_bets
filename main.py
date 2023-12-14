@@ -4,7 +4,7 @@ from database.data_intake import squad_data, team_match_data
 from database.cli import cl_output
 import os, sys
 
-from . import db_connector
+from .app.backend import db_connector
 
 if __name__ == "__main__":
 
