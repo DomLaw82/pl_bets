@@ -7,9 +7,6 @@ def get_team_id(connector, team_name: str) -> str:
     else:
         return None  # Handle the case where no result is found
 
-def convert_team_name_to_team_id(connector, team_name:str) -> str:
-	return connector.get_list(f"SELECT id FROM team WHERE name = '{team_name}'")[0][0]
-
 def get_player_id(connector, row) -> str:
 	row.first_name = row.first_name.replace("'", "''")
 	row.last_name = row.last_name.replace("'", "''")

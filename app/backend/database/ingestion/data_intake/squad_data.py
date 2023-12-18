@@ -41,10 +41,8 @@ def get_all_teams_for_season(soup) -> list:
 	hrefs = [ele.get("href") for ele in a_elements]
 	return list(zip(team_names, hrefs))
 
-def get_team_squad(endpoint: str, SEASON: str, site_root: str):
-	squad_url = site_root+SEASON+endpoint
-	page_content = requests.get(squad_url).text
-	soup = get_page_soup(page_content)
+def get_team_squad(html_content):
+	soup = get_page_soup(html_content)
 	rows = soup.find_all("tr")[1:]
 	
 	all_columns = soup.find_all("tr")[0]

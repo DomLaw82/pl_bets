@@ -39,9 +39,7 @@ CREATE TABLE schedule (
 	home_team_id VARCHAR(7) REFERENCES team(id),
 	away_team_id VARCHAR(7) REFERENCES team(id),
 	competition_id VARCHAR(7) REFERENCES competition(id),
-	result
-
-	,,Date,Location,Home Team,Away Team,Result
+	result VARCHAR
 );
 
 CREATE TABLE player_team (
