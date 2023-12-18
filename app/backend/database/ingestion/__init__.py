@@ -4,9 +4,11 @@ from app.backend.database.ingestion.data_intake.team_ref_match import team_ref_m
 from app.backend.database.ingestion.data_intake.player import player_main
 from app.backend.database.ingestion.data_intake.country_competition import country_competition_main
 from app.backend.database.ingestion.data_intake.per_90_stats import per_90_main
+import subprocess, time
 
 
-# Ingest locally stored data into the database
+# Start postgres server
+subprocess.run(["postgres"])
 
 # format season schedule [schedule]
 schedule_main(local_pl_stats_connector)
