@@ -31,6 +31,42 @@ def format_player_entries(player: list[str]) -> list[str]:
 
 	return formatted_name + [player[1]] + new_dob + [player[3]]
 
+def get_page_soup(html_text):
+	return BeautifulSoup(html_text, "html.parser")
+
+def get_all_teams_for_season(soup) -> list:
+	h5_elements = soup.find_all("h5")
+	team_names = [ele.text for ele in h5_elements]
+	a_elements = [ele.a for ele in h5_elements]
+	hrefs = [ele.get("href") for ele in a_elements]
+	return list(zip(team_names, hrefs))
+
+def get_team_squad(endpoint: str, SEASON: str, site_root: str):
+	squad_url = site_root+SEASON+endpoint
+	page_content = requests.get(squad_url).text
+	soup = get_page_soup(page_content)
+	rows = soup.find_all("tr")[1:]
+	
+	all_columns = soup.find_all("tr")[0]
+	all_column_names = all_columns.find_all("td")
+	all_column_names = [elem.text.strip("\n") for elem in all_column_names]
+
+	for idx, row in enumerate(rows):
+		if "Players no longer at this club" in str(row):
+			rows = rows[:idx]
+			break
+	
+	squad = []
+	for row in rows:
+		row = row.find_all("td")
+		required_cols = [all_column_names.index("Name"), all_column_names.index("Pos"),all_column_names.index("Date of Birth")]
+		try:
+			squad.append([row[i].text for i in required_cols])
+		except:
+			
+			continue
+	return squad
+
 # def player_df_to_db(df:DataFrame, db_connection):
 # 	df = df[["first_name", "last_name", "birth_date", "position"]]
 # 	df.loc[:, "first_name"] = df.apply(lambda row: escape_single_quote(row.first_name), axis=1)
@@ -64,8 +100,6 @@ if __name__ == "__main__":
 				if response.status_code != 200:
 					raise Exception
 			html_content = response.text
-			with open(f"app/backend/database/ingestion/data/squad_data/squads_{SEASON.replace('/', '')}.html", 'w') as file:
-				file.write(html_content)
 			soup = BeautifulSoup(html_content, "html.parser")
 
 
@@ -78,10 +112,18 @@ if __name__ == "__main__":
 				team = team_link[0]
 				link = team_link[1]
 				
-			# 	squad = get_team_squad(link, SEASON, PLAYERS_WEBSITE_ROOT)
-			# 	squad_no_blanks = [player for player in squad if not_blank_entry(player)]
-			# 	squad_with_team = [player + [team] for player in squad_no_blanks]
-			# 	complete_squad = [format_player_entries(player) for player in squad_with_team]
+				squad = get_team_squad(link, SEASON, PLAYERS_WEBSITE_ROOT)
+
+				squad_url = PLAYERS_WEBSITE_ROOT+SEASON+link
+				page_content = requests.get(squad_url).text
+				if (not os.path.exists(f"app/backend/database/ingestion/data/squad_data/{SEASON.replace('/', '')}")):
+					os.mkdir(f"app/backend/database/ingestion/data/squad_data/{SEASON.replace('/', '')}") 
+				with open(f"app/backend/database/ingestion/data/squad_data/{SEASON}{team}.html", 'w') as file:
+					file.write(html_content)
+
+				# squad_no_blanks = [player for player in squad if not_blank_entry(player)]
+				# squad_with_team = [player + [team] for player in squad_no_blanks]
+				# complete_squad = [format_player_entries(player) for player in squad_with_team]
 
 			# 	squad_df = DataFrame(data=complete_squad, columns=["first_name", "last_name", "position", "birth_date", "team_id"])
 			# 	squad_df.loc[:, "birth_date"] = squad_df.apply(lambda row: datetime.date(datetime.strptime(row.birth_date, "%Y-%m-%d")), axis=1)
