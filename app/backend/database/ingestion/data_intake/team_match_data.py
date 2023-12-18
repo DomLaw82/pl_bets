@@ -90,6 +90,7 @@ def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
 			"away_corners",
 		]
 	]
+    
     new_df.loc[:, "home_team_id"] = new_df.apply(lambda row: get_team_id(db_connection, row.home_team_id), axis=1)
     new_df.loc[:, "away_team_id"] = new_df.apply(lambda row: get_team_id(db_connection, row.away_team_id), axis=1)
     

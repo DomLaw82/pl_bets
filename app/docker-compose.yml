@@ -1,7 +1,7 @@
-
 services:
   postgres:
-    image: postgres:10.7-alpine
+    build: ./backend/database/Dockerfile
+    image: pl_stats_database
     ports:
       - 5432:5432
     environment:
@@ -9,6 +9,24 @@ services:
       POSTGRES_PASSWORD: MySecretPassword
     volumes:
        - db-data:/var/lib/postgresql/data
+  frontend:
+    build: ./frontend/Dockerfile
+    image: pl_stats_frontend
+    ports:
+      -5000:5000
+    depends_on:
+      - api
+  model:
+    build: ./model/Dockerfile
+    image: pl_stats_model
+    ports:
+      - 6000:6000
+  backend:
+    build: ./Dockerfile
+    image: pl_stats_backend
+    ports: 
+      - 5000:5000
+
 
 volumes:
   db-data:

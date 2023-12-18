@@ -1,25 +1,34 @@
 from flask import Flask
 from flask_rebar import Rebar, ResponseSchema
-from marshmallow import fields
 
 rebar = Rebar()
 registry = rebar.create_handler_registry()
 
-# class TeamSchema(ResponseSchema):
-#     id = fields.Integer()
+### routes ###
+# data
+   # update historic player stats
+      # upload csv and handle operations in the backend
+   # re-ingest squad data
+   # re-ingest team data
+   # re-ingest schedule data
+   # re-ingest match facts
+   # add player injury
 
-# add teams
-# view teams
-# add competition
-# view competition
-# add country
-# view country
-# add match
-# view match
-# add player
-# view player
-# add performance
-# view performance
+
+# run prediction model
+   # confirm lineups
+# confirm lineups
+   	# set home team lineup
+      # set home team subs
+      # set away team lineup
+      # set away team subs
+# check current gameweek fixtures
+   # display predicted and actual (if inputted) stats
+   # flag for whether lineups have been selected
+   # pre lineup prediction (based on historic game time) and actual lineup
+# check next gameweek fixtures
+# check entire schedule
+# input match facts
 
 @registry.handles(
    rule='/add/teams',
@@ -51,29 +60,8 @@ rebar.init_app(app)
 if __name__ == '__main__':
     app.run()
 
-# add teams
-# view teams
-# add competition
-# view competition
-# add country
-# view country
-# add match
-# view match
-# add player
-# view player
-# add performance
-# view performance
-
 # replace team season stats
 
-# ingest squad data
-# ingest team data
-# ingest schedule data
-# ingest match facts
-# ingest historic player season stats
+
 
 # predict match stats
-	# set home team lineup
-	# set home team subs
-	# set away team lineup
-	# set away team subs
