@@ -112,7 +112,7 @@ def create_referee_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     referee_df = df[["name"]]
     return referee_df
 
-def clean_match_data(db_connector) -> list:
+def clean_match_data(db_connection) -> list:
 
     data_folder_path = "./app/data_intake/game_data"
 
@@ -132,19 +132,19 @@ def clean_match_data(db_connector) -> list:
         year_df.loc[:, "home_team_id"] = year_df.apply(lambda row: rename_team_name(row.home_team_id), axis=1)
         year_df.loc[:, "away_team_id"] = year_df.apply(lambda row: rename_team_name(row.away_team_id), axis=1)
         
-        team_df = create_teams_table(year_df, db_connector)
-        referee_df = create_referee_table(year_df, db_connector)
-        match_df = select_match_columns(year_df, db_connector)
+        team_df = create_teams_table(year_df, db_connection)
+        referee_df = create_referee_table(year_df, db_connection)
+        match_df = select_match_columns(year_df, db_connection)
         
         return [team_df, referee_df, match_df]
 
-def save_to_database(db_connector, df: pd.DataFrame) -> None:
-	df.to_sql("schedule", db_connector.conn, if_exists="append", index=False) if not df.empty else None
+def save_to_database(db_connection, df: pd.DataFrame) -> None:
+	df.to_sql("schedule", db_connection.conn, if_exists="append", index=False) if not df.empty else None
 
 
-def team_ref_match_main(db_connector):
+def team_ref_match_main(db_connection):
 
     team_ref_match_df = clean_match_data()
 
     for df in team_ref_match_df:
-        save_to_database(db_connector, df)
+        save_to_database(db_connection, df)

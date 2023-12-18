@@ -4,13 +4,13 @@ from database.data_intake import squad_data, team_match_data
 from database.cli import cl_output
 import os, sys
 
-from .app.backend.database.ingestion import db_connector
+from .app.backend.database.ingestion import db_connection
 
 if __name__ == "__main__":
 
     os.chdir(sys.path[0])
 
-    connector = db_connector.local_pl_stats_connector
+    connector = db_connection.local_pl_stats_connector
     options = {
         "1": add_match,
         "2": add_performance,

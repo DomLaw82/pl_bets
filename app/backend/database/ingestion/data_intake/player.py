@@ -126,5 +126,5 @@ def player_main(db_connection):
 			player_team_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
 			save_to_database(db_connection, player_team_df, "player_team")
 		
-def save_to_database(db_connector, df: pd.DataFrame, table_name: str) -> None:
-	df.to_sql(table_name, db_connector.conn, if_exists="append", index=False)
+def save_to_database(db_connection, df: pd.DataFrame, table_name: str) -> None:
+	df.to_sql(table_name, db_connection.conn, if_exists="append", index=False)
