@@ -1,8 +1,12 @@
-import requests
+import requests, os, time
 from bs4 import BeautifulSoup
 
 # DOWNLOADING GAMES DATA FOR EVERY SEASON
 # TODO - add url and word_to_replace as an argument to the download_csv_for_all_games_in_a_season function, have a word set in the url to replace with the season
+
+PLAYERS_WEBSITE_ROOT = "https://www.footballsquads.co.uk/eng/"
+SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2017, 2025, 1)]
+LEAGUE_NAMES = ["faprem.htm", "engprem.htm"]
 
 def download_csv_for_all_games_in_a_season(season: str):
 	"""
@@ -64,3 +68,35 @@ def get_team_squad(endpoint: str, SEASON: str, site_root: str):
 			
 			continue
 	return squad
+
+def player_data():
+	
+	for SEASON in SEASONS_ARRAY:
+		faprem_url = PLAYERS_WEBSITE_ROOT+SEASON+LEAGUE_NAMES[0]
+		engprem_url = PLAYERS_WEBSITE_ROOT+SEASON+LEAGUE_NAMES[1]
+		time.sleep(2)
+		try:
+			response = requests.get(faprem_url)
+			if response.status_code != 200:
+				response = requests.get(engprem_url)
+				if response.status_code != 200:
+					raise Exception
+			html_content = response.text
+			soup = BeautifulSoup(html_content, "html.parser")
+
+
+			teams_links = get_all_teams_for_season(soup)
+
+			for team_link in teams_links:
+				team = team_link[0]
+				link = team_link[1]
+
+				squad_url = PLAYERS_WEBSITE_ROOT+SEASON+link
+				page_content = requests.get(squad_url).text
+				if (not os.path.exists(f"app/backend/database/ingestion/data/squad_data/{SEASON.replace('/', '')}")):
+					os.mkdir(f"app/backend/database/ingestion/data/squad_data/{SEASON.replace('/', '')}") 
+				with open(f"app/backend/database/ingestion/data/squad_data/{SEASON}{team}.html", 'w') as file:
+					file.write(page_content)
+		except Exception as e:
+			print(f"ERROR: {SEASON}\n")
+			print(e)

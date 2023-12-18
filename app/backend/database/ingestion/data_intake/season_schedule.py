@@ -1,10 +1,10 @@
 import pandas as pd
 import os
 from utilities.unique_id import get_team_id
-from data_intake.team_match_data import rename_team_name
+from app.backend.database.ingestion.data_intake.team_ref_match import rename_team_name
 
 
-def clean_schedule_data(db_connector, path: str) -> pd.DataFrame:
+def clean_schedule_data(db_connector) -> pd.DataFrame:
 	season_schedule_folder_path = "./app/data_intake/schedule_data"
 
 	season_schedules = sorted(os.listdir(season_schedule_folder_path))
@@ -23,8 +23,8 @@ def clean_schedule_data(db_connector, path: str) -> pd.DataFrame:
 def save_to_database(db_connector, df: pd.DataFrame) -> None:
 	df.to_sql("schedule", db_connector.conn, if_exists="append", index=False)
 
-def schedule_main(db_connector, path: str) -> None:
-	df = clean_schedule_data(db_connector, path)
+def schedule_main(db_connector) -> None:
+	df = clean_schedule_data(db_connector)
 	save_to_database(db_connector, df)
 
 
