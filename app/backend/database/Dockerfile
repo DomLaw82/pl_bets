@@ -10,7 +10,6 @@ WORKDIR /app
 
 COPY . .
 
-RUN pip install --no-cache-dir -r requirements.txt
 
 # Set environment variables
 ENV POSTGRES_DB=pl_bets
@@ -26,4 +25,4 @@ EXPOSE 5432
 # Start PostgreSQL server
 CMD ["postgres"]
 
-CMD ["python3", "./ingestion/__init__.py"]
+RUN python3 ./ingestion/__init__.py
