@@ -100,3 +100,5 @@ def player_data():
 		except Exception as e:
 			print(f"ERROR: {SEASON}\n")
 			print(e)
+
+player_data()
