@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 
 PLAYERS_WEBSITE_ROOT = "https://www.footballsquads.co.uk/eng/"
 SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2017, 2025, 1)]
+MATCH_SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2017, 2025, 1)]
+
 LEAGUE_NAMES = ["faprem.htm", "engprem.htm"]
 
 def download_csv_for_all_games_in_a_season(season: str):
@@ -17,6 +19,7 @@ def download_csv_for_all_games_in_a_season(season: str):
 	"""
       
 	try:
+			# MATCH_SITE_SEASONS
 		save_path = f"game_data/E0 - {season}.csv"
 		url = f'https://www.football-data.co.uk/mmz4281/{season}/E0.csv'
 		response = requests.get(url)
