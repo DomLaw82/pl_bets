@@ -5,7 +5,7 @@ from app.backend.database.ingestion.data_intake.team_ref_match import rename_tea
 
 
 def clean_schedule_data(db_connector) -> pd.DataFrame:
-	season_schedule_folder_path = "./app/data_intake/schedule_data"
+	season_schedule_folder_path = "./app/data/schedule_data"
 
 	season_schedules = sorted(os.listdir(season_schedule_folder_path))
 

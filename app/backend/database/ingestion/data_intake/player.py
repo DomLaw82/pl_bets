@@ -82,7 +82,7 @@ def player_team_df_to_db(df: pd.DataFrame, season: str, db_connection):
 
 def player_main(db_connection):
 
-	data_folder_path = "./app/data_intake/squad_data"
+	data_folder_path = "./app/data/squad_data"
 
 	seasons = sorted(os.listdir(data_folder_path))
 
