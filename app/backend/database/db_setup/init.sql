@@ -45,7 +45,7 @@ CREATE TABLE schedule (
 CREATE TABLE player_team (
 	player_id VARCHAR(7) REFERENCES team(id),
 	team_id VARCHAR(7) REFERENCES team(id),
-	season VARCHAR(7) NOT NULL
+	season VARCHAR(9) NOT NULL
 );
 
 CREATE TABLE match (
@@ -220,17 +220,17 @@ BEGIN
 
     CASE
         WHEN TG_TABLE_NAME = 'team' THEN
-            NEW.id = 't-' || LPAD(nextval('team_id_seq')::TEXT, 7, '0');
+            NEW.id = 't-' || LPAD(nextval('team_id_seq')::TEXT, 5, '0');
         WHEN TG_TABLE_NAME = 'country' THEN
-            NEW.id = 'c-' || LPAD(nextval('country_id_seq')::TEXT, 7, '0');
+            NEW.id = 'c-' || LPAD(nextval('country_id_seq')::TEXT, 5, '0');
         WHEN TG_TABLE_NAME = 'competition' THEN
-            NEW.id = 'x-' || LPAD(nextval('competition_id_seq')::TEXT, 7, '0');
+            NEW.id = 'x-' || LPAD(nextval('competition_id_seq')::TEXT, 5, '0');
         WHEN TG_TABLE_NAME = 'match' THEN
-            NEW.id = 'm-' || LPAD(nextval('match_id_seq')::TEXT, 7, '0');
+            NEW.id = 'm-' || LPAD(nextval('match_id_seq')::TEXT, 5, '0');
         WHEN TG_TABLE_NAME = 'referee' THEN
-            NEW.id = 'r-' || LPAD(nextval('referee_id_seq')::TEXT, 7, '0');
+            NEW.id = 'r-' || LPAD(nextval('referee_id_seq')::TEXT, 5, '0');
         WHEN TG_TABLE_NAME = 'player' THEN
-            NEW.id = 'p-' || LPAD(nextval('player_id_seq')::TEXT, 7, '0');
+            NEW.id = 'p-' || LPAD(nextval('player_id_seq')::TEXT, 5, '0');
     END CASE;
     
     RETURN NEW;

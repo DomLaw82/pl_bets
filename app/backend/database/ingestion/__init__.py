@@ -6,16 +6,12 @@ from data_intake.country_competition import country_competition_main
 from data_intake.per_90_stats import per_90_main
 import subprocess, time
 
-
-# Start postgres server
-subprocess.run(["postgres"])
+# format game data [team, match, referee]
+team_ref_match_main(local_pl_stats_connector)
 
 # format season schedule [schedule]
 schedule_main(local_pl_stats_connector)
     
-# format game data [team, match, referee]
-team_ref_match_main(local_pl_stats_connector)
-
 # format squad data [player, player_team]
 player_main(local_pl_stats_connector)
 

@@ -1,7 +1,6 @@
 def get_team_id(connector, team_name: str) -> str:
     query = f"SELECT id FROM team WHERE name = '{team_name}'"
     result = connector.get_list(query)
-    
     if result:
         return result[0][0]  # Assuming the first column is id
     else:

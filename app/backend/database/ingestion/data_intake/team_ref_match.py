@@ -34,8 +34,7 @@ def rename_team_name(team_name:str) -> str:
         "Cardiff": "Cardiff City",
         "Huddersfield": "Huddersfield Town"
     }
-    new_name = rename_teams.get(team_name) or team_name
-    return new_name
+    return rename_teams.get(team_name) or team_name
 
 def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> pd.DataFrame:
     df = df.rename(
@@ -103,7 +102,7 @@ def create_teams_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     df = df.rename(columns={"home_team_id": "name"})
     only_new_teams_df = df.drop_duplicates(subset="name", keep="first")
     only_new_teams_df = remove_duplicate_rows(db_connection, only_new_teams_df, ["name"], "team").reset_index()
-    return only_new_teams_df
+    return only_new_teams_df[["name"]]
 
 def create_referee_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     df = df.rename(columns={"referee_id": "name"})
@@ -111,7 +110,30 @@ def create_referee_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     referee_df = df[["name"]]
     return referee_df
 
-def clean_match_data(db_connection) -> list:
+def clean_match_data(db_connection, table_name:str, season:str, df: pd.DataFrame) -> pd.DataFrame:
+    df = rename_table_columns(df, season, '001')
+
+    df = df.drop(columns=["B365H","B365D","B365A","BWH","BWD","BWA","IWH","IWD","IWA","PSH","PSD","PSA","WHH","WHD","WHA","VCH","VCD","VCA","Bb1X2","BbMxH","BbAvH","BbMxD","BbAvD","BbMxA","BbAvA","BbOU","BbMx>2.5","BbAv>2.5","BbMx<2.5","BbAv<2.5","BbAH","BbAHh","BbMxAHH","BbAvAHH","BbMxAHA","BbAvAHA","PSCH","PSCD","PSCA"], errors="ignore")
+
+    df.loc[:, "home_team_id"] = df.apply(lambda row: rename_team_name(row.home_team_id), axis=1)
+    df.loc[:, "away_team_id"] = df.apply(lambda row: rename_team_name(row.away_team_id), axis=1)
+    df.loc[:, "referee_id"] = df.apply(lambda row: escape_single_quote(row.referee_id), axis=1)
+
+    if table_name == "team":
+        df = create_teams_table(df, db_connection)
+    if table_name == "referee":
+        df = create_referee_table(df, db_connection)
+    if table_name == "match":
+        df = select_match_columns(df, db_connection)
+
+        
+    return df
+
+def save_to_database(db_connection, table_name, df: pd.DataFrame) -> None:
+    df.to_sql(table_name, db_connection.conn, if_exists="append", index=False) if not df.empty else None
+
+
+def team_ref_match_main(db_connection):
 
     data_folder_path = "./data/game_data"
 
@@ -123,27 +145,9 @@ def clean_match_data(db_connection) -> list:
         full_season = TABLE_SEASONS[data.index(year)]
         
         path = data_folder_path+"/"+year
-        
-        df = pd.read_csv(path)
+        order = ["team", "referee", "match"]
 
-        year_df = rename_table_columns(df, full_season, '001')
-        year_df.loc[:, "referee_id"] = year_df.apply(lambda row: escape_single_quote(row.referee_id), axis=1)
-        year_df.loc[:, "home_team_id"] = year_df.apply(lambda row: rename_team_name(row.home_team_id), axis=1)
-        year_df.loc[:, "away_team_id"] = year_df.apply(lambda row: rename_team_name(row.away_team_id), axis=1)
-        
-        team_df = create_teams_table(year_df, db_connection)
-        referee_df = create_referee_table(year_df, db_connection)
-        match_df = select_match_columns(year_df, db_connection)
-        
-        return [team_df, referee_df, match_df]
-
-def save_to_database(db_connection, df: pd.DataFrame) -> None:
-	df.to_sql("schedule", db_connection.conn, if_exists="append", index=False) if not df.empty else None
-
-
-def team_ref_match_main(db_connection):
-
-    team_ref_match_df = clean_match_data()
-
-    for df in team_ref_match_df:
-        save_to_database(db_connection, df)
+        for table in order:
+            df = pd.read_csv(path)
+            df = clean_match_data(db_connection, table, full_season, df)
+            save_to_database(db_connection, table, df)

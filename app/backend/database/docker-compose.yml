@@ -5,10 +5,16 @@ services:
     image: pl_postgres
     ports:
       - 5432:5432
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "pl_stats", "-h", "pl-stats-database", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   pl-data-ingestion:
     container_name: pl-data-ingestion
     build: ./ingestion
     image: pl_data_ingestion
     depends_on:
-      - pl-stats-database
+      pl-stats-database:
+        condition: service_healthy
