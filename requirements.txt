@@ -1,0 +1,10 @@
+pandas
+psycopg2-binary
+sqlalchemy
+beautifulsoup4
+tabulate
+python-dotenv
+marshmellow
+flask
+flask_rebar
+python-json-logger
