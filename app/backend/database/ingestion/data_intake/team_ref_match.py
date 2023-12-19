@@ -1,8 +1,8 @@
 import os, re
 import pandas as pd
-from utilities.remove_duplicates import remove_duplicate_rows
-from utilities.unique_id import *
-from utilities.string_manipulation import escape_single_quote
+from data_intake.utilities.remove_duplicates import remove_duplicate_rows
+from data_intake.utilities.unique_id import *
+from data_intake.utilities.string_manipulation import escape_single_quote
 
 SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2017, 2025, 1)]
 TABLE_SEASONS = [f"{str(year-1)}-{str(year)[-2:]}" for year in range(2017, 2025, 1)]
@@ -113,7 +113,7 @@ def create_referee_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
 
 def clean_match_data(db_connection) -> list:
 
-    data_folder_path = "./app/data_intake/game_data"
+    data_folder_path = "./data/game_data"
 
     data = sorted(os.listdir(data_folder_path))
 

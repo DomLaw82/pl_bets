@@ -2,9 +2,9 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import pandas as pd
 import os
-from utilities.remove_duplicates import remove_duplicate_rows
-from utilities.unique_id import get_team_id, get_player_id
-from utilities.string_manipulation import escape_single_quote
+from data_intake.utilities.remove_duplicates import remove_duplicate_rows
+from data_intake.utilities.unique_id import get_team_id, get_player_id
+from data_intake.utilities.string_manipulation import escape_single_quote
 
 def not_blank_entry(player: list) -> bool:
 	player = [player[0].strip("\r\n-").strip(), player[1].strip("\r\n-").strip(), player[2].strip("\r\n-").strip()]
@@ -81,7 +81,7 @@ def player_team_df_to_db(df: pd.DataFrame, season: str, db_connection):
 
 def player_main(db_connection):
 
-	data_folder_path = "./app/data/squad_data"
+	data_folder_path = "./data/squad_data"
 
 	seasons = sorted(os.listdir(data_folder_path))
 

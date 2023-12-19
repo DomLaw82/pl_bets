@@ -96,9 +96,9 @@ def player_data():
 
 				squad_url = PLAYERS_WEBSITE_ROOT+SEASON+link
 				page_content = requests.get(squad_url).text
-				if (not os.path.exists(f"app/backend/database/ingestion/data/squad_data/{SEASON.replace('/', '')}")):
-					os.mkdir(f"app/backend/database/ingestion/data/squad_data/{SEASON.replace('/', '')}") 
-				with open(f"app/backend/database/ingestion/data/squad_data/{SEASON}{team}.html", 'w') as file:
+				if (not os.path.exists(f"./data/squad_data/{SEASON.replace('/', '')}")):
+					os.mkdir(f"./data/squad_data/{SEASON.replace('/', '')}") 
+				with open(f"./data/squad_data/{SEASON}{team}.html", 'w') as file:
 					file.write(page_content)
 		except Exception as e:
 			print(f"ERROR: {SEASON}\n")

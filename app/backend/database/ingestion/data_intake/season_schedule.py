@@ -1,11 +1,11 @@
 import pandas as pd
 import os
-from utilities.unique_id import get_team_id
-from team_ref_match import rename_team_name
+from data_intake.utilities.unique_id import get_team_id
+from data_intake.team_ref_match import rename_team_name
 
 
 def clean_schedule_data(db_connection) -> pd.DataFrame:
-	season_schedule_folder_path = "./app/data/schedule_data"
+	season_schedule_folder_path = "./data/schedule_data"
 
 	season_schedules = sorted(os.listdir(season_schedule_folder_path))
 

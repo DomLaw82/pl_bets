@@ -1,6 +1,6 @@
 import pandas as pd
-from team_ref_match import rename_team_name
-from utilities.unique_id import get_team_id
+from data_intake.team_ref_match import rename_team_name
+from data_intake.utilities.unique_id import get_team_id
 import os
 
 def clean_country_competition_data() -> pd.DataFrame:

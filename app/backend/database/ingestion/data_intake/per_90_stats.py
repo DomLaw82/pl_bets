@@ -1,8 +1,8 @@
 import os, pandas as pd
-from utilities.unique_id import get_player_id
+from data_intake.utilities.unique_id import get_player_id
 
 def combining_datasets(season: str) -> pd.DataFrame:
-	data_folder_path = "./app/data/historic_player_stats"
+	data_folder_path = "./data/historic_player_stats"
 	season_folder = data_folder_path + "/" + season
 
 	datasets = sorted(os.listdir(season_folder))
@@ -45,7 +45,7 @@ def save_to_database(db_connection, df: pd.DataFrame) -> None:
 
 def per_90_main(db_connection):
 
-	data_folder_path = "./app/data/historic_player_stats"
+	data_folder_path = "./app/historic_player_stats"
 
 	seasons = sorted(os.listdir(data_folder_path))
 
@@ -53,4 +53,4 @@ def per_90_main(db_connection):
 
 		df = combining_datasets(season)
 		df = clean_historic_stats_df(df, season)
-		save_to_database(df)
+		save_to_database(db_connection, df)
