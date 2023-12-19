@@ -13,4 +13,4 @@ RUN apt install -y python3-pandas && \
     apt install -y python3-sqlalchemy && \
     apt install -y python3-bs4
 
-CMD ["python3", "app/ingestion/__init__.py"]
+CMD ["python3", "__init__.py"]

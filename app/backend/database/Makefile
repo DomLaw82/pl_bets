@@ -3,10 +3,14 @@
 include .env
 
 PSQL_IMAGE_NAME = pl_postgres
-PSQL_CONTAINER_NAME = pl_bets
+PROJECT_NAME = pl_bets
 DATABASE = $(local_db_name)
 USERNAME = $(local_db_username)
 PASSWORD = $(local_db_password)
+
+DOCKER_COMPOSE_DIR=.
+DOCKER_COMPOSE_FILE=$(DOCKER_COMPOSE_DIR)/docker-compose.yml
+DOCKER_COMPOSE=docker-compose -f $(DOCKER_COMPOSE_FILE) --project-directory $(DOCKER_COMPOSE_DIR) --project-name $(PROJECT_NAME)
 
 .PHONY: build_postgres run_postgres enter_shell start_postgres rebuild_postgres
 
@@ -34,3 +38,22 @@ start_postgres:
 rebuild_postgres: remove_postgres build_postgres run_postgres sleep enter_shell
 
 restart_postgres: stop_postgres start_postgres sleep enter_shell
+
+
+
+.PHONY: devstackup devstackdown devstackbuild devstackreboot devstackrebuild entershell attach help
+
+##@ Docker Commands
+
+devstackup: ## Start frontend container
+	@$(DOCKER_COMPOSE) up -d --force-recreate
+
+devstackdown: ## Stop frontend container
+	@$(DOCKER_COMPOSE) down
+
+devstackbuild: ## Build docker image
+	@$(DOCKER_COMPOSE) build --parallel
+
+devstackreboot: devstackdown devstackup ## Reboot frontend container
+
+devstackrebuild: devstackdown devstackbuild devstackup ## Rebuild frontend container

@@ -32,7 +32,8 @@ def clean_historic_stats_df(df: pd.DataFrame, season: str) -> pd.DataFrame:
 	df.loc[:, "first_name"] = df["player"].str.split(pat=" ", n=1)[0]
 	df.loc[:, "last_name"] = df["player"].str.split(pat=" ", n=1)[1]
 	df["player"] = df.apply(lambda row: get_player_id(row), axis=1)
-	df = df.rename(columns={"player": "player_id"})
+	df = df.rename(columns={"player": "player_id", "90s": "ninetys"})
+	df.columns = [x.replace("+", "_plus_").replace("/", "_divided_by_").replace("-", "_minus_") for x in df.columns.tolist()]
 
 	df = df.drop(["first_name", "last_name", "starts", "matches_played", "wins", "draws", "losses"])
 	df.loc[:, "season"] = season

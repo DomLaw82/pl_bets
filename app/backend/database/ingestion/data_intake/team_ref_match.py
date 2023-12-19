@@ -1,6 +1,5 @@
-import os, sys, re
+import os, re
 import pandas as pd
-import requests
 from utilities.remove_duplicates import remove_duplicate_rows
 from utilities.unique_id import *
 from utilities.string_manipulation import escape_single_quote

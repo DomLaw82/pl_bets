@@ -1,5 +1,5 @@
 import pandas as pd
-from app.backend.database.ingestion.data_intake.team_ref_match import rename_team_name
+from team_ref_match import rename_team_name
 from utilities.unique_id import get_team_id
 import os
 

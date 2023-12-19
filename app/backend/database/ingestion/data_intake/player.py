@@ -1,8 +1,7 @@
-import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import pandas as pd
-import time, os
+import os
 from utilities.remove_duplicates import remove_duplicate_rows
 from utilities.unique_id import get_team_id, get_player_id
 from utilities.string_manipulation import escape_single_quote

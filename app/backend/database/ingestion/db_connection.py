@@ -94,4 +94,4 @@ class SQLConnection():
 			print('\n')
 
 # TODO - remove password from file
-local_pl_stats_connector = SQLConnection("postgres", "password", "pl_bets", "5432", "pl_stats")
+local_pl_stats_connector = SQLConnection("postgres", "password", "pl-stats-database", "5432", "pl_stats")

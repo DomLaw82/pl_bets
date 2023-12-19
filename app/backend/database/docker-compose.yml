@@ -1,14 +1,14 @@
 services:
-  postgres:
-    build: ./db_setup/Dockerfile
+  pl-stats-database:
+    container_name: pl-stats-database
+    build: ./db_setup
     image: pl_postgres
     ports:
       - 5432:5432
-    environment:
-      POSTGRES_DB: pl_stats
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
 
-  ingestion:
-    build: ./ingestion/Dockerfile
+  pl-data-ingestion:
+    container_name: pl-data-ingestion
+    build: ./ingestion
     image: pl_data_ingestion
+    depends_on:
+      - pl-stats-database

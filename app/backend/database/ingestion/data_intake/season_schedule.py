@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from utilities.unique_id import get_team_id
-from app.backend.database.ingestion.data_intake.team_ref_match import rename_team_name
+from team_ref_match import rename_team_name
 
 
 def clean_schedule_data(db_connection) -> pd.DataFrame:

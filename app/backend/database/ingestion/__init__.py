@@ -1,9 +1,9 @@
 from db_connection import local_pl_stats_connector
-from app.backend.database.ingestion.data_intake.season_schedule import schedule_main
-from app.backend.database.ingestion.data_intake.team_ref_match import team_ref_match_main
-from app.backend.database.ingestion.data_intake.player import player_main
-from app.backend.database.ingestion.data_intake.country_competition import country_competition_main
-from app.backend.database.ingestion.data_intake.per_90_stats import per_90_main
+from data_intake.season_schedule import schedule_main
+from data_intake.team_ref_match import team_ref_match_main
+from data_intake.player import player_main
+from data_intake.country_competition import country_competition_main
+from data_intake.per_90_stats import per_90_main
 import subprocess, time
 
 
