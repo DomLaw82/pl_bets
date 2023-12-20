@@ -1,4 +1,4 @@
-marshmellow
+marshmallow
 flask
 flask_rebar
 python-json-logger

@@ -1,18 +1,18 @@
 services:
+  environment:
+    - POSTGRES_DB=pl_stats
+    - POSTGRES_USER=postgres
+    - POSTGRES_PASSWORD=password
+    - POSTGRES_CONTAINER=database
+    - POSTGRES_PORT=5432
   database:
     container_name: database
     build: ./database/db_setup
     image: pl-postgres
     ports:
       - 5432:5432
-    environment:
-      - POSTGRES_DB=pl_stats
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_CONTAINER=pl-stats-database
-      - POSTGRES_PORT=5432
     healthcheck:
-      test: ["CMD", "pg_isready", "-q", "-d", "pl_stats", "-h", "pl-stats-database", "-U", "postgres"]
+      test: ["CMD", "pg_isready", "-q", "-d", "pl_stats", "-h", "database", "-U", "postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -35,12 +35,7 @@ services:
     build: ./api/
     image: api
     depends_on:
-      - local-data-ingestion
+      local-data-ingestion:
+        condition: service_healthy
     ports:
       - 80:80
-    environment:
-      - POSTGRES_DB=pl_stats
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_CONTAINER=pl-stats-database
-      - POSTGRES_PORT=5432

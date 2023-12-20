@@ -1,17 +1,10 @@
-# Use the official PostgreSQL image from Docker Hub
-FROM postgres:16.1
+FROM python:3.11.7-bookworm
 
 WORKDIR /app
 
-RUN apt-get update && \
-    apt-get install -y python3 python3-pip
-
-RUN apt install -y python3-pandas && \
-    apt install -y python3-psycopg2 && \
-    apt install -y python3-sqlalchemy && \
-    apt install -y python3-bs4 && \
-    apt install -y python3-fuzzywuzzy
-
 COPY . .
+
+RUN pip install --no-cache-dir -r ./requirements.txt
+
 
 CMD ["python3", "__init__.py"]

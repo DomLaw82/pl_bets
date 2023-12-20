@@ -1,6 +1,6 @@
 import psycopg2
 import pandas as pd
-import sqlalchemy
+import sqlalchemy, os
 
 class SQLConnection():
 	"""Create a PostgreSQL connection class
@@ -94,4 +94,4 @@ class SQLConnection():
 			print('\n')
 
 # TODO - remove password from file
-local_pl_stats_connector = SQLConnection("postgres", "password", "pl-stats-database", "5432", "pl_stats")
+local_pl_stats_connector = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))

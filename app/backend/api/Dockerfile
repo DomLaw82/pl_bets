@@ -1,6 +1,10 @@
-FROM python:3.11
+FROM python:3.11.7-bookworm
 
-RUN ls
+WORKDIR /app
+
+COPY . .
+
 RUN pip install --no-cache-dir -r ./requirements.txt
+
 
 EXPOSE 80

@@ -13,7 +13,7 @@ registry.generate_swagger(generator=generator)
 ### routes ###
 # index
 def index():
-    return jsonify({"head": "Welcome to PL Bets"})
+    return jsonify({"title": "Welcome to PL Bets"})
 
 # data
    # update historic player stats
