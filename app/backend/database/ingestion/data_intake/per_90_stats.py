@@ -1,5 +1,5 @@
 import os, pandas as pd
-from data_intake.utilities.unique_id import get_player_id_per_ninety
+from data_intake.utilities.unique_id import get_player_id_per_ninety, get_team_id_from_player_team
 
 def combining_datasets(season: str) -> pd.DataFrame:
 	data_folder_path = "./data/historic_player_stats"
@@ -7,7 +7,6 @@ def combining_datasets(season: str) -> pd.DataFrame:
 
 	datasets = sorted(os.listdir(season_folder))
 	complete = pd.DataFrame()
-	
 	for dataset in datasets:
 		dataset_path = season_folder + "/" + dataset
 
@@ -15,7 +14,7 @@ def combining_datasets(season: str) -> pd.DataFrame:
 		if complete.empty:
 			complete = df.copy(deep=True)
 		else:
-			complete = complete.merge(df, on=["player", "position", "team"], how='inner')
+			complete = complete.merge(df, on=["player", "position", "team"], how='left')
 	
 	return complete
 
@@ -36,10 +35,12 @@ def clean_historic_stats_df(db_connection, df: pd.DataFrame, season: str) -> pd.
 	df = df.rename(columns={"player": "player_id", "90s": "ninetys"})
 	df.columns = [x.replace("+", "_plus_").replace("/", "_divided_by_").replace("-", "_minus_") for x in df.columns.tolist()]
 
-	df = df.drop(columns=["first_name", "last_name", "starts", "matches_played", "wins", "draws", "losses"])
 	df.loc[:, "season"] = season
+
+	df = df.drop(columns=["first_name", "last_name", "starts", "matches_played", "wins", "draws", "losses"])
 	# 	TODO - More granular method to impute nulls
-	df = df.fillna(0)
+	# 	TODO - Null and multiple player ids
+	df = df.fillna({col: 0 for col in df.columns if col not in ['player_id', 'team_id']})
 
 	return df
 

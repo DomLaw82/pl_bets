@@ -5,7 +5,7 @@ Nathan Aké,DF,Bournemouth,4,25,8,0.16,0.5,9.4,0,0,0.13,0.6,0.6
 Marc Albrighton,"FW,MF",Leicester City,2,19,7,0.11,0.29,21.4,0,0,0.06,0.8,0.8
 Toby Alderweireld,DF,Tottenham,0,19,5,0,0,14.1,0,0,0.06,-1.1,-1.1
 Trent Alexander-Arnold,DF,Liverpool,1,29,9,0.03,0.11,25.1,9,0,0.05,-0.6,-0.6
-Alisson,GK,Liverpool,0,0,0,,,,0,0,,0,0
+Alisson Becker,GK,Liverpool,0,0,0,,,,0,0,,0,0
 Dele Alli,MF,Tottenham,5,39,19,0.13,0.26,14.4,0,0,0.12,0.2,0.2
 Miguel Almirón,MF,Newcastle Utd,0,19,8,0,0,20.1,0,0,0.08,-1.5,-1.5
 Marcos Alonso,DF,Chelsea,2,45,7,0.04,0.29,19.2,8,0,0.08,-1.4,-1.4
@@ -414,7 +414,7 @@ Kasper Schmeichel,GK,Leicester City,0,1,0,0,,9.6,0,0,0.06,-0.1,-0.1
 Morgan Schneiderlin,MF,Everton,0,3,0,0,,17,0,0,0.05,-0.1,-0.1
 André Schürrle,"FW,MF",Fulham,6,55,17,0.11,0.35,22.4,4,0,0.07,2.4,2.4
 Ken Sema,"MF,FW",Watford,1,12,3,0.08,0.33,17.3,0,0,0.07,0.2,0.2
-Jean Seri,MF,Fulham,1,19,6,0.05,0.17,25.7,3,0,0.05,0.1,0.1
+Jean Michaël Seri,MF,Fulham,1,19,6,0.05,0.17,25.7,3,0,0.05,0.1,0.1
 Ryan Sessegnon,"FW,DF",Fulham,2,28,11,0.07,0.18,14.9,0,0,0.14,-2,-2
 Xherdan Shaqiri,"FW,MF",Liverpool,6,26,10,0.23,0.6,19.8,5,0,0.15,2.1,2.1
 Luke Shaw,DF,Manchester Utd,1,21,7,0.05,0.14,19.8,0,0,0.07,-0.4,-0.4
@@ -437,7 +437,7 @@ Robert Snodgrass,MF,West Ham,2,30,7,0.07,0.29,19.9,4,0,0.08,-0.3,-0.3
 Cédric Soares,DF,Southampton,1,10,3,0.1,0.33,27.6,1,0,0.03,0.7,0.7
 Ramadan Sobhi,"FW,MF",Huddersfield,0,0,0,,,,0,0,,0,0
 Dominic Solanke,"FW,MF",Bournemouth,0,11,3,0,0,13.9,0,0,0.09,-1,-1
-Pape Souaré,DF,Crystal Palace,0,0,0,,,,0,0,,0,0
+Pape N'Diaye Souaré,DF,Crystal Palace,0,0,0,,,,0,0,,0,0
 Çağlar Söyüncü,DF,Leicester City,0,2,0,0,,12.1,0,0,0.04,-0.1,-0.1
 Julián Speroni,GK,Crystal Palace,0,0,0,,,,0,0,,0,0
 Junior Stanislas,"MF,FW",Bournemouth,2,33,9,0.03,0.11,21,10,1,0.07,-1.1,-1.3
@@ -487,7 +487,7 @@ Danny Welbeck,"FW,MF",Arsenal,1,4,2,0.25,0.5,10.5,0,0,0.2,0.2,0.2
 Ashley Westwood,MF,Burnley,2,22,7,0.09,0.29,22.2,1,0,0.09,0.1,0.1
 Connor Wickham,"FW,MF",Crystal Palace,0,5,1,0,0,12.3,0,0,0.07,-0.4,-0.4
 Georginio Wijnaldum,MF,Liverpool,3,30,8,0.1,0.38,15.3,0,0,0.1,0,0
-Danny Williams,MF,Huddersfield,0,1,0,0,,30.3,0,0,0.02,0,0
+Daniel Williams,MF,Huddersfield,0,1,0,0,,30.3,0,0,0.02,0,0
 Willian,FW,Chelsea,3,62,22,0.05,0.14,19.9,8,0,0.07,-1.2,-1.2
 Joe Willock,"MF,FW",Arsenal,0,2,0,0,,17.4,0,0,0.06,-0.1,-0.1
 Ben Wilmot,"MF,DF",Watford,0,0,0,,,,0,0,,0,0

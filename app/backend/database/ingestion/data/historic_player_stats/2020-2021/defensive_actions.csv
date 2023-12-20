@@ -15,7 +15,7 @@ Toby Alderweireld,DF,Tottenham,35,22,22,11,2,18,30,28,12,10,121,0
 Rúnar Alex Rúnarsson,GK,Arsenal,0,0,0,0,0,0,0,0,0,0,0,0
 Trent Alexander-Arnold,DF,Liverpool,56,33,31,18,7,36,56,3,21,49,50,3
 Ezgjan Alioski,"DF,MF",Leeds United,74,31,38,28,8,32,74,2,15,23,50,2
-Alisson,GK,Liverpool,3,2,3,0,0,3,4,0,0,2,26,7
+Alisson Becker,GK,Liverpool,3,2,3,0,0,3,4,0,0,2,26,7
 Allan,MF,Everton,80,45,39,37,4,28,95,12,19,19,25,1
 Dele Alli,MF,Tottenham,18,11,8,6,4,7,19,0,9,7,3,0
 Miguel Almirón,"MF,FW",Newcastle Utd,49,29,21,25,3,14,56,4,19,25,20,1
@@ -24,7 +24,6 @@ Steven Alzate,MF,Brighton,17,8,10,4,3,6,15,1,7,8,10,0
 Daniel Amartey,DF,Leicester City,11,7,6,4,1,8,12,4,4,12,26,0
 Ethan Ampadu,"DF,MF",Sheffield Utd,57,36,31,24,2,20,46,19,21,49,87,3
 Joachim Andersen,DF,Fulham,33,19,18,11,4,15,28,13,11,44,151,1
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Elliot Anderson,MF,Newcastle Utd,0,0,0,0,0,0,0,0,0,0,0,0
 Felipe Anderson,"FW,MF",West Ham,1,1,0,1,0,0,0,0,0,0,0,0
 Michail Antonio,FW,West Ham,7,4,1,5,1,1,7,3,17,7,7,0
@@ -50,7 +49,6 @@ Harvey Barnes,"FW,MF",Leicester City,19,9,11,3,5,5,22,3,13,8,11,0
 Kyle Bartley,DF,West Brom,27,16,14,10,3,11,23,35,15,38,159,1
 Chris Basham,"DF,MF",Sheffield Utd,69,42,41,23,5,41,67,15,21,49,105,1
 Michy Batshuayi,FW,Crystal Palace,5,3,1,2,2,1,9,1,4,4,5,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Jan Bednarek,DF,Southampton,37,19,25,11,1,25,49,27,17,84,132,0
 Donny van de Beek,"MF,FW",Manchester Utd,15,10,2,11,2,7,15,1,9,6,7,0
 Héctor Bellerín,"DF,MF",Arsenal,29,19,14,12,3,12,41,8,18,33,33,0
@@ -76,7 +74,6 @@ Joe Bryan,"DF,MF",Fulham,15,8,7,5,3,7,12,2,6,14,16,0
 Kean Bryan,DF,Sheffield Utd,20,10,9,11,0,9,19,10,6,13,39,1
 Oliver Burke,FW,Sheffield Utd,16,8,6,9,1,5,24,0,24,2,6,0
 Dan Burn,DF,Brighton,50,26,33,14,3,27,53,7,23,31,75,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Jack Butland,GK,Crystal Palace,0,0,0,0,0,0,0,0,0,0,0,0
 David Button,GK,West Brom,0,0,0,0,0,0,0,0,0,0,0,0
 Oskar Buur,DF,Wolves,0,0,0,0,0,0,2,0,0,0,0,0
@@ -102,7 +99,6 @@ Hamza Choudhury,MF,Leicester City,8,7,3,5,0,4,10,1,3,4,9,1
 Andreas Christensen,DF,Chelsea,11,6,8,3,0,0,8,14,5,20,51,1
 Carney Chukwuemeka,"MF,FW",Aston Villa,2,2,1,0,1,1,3,0,0,0,0,0
 Ciaran Clark,DF,Newcastle Utd,24,14,15,6,3,6,13,20,7,29,104,1
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Nathaniel Clyne,DF,Crystal Palace,17,10,8,8,1,9,16,2,5,18,25,1
 Conor Coady,DF,Wolves,35,23,25,10,0,19,35,32,8,27,134,2
 Séamus Coleman,"DF,MF",Everton,39,26,21,14,4,21,30,6,16,13,37,2
@@ -128,7 +124,6 @@ Fabian Delph,"MF,DF",Everton,5,2,3,2,0,1,3,0,2,4,8,1
 Leander Dendoncker,"MF,DF",Wolves,54,29,29,22,3,31,60,15,23,27,52,2
 Mbaye Diagne,FW,West Brom,4,3,3,0,1,1,4,1,1,1,16,0
 Amad Diallo,FW,Manchester Utd,3,3,1,2,0,0,0,1,1,0,1,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Ibrahima Diallo,MF,Southampton,29,16,11,17,1,9,16,1,9,10,12,2
 Grady Diangana,"MF,FW",West Brom,35,19,19,9,7,19,43,2,14,16,9,0
 Rúben Dias,DF,Manchester City,24,13,13,8,3,4,16,23,8,35,92,0
@@ -154,7 +149,6 @@ Eberechi Eze,MF,Crystal Palace,27,14,11,13,3,16,35,3,16,24,9,1
 Łukasz Fabiański,GK,West Ham,1,0,1,0,0,1,1,0,1,1,12,3
 Fabinho,"DF,MF",Liverpool,58,31,21,29,8,27,54,10,18,44,66,1
 Bruno Fernandes,MF,Manchester Utd,57,30,16,29,12,26,100,0,38,26,29,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Federico Fernández,DF,Newcastle Utd,29,22,23,5,1,17,21,31,10,17,147,0
 Fernandinho,MF,Manchester City,31,17,8,14,9,20,43,2,9,23,17,0
 Sam Field,MF,West Brom,5,5,3,2,0,0,0,1,3,2,4,0
@@ -180,7 +174,6 @@ Anwar El Ghazi,FW,Aston Villa,16,13,6,7,3,7,23,0,11,6,11,0
 Kieran Gibbs,DF,West Brom,15,11,11,3,1,8,10,6,2,16,30,1
 Morgan Gibbs-White,"MF,FW",Wolves,9,7,3,4,2,5,12,0,6,3,1,0
 Billy Gilmour,MF,Chelsea,4,2,1,2,1,2,7,2,1,3,1,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Olivier Giroud,FW,Chelsea,4,2,0,1,3,1,7,1,3,5,10,0
 Ben Godfrey,DF,Everton,55,33,37,15,3,27,41,37,19,33,120,0
 André Gomes,MF,Everton,35,23,16,16,3,17,58,1,18,10,12,1
@@ -206,7 +199,6 @@ Ahmed Hegazi,DF,West Brom,0,0,0,0,0,0,0,0,2,1,7,0
 Dean Henderson,GK,Manchester Utd,1,1,1,0,0,1,2,0,0,0,3,2
 Jordan Henderson,"MF,DF",Liverpool,24,15,12,9,3,10,26,1,11,34,30,0
 Jeff Hendrick,MF,Newcastle Utd,8,3,5,3,0,1,13,9,5,19,18,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Pablo Hernández,MF,Leeds United,5,3,2,1,2,5,16,0,2,0,0,1
 Son Heung-min,FW,Tottenham,32,18,11,14,7,18,72,3,25,14,8,0
 Ki-Jana Hoever,"DF,MF",Wolves,14,6,11,2,1,10,22,0,2,9,23,0
@@ -232,7 +224,6 @@ Gabriel Jesus,FW,Manchester City,17,6,5,5,7,11,28,0,16,15,5,0
 Raúl Jiménez,FW,Wolves,3,2,1,2,0,0,7,0,2,8,12,0
 Joelinton,"FW,MF",Newcastle Utd,33,21,7,21,5,14,37,2,28,9,24,0
 Ben Johnson,"DF,FW",West Ham,11,5,5,3,3,7,9,1,4,11,9,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Sam Johnstone,GK,West Brom,0,0,0,0,0,0,0,0,0,2,15,2
 Curtis Jones,MF,Liverpool,16,6,6,7,3,12,25,0,13,19,11,1
 Jorginho,MF,Chelsea,57,30,22,31,4,31,76,5,28,40,21,3
@@ -258,7 +249,6 @@ Robin Koch,"DF,MF",Leeds United,27,16,17,10,0,10,19,12,6,27,34,2
 Sead Kolašinac,DF,Arsenal,0,0,0,0,0,0,0,0,0,1,0,0
 Terence Kongolo,DF,Fulham,3,2,1,2,0,1,1,0,0,2,3,0
 Ezri Konsa,DF,Aston Villa,25,13,18,6,1,9,13,47,6,29,162,1
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Cheikhou Kouyaté,DF,Crystal Palace,58,37,44,12,2,25,43,26,16,32,125,2
 Mateo Kovačić,MF,Chelsea,46,28,19,24,3,17,32,1,17,15,11,2
 Emil Krafth,DF,Newcastle Utd,19,8,9,9,1,12,25,9,6,15,52,2
@@ -284,7 +274,6 @@ Giovani Lo Celso,MF,Tottenham,28,22,12,11,5,10,29,1,11,7,5,0
 Ruben Loftus-Cheek,FW,Chelsea,0,0,0,0,0,0,0,0,0,0,0,0
 Ruben Loftus-Cheek,"MF,FW",Fulham,25,14,7,15,3,7,23,2,18,7,18,0
 Kevin Long,DF,Burnley,11,6,9,2,0,7,9,7,4,6,24,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Shane Long,FW,Southampton,2,1,0,0,2,2,3,0,0,3,1,0
 Matthew Longstaff,MF,Newcastle Utd,3,2,2,1,0,2,8,0,7,7,2,0
 Sean Longstaff,MF,Newcastle Utd,31,14,13,15,3,18,42,5,21,19,14,2
@@ -310,7 +299,6 @@ Anthony Martial,FW,Manchester Utd,2,1,1,1,0,0,10,3,14,1,8,0
 Gabriel Martinelli,FW,Arsenal,7,1,2,3,2,4,10,0,6,8,4,0
 Emiliano Martínez,GK,Aston Villa,3,3,3,0,0,3,4,0,0,2,10,2
 Arthur Masuaku,"DF,MF",West Ham,20,12,14,6,0,11,34,0,12,8,28,2
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Juan Mata,"FW,MF",Manchester Utd,1,0,1,0,0,0,7,0,3,3,3,0
 Jean-Philippe Mateta,FW,Crystal Palace,1,1,0,1,0,1,3,0,1,0,2,0
 Nemanja Matić,MF,Manchester Utd,25,11,13,12,0,13,31,5,14,22,10,3
@@ -327,7 +315,7 @@ Scott McTominay,MF,Manchester Utd,51,24,23,25,3,23,36,10,25,29,46,0
 Ben Mee,DF,Burnley,32,15,16,14,2,14,29,45,9,43,148,2
 Hannibal Mejbri,MF,Manchester Utd,0,0,0,0,0,0,0,0,0,0,0,0
 Benjamin Mendy,DF,Manchester City,13,9,1,8,4,5,21,5,7,5,14,1
-Edouard Mendy,GK,Chelsea,0,0,0,0,0,0,1,0,0,1,9,3
+Édouard Mendy,GK,Chelsea,0,0,0,0,0,0,1,0,0,1,9,3
 Nampalys Mendy,MF,Leicester City,26,17,18,6,2,7,20,1,11,14,8,0
 Illan Meslier,GK,Leeds United,0,0,0,0,0,0,1,0,0,0,17,8
 Luka Milivojević,MF,Crystal Palace,65,34,25,31,9,42,77,6,23,35,47,2
@@ -336,7 +324,6 @@ Yerry Mina,DF,Everton,21,14,17,4,0,8,12,23,7,24,110,1
 Takumi Minamino,MF,Southampton,7,3,2,5,0,2,19,1,12,4,9,0
 Takumi Minamino,"MF,FW",Liverpool,4,3,1,2,1,0,12,0,1,2,3,0
 Tyrone Mings,DF,Aston Villa,32,16,23,7,2,16,24,40,19,41,172,3
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Tyrick Mitchell,DF,Crystal Palace,64,35,48,9,7,23,40,10,19,21,62,1
 Aleksandar Mitrović,FW,Fulham,7,4,0,3,4,2,8,3,9,3,8,0
 Jakub Moder,"DF,MF",Brighton,15,7,5,7,3,7,20,1,11,3,9,0
@@ -362,7 +349,6 @@ Niels Nkounkou,"DF,FW",Everton,4,3,1,2,1,3,8,0,4,0,4,0
 Dan Nlundulu,"FW,MF",Southampton,0,0,0,0,0,0,1,0,2,0,2,0
 Mark Noble,MF,West Ham,8,4,2,5,1,4,14,3,4,13,3,0
 Will Norris,GK,Burnley,0,0,0,0,0,0,0,0,0,0,0,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Oliver Norwood,MF,Sheffield Utd,49,22,16,28,5,21,72,12,17,36,51,1
 Jack O'Connell,DF,Sheffield Utd,3,1,1,1,1,0,1,3,1,2,7,0
 Dara O'Shea,DF,West Brom,45,25,30,13,2,21,45,17,15,45,108,0
@@ -388,7 +374,6 @@ Kalvin Phillips,MF,Leeds United,74,38,38,29,7,26,62,14,35,45,53,3
 Matt Phillips,MF,West Brom,15,8,4,11,0,7,23,4,28,10,32,1
 Nathaniel Phillips,DF,Liverpool,22,14,15,7,0,11,24,14,3,20,81,0
 Jaden Philogene Bidace,FW,Aston Villa,0,0,0,0,0,0,0,0,0,0,0,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Jordan Pickford,GK,Everton,0,0,0,0,0,0,2,0,2,3,16,4
 Erik Pieters,"DF,MF",Burnley,30,21,18,9,3,19,39,9,21,12,34,0
 Daniel Podence,"MF,FW",Wolves,12,6,5,5,2,2,19,1,4,13,2,0
@@ -414,7 +399,6 @@ Richarlison,FW,Everton,50,32,21,22,7,16,51,3,25,14,36,1
 Jaïro Riedewald,MF,Crystal Palace,34,15,13,17,4,16,36,7,32,29,25,0
 Matt Ritchie,"DF,MF",Newcastle Utd,10,3,5,3,2,3,17,2,15,12,47,0
 Tyler Roberts,"MF,FW",Leeds United,15,13,1,11,3,5,22,2,15,9,12,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Andrew Robertson,DF,Liverpool,46,34,23,18,5,28,57,9,30,21,79,1
 Antonee Robinson,DF,Fulham,45,28,24,16,5,27,44,4,17,37,68,0
 Callum Robinson,"FW,MF",West Brom,7,5,5,1,1,3,19,0,9,7,8,0
@@ -440,7 +424,6 @@ Mohammed Salisu,DF,Southampton,38,21,20,16,2,25,34,5,17,17,30,0
 Davinson Sánchez,DF,Tottenham,40,20,31,9,0,21,32,13,5,14,85,2
 Robert Sánchez,GK,Brighton,1,0,1,0,0,1,1,0,1,1,11,2
 Morgan Sanson,MF,Aston Villa,7,4,4,2,1,1,4,0,5,4,1,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Romaine Sawyers,MF,West Brom,30,18,16,12,2,14,43,4,16,18,12,3
 Dane Scarlett,FW,Tottenham,0,0,0,0,0,0,0,0,0,0,0,0
 Fabian Schär,DF,Newcastle Utd,13,4,8,5,0,7,19,12,7,27,52,1
@@ -466,7 +449,6 @@ Robert Snodgrass,"MF,FW",West Brom,17,12,12,4,1,10,16,2,9,1,12,0
 Robert Snodgrass,"FW,MF",West Ham,0,0,0,0,0,0,0,0,0,0,0,0
 Cédric Soares,DF,Arsenal,12,8,6,4,2,6,21,1,5,8,16,1
 Tomáš Souček,MF,West Ham,78,41,37,36,5,28,77,18,25,62,107,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Çağlar Söyüncü,DF,Leicester City,27,17,13,14,0,17,30,9,3,28,80,1
 Zack Steffen,GK,Manchester City,0,0,0,0,0,0,0,0,0,0,0,0
 Dale Stephens,MF,Burnley,11,6,2,7,2,3,6,0,3,8,2,0
@@ -492,7 +474,6 @@ Youri Tielemans,MF,Leicester City,86,45,32,38,16,45,108,8,27,46,20,1
 Kieran Tierney,DF,Arsenal,27,15,5,14,8,11,31,10,21,16,63,0
 James Tomkins,DF,Crystal Palace,4,2,4,0,0,3,4,3,1,4,45,0
 Fikayo Tomori,DF,Chelsea,2,1,2,0,0,0,0,1,0,2,8,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Ferrán Torres,"FW,MF",Manchester City,12,5,4,6,2,5,16,0,16,3,8,0
 Cenk Tosun,FW,Everton,0,0,0,0,0,0,1,0,0,0,0,0
 Andros Townsend,"MF,FW",Crystal Palace,78,41,45,20,13,30,79,2,46,41,19,0
@@ -518,7 +499,6 @@ Matěj Vydra,FW,Burnley,9,5,2,4,3,1,8,1,7,6,5,0
 Theo Walcott,"MF,FW",Southampton,23,11,8,9,6,11,32,0,16,14,5,0
 Theo Walcott,FW,Everton,0,0,0,0,0,0,0,0,0,0,0,0
 Kyle Walker,DF,Manchester City,29,19,15,12,2,16,24,7,12,14,28,0
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Kyle Walker-Peters,DF,Southampton,83,53,56,25,2,34,57,10,31,38,66,2
 Aaron Wan-Bissaka,DF,Manchester Utd,88,54,53,29,6,32,45,17,48,62,84,2
 Joel Ward,DF,Crystal Palace,43,25,29,14,0,24,42,8,19,41,87,2
@@ -544,7 +524,6 @@ Granit Xhaka,"MF,DF",Arsenal,50,26,18,17,15,30,58,7,16,24,38,3
 Andriy Yarmolenko,"FW,MF",West Ham,5,4,2,2,1,2,8,0,1,1,2,0
 DeAndre Yedlin,DF,Newcastle Utd,9,4,8,1,0,4,10,1,4,7,17,0
 Okay Yokuşlu,MF,West Brom,38,25,21,13,4,17,35,3,12,35,33,1
-Player,Pos,Squad,Tkl,TklW,Def 3rd,Mid 3rd,Att 3rd,Tkl,Att,Sh,Pass,Int,Clr,Err
 Wilfried Zaha,FW,Crystal Palace,26,18,8,15,3,11,30,0,21,9,4,0
 Andre-Frank Zambo Anguissa,MF,Fulham,78,37,27,38,13,27,68,6,29,56,17,2
 Andi Zeqiri,"FW,DF",Brighton,3,2,0,2,1,1,2,0,1,0,2,0

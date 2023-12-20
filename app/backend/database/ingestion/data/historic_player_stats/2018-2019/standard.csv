@@ -5,7 +5,7 @@ Nathan Aké,DF,Bournemouth,38,38,3411,37.9,4,0,4,4,0,0,3,0,3.4,3.4,1,4.4,20,98,2
 Marc Albrighton,"FW,MF",Leicester City,27,18,1625,18.1,2,2,4,2,0,0,3,0,1.2,1.2,2.9,4.1,54,64,172
 Toby Alderweireld,DF,Tottenham,34,33,2922,32.5,0,0,0,0,0,0,3,0,1.1,1.1,0.6,1.8,25,161,5
 Trent Alexander-Arnold,DF,Liverpool,29,27,2462,27.4,1,12,13,1,0,0,3,0,1.6,1.6,6.3,7.9,70,157,174
-Alisson,GK,Liverpool,38,38,3420,38,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0
+Alisson Becker,GK,Liverpool,38,38,3420,38,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0
 Dele Alli,MF,Tottenham,25,22,1825,20.3,5,3,8,5,0,0,4,0,4.8,4.8,3.1,7.9,48,111,153
 Miguel Almirón,MF,Newcastle Utd,10,9,759,8.4,0,0,0,0,0,0,0,0,1.5,1.5,0.6,2.1,31,25,45
 Marcos Alonso,DF,Chelsea,31,31,2759,30.7,2,4,6,2,0,0,6,0,3.4,3.4,3.4,6.8,102,146,230
@@ -414,7 +414,7 @@ Kasper Schmeichel,GK,Leicester City,38,38,3420,38,0,0,0,0,0,0,3,0,0.1,0.1,0.4,0.
 Morgan Schneiderlin,MF,Everton,14,10,834,9.3,0,1,1,0,0,0,2,0,0.1,0.1,0.4,0.6,6,47,5
 André Schürrle,"FW,MF",Fulham,24,21,1641,18.2,6,0,6,6,0,0,2,0,3.6,3.6,1.9,5.6,46,57,136
 Ken Sema,"MF,FW",Watford,17,9,754,8.4,1,2,3,1,0,0,1,0,0.8,0.8,0.6,1.4,30,17,60
-Jean Seri,MF,Fulham,32,27,2244,24.9,1,2,3,1,0,0,6,0,0.9,0.9,4.8,5.6,26,164,40
+Jean Michaël Seri,MF,Fulham,32,27,2244,24.9,1,2,3,1,0,0,6,0,0.9,0.9,4.8,5.6,26,164,40
 Ryan Sessegnon,"FW,DF",Fulham,35,26,2300,25.6,2,6,8,2,0,0,0,0,4,4,3.8,7.8,57,57,193
 Xherdan Shaqiri,"FW,MF",Liverpool,24,11,1064,11.8,6,3,9,6,0,0,2,0,3.9,3.9,1.6,5.5,28,85,75
 Luke Shaw,DF,Manchester Utd,29,29,2591,28.8,1,4,5,1,0,0,11,0,1.4,1.4,3.9,5.3,90,158,121
@@ -437,7 +437,7 @@ Robert Snodgrass,MF,West Ham,33,25,2220,24.7,2,5,7,2,0,0,10,0,2.3,2.3,5.6,8,72,1
 Cédric Soares,DF,Southampton,18,16,1495,16.6,1,2,3,1,0,0,4,0,0.3,0.3,1,1.4,31,54,66
 Ramadan Sobhi,"FW,MF",Huddersfield,4,0,79,0.9,0,0,0,0,0,0,0,0,0,0,0.2,0.2,3,6,14
 Dominic Solanke,"FW,MF",Bournemouth,10,2,347,3.9,0,1,1,0,0,0,0,0,1,1,0.4,1.3,10,6,24
-Pape Souaré,DF,Crystal Palace,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+Pape N'Diaye Souaré,DF,Crystal Palace,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 Çağlar Söyüncü,DF,Leicester City,6,4,372,4.1,0,0,0,0,0,0,1,0,0.1,0.1,0,0.1,2,10,0
 Julián Speroni,GK,Crystal Palace,1,1,90,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 Junior Stanislas,"MF,FW",Bournemouth,23,11,1031,11.5,2,3,5,1,1,1,1,0,3.1,2.3,2,4.2,35,58,81
@@ -487,7 +487,7 @@ Danny Welbeck,"FW,MF",Arsenal,8,1,153,1.7,1,1,2,1,0,0,0,0,0.8,0.8,0.3,1.1,6,10,1
 Ashley Westwood,MF,Burnley,34,31,2824,31.4,2,7,9,2,0,0,5,0,1.9,1.9,4.8,6.7,16,175,40
 Connor Wickham,"FW,MF",Crystal Palace,6,0,67,0.7,0,1,1,0,0,0,0,0,0.4,0.4,0.3,0.7,0,0,1
 Georginio Wijnaldum,MF,Liverpool,35,32,2725,30.3,3,0,3,3,0,0,3,0,3,3,1.8,4.8,47,168,67
-Danny Williams,MF,Huddersfield,5,1,96,1.1,0,0,0,0,0,0,1,0,0,0,0,0.1,1,3,1
+Daniel Williams,MF,Huddersfield,5,1,96,1.1,0,0,0,0,0,0,1,0,0,0,0,0.1,1,3,1
 Willian,FW,Chelsea,32,26,2097,23.3,3,6,9,3,0,0,2,0,4.2,4.2,5.4,9.6,143,141,283
 Joe Willock,"MF,FW",Arsenal,2,1,64,0.7,0,0,0,0,0,0,0,0,0.1,0.1,0,0.1,0,1,7
 Ben Wilmot,"MF,DF",Watford,2,0,28,0.3,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0

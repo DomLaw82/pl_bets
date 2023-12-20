@@ -1,7 +1,7 @@
 player,position,team,goals_against,shots_on_target_against,saves,wins,draws,losses,clean_sheets,penalties_faced,penalties_allowed,penalties_saved,penalties_missed
 Adrián,GK,Liverpool,9,18,9,1,1,1,1,0,0,0,0
 Rúnar Alex Rúnarsson,GK,Arsenal,0,2,2,0,0,0,0,0,0,0,0
-Alisson,GK,Liverpool,32,115,82,18,8,7,10,8,4,1,3
+Alisson Becker,GK,Liverpool,32,115,82,18,8,7,10,8,4,1,3
 Alphonse Areola,GK,Fulham,48,161,114,5,13,18,9,6,6,0,0
 Kepa Arrizabalaga,GK,Chelsea,8,23,15,2,2,2,2,1,1,0,0
 Jack Butland,GK,Crystal Palace,2,5,3,1,0,0,0,0,0,0,0
@@ -23,7 +23,7 @@ Bernd Leno,GK,Arsenal,37,117,83,17,6,12,11,2,1,1,0
 Hugo Lloris,GK,Tottenham,45,155,113,18,8,12,12,10,10,0,0
 Emiliano Martínez,GK,Aston Villa,46,186,133,16,7,15,15,6,5,1,0
 Alex McCarthy,GK,Southampton,57,147,91,8,7,15,7,6,6,0,0
-Edouard Mendy,GK,Chelsea,25,81,56,17,7,7,16,3,2,1,0
+Édouard Mendy,GK,Chelsea,25,81,56,17,7,7,16,3,2,1,0
 Illan Meslier,GK,Leeds United,52,188,137,16,5,14,11,9,8,1,0
 Will Norris,GK,Burnley,4,6,2,0,0,2,0,0,0,0,0
 Robin Olsen,GK,Everton,9,30,21,2,3,2,2,1,1,0,0

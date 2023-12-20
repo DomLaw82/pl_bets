@@ -9,7 +9,8 @@ RUN apt-get update && \
 RUN apt install -y python3-pandas && \
     apt install -y python3-psycopg2 && \
     apt install -y python3-sqlalchemy && \
-    apt install -y python3-bs4
+    apt install -y python3-bs4 && \
+    apt install -y python3-fuzzywuzzy
 
 COPY . .
 

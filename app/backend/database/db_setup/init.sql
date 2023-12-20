@@ -72,7 +72,7 @@ CREATE TABLE match (
 );
 
 CREATE TABLE historic_player_per_ninety (
-	player_id VARCHAR(7) REFERENCES player(id) PRIMARY KEY,
+	player_id VARCHAR(7) REFERENCES player(id),
 	minutes_played FLOAT NOT NULL,
 	ninetys FLOAT NOT NULL,
 	goals FLOAT NOT NULL,
@@ -152,8 +152,10 @@ CREATE TABLE historic_player_per_ninety (
 	penalties_allowed FLOAT NOT NULL,
 	penalties_saved FLOAT NOT NULL,
 	penalties_missed FLOAT NOT NULL,
-	season VARCHAR NOT NULL
+	season VARCHAR NOT NULL,
+	PRIMARY KEY (player_id, minutes_played, season)
 );
+
 
 CREATE TABLE player_form (
 	player_id VARCHAR(7) REFERENCES player(id) PRIMARY KEY,

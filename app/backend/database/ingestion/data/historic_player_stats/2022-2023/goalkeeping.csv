@@ -1,5 +1,5 @@
 player,position,team,goals_against,shots_on_target_against,saves,wins,draws,losses,clean_sheets,penalties_faced,penalties_allowed,penalties_saved,penalties_missed
-Alisson,GK,Liverpool,43,147,105,19,9,9,14,4,2,1,1
+Alisson Becker,GK,Liverpool,43,147,105,19,9,9,14,4,2,1,1
 Alphonse Areola,GK,West Ham,7,16,9,0,1,1,1,2,2,0,0
 Kepa Arrizabalaga,GK,Chelsea,33,120,90,8,9,12,9,1,1,0,0
 Gavin Bazunu,GK,Southampton,56,120,67,6,6,20,4,2,1,1,0
@@ -20,7 +20,7 @@ Bernd Leno,GK,Fulham,51,192,142,15,5,16,8,8,7,1,0
 Hugo Lloris,GK,Tottenham,39,117,79,13,3,9,7,1,1,0,0
 Emiliano Martínez,GK,Aston Villa,38,132,97,17,7,12,11,5,4,1,0
 Alex McCarthy,GK,Southampton,17,30,14,0,1,5,0,1,1,0,0
-Edouard Mendy,GK,Chelsea,14,39,25,3,2,4,1,0,0,0,0
+Édouard Mendy,GK,Chelsea,14,39,25,3,2,4,1,0,0,0,0
 Illan Meslier,GK,Leeds United,67,158,92,7,9,18,5,3,3,0,0
 Keylor Navas,GK,Nott'ham Forest,32,83,51,4,4,9,1,4,4,0,0
 Neto,GK,Bournemouth,39,138,100,9,6,12,6,5,4,0,1

@@ -1,5 +1,5 @@
 player,position,team,goals_against,shots_on_target_against,saves,wins,draws,losses,clean_sheets,penalties_faced,penalties_allowed,penalties_saved,penalties_missed
-Alisson,GK,Liverpool,24,99,76,27,7,2,20,0,0,0,0
+Alisson Becker,GK,Liverpool,24,99,76,27,7,2,20,0,0,0,0
 Alphonse Areola,GK,West Ham,1,3,2,0,0,1,0,0,0,0,0
 Kepa Arrizabalaga,GK,Chelsea,2,13,11,2,1,1,2,0,0,0,0
 Daniel Bachmann,GK,Watford,28,72,46,1,0,11,0,3,3,0,0
@@ -25,7 +25,7 @@ Hugo Lloris,GK,Tottenham,40,137,98,22,5,11,16,2,2,0,0
 Jonas Lössl,GK,Brentford,5,7,2,0,0,2,0,0,0,0,0
 Emiliano Martínez,GK,Aston Villa,48,140,93,13,6,17,11,6,4,1,1
 Alex McCarthy,GK,Southampton,27,71,44,3,7,7,5,0,0,0,0
-Edouard Mendy,GK,Chelsea,31,102,72,19,10,5,14,6,6,0,0
+Édouard Mendy,GK,Chelsea,31,102,72,19,10,5,14,6,6,0,0
 Illan Meslier,GK,Leeds United,79,220,142,9,11,18,5,5,5,0,0
 Robin Olsen,GK,Aston Villa,3,5,2,0,0,1,0,0,0,0,0
 Jordan Pickford,GK,Everton,58,170,116,10,6,19,7,1,1,0,0

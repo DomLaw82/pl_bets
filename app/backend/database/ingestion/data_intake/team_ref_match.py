@@ -32,7 +32,8 @@ def rename_team_name(team_name:str) -> str:
         "West Ham": "West Ham United",
         "Charlton": "Charlton Athletic",
         "Cardiff": "Cardiff City",
-        "Huddersfield": "Huddersfield Town"
+        "Huddersfield": "Huddersfield Town",
+        "Norwich": "Norwich City",
     }
     return rename_teams.get(team_name) or team_name
 

@@ -11,7 +11,7 @@ def not_blank_entry(player: list) -> bool:
 	return all(player)
 
 def format_player_entries(player: list[str]) -> list[str]:
-	# Original format: [first_name last_name, position, dob]
+	# Original format: [first_name, last_name, position, dob]
 
 	player = [player[0].strip("\r\n-").strip(), player[1].strip("\r\n-").strip(), player[2].strip("\r\n-").strip(), player[3].strip("\r\n-").strip()]
 	
@@ -46,7 +46,7 @@ def get_team_squad(html_content):
 
 	for idx, row in enumerate(rows):
 		if "Players no longer at this club" in str(row):
-			rows = rows[:idx]
+			rows = rows[:idx] + rows[idx+2:-1]
 			break
 	
 	squad = []
@@ -97,7 +97,7 @@ def player_main(db_connection):
 				html_content = file.read()
 			
 			squad = get_team_squad(html_content)
-
+			
 			squad_no_blanks = [player for player in squad if not_blank_entry(player)]
 			squad_with_team = [player + [team] for player in squad_no_blanks]
 			complete_squad = [format_player_entries(player) for player in squad_with_team]
@@ -110,8 +110,7 @@ def player_main(db_connection):
 			player_df = player_df[["first_name", "last_name", "birth_date", "position"]]
 			player_df.loc[:, "first_name"] = player_df.apply(lambda row: escape_single_quote(row.first_name), axis=1)
 			player_df.loc[:, "last_name"] = player_df.apply(lambda row: escape_single_quote(row.last_name), axis=1)
-
-			rows_not_in_db_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date", "position"], "player")
+			rows_not_in_db_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date"], "player")
 			if rows_not_in_db_df.empty:
 				continue
 			save_to_database(db_connection, rows_not_in_db_df, "player")
@@ -121,6 +120,7 @@ def player_main(db_connection):
 			player_team_df.loc[:, "team_id"] = player_team_df.apply(lambda row: get_team_id(db_connection, row.team_id), axis=1)
 
 			player_team_df["season"] = season
+			
 
 			player_team_df = player_team_df[["player_id", "team_id", "season"]]
 			player_team_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")

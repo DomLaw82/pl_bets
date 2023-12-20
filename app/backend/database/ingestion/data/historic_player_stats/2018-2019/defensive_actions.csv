@@ -5,7 +5,7 @@ Nathan Aké,DF,Bournemouth,66,35,42,21,3,22,35,35,16,32,241,0
 Marc Albrighton,"FW,MF",Leicester City,35,22,18,14,3,13,31,3,23,23,30,0
 Toby Alderweireld,DF,Tottenham,37,23,25,10,2,12,22,22,19,24,175,0
 Trent Alexander-Arnold,DF,Liverpool,61,39,31,22,8,36,68,3,16,35,68,0
-Alisson,GK,Liverpool,2,1,2,0,0,2,2,0,0,1,14,6
+Alisson Becker,GK,Liverpool,2,1,2,0,0,2,2,0,0,1,14,6
 Dele Alli,MF,Tottenham,33,19,6,14,13,5,24,5,28,19,20,0
 Miguel Almirón,MF,Newcastle Utd,20,12,7,10,3,4,10,1,13,8,5,0
 Marcos Alonso,DF,Chelsea,73,46,44,22,7,33,58,2,23,39,101,0
@@ -414,7 +414,7 @@ Kasper Schmeichel,GK,Leicester City,1,1,1,0,0,1,1,0,0,3,14,3
 Morgan Schneiderlin,MF,Everton,24,16,11,11,2,6,14,3,13,15,16,0
 André Schürrle,"FW,MF",Fulham,30,19,14,10,6,12,42,1,15,8,17,1
 Ken Sema,"MF,FW",Watford,15,7,7,5,3,9,21,0,7,8,5,0
-Jean Seri,MF,Fulham,41,28,20,20,1,13,45,9,31,32,17,4
+Jean Michaël Seri,MF,Fulham,41,28,20,20,1,13,45,9,31,32,17,4
 Ryan Sessegnon,"FW,DF",Fulham,22,14,8,8,6,6,22,2,23,19,49,1
 Xherdan Shaqiri,"FW,MF",Liverpool,14,4,3,9,2,9,19,1,5,6,6,0
 Luke Shaw,DF,Manchester Utd,55,29,17,31,7,28,47,12,30,21,93,2
@@ -437,7 +437,7 @@ Robert Snodgrass,MF,West Ham,44,27,18,24,2,13,46,4,20,11,23,0
 Cédric Soares,DF,Southampton,22,16,15,6,1,9,15,5,16,22,60,2
 Ramadan Sobhi,"FW,MF",Huddersfield,1,1,0,1,0,0,0,0,2,1,0,0
 Dominic Solanke,"FW,MF",Bournemouth,8,3,1,4,3,1,8,1,3,2,9,0
-Pape Souaré,DF,Crystal Palace,0,0,0,0,0,0,0,0,0,1,0,0
+Pape N'Diaye Souaré,DF,Crystal Palace,0,0,0,0,0,0,0,0,0,1,0,0
 Çağlar Söyüncü,DF,Leicester City,5,2,4,1,0,3,6,5,3,7,22,3
 Julián Speroni,GK,Crystal Palace,0,0,0,0,0,0,0,0,0,0,1,2
 Junior Stanislas,"MF,FW",Bournemouth,12,6,5,4,3,3,7,1,7,2,15,0
@@ -487,7 +487,7 @@ Danny Welbeck,"FW,MF",Arsenal,3,2,0,2,1,0,0,0,2,1,2,0
 Ashley Westwood,MF,Burnley,58,30,24,27,7,14,39,9,29,47,42,2
 Connor Wickham,"FW,MF",Crystal Palace,0,0,0,0,0,0,0,0,0,0,2,0
 Georginio Wijnaldum,MF,Liverpool,41,28,14,20,7,14,27,7,14,21,24,0
-Danny Williams,MF,Huddersfield,0,0,0,0,0,0,0,1,3,1,2,0
+Daniel Williams,MF,Huddersfield,0,0,0,0,0,0,0,1,3,1,2,0
 Willian,FW,Chelsea,35,21,11,15,9,9,25,1,15,14,12,2
 Joe Willock,"MF,FW",Arsenal,1,0,0,1,0,0,0,0,1,1,0,0
 Ben Wilmot,"MF,DF",Watford,0,0,0,0,0,0,1,1,1,0,1,0
