@@ -1,0 +1,43 @@
+player,position,team,goals_against,shots_on_target_against,saves,wins,draws,losses,clean_sheets,penalties_faced,penalties_allowed,penalties_saved,penalties_missed
+Adrián,GK,Liverpool,9,18,9,1,1,1,1,0,0,0,0
+Rúnar Alex Rúnarsson,GK,Arsenal,0,2,2,0,0,0,0,0,0,0,0
+Alisson,GK,Liverpool,32,115,82,18,8,7,10,8,4,1,3
+Alphonse Areola,GK,Fulham,48,161,114,5,13,18,9,6,6,0,0
+Kepa Arrizabalaga,GK,Chelsea,8,23,15,2,2,2,2,1,1,0,0
+Jack Butland,GK,Crystal Palace,2,5,3,1,0,0,0,0,0,0,0
+David Button,GK,West Brom,2,6,4,1,0,0,0,0,0,0,0
+Willy Caballero,GK,Chelsea,3,3,0,0,1,0,0,0,0,0,0
+Scott Carson,GK,Manchester City,3,5,1,1,0,0,0,2,1,1,0
+Kiko Casilla,GK,Leeds United,2,10,8,2,0,1,1,0,0,0,0
+Karl Darlow,GK,Newcastle Utd,43,126,84,7,4,14,4,4,3,1,0
+Martin Dúbravka,GK,Newcastle Utd,19,62,44,5,5,3,3,1,1,0,0
+Ederson,GK,Manchester City,28,93,65,25,5,6,19,8,7,1,0
+Łukasz Fabiański,GK,West Ham,44,138,97,17,8,10,10,5,3,1,1
+Fraser Forster,GK,Southampton,11,31,19,4,0,4,2,3,2,1,0
+David de Gea,GK,Manchester Utd,32,90,59,12,9,5,9,4,4,0,0
+Vicente Guaita,GK,Crystal Palace,64,169,104,11,8,18,8,4,3,1,0
+Dean Henderson,GK,Manchester Utd,12,51,39,9,2,1,4,0,0,0,0
+Sam Johnstone,GK,West Brom,74,234,162,4,11,22,6,11,7,1,3
+Caoimhín Kelleher,GK,Liverpool,1,7,6,1,0,1,1,0,0,0,0
+Bernd Leno,GK,Arsenal,37,117,83,17,6,12,11,2,1,1,0
+Hugo Lloris,GK,Tottenham,45,155,113,18,8,12,12,10,10,0,0
+Emiliano Martínez,GK,Aston Villa,46,186,133,16,7,15,15,6,5,1,0
+Alex McCarthy,GK,Southampton,57,147,91,8,7,15,7,6,6,0,0
+Edouard Mendy,GK,Chelsea,25,81,56,17,7,7,16,3,2,1,0
+Illan Meslier,GK,Leeds United,52,188,137,16,5,14,11,9,8,1,0
+Will Norris,GK,Burnley,4,6,2,0,0,2,0,0,0,0,0
+Robin Olsen,GK,Everton,9,30,21,2,3,2,2,1,1,0,0
+Rui Patrício,GK,Wolves,51,148,99,12,9,16,10,8,7,1,0
+Bailey Peacock-Farrell,GK,Burnley,14,24,10,0,0,4,0,0,0,0,0
+Jordan Pickford,GK,Everton,39,128,90,15,5,11,10,3,2,0,1
+Nick Pope,GK,Burnley,37,149,113,10,9,13,11,3,3,0,0
+Aaron Ramsdale,GK,Sheffield Utd,63,206,145,7,2,29,5,4,3,0,1
+Darren Randolph,GK,West Ham,3,9,6,2,0,1,1,0,0,0,0
+Marek Rodák,GK,Fulham,5,9,4,0,0,2,0,1,1,0,0
+John Ruddy,GK,Wolves,1,4,3,0,0,1,0,0,0,0,0
+Mathew Ryan,GK,Arsenal,2,10,8,1,1,1,1,1,1,0,0
+Mathew Ryan,GK,Brighton,19,34,16,2,4,5,2,4,4,0,0
+Robert Sánchez,GK,Brighton,27,91,65,7,10,10,10,3,2,0,1
+Kasper Schmeichel,GK,Leicester City,50,136,88,20,6,12,11,4,4,0,0
+Zack Steffen,GK,Manchester City,1,2,1,1,0,0,0,0,0,0,0
+João Virgínia,GK,Everton,0,3,3,0,0,0,0,0,0,0,0
