@@ -116,6 +116,7 @@ def player_main(db_connection):
 				continue
 			save_to_database(db_connection, rows_not_in_db_df, "player")
 
+			player_team_df['team_id'] = player_team_df['team_id'].apply(lambda x: x.replace('.html', ''))
 			player_team_df.loc[:, "player_id"] = player_team_df.apply(lambda row: get_player_id(db_connection, row), axis=1)
 			player_team_df.loc[:, "team_id"] = player_team_df.apply(lambda row: get_team_id(db_connection, row.team_id), axis=1)
 

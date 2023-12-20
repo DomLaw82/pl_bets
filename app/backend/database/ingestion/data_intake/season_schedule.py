@@ -7,8 +7,6 @@ from data_intake.team_ref_match import rename_team_name
 def clean_schedule_data(db_connection, df:pd.DataFrame) -> pd.DataFrame:
 	df.columns = ["_".join(col.lower().split(" ") )for col in df.columns.to_list()]
 
-	print(df.columns)
-
 	df.loc[:, "home_team"] = df.apply(lambda row: rename_team_name(row.home_team.title()), axis=1)
 	df.loc[:, "away_team"] = df.apply(lambda row: rename_team_name(row.away_team.title()), axis=1)
 	

@@ -1,5 +1,5 @@
 import os, pandas as pd
-from data_intake.utilities.unique_id import get_player_id
+from data_intake.utilities.unique_id import get_player_id_per_ninety
 
 def combining_datasets(season: str) -> pd.DataFrame:
 	data_folder_path = "./data/historic_player_stats"
@@ -19,7 +19,7 @@ def combining_datasets(season: str) -> pd.DataFrame:
 	
 	return complete
 
-def clean_historic_stats_df(df: pd.DataFrame, season: str) -> pd.DataFrame:
+def clean_historic_stats_df(db_connection, df: pd.DataFrame, season: str) -> pd.DataFrame:
 	goalkeeping_columns = ["goals_against", "shots_on_target_against", "saves", "wins",	"draws", "losses", "clean_sheets", "penalties_faced", "penalties_allowed", "penalties_saved", "penalties_missed"]
 
 	columns_to_remove = ["position", "team"]
@@ -29,14 +29,17 @@ def clean_historic_stats_df(df: pd.DataFrame, season: str) -> pd.DataFrame:
 	df = df.rename(columns={"goals_x": "goals", "expected_assisted_goals_x": "expected_assisted_goals", "progressive_passes_x": "progressive_passes"})
 	df[goalkeeping_columns] = df[goalkeeping_columns].fillna(0)
 
-	df.loc[:, "first_name"] = df["player"].str.split(pat=" ", n=1)[0]
-	df.loc[:, "last_name"] = df["player"].str.split(pat=" ", n=1)[1]
-	df["player"] = df.apply(lambda row: get_player_id(row), axis=1)
+
+	df[["first_name", "last_name"]] = df["player"].str.split(pat=" ", n=1, expand=True).fillna('').astype(str)
+	df.loc[:, "player"] = df.apply(lambda row: get_player_id_per_ninety(db_connection, row), axis=1)
+
 	df = df.rename(columns={"player": "player_id", "90s": "ninetys"})
 	df.columns = [x.replace("+", "_plus_").replace("/", "_divided_by_").replace("-", "_minus_") for x in df.columns.tolist()]
 
-	df = df.drop(["first_name", "last_name", "starts", "matches_played", "wins", "draws", "losses"])
+	df = df.drop(columns=["first_name", "last_name", "starts", "matches_played", "wins", "draws", "losses"])
 	df.loc[:, "season"] = season
+	# 	TODO - More granular method to impute nulls
+	df = df.fillna(0)
 
 	return df
 
@@ -45,12 +48,12 @@ def save_to_database(db_connection, df: pd.DataFrame) -> None:
 
 def per_90_main(db_connection):
 
-	data_folder_path = "./app/historic_player_stats"
+	data_folder_path = "./data/historic_player_stats"
 
 	seasons = sorted(os.listdir(data_folder_path))
 
 	for season in seasons:
 
 		df = combining_datasets(season)
-		df = clean_historic_stats_df(df, season)
+		df = clean_historic_stats_df(db_connection, df, season)
 		save_to_database(db_connection, df)

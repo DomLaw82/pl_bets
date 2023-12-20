@@ -4,10 +4,10 @@ from data_intake.utilities.unique_id import get_team_id
 import os
 
 def clean_country_competition_data() -> pd.DataFrame:
-	competition_csv_path = "./app/data/competition.csv"
-	country_csv_path = "./app/data/country.csv"
+	competition_csv_path = "./data/competition.csv"
+	country_csv_path = "./data/country.csv"
 
-	paths = [competition_csv_path, country_csv_path]
+	paths = [country_csv_path, competition_csv_path]
 	dfs = []
 
 	for path in paths:
@@ -20,7 +20,7 @@ def save_to_database(db_connection, df: pd.DataFrame, team_name: str) -> None:
 
 def country_competition_main(db_connection):
 	dfs = clean_country_competition_data()
-	tables = ["competition", "country"]
+	tables = ["country", "competition"]
 	
 	for idx, df in enumerate(dfs):
 		save_to_database(db_connection, df, tables[idx])

@@ -43,7 +43,7 @@ CREATE TABLE schedule (
 );
 
 CREATE TABLE player_team (
-	player_id VARCHAR(7) REFERENCES team(id),
+	player_id VARCHAR(7) REFERENCES player(id),
 	team_id VARCHAR(7) REFERENCES team(id),
 	season VARCHAR(9) NOT NULL
 );
