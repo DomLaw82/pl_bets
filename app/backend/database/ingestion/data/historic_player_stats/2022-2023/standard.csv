@@ -1,4 +1,4 @@
-Player,Pos,Squad,MP,Starts,Min,90s,Gls,Ast,G+A,G-PK,PK,PKatt,CrdY,CrdR,xG,npxG,xAG,npxG+xAG,PrgC,PrgP,PrgR
+player,position,team,matches_played,starts,minutes_played,90s,goals,assists,goals+assists,non_penalty_goals,penalties_scored,penalties_attempted,yellow_cards,red_cards,expected_goals,non_penalty_expected_goals,expected_assisted_goals,non_penalty_expected_goals+expected_assisted_goals,progressive_carries,progressive_passes,progressive_passes_recieved
 Brenden Aaronson,"MF,FW",Leeds United,36,28,2372,26.4,1,3,4,1,0,0,2,0,3.9,3.9,4.2,8.1,43,86,151
 George Abbott,MF,Tottenham,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 Che Adams,FW,Southampton,28,23,1992,22.1,5,3,8,5,0,0,1,0,6.6,6.6,2.8,9.4,17,34,115
