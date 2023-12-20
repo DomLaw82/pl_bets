@@ -1,0 +1,7 @@
+marshmellow
+flask
+flask_rebar
+python-json-logger
+pandas
+sqlalchemy
+psycopg2-binary
