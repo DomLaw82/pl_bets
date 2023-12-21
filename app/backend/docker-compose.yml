@@ -30,11 +30,11 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_CONTAINER=database
       - POSTGRES_PORT=5432
-    healthcheck:
-      test: ["CMD-SHELL", "docker logs pl_data_ingestion 2>&1 | grep -q 'Data Intake: COMPLETE'"]
-      interval: 30s
-      timeout: 3s
-      retries: 20
+    # healthcheck:
+    #   test: ["CMD-SHELL", "docker logs pl_data_ingestion 2>&1 | grep -q 'Data Intake: COMPLETE'"]
+    #   interval: 30s
+    #   timeout: 3s
+    #   retries: 20
 
   api:
     container_name: api
@@ -47,7 +47,7 @@ services:
       - POSTGRES_CONTAINER=database
       - POSTGRES_PORT=5432
     depends_on:
-      local-data-ingestion:
-        condition: service_healthy
+      - local-data-ingestion
+        # condition: service_healthy
     ports:
-      - 80:80
+      - 8080:8080

@@ -8,10 +8,14 @@ rebar = Rebar()
 registry = rebar.create_handler_registry()
 
 # Generate Flask Rebar views, routes, etc.
-registry.generate_swagger(generator=generator)
+# registry.generate_swagger(generator=generator)
 
 ### routes ###
 # index
+@registry.handles(
+   rule='/',
+   method='GET',
+)
 def index():
     return jsonify({"title": "Welcome to PL Bets"})
 
@@ -71,4 +75,4 @@ app = Flask(__name__)
 rebar.init_app(app)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, port="8080")
