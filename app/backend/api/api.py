@@ -4,6 +4,7 @@ from schemas import *
 import pandas as pd
 from db_connection import local_pl_stats_connector
 
+db = local_pl_stats_connector
 rebar = Rebar()
 registry = rebar.create_handler_registry()
 
@@ -18,6 +19,26 @@ registry = rebar.create_handler_registry()
 )
 def index():
     return jsonify({"title": "Welcome to PL Bets"})
+
+# current team roster
+@registry.handles(
+   rule='/<team_id>/current',
+   method='GET',
+   response_body_schema=PlayerSchema()
+)
+def get_team_current_roster(team_id:str) :
+   players = db.get_list(f"""
+      SELECT player.*
+      FROM player
+      JOIN player_team ON player.id = player_team.player_id
+      WHERE player_team.team_id = {team_id}
+      AND player_team.season = (
+         SELECT MAX(season)
+         FROM player_team
+         WHERE team_id = {team_id}
+      )
+  """)
+   return jsonify(players)
 
 # data
    # update historic player stats
@@ -75,4 +96,4 @@ app = Flask(__name__)
 rebar.init_app(app)
 
 if __name__ == '__main__':
-    app.run(debug=True, port="8080")
+    app.run(debug=True, host='0.0.0.0', port="8080")
