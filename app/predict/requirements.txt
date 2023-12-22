@@ -1,0 +1,7 @@
+pandas
+sqlalchemy
+psycopg2-binary
+beautifulsoup4
+fuzzywuzzy
+python-Levenshtein
+tensorflow
