@@ -10,18 +10,11 @@ def get_team_id(connector, team_name: str) -> str:
     # Fetch data from the database for comparison
     database_data = connector.get_list(f"SELECT id, name FROM team WHERE name = '{team_name}'")
 
-    # Apply fuzzy matching to find the most similar team in the database
-    matched_team = None
-    score = 0
-    for db_team in database_data:
-        current_match = find_most_similar(team_name, [db_team[1]])
-        if not current_match:
-            continue
-        if current_match[1] and current_match[1] > score:
-            matched_team = db_team
-            score = current_match[1]
-    if matched_team:
-        return matched_team[0]  # Assuming the first column is id
+    team_names = [pair[1] for pair in database_data]
+    best_match = find_most_similar(team_name, team_names)
+
+    if best_match:
+        return best_match[0]  # Assuming the first column is id
     else:
         return None  # Handle the case where no result is found
         
