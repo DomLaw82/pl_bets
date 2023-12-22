@@ -50,7 +50,7 @@ CREATE TABLE player_team (
 
 CREATE TABLE match (
 	id VARCHAR(7) PRIMARY KEY,
-	season VARCHAR(7) NOT NULL,
+	season VARCHAR(9) NOT NULL,
 	competition_id VARCHAR(7) NOT NULL,
 	home_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
 	away_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
@@ -73,6 +73,7 @@ CREATE TABLE match (
 
 CREATE TABLE historic_player_per_ninety (
 	player_id VARCHAR(7) REFERENCES player(id),
+	team_id VARCHAR(7) REFERENCES team(id),
 	minutes_played FLOAT NOT NULL,
 	ninetys FLOAT NOT NULL,
 	goals FLOAT NOT NULL,
@@ -89,7 +90,7 @@ CREATE TABLE historic_player_per_ninety (
 	non_penalty_expected_goals_plus_expected_assisted_goals FLOAT NOT NULL,
 	progressive_carries FLOAT NOT NULL,
 	progressive_passes FLOAT NOT NULL,
-	progressive_passes_recieved FLOAT NOT NULL,
+	progressive_passes_received FLOAT NOT NULL,
 	total_passing_distance FLOAT NOT NULL,
 	total_progressive_passing_distance FLOAT NOT NULL,
 	short_passes_completed FLOAT NOT NULL,

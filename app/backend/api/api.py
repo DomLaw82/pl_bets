@@ -40,6 +40,22 @@ def get_team_current_roster(team_id:str) :
   """)
    return jsonify(players)
 
+# run prediction model --- /predict/run POST
+   # confirm lineups
+# confirm lineups --- /predict/confirm-lineups
+   	# set home team lineup --- /predict/confirm-lineups/home-start POST
+      # set home team subs --- /predict/confirm-lineups/home-sub POST
+      # set away team lineup  --- /predict/confirm-lineups/away-start POST
+      # set away team subs  --- /predict/confirm-lineups/away-sub POST
+
+# check current gameweek fixtures --- /gameweek/current
+   # display predicted and actual (if inputted) stats
+   # flag for whether lineups have been selected
+   # pre lineup prediction (based on historic game time) and actual lineup
+# check next gameweek fixtures --- /gameweek/next
+# check entire schedule --- /schedule
+# input match facts --- /update/match-facts
+
 # data
    # update historic player stats
       # upload csv and handle operations in the backend
@@ -71,20 +87,6 @@ def update_historic_per_ninety(content:str):
    # add player injury
 
 
-# run prediction model
-   # confirm lineups
-# confirm lineups
-   	# set home team lineup
-      # set home team subs
-      # set away team lineup
-      # set away team subs
-# check current gameweek fixtures
-   # display predicted and actual (if inputted) stats
-   # flag for whether lineups have been selected
-   # pre lineup prediction (based on historic game time) and actual lineup
-# check next gameweek fixtures
-# check entire schedule
-# input match facts
 
 # @registry.handles(
 #    rule='/add/teams',

@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 # TODO - add url and word_to_replace as an argument to the download_csv_for_all_games_in_a_season function, have a word set in the url to replace with the season
 
 PLAYERS_WEBSITE_ROOT = "https://www.footballsquads.co.uk/eng/"
-SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2017, 2025, 1)]
-MATCH_SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2017, 2025, 1)]
+SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2018, 2025, 1)]
+MATCH_SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, 2025, 1)]
 
 LEAGUE_NAMES = ["faprem.htm", "engprem.htm"]
 

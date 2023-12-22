@@ -4,8 +4,8 @@ from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 from data_intake.utilities.unique_id import *
 from data_intake.utilities.string_manipulation import escape_single_quote
 
-SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2017, 2025, 1)]
-TABLE_SEASONS = [f"{str(year-1)}-{str(year)[-2:]}" for year in range(2017, 2025, 1)]
+SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, 2025, 1)]
+TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, 2025, 1)]
 
 def rename_team_name(team_name:str) -> str:
     rename_teams = {
@@ -126,7 +126,6 @@ def clean_match_data(db_connection, table_name:str, season:str, df: pd.DataFrame
         df = create_referee_table(df, db_connection)
     if table_name == "match":
         df = select_match_columns(df, db_connection)
-
         
     return df
 

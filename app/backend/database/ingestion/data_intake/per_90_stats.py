@@ -1,5 +1,5 @@
 import os, pandas as pd
-from data_intake.utilities.unique_id import get_player_id_per_ninety, get_team_id_from_player_team
+from data_intake.utilities.unique_id import get_player_id_per_ninety, get_team_id
 
 def combining_datasets(season: str) -> pd.DataFrame:
 	data_folder_path = "./data/historic_player_stats"
@@ -21,11 +21,13 @@ def combining_datasets(season: str) -> pd.DataFrame:
 def clean_historic_stats_df(db_connection, df: pd.DataFrame, season: str) -> pd.DataFrame:
 	goalkeeping_columns = ["goals_against", "shots_on_target_against", "saves", "wins",	"draws", "losses", "clean_sheets", "penalties_faced", "penalties_allowed", "penalties_saved", "penalties_missed"]
 
-	columns_to_remove = ["position", "team"]
+	columns_to_remove = ["position"]
 	df = df.drop(columns=columns_to_remove)
 
+	df["team"] = df.apply(lambda row: get_team_id(db_connection, row.team))
+
 	df = df.drop(columns=["goals_y", "expected_assisted_goals_y", "progressive_passes_y"])
-	df = df.rename(columns={"goals_x": "goals", "expected_assisted_goals_x": "expected_assisted_goals", "progressive_passes_x": "progressive_passes"})
+	df = df.rename(columns={"team": "team_id", "goals_x": "goals", "expected_assisted_goals_x": "expected_assisted_goals", "progressive_passes_x": "progressive_passes"})
 	df[goalkeeping_columns] = df[goalkeeping_columns].fillna(0)
 
 
