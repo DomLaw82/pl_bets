@@ -11,34 +11,74 @@ import plotly.express as px
 
 db = local_pl_stats_connector
 
+output_columns = [
+	"home_goals", "away_goals", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target",
+	"home_corners", "away_corners", "home_fouls", "away_fouls", "home_yellow_cards", "away_yellow_cards",
+	"home_red_cards", "away_red_cards"
+]
+career_columns = [
+	"player_id", "minutes_played","ninetys","goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
+	"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
+	"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
+	"shots_from_penalties","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
+	"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
+	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed","season", "team_id", "match_id"
+]
+player_stats_columns = [
+	"player_id", "minutes_played","ninetys","goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
+	"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
+	"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
+	"shots_from_penalties","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
+	"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
+	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
+]
+pure_stats_columns = [
+	"minutes_played","goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
+	"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
+	"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
+	"shots_from_penalties","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
+	"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
+	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
+]
+team_stats_columns = [
+	"team_id", "goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
+	"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
+	"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
+	"shots_from_penalties","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
+	"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
+	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
+]
+
 def create_player_stats_for_match(game_season: str, home_team_id: str, away_team_id: str) -> pd.DataFrame:
 	"""
 		Generate a dataframe containing all the career stats of the players (up to and including season of the game in question) 
 		playing in a specific match
 	"""
 	return db.get_df(f"""
-		SELECT hpn.*, pt.team_id FROM historic_player_per_ninety hpn
-		JOIN player_team pt ON pt.player_id = hpn.player_id
-		WHERE hpn.season <= '{game_season}'
-		AND pt.player_id IN (
-			SELECT player_id FROM player_team 
-			WHERE team_id IN ('{home_team_id}', '{away_team_id}')
-			AND season = '{game_season}'
+		SELECT 
+			hpn.*, m.id AS match_id, m.competition_id, m.home_team_id, m.away_team_id, m.referee_id, 
+			m.home_goals, m.away_goals, m.home_shots, m.away_shots, m.home_shots_on_target, 
+			m.away_shots_on_target, m.home_corners, m.away_corners, m.home_fouls, m.away_fouls, 
+			m.home_yellow_cards, m.away_yellow_cards, m.home_red_cards, m.away_red_cards
+ 		FROM historic_player_per_ninety hpn
+		JOIN match m
+			ON m.season = '{game_season}'
+			AND m.home_team_id = '{home_team_id}'
+			AND m.away_team_id = '{away_team_id}'
+		WHERE player_id IN (
+			SELECT player_id FROM historic_player_per_ninety hpn
+			JOIN match m
+				ON m.season = '{game_season}'
+				AND m.home_team_id = '{home_team_id}'
+				AND m.away_team_id = '{away_team_id}'
+				AND hpn.team_id IN (m.home_team_id, m.away_team_id)
+			WHERE hpn.season <= '{game_season}'
 		)
-	""")
-
-
-def create_match_facts_for_match(game_season: str, home_team_id: str, away_team_id: str) -> pd.DataFrame:
-	"""
-		Generate a dataframe containing all the match facts based on the season and teams
-	"""
-	return db.get_df(f"""
-		SELECT * FROM match 
-		WHERE season = '{game_season}' and home_team_id = '{home_team_id}' and away_team_id = '{away_team_id}'
+			AND hpn.season <= '{game_season}'
 	""")
 
 def get_match_column_values(all_matches: pd.DataFrame) -> list:
-	columns_to_extract = ["home_team_id", "away_team_id", "season"]
+	columns_to_extract = ["home_team_id", "away_team_id", "season", "id"]
 	values_list = []
 
 	for index, row in all_matches.iterrows():
@@ -47,69 +87,143 @@ def get_match_column_values(all_matches: pd.DataFrame) -> list:
 
 	return values_list
 
-if __name__ == "__main__":
+def get_all_players_in_match(season: str, home_team_id: str, away_team_id: str, match_id: str) -> pd.DataFrame:
+	columns_to_remove = ["_plus_", "_minus", "_divided_by_",]
+	
+	season = match[2]
+	home_team_id = match[0]
+	away_team_id = match[1]
+	match_id = match[3]
 
-# Query to the database is written based on:
-	# The teams playing (home, away)
-	# Season the match is taking place in
+	df = create_player_stats_for_match(season, home_team_id, away_team_id)
+
+	columns = [col for col in df.columns if any(word in col for word in columns_to_remove)]
+	df = df.drop(columns=columns)
+
+	return df
+
+def group_stats_by_player_for_home_and_away_teams(df: pd.DataFrame, home_team_id: str, away_team_id:str) -> pd.DataFrame:
+    specified_team_ids = [home_team_id, away_team_id]
+    unique_player_ids = df['player_id'].unique().tolist()
+
+    for player_id in unique_player_ids:
+        teams_played_for = df[df["player_id"] == player_id]["team_id"].unique().tolist()
+        if specified_team_ids[0] in teams_played_for:
+            df.loc[df["player_id"] == player_id, "team_id"] = specified_team_ids[0]
+        if specified_team_ids[1] in teams_played_for:
+            df.loc[df["player_id"] == player_id, "team_id"] = specified_team_ids[1]
+            
+    # Apply the custom aggregation function to "team_id" while grouping by "player_id"
+    df[player_stats_columns] = (
+        df[player_stats_columns]
+        .groupby("player_id")
+        .sum()
+        .div(df.groupby("player_id")["season"].nunique(), axis=0)
+        .reset_index()
+    )
+
+    df = df[df.index < df["player_id"].nunique()]
+
+    return df
+
+def create_per_90_stats(df: pd.DataFrame) -> pd.DataFrame:
+	ninety_mins_per_season = 38
+
+	df.loc[:, pure_stats_columns] = df[pure_stats_columns].apply(lambda x: x / ninety_mins_per_season)
+	return df
+
+def create_contribution_per_90_stats(df: pd.DataFrame) -> pd.DataFrame:
+	minutes_per_game = 90
+
+	df[pure_stats_columns] = df[pure_stats_columns].apply(lambda x: x * (df["minutes_played"] / minutes_per_game))
+	df = df.drop(columns=["minutes_played"])
+	pure_stats_columns.remove("minutes_played")
+	return df
+
+def group_stats_by_team(df: pd.DataFrame) -> pd.DataFrame:
+	df = df.drop(columns=["player_id"])
+	df[team_stats_columns] = df[team_stats_columns].groupby("team_id").sum().reset_index()
+	return df[df.index < df["team_id"].nunique()]
+
+def convert_team_rows_to_single_row(df: pd.DataFrame) -> pd.DataFrame:
+	home = df["home_team_id"].unique().tolist()[0]
+	away = df["away_team_id"].unique().tolist()[0]
+
+	columns = df.columns.to_list()
+	final_df = {}
+
+	for column in columns:
+		if column in pure_stats_columns:
+			value = df[column][df["team_id"] == home].iloc[0] - df[column][df["team_id"] == away].iloc[0] 
+			final_df[column] = value
+		else:
+			final_df[column] = df[column][df["team_id"] == home].iloc[0]
+
+	return pd.DataFrame(final_df, index=[0])
+
+if __name__ == "__main__":
 
 	all_matches = db.get_df("SELECT * FROM match")
 	match_values = get_match_column_values(all_matches)
 
-	complete_dataset = pd.DataFrame()
+	complete_player_stats_for_match_df = pd.DataFrame()
+
+	columns_to_remove = ["_plus_", "_minus", "_divided_by_",]
 
 	for match in match_values:
 
+		output_columns = [
+			"home_goals", "away_goals", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target",
+			"home_corners", "away_corners", "home_fouls", "away_fouls", "home_yellow_cards", "away_yellow_cards",
+			"home_red_cards", "away_red_cards"
+		]
+
+		player_stats_columns = [
+			"player_id", "minutes_played","ninetys","goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
+			"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
+			"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
+			"shots_from_penalties","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
+			"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
+			"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
+		]
+		pure_stats_columns = [
+			"minutes_played","goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
+			"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
+			"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
+			"shots_from_penalties","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
+			"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
+			"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
+		]
+		team_stats_columns = [
+			"team_id", "goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
+			"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
+			"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
+			"shots_from_penalties","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
+			"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
+			"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
+		]
+		
 		season = match[2]
 		home_team_id = match[0]
 		away_team_id = match[1]
+		match_id = match[3]
 
-		players_in_match = create_player_stats_for_match(season, home_team_id, away_team_id)
-		# combine all rows for all the players into one row row the match
-		print(players_in_match)
-		break
-		# join the match facts for the game to the player dataframe row
-		# append to complete match dataframe
+		df = create_player_stats_for_match(season, home_team_id, away_team_id)
 
-	# all_player_historic_stats = db.get_df("SELECT * FROM historic_player_per_ninety")
+		columns = [col for col in df.columns if any(word in col for word in columns_to_remove)]
+		df = df.drop(columns=columns)
 
+		df = group_stats_by_player_for_home_and_away_teams(df)
+		df = create_per_90_stats(df)
+		df = create_contribution_per_90_stats(df)
+		df = group_stats_by_team(df)
+		df = convert_team_rows_to_single_row(df)
 
-	# output_columns = [
-	# 	"home_goals", "away_goals", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target",
-	# 	"home_corners", "away_corners", "home_fouls", "away_fouls", "home_yellow_cards", "away_yellow_cards",
-	# 	"home_red_cards", "away_red_cards"
-	# ]
+		if complete_player_stats_for_match_df.empty:
+			complete_player_stats_for_match_df = df.copy(deep=True)
+		else:
+			complete_player_stats_for_match_df = pd.concat([complete_player_stats_for_match_df, df])
 
-	# columns_to_remove = ["_plus_", "_minus", "_divided_by_",]
-	
-	# player_stats_columns = [
-	# 	"player_id", "minutes_played","ninetys","goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
-	# 	"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
-	# 	"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
-	# 	"shots_from_penalties","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
-	# 	"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
-	# 	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed","season"
-	# ]
-
-	# player_all_stats = all_player_historic_stats[player_stats_columns].groupby("player_id").sum() / all_player_historic_stats.groupby("player_id")["season"].nunique()
-	# player_current_season_stats = max_season = all_player_historic_stats[player_stats_columns][all_player_historic_stats["season"] == all_player_historic_stats["season"].max()]
-
-	# columns_to_divide = [
-	# 	"minutes_played","ninetys","goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
-	# 	"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
-	# 	"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
-	# 	"shots_from_penalties","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
-	# 	"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
-	# 	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed","season"
-	# ]
-
-	# for col in columns_to_divide:
-	# 	player_all_stats[col] = np.where(player_all_stats['ninetys'] == 0, 0, player_all_stats[col] / player_all_stats['ninetys'])
-	# 	player_current_season_stats[col] = np.where(player_current_season_stats['ninetys'] == 0, 0, player_current_season_stats[col] / player_current_season_stats['ninetys'])
-
-	# career_stats = player_all_stats.drop(columns=["player_id", "ninetys", "minutes_played", "penalties_allowed", "penalties_saved", "penalties_missed"])
-	# season_stats = player_current_season_stats.drop(columns=["player_id", "ninetys", "minutes_played", "penalties_allowed", "penalties_saved", "penalties_missed"])
-	
 	# scaler = StandardScaler(copy=True)
 
 	# career_stats_standardized = scaler.fit_transform(career_stats)	
