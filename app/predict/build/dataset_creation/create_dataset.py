@@ -72,9 +72,9 @@ def create_player_stats_for_match(game_season: str, home_team_id: str, away_team
 				AND m.home_team_id = '{home_team_id}'
 				AND m.away_team_id = '{away_team_id}'
 				AND hpn.team_id IN (m.home_team_id, m.away_team_id)
-			WHERE hpn.season <= '{game_season}'
+			WHERE hpn.season < '{game_season}'
 		)
-			AND hpn.season <= '{game_season}'
+			AND hpn.season < '{game_season}'
 	""")
 
 def get_match_column_values(all_matches: pd.DataFrame) -> list:
@@ -166,7 +166,7 @@ if __name__ == "__main__":
 	all_matches = db.get_df("SELECT * FROM match")
 	match_values = get_match_column_values(all_matches)
 
-	complete_player_stats_for_match_df = pd.DataFrame()
+	complete_player_career_stats_for_match_df = pd.DataFrame()
 
 	columns_to_remove = ["_plus_", "_minus", "_divided_by_",]
 
@@ -219,10 +219,10 @@ if __name__ == "__main__":
 		df = group_stats_by_team(df)
 		df = convert_team_rows_to_single_row(df)
 
-		if complete_player_stats_for_match_df.empty:
-			complete_player_stats_for_match_df = df.copy(deep=True)
+		if complete_player_career_stats_for_match_df.empty:
+			complete_player_career_stats_for_match_df = df.copy(deep=True)
 		else:
-			complete_player_stats_for_match_df = pd.concat([complete_player_stats_for_match_df, df])
+			complete_player_career_stats_for_match_df = pd.concat([complete_player_career_stats_for_match_df, df])
 
 	# scaler = StandardScaler(copy=True)
 
