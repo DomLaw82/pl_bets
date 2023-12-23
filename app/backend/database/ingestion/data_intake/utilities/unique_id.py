@@ -5,27 +5,18 @@ def find_most_similar(player, options):
     return result, score
 
 def get_team_id(connector, team_name: str) -> str:
+    print(team_name)
     team_name = team_name.replace("'", " ")
+    print(team_name)
 
     # Fetch data from the database for comparison
-    database_data = connector.get_list(f"SELECT id, name FROM team WHERE name = '{team_name}'")
+    database_data = connector.get_list(f"SELECT id, name FROM team")
 
     team_names = [pair[1] for pair in database_data]
     best_match = find_most_similar(team_name, team_names)
 
     if best_match:
-        return best_match[0]  # Assuming the first column is id
-    else:
-        return None  # Handle the case where no result is found
-        
-def get_team_id_from_player_team(connector, player_id: str, season: str) -> str:
-    query = f"SELECT team_id FROM player_team WHERE player_id = '{player_id}' AND season = '{season}' ORDER BY season"
-    result = connector.get_list(query)
-
-    if len(result) > 1:
-        return [row[0] for row in result]
-    elif result:
-        return result[0][0]  # Assuming the first column is id
+        return [pair[0] for pair in database_data if pair[1] == best_match[0]][0]  # Assuming the first column is id
     else:
         return None  # Handle the case where no result is found
 
@@ -84,22 +75,4 @@ def get_referee_id(connector, referee_name: str) -> str:
         return result[0][0]  # Assuming the first column is id
     else:
         print(query)
-        return None  # Handle the case where no result is found
-
-def get_team_id(connector, team_name: str) -> str:
-    query = f"SELECT id FROM team WHERE name = '{team_name}'"
-    result = connector.get_list(query)
-    if result:
-        return result[0][0]  # Assuming the first column is id
-    else:
-        return None  # Handle the case where no result is found
-def get_team_id_from_player_team(connector, player_id: str, season: str) -> str:
-    query = f"SELECT team_id FROM player_team WHERE player_id = '{player_id}' AND season = '{season}' ORDDER BY season"
-    result = connector.get_list(query)
-
-    if len(result) > 1:
-        return [row[0] for row in result]
-    elif result:
-        return result[0][0]  # Assuming the first column is id
-    else:
         return None  # Handle the case where no result is found
