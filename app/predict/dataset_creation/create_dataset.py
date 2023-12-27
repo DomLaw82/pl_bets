@@ -267,10 +267,10 @@ if __name__ == "__main__":
 		combined = all_match_stats.groupby("match_id").sum().reset_index()
 		combined = combined.merge(all_match_facts, how="inner", on=["match_id"])
 
-		scaler = StandardScaler(copy=True)
-
 		X = combined[pure_stats_columns_no_minutes]
 		Y = combined[output_columns]
+		
+		scaler = StandardScaler(copy=True)
 
 		combined_standardized = scaler.fit_transform(combined[pure_stats_columns_no_minutes])
 
