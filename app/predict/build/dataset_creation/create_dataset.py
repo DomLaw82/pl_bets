@@ -49,11 +49,7 @@ team_stats_columns = [
 	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
 ]
 
-def create_player_stats_for_match(game_season: str, home_team_id: str, away_team_id: str) -> pd.DataFrame:
-	"""
-		Generate a dataframe containing all the career stats of the players (up to and including season of the game in question) 
-		playing in a specific match
-	"""
+def create_player_stats_for_match(game_season: str, home_team_id: str, away_team_id: str, less_than_or_equal_to:str) -> pd.DataFrame:
 	return db.get_df(f"""
 		SELECT 
 			hpn.*, m.id AS match_id, m.competition_id, m.home_team_id, m.away_team_id, m.referee_id, 
@@ -65,16 +61,16 @@ def create_player_stats_for_match(game_season: str, home_team_id: str, away_team
 			ON m.season = '{game_season}'
 			AND m.home_team_id = '{home_team_id}'
 			AND m.away_team_id = '{away_team_id}'
-		WHERE player_id IN (
+		WHERE player_id IN ( 
 			SELECT player_id FROM historic_player_per_ninety hpn
 			JOIN match m
 				ON m.season = '{game_season}'
 				AND m.home_team_id = '{home_team_id}'
 				AND m.away_team_id = '{away_team_id}'
 				AND hpn.team_id IN (m.home_team_id, m.away_team_id)
-			WHERE hpn.season < '{game_season}'
+			WHERE hpn.season {less_than_or_equal_to} '{game_season}'
 		)
-			AND hpn.season < '{game_season}'
+			AND hpn.season {less_than_or_equal_to} '{game_season}'
 	""")
 
 def get_match_column_values(all_matches: pd.DataFrame) -> list:
@@ -167,6 +163,7 @@ if __name__ == "__main__":
 	match_values = get_match_column_values(all_matches)
 
 	complete_player_career_stats_for_match_df = pd.DataFrame()
+	complete_player_form_stats_for_match_df = pd.DataFrame()
 
 	columns_to_remove = ["_plus_", "_minus", "_divided_by_",]
 
@@ -177,7 +174,12 @@ if __name__ == "__main__":
 			"home_corners", "away_corners", "home_fouls", "away_fouls", "home_yellow_cards", "away_yellow_cards",
 			"home_red_cards", "away_red_cards"
 		]
-
+		match_columns = [
+			"match_id", "competition_id", "home_team_id", "away_team_id", "referee_id",
+			"home_goals", "away_goals", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target",
+			"home_corners", "away_corners", "home_fouls", "away_fouls", "home_yellow_cards", "away_yellow_cards",
+			"home_red_cards", "away_red_cards"
+		]
 		player_stats_columns = [
 			"player_id", "minutes_played","ninetys","goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
 			"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
@@ -194,6 +196,14 @@ if __name__ == "__main__":
 			"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
 			"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
 		]
+		pure_stats_columns_no_minutes = [
+			"goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
+			"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
+			"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
+			"shots_from_penalties","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
+			"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
+			"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
+		]
 		team_stats_columns = [
 			"team_id", "goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
 			"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
@@ -202,47 +212,91 @@ if __name__ == "__main__":
 			"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
 			"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
 		]
-		
+
 		season = match[2]
 		home_team_id = match[0]
 		away_team_id = match[1]
 		match_id = match[3]
 
-		df = create_player_stats_for_match(season, home_team_id, away_team_id)
+		career_df = create_player_stats_for_match(season, home_team_id, away_team_id, "<")
+		form_df = create_player_stats_for_match(season, home_team_id, away_team_id, "=")
 
-		columns = [col for col in df.columns if any(word in col for word in columns_to_remove)]
-		df = df.drop(columns=columns)
+		if career_df.empty or form_df.empty:
+			continue
+		
+		for key, df in {"career": career_df, "form": form_df}.items():
+			columns = [col for col in df.columns if any(word in col for word in columns_to_remove)]
+			df = df.drop(columns=columns)
 
-		df = group_stats_by_player_for_home_and_away_teams(df)
-		df = create_per_90_stats(df)
-		df = create_contribution_per_90_stats(df)
-		df = group_stats_by_team(df)
-		df = convert_team_rows_to_single_row(df)
+			df = group_stats_by_player_for_home_and_away_teams(df)
 
-		if complete_player_career_stats_for_match_df.empty:
-			complete_player_career_stats_for_match_df = df.copy(deep=True)
-		else:
-			complete_player_career_stats_for_match_df = pd.concat([complete_player_career_stats_for_match_df, df])
+			if df["team_id"].nunique() < 2:
+				continue
 
-	# scaler = StandardScaler(copy=True)
+			df = create_per_90_stats(df)
+			df = create_contribution_per_90_stats(df)
+			df = group_stats_by_team(df)
+			df = convert_team_rows_to_single_row(df)
 
-	# career_stats_standardized = scaler.fit_transform(career_stats)	
-	# season_stats_standardized = scaler.fit_transform(season_stats)
+			if key == "career" and complete_player_career_stats_for_match_df.empty:
+				complete_player_career_stats_for_match_df = df.copy(deep=True)
+			elif key == "form" and complete_player_form_stats_for_match_df.empty:
+				complete_player_form_stats_for_match_df = df.copy(deep=True)
+			elif key == "career":
+				complete_player_career_stats_for_match_df = pd.concat([complete_player_career_stats_for_match_df, df])
+			else:
+				complete_player_form_stats_for_match_df = pd.concat([complete_player_form_stats_for_match_df, df])
 
-	# n=13
+		# TODO - Some method to combine both the form and career stats together
+		career_stats = complete_player_career_stats_for_match_df.copy(deep=True)
+		form_stats = complete_player_form_stats_for_match_df.copy(deep=True)
 
-	# pca = PCA(n_components = n, random_state=938)
+		# TODO - Some ratio to combine for and career stats rows 
+		career_stats_ratio = 0.6
+		form_stats_ratio = 0.4
 
-	# pca.fit(career_stats_standardized)
-	# feature_to_pc_map_career = pd.DataFrame(pca.components_, columns=career_stats_standardized.columns)
-	# components_career = pca.transform(career_stats_standardized)
-	# components_career_df = pd.DataFrame(data=components_career[:, [p for p in range(n)]], columns=pca.get_feature_names_out(), )
+		career_stats[pure_stats_columns_no_minutes] = career_stats[pure_stats_columns_no_minutes] * career_stats_ratio
+		form_stats[pure_stats_columns_no_minutes] = form_stats[pure_stats_columns_no_minutes] * form_stats_ratio
 
-	# pca.fit(season_stats_standardized)
-	# feature_to_pc_map_season = pd.DataFrame(pca.components_, columns=season_stats_standardized.columns)
-	# components_season = pca.transform(season_stats_standardized)
-	# components_season_df = pd.DataFrame(data=components_season[:, [p for p in range(n)]], columns=pca.get_feature_names_out(), )
+		all_stats = pd.concat([career_stats, form_stats])
+		# Combined stats for all the players on both teams
+		all_match_stats = all_stats[pure_stats_columns_no_minutes + ["match_id"]]
+		#Match facts for all games
+		all_match_facts = all_stats[match_columns].drop_duplicates(subset='match_id')
 
-	# Output Layer Activator - ReLU
+		combined = all_match_stats.groupby("match_id").sum().reset_index()
+		combined = combined.merge(all_match_facts, how="inner", on=["match_id"])
+
+		scaler = StandardScaler(copy=True)
+
+		X = combined[pure_stats_columns_no_minutes]
+		Y = combined[output_columns]
+
+		combined_standardized = scaler.fit_transform(combined[pure_stats_columns_no_minutes])
+
+		# Carry out PCA where n = 5/10
+		n = 15
+		pca = PCA(n_components = n, random_state=938)
+		pca.fit(combined_standardized)
+		feature_to_pc_map = pd.DataFrame(pca.components_, columns=pure_stats_columns_no_minutes)
+		components = pca.transform(combined_standardized)
+		components_df = pd.DataFrame(data=components[:, [p for p in range(n)]], columns=pca.get_feature_names_out(), )
+		# form_df_standardized = scaler.fit_transform(form_df)
+
+		# n=13
+
+		# pca = PCA(n_components = n, random_state=938)
+
+		# pca.fit(career_df_standardized)
+		# feature_to_pc_map_career = pd.DataFrame(pca.components_, columns=career_df_standardized.columns)
+		# components_career = pca.transform(career_df_standardized)
+		# components_career_df = pd.DataFrame(data=components_career[:, [p for p in range(n)]], columns=pca.get_feature_names_out(), )
+
+		# pca.fit(form_df_standardized)
+		# feature_to_pc_map_season = pd.DataFrame(pca.components_, columns=form_df_standardized.columns)
+		# components_season = pca.transform(form_df_standardized)
+		# components_season_df = pd.DataFrame(data=components_season[:, [p for p in range(n)]], columns=pca.get_feature_names_out(), )
+
+		# Output Layer Activator - ReLU
 
 	
