@@ -55,6 +55,7 @@ def get_team_current_roster(team_id:str) :
 # check next gameweek fixtures --- /gameweek/next
 # check entire schedule --- /schedule
 # input match facts --- /update/match-facts
+# update squads --- /update/squads
 
 # data
    # update historic player stats
