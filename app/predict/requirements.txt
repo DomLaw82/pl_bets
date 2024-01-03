@@ -8,3 +8,4 @@ python-Levenshtein
 tensorflow
 scikit-learn
 scikeras
+tensorrt
