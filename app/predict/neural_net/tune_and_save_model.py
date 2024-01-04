@@ -98,12 +98,12 @@ def get_mlp_model(hidden_layer_one=13, dropout=0.2, learn_rate=0.01, n_h_layers=
 model = KerasRegressor(model=get_mlp_model, verbose=0, hidden_layer_one=10, learn_rate=0.01, dropout=0.05, n_h_layers=1);
 
 # define a grid of the hyperparameter search space
-hidden_layer_one = [10, 15, 30, 50, 100]
-learn_rate = [1e-2, 1e-3, 1e-4]
-dropout = [0.05, 0.1, 0.2, 0.3, 0.4]
-batch_size = [4, 8, 16, 32, 64]
-epochs = [10, 50, 100, 150, 200, 500]
-n_h_layers = [1, 2, 3, 5]
+hidden_layer_one = [10, 12, 15]
+learn_rate = [1e-3, 1e-4, 1e-5]
+dropout = [0.2, 0.3, 0.4]
+batch_size = [32, 64]
+epochs = [12, 15, 17]
+n_h_layers = [1, 2, 3, 4]
 
 # create a dictionary from the hyperparameter grid
 grid = dict(
@@ -157,10 +157,11 @@ searchResults = searcher.fit(X_train, y_train)
 
 best_score = searchResults.best_score_
 best_params = searchResults.best_params_
-print("[INFO] best score is {:.2f} using {}".format(best_score,best_params))
+print("[INFO] best score is {:.5f} using {}".format(best_score,best_params))
 
 for key, value in best_params.items():
     os.environ[key] = str(value)
 
-tuned_model = searcher.best_estimator_.model
+tuned_model = get_mlp_model(best_params["hidden_layer_one"], best_params["dropout"], best_params["learn_rate"], best_params["n_h_layers"])
+tuned_model.fit(X_train, y_train, epochs=best_params["epochs"], batch_size=best_params["batch_size"], verbose=0)
 tuned_model.save("../stats_regression_model.h5")

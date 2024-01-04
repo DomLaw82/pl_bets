@@ -1,7 +1,7 @@
 services:
   database:
     container_name: database
-    build: ./database/db_setup
+    build: ./backend/database/db_setup
     image: pl-postgres
     ports:
       - 5432:5432
@@ -19,7 +19,7 @@ services:
 
   local-data-ingestion:
     container_name: local-data-ingestion
-    build: ./database/ingestion
+    build: ./backend/database/ingestion
     image: local-data-ingestion
     depends_on:
       database:
@@ -38,7 +38,7 @@ services:
 
   api:
     container_name: api
-    build: ./api/
+    build: ./backend/api/
     image: api
     depends_on:
       - local-data-ingestion
@@ -51,4 +51,24 @@ services:
       - POSTGRES_PORT=5432
     ports:
       - 8080:8080
+  
+  predict:
+    container_name: predict
+    build: ./predict/
+    image: predictor
+    depends_on:
+      - local-data-ingestion
+        # condition: service_healthy
+    environment:
+      - POSTGRES_DB=pl_stats
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_CONTAINER=database
+      - POSTGRES_PORT=5432
+      - batch_size=64
+      - dropout=0.3
+      - epochs=15
+      - hidden_layer_one=10
+      - learn_rate=0.0001
+      - n_h_layers=4
 
