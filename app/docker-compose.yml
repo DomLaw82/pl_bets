@@ -55,7 +55,7 @@ services:
   predict:
     container_name: predict
     build: ./predict/
-    image: predictor
+    image: pl-predictor
     depends_on:
       - local-data-ingestion
         # condition: service_healthy

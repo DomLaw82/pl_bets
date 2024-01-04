@@ -101,7 +101,7 @@ model = KerasRegressor(model=get_mlp_model, verbose=0, hidden_layer_one=10, lear
 hidden_layer_one = [10, 12, 15]
 learn_rate = [1e-3, 1e-4, 1e-5]
 dropout = [0.2, 0.3, 0.4]
-batch_size = [32, 64]
+batch_size = [32, 64, 128]
 epochs = [12, 15, 17]
 n_h_layers = [1, 2, 3, 4]
 
