@@ -51,57 +51,57 @@ pure_stats_columns_no_minutes = [
 	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
 ]
 
-# Split into X and y
-X = combined[pure_stats_columns_no_minutes]
-y = combined[output_columns]
+def build_and_save_model():
+	# Split into X and y
+	X = combined[pure_stats_columns_no_minutes]
+	y = combined[output_columns]
 
-# Split into train and test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=543)
+	# Split into train and test
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=543)
 
-# Scale the data
-X_scaler = StandardScaler(copy=True).fit(X_train)
+	# Scale the data
+	X_scaler = StandardScaler(copy=True).fit(X_train)
 
-X_train = X_scaler.transform(X_train)
-X_test = X_scaler.transform(X_test)
+	X_train = X_scaler.transform(X_train)
+	X_test = X_scaler.transform(X_test)
 
 
-# PCA where N is the number of components set above
-pca = PCA(n_components = N, random_state=576)
-pca.fit(X_train)
+	# PCA where N is the number of components set above
+	pca = PCA(n_components = N, random_state=576)
+	pca.fit(X_train)
 
-X_train = pca.transform(X_train)
-X_test = pca.transform(X_test)
+	X_train = pca.transform(X_train)
+	X_test = pca.transform(X_test)
 
-# Get model parameters from environment variables
-hidden_layer_one = os.environ.get('hidden_layer_one')
-learn_rate = os.environ.get('learn_rate')
-dropout = os.environ.get('dropout')
-batch_size = os.environ.get('batch_size')
-epochs = os.environ.get('epochs')
-n_h_layers = os.environ.get('n_h_layers')
-loss = os.environ.get('loss')
+	# Get model parameters from environment variables
+	hidden_layer_one = os.environ.get('hidden_layer_one')
+	learn_rate = os.environ.get('learn_rate')
+	dropout = os.environ.get('dropout')
+	batch_size = os.environ.get('batch_size')
+	epochs = os.environ.get('epochs')
+	n_h_layers = os.environ.get('n_h_layers')
 
-def get_model(hidden_layer_one, dropout, learn_rate, n_h_layers):
+	def get_model(hidden_layer_one, dropout, learn_rate, n_h_layers):
 
-	model = tf.keras.models.Sequential()
-	model.add(tf.keras.layers.Dense(15, activation="relu", input_dim=15))
+		model = tf.keras.models.Sequential()
+		model.add(tf.keras.layers.Dense(15, activation="relu", input_dim=15))
 
-	for i in range(n_h_layers):
-		model.add(tf.keras.layers.Dense(hidden_layer_one, activation="relu"))
+		for i in range(n_h_layers):
+			model.add(tf.keras.layers.Dense(hidden_layer_one, activation="relu"))
 
-	model.add(tf.keras.layers.Dropout(dropout))
-	model.add(tf.keras.layers.Dense(14, activation="relu"))
+		model.add(tf.keras.layers.Dropout(dropout))
+		model.add(tf.keras.layers.Dense(14, activation="relu"))
 
-	model.compile(
-		optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=learn_rate),
-		loss="mse",
-		metrics=["accuracy"])
+		model.compile(
+			optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=learn_rate),
+			loss="mse",
+			metrics=["accuracy"])
 
-	return model
+		return model
 
-# Define fit, and save the model
-model = get_model(hidden_layer_one, dropout, learn_rate, n_h_layers)
+	# Define fit, and save the model
+	model = get_model(hidden_layer_one, dropout, learn_rate, n_h_layers)
 
-model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
+	model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
 
-model.save("../stats_regression_model.h5")
+	model.save("../stats_regression_model.h5")

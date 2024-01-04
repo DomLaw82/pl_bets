@@ -9,8 +9,6 @@ import tensorflow as tf
 from sklearn.model_selection import GridSearchCV
 import os
 
-combined = pd.read_csv("../final_combined_dataframe.csv")
-
 output_columns = [
 	"home_goals", "away_goals", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target",
 	"home_corners", "away_corners", "home_fouls", "away_fouls", "home_yellow_cards", "away_yellow_cards",
@@ -49,28 +47,6 @@ pure_stats_columns_no_minutes = [
 	"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","tackles","tackles_won","defensive_third_tackles",
 	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
 ]
-
-X = combined[pure_stats_columns_no_minutes]
-y = combined[output_columns]
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=543)
-
-X_scaler = StandardScaler(copy=True).fit(X_train)
-y_scaler = StandardScaler(copy=True).fit(y_train)
-
-X_train = X_scaler.transform(X_train)
-# y_train = y_scaler.transform(y_train)
-
-X_test = X_scaler.transform(X_test)
-# y_test = y_scaler.transform(y_test)
-
-n=15
-
-pca = PCA(n_components = n, random_state=576)
-pca.fit(X_train)
-
-X_train = pca.transform(X_train)
-X_test = pca.transform(X_test)
 
 def get_mlp_model(hidden_layer_one=13, dropout=0.2, learn_rate=0.01, n_h_layers=1):
 
@@ -150,18 +126,36 @@ def scoring(estimator, test_x: np.ndarray, test_y: pd.DataFrame) -> float:
 	
 	return average_under_rate
 
-searcher = GridSearchCV(estimator=model, n_jobs=-2, 
-	param_grid=grid, scoring=scoring, verbose=4, cv=3)
+def tune_model_params():
+	combined = pd.read_csv("../final_combined_dataframe.csv")
 
-searchResults = searcher.fit(X_train, y_train)
+	X = combined[pure_stats_columns_no_minutes]
+	y = combined[output_columns]
 
-best_score = searchResults.best_score_
-best_params = searchResults.best_params_
-print("[INFO] best score is {:.5f} using {}".format(best_score,best_params))
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=543)
 
-for key, value in best_params.items():
-    os.environ[key] = str(value)
+	X_scaler = StandardScaler(copy=True).fit(X_train)
+	y_scaler = StandardScaler(copy=True).fit(y_train)
 
-tuned_model = get_mlp_model(best_params["hidden_layer_one"], best_params["dropout"], best_params["learn_rate"], best_params["n_h_layers"])
-tuned_model.fit(X_train, y_train, epochs=best_params["epochs"], batch_size=best_params["batch_size"], verbose=0)
-tuned_model.save("../stats_regression_model.h5")
+	X_train = X_scaler.transform(X_train)
+	X_test = X_scaler.transform(X_test)
+
+	n=15
+
+	pca = PCA(n_components = n, random_state=576)
+	pca.fit(X_train)
+
+	X_train = pca.transform(X_train)
+	X_test = pca.transform(X_test)
+
+	searcher = GridSearchCV(estimator=model, n_jobs=-2, 
+		param_grid=grid, scoring=scoring, verbose=4, cv=3)
+
+	searchResults = searcher.fit(X_train, y_train)
+
+	best_score = searchResults.best_score_
+	best_params = searchResults.best_params_
+	print("[INFO] best score is {:.5f} using {}".format(best_score,best_params))
+
+	for key, value in best_params.items():
+		os.environ[key] = str(value)
