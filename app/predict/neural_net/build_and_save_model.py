@@ -60,13 +60,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # Scale the data
 X_scaler = StandardScaler(copy=True).fit(X_train)
-y_scaler = StandardScaler(copy=True).fit(y_train)
 
 X_train = X_scaler.transform(X_train)
-# y_train = y_scaler.transform(y_train)
-
 X_test = X_scaler.transform(X_test)
-# y_test = y_scaler.transform(y_test)
+
 
 # PCA where N is the number of components set above
 pca = PCA(n_components = N, random_state=576)
@@ -75,6 +72,7 @@ pca.fit(X_train)
 X_train = pca.transform(X_train)
 X_test = pca.transform(X_test)
 
+# Get model parameters from environment variables
 hidden_layer_one = os.environ.get('hidden_layer_one')
 learn_rate = os.environ.get('learn_rate')
 dropout = os.environ.get('dropout')
@@ -101,6 +99,7 @@ def get_model(hidden_layer_one, dropout, learn_rate, n_h_layers):
 
 	return model
 
+# Define fit, and save the model
 model = get_model(hidden_layer_one, dropout, learn_rate, n_h_layers)
 
 model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
