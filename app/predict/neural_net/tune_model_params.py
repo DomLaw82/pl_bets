@@ -159,3 +159,5 @@ def tune_model_params():
 
 	for key, value in best_params.items():
 		os.environ[key] = str(value)
+	
+	return best_score, best_params

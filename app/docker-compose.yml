@@ -49,6 +49,7 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_CONTAINER=database
       - POSTGRES_PORT=5432
+      - PREDICT_API_URL=http://predict:8008/predict
     ports:
       - 8080:8080
   
@@ -73,4 +74,21 @@ services:
       - n_h_layers=4
     ports:
       - 8008:8008
+
+  frontend:
+    container_name: frontend
+    build: ./frontend/
+    image: frontend
+    depends_on:
+      - api
+        # condition: service_healthy
+    ports:
+      - 3000:80
+    environment:
+      - POSTGRES_DB=pl_stats
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_CONTAINER=database
+      - POSTGRES_PORT=5432
+      - API_URL=http://api:8080
 

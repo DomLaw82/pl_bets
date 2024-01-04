@@ -1,8 +1,9 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_rebar import Rebar
 from schemas import *
 import pandas as pd
 from db_connection import local_pl_stats_connector
+from flask import render_template
 
 db = local_pl_stats_connector
 rebar = Rebar()
@@ -19,6 +20,19 @@ registry = rebar.create_handler_registry()
 )
 def index():
     return jsonify({"title": "Welcome to PL Bets"})
+
+# current teams
+@registry.handles(
+   rule='/teams',
+   method='GET',
+   response_body_schema=TeamSchema()
+)
+def get_teams() :
+   teams = db.get_list(f"""
+      SELECT * from team
+   """)
+   print(teams)
+   return jsonify(teams)
 
 # current team roster
 @registry.handles(
@@ -37,10 +51,17 @@ def get_team_current_roster(team_id:str) :
          FROM player_team
          WHERE team_id = {team_id}
       )
-  """)
+   """)
    return jsonify(players)
 
 # run prediction model --- /predict/run POST
+@registry.handles(
+   rule='/predict',
+   method='POST',
+   response_body_schema=''
+)
+def show_prediction_form():
+   return render_template('../views/prediction_form.html')
    # confirm lineups
 # confirm lineups --- /predict/confirm-lineups
    	# set home team lineup --- /predict/confirm-lineups/home-start POST
