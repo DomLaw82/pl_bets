@@ -41,7 +41,7 @@ def list_to_list_of_objects(list_of_tuples:list, column_names: list) -> dict:
 def index():
     return jsonify({"title": "Welcome to PL Bets"})
 
-# current teams
+# all teams
 @registry.handles(
    rule='/teams',
    method='GET',
@@ -53,6 +53,24 @@ def get_teams() :
    """)
    teams = list_to_list_of_objects(teams, ['id', 'name'])
    return jsonify(teams)
+
+# all players
+@registry.handles(
+   rule='/players',
+   method='GET',
+   response_body_schema=PlayerTeamNameSchema(many=True)
+)
+def get_all_players() :
+   players = db.get_list(f"""
+      SELECT player.*, team.name
+      FROM player
+      JOIN player_team ON player.id = player_team.player_id
+      JOIN team ON player_team.team_id = team.id
+      ORDER BY player.last_name ASC
+   """)
+   players = list_to_list_of_objects(players, ["id", "first_name", "last_name", "birth_date", "position", "team_name"])
+
+   return jsonify(players)
 
 # current team roster
 @registry.handles(

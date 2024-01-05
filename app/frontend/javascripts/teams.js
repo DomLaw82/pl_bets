@@ -25,13 +25,14 @@ function create_team_divs(data) {
 		// teamBadge.src = team.badgeUrl;
 
 		// Create a span element for the team name
+		const teamNameDiv = document.createElement('div');
 		const teamName = document.createElement('span');
 		teamName.textContent = team.name;
 
+		teamNameDiv.appendChild(teamName);
 		// Append the badge and name elements to the team div
 		// teamDiv.appendChild(teamBadge);
-		teamDiv.appendChild(teamName);
-		teamDiv.appendChild(teamId);
+		teamDiv.appendChild(teamNameDiv);
 
 		// Append the team div to the teams container
 		teamsContainer.appendChild(teamDiv);
