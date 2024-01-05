@@ -7,19 +7,35 @@ from data_intake.utilities.unique_id import get_team_id, get_player_id
 from data_intake.utilities.string_manipulation import escape_single_quote
 
 def not_blank_entry(player: list) -> bool:
+	"""
+	Checks if all elements in the player list are not blank.
+
+	Args:
+		player (list): A list containing player information.
+
+	Returns:
+		bool: True if all elements in the player list are not blank, False otherwise.
+	"""
 	player = [player[0].strip("\r\n-").strip(), player[1].strip("\r\n-").strip(), player[2].strip("\r\n-").strip()]
 	return all(player)
 
 def format_player_entries(player: list[str]) -> list[str]:
-	# Original format: [first_name, last_name, position, dob]
+	"""
+	Formats the player entries by removing leading and trailing whitespaces and hyphens,
+	splitting the first name and last name if necessary, and reformatting the date of birth.
 
+	Args:
+		player (list[str]): The player information in the format [first_name, last_name, position, dob].
+
+	Returns:
+		list[str]: The formatted player information in the format [first_name, last_name, position, dob].
+	"""
 	player = [player[0].strip("\r\n-").strip(), player[1].strip("\r\n-").strip(), player[2].strip("\r\n-").strip(), player[3].strip("\r\n-").strip()]
 	
 	formatted_name = player[0].split(maxsplit=1)
 	formatted_name = formatted_name + [""] if len(formatted_name) < 2 else formatted_name
 	formatted_name = [name.strip("\r\n").strip() for name in formatted_name]
 	
-		
 	split_dob = [portion.strip("\r\n").strip() for portion in player[2].split("-")]
 	formatted_dob_year = "19" + str(split_dob[-1]) if int(str(datetime.now().year)[-2:]) < int(split_dob[-1]) else "20" + str(split_dob[-1]) 
 	new_dob = [f"{formatted_dob_year}-{split_dob[1]}-{split_dob[0]}"]
@@ -27,9 +43,27 @@ def format_player_entries(player: list[str]) -> list[str]:
 	return formatted_name + [player[1]] + new_dob + [player[3]]
 
 def get_page_soup(html_text):
+	"""
+	Parses the given HTML text and returns a BeautifulSoup object.
+
+	Parameters:
+		html_text (str): The HTML text to be parsed.
+
+	Returns:
+		BeautifulSoup: A BeautifulSoup object representing the parsed HTML.
+	"""
 	return BeautifulSoup(html_text, "html.parser")
 
 def get_all_teams_for_season(soup) -> list:
+	"""
+	Retrieves all the teams for a given season from the provided BeautifulSoup object.
+
+	Parameters:
+	soup (BeautifulSoup): The BeautifulSoup object containing the HTML data.
+
+	Returns:
+	list: A list of tuples, where each tuple contains the team name and its corresponding href.
+	"""
 	h5_elements = soup.find_all("h5")
 	team_names = [ele.text for ele in h5_elements]
 	a_elements = [ele.a for ele in h5_elements]
@@ -37,6 +71,15 @@ def get_all_teams_for_season(soup) -> list:
 	return list(zip(team_names, hrefs))
 
 def get_team_squad(html_content):
+	"""
+	Extracts the squad information from the HTML content.
+
+	Args:
+		html_content (str): The HTML content of the page.
+
+	Returns:
+		list: A list of lists containing the player's name, position, and date of birth.
+	"""
 	soup = get_page_soup(html_content)
 	rows = soup.find_all("tr")[1:]
 	
@@ -56,11 +99,20 @@ def get_team_squad(html_content):
 		try:
 			squad.append([row[i].text for i in required_cols])
 		except:
-			
 			continue
 	return squad
 
 def player_df_to_db(df:pd.DataFrame, db_connection):
+	"""
+	Inserts player data from a DataFrame into the database.
+
+	Args:
+		df (pd.DataFrame): The DataFrame containing player data.
+		db_connection: The connection to the database.
+
+	Returns:
+		None
+	"""
 	df = df[["first_name", "last_name", "birth_date", "position"]]
 	df.loc[:, "first_name"] = df.apply(lambda row: escape_single_quote(row.first_name), axis=1)
 	df.loc[:, "last_name"] = df.apply(lambda row: escape_single_quote(row.last_name), axis=1)
@@ -71,6 +123,17 @@ def player_df_to_db(df:pd.DataFrame, db_connection):
 	ordered_player_df.to_sql("player", db_connection.conn, if_exists="append", index=False)
 
 def player_team_df_to_db(df: pd.DataFrame, season: str, db_connection):
+	"""
+	Inserts player-team data from a DataFrame into the database.
+
+	Args:
+		df (pd.DataFrame): The DataFrame containing the player-team data.
+		season (str): The season for which the data is being inserted.
+		db_connection: The database connection object.
+
+	Returns:
+		None
+	"""
 	df.loc[:, "player_id"] = df.apply(lambda row: get_player_id(db_connection, row), axis=1)
 	df.loc[:, "team_id"] = df.apply(lambda row: get_team_id(db_connection, row.team_id), axis=1)
 	df["season"] = season
@@ -79,7 +142,15 @@ def player_team_df_to_db(df: pd.DataFrame, season: str, db_connection):
 	player_team_df.to_sql("player_team", db_connection.conn, if_exists="append", index=False)
 
 def player_main(db_connection):
+	"""
+	Main function for ingesting player data into the database.
 
+	Args:
+		db_connection: The database connection object.
+
+	Returns:
+		None
+	"""
 	data_folder_path = "./data/squad_data"
 
 	seasons = sorted(os.listdir(data_folder_path))
@@ -119,11 +190,21 @@ def player_main(db_connection):
 			player_team_df.loc[:, "team_id"] = player_team_df.apply(lambda row: get_team_id(db_connection, row.team_id), axis=1)
 
 			player_team_df["season"] = season
-			
 
 			player_team_df = player_team_df[["player_id", "team_id", "season"]]
 			player_team_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
 			save_to_database(db_connection, player_team_df, "player_team")
 		
 def save_to_database(db_connection, df: pd.DataFrame, table_name: str) -> None:
+	"""
+	Saves a DataFrame to a database table.
+
+	Args:
+		db_connection: The database connection object.
+		df: The DataFrame to be saved.
+		table_name: The name of the table to save the DataFrame to.
+
+	Returns:
+		None
+	"""
 	df.to_sql(table_name, db_connection.conn, if_exists="append", index=False)

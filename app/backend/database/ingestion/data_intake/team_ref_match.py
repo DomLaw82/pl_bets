@@ -8,6 +8,15 @@ SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, 20
 TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, 2025, 1)]
 
 def rename_team_name(team_name:str) -> str:
+    """
+    Renames a team name based on a predefined mapping.
+
+    Args:
+        team_name (str): The name of the team to be renamed.
+
+    Returns:
+        str: The renamed team name, if it exists in the mapping. Otherwise, returns the original team name.
+    """
     rename_teams = {
         "Leeds": "Leeds United",
         "Newcastle": "Newcastle United",
@@ -38,6 +47,17 @@ def rename_team_name(team_name:str) -> str:
     return rename_teams.get(team_name) or team_name
 
 def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> pd.DataFrame:
+    """
+    Renames the columns of a DataFrame according to a predefined mapping and adds season and competition_id columns.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to be modified.
+        season (str): The season value to be added to the DataFrame.
+        competition_id (str): The competition ID value to be added to the DataFrame.
+
+    Returns:
+        pd.DataFrame: The modified DataFrame with renamed columns and added season and competition_id columns.
+    """
     df = df.rename(
         {
             "HomeTeam": "home_team_id", 
@@ -66,52 +86,96 @@ def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> 
     return df
 
 def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
+    """
+    Selects specific columns from the input DataFrame and performs data transformations.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame containing match data.
+        db_connection: The database connection object.
+
+    Returns:
+        pd.DataFrame: The transformed DataFrame with selected columns.
+
+    """
     new_df = df[
-		[
-			"season",
-			"competition_id",
-			"home_team_id",
-			"away_team_id",
-			"referee_id",
-			"home_goals",
-			"away_goals",
-			"home_shots",
-			"home_shots_on_target",
-			"away_shots",
-			"away_shots_on_target",
-			"home_fouls",
-			"home_yellow_cards",
-			"home_red_cards",
-			"away_fouls",
-			"away_yellow_cards",
-			"away_red_cards",
-			"home_corners",
-			"away_corners",
-		]
-	]
+        [
+            "season",
+            "competition_id",
+            "home_team_id",
+            "away_team_id",
+            "referee_id",
+            "home_goals",
+            "away_goals",
+            "home_shots",
+            "home_shots_on_target",
+            "away_shots",
+            "away_shots_on_target",
+            "home_fouls",
+            "home_yellow_cards",
+            "home_red_cards",
+            "away_fouls",
+            "away_yellow_cards",
+            "away_red_cards",
+            "home_corners",
+            "away_corners",
+        ]
+    ]
 
     new_df.loc[:, "home_team_id"] = new_df.apply(lambda row: get_team_id(db_connection, row.home_team_id), axis=1)
     new_df.loc[:, "away_team_id"] = new_df.apply(lambda row: get_team_id(db_connection, row.away_team_id), axis=1)
-    
+
     new_df.loc[:, "referee_id"] = new_df.apply(lambda row: get_referee_id(db_connection, row.referee_id), axis=1)
-    
+
     columns_to_compare = ["season", "competition_id", "home_team_id", "away_team_id"]
     final_df = remove_duplicate_rows(db_connection, new_df, columns_to_compare, "match")
     return final_df
 
 def create_teams_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
+    """
+    Creates a teams table in the database based on the provided DataFrame.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the team data.
+        db_connection: The connection to the database.
+
+    Returns:
+        pd.DataFrame: The DataFrame containing only the names of the newly created teams.
+    """
     df = df.rename(columns={"home_team_id": "name"})
     only_new_teams_df = df.drop_duplicates(subset="name", keep="first")
     only_new_teams_df = remove_duplicate_rows(db_connection, only_new_teams_df, ["name"], "team").reset_index()
     return only_new_teams_df[["name"]]
 
 def create_referee_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
+    """
+    Creates a referee table from the given DataFrame.
+
+    Args:
+        df (pd.DataFrame): The DataFrame containing the referee data.
+        db_connection: The database connection object.
+
+    Returns:
+        pd.DataFrame: The DataFrame containing the referee names.
+    """
     df = df.rename(columns={"referee_id": "name"})
     df = remove_duplicate_rows(db_connection, df, ["name"], "referee")
     referee_df = df[["name"]]
     return referee_df
 
 def clean_match_data(db_connection, table_name:str, season:str, df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Cleans the match data by renaming table columns, dropping unnecessary columns, 
+    renaming team names, and escaping single quotes in the referee_id column.
+    
+    Parameters:
+        db_connection (connection): The database connection object.
+        table_name (str): The name of the table to be created.
+        season (str): The season of the match data.
+        df (pd.DataFrame): The input DataFrame containing the match data.
+        
+    Returns:
+        pd.DataFrame: The cleaned DataFrame.
+    """
     df = rename_table_columns(df, season, '001')
 
     df = df.drop(columns=["B365H","B365D","B365A","BWH","BWD","BWA","IWH","IWD","IWA","PSH","PSD","PSA","WHH","WHD","WHA","VCH","VCD","VCA","Bb1X2","BbMxH","BbAvH","BbMxD","BbAvD","BbMxA","BbAvA","BbOU","BbMx>2.5","BbAv>2.5","BbMx<2.5","BbAv<2.5","BbAH","BbAHh","BbMxAHH","BbAvAHH","BbMxAHA","BbAvAHA","PSCH","PSCD","PSCA"], errors="ignore")
@@ -130,11 +194,30 @@ def clean_match_data(db_connection, table_name:str, season:str, df: pd.DataFrame
     return df
 
 def save_to_database(db_connection, table_name, df: pd.DataFrame) -> None:
+    """
+    Save a DataFrame to a database table.
+
+    Args:
+        db_connection: The database connection object.
+        table_name: The name of the table to save the DataFrame to.
+        df: The DataFrame to be saved.
+
+    Returns:
+        None
+    """
     df.to_sql(table_name, db_connection.conn, if_exists="append", index=False) if not df.empty else None
 
 
 def team_ref_match_main(db_connection):
+    """
+    Main function for processing team, referee, and match data intake.
 
+    Args:
+        db_connection (object): Database connection object.
+
+    Returns:
+        None
+    """
     data_folder_path = "./data/game_data"
 
     data = sorted(os.listdir(data_folder_path))

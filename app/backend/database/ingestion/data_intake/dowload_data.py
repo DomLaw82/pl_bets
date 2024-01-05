@@ -37,9 +37,27 @@ def download_csv_for_all_games_in_a_season(season: str):
 		return False
 	
 def get_page_soup(html_text):
+	"""
+	Parses the given HTML text and returns a BeautifulSoup object.
+
+	Parameters:
+	html_text (str): The HTML text to be parsed.
+
+	Returns:
+	BeautifulSoup: A BeautifulSoup object representing the parsed HTML.
+	"""
 	return BeautifulSoup(html_text, "html.parser")
 
 def get_all_teams_for_season(soup) -> list:
+	"""
+	Extracts the names and hrefs of all teams for a given season from the provided soup object.
+
+	Parameters:
+	soup (BeautifulSoup): The BeautifulSoup object containing the HTML data.
+
+	Returns:
+	list: A list of tuples, where each tuple contains the team name and its corresponding href.
+	"""
 	h5_elements = soup.find_all("h5")
 	team_names = [ele.text for ele in h5_elements]
 	a_elements = [ele.a for ele in h5_elements]
@@ -47,6 +65,17 @@ def get_all_teams_for_season(soup) -> list:
 	return list(zip(team_names, hrefs))
 
 def get_team_squad(endpoint: str, SEASON: str, site_root: str):
+	"""
+	Retrieves the squad information for a given team and season.
+
+	Args:
+		endpoint (str): The endpoint for the squad data.
+		SEASON (str): The season for which the squad data is requested.
+		site_root (str): The root URL of the website.
+
+	Returns:
+		list: A list of lists containing the squad information. Each inner list contains the name, position, and date of birth of a player.
+	"""
 	squad_url = site_root+SEASON+endpoint
 	page_content = requests.get(squad_url).text
 	soup = get_page_soup(page_content)
@@ -68,10 +97,33 @@ def get_team_squad(endpoint: str, SEASON: str, site_root: str):
 		try:
 			squad.append([row[i].text for i in required_cols])
 		except:
-			
 			continue
 	return squad
 
+def player_data():
+	"""
+	Downloads player data for each season and team.
+
+	This function iterates over each season in the SEASONS_ARRAY and downloads player data for each team in that season.
+	It first retrieves the HTML content of the players' website for the given season and league. If the response status
+	code is not 200, it tries with the other league. If both requests fail, an exception is raised.
+
+	For each team in the season, it retrieves the squad data by visiting the team's URL. The squad data is then saved
+	in a file in the format "./data/squad_data/{SEASON}{team}.html".
+
+	If the directory for the squad data of the current season does not exist, it creates the directory before saving
+	the file.
+
+	If any error occurs during the process, the error message along with the season is printed.
+
+	Note: This function requires the SEASONS_ARRAY, PLAYERS_WEBSITE_ROOT, LEAGUE_NAMES, get_all_teams_for_season,
+	requests, time, os, and BeautifulSoup to be imported.
+
+	Returns:
+		None
+	"""
+	# Function code here
+	pass
 def player_data():
 	
 	for SEASON in SEASONS_ARRAY:

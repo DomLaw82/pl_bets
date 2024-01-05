@@ -5,8 +5,6 @@ from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 import os
 
-# TODO: remove this after added to rebuild_model.py
-combined = pd.read_csv("final_combined_dataframe.csv")
 N = 15
 
 output_columns = [
@@ -48,12 +46,51 @@ pure_stats_columns_no_minutes = [
 	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
 ]
 
-def build_and_save_model():
+def get_model(hidden_layer_one, dropout, learn_rate, n_h_layers) -> tf.keras.models.Sequential:
+	"""
+	Creates a neural network model with the specified parameters.
+
+	Parameters:
+	hidden_layer_one (int): Number of units in the first hidden layer.
+	dropout (float): Dropout rate, a fraction of the input units to drop.
+	learn_rate (float): Learning rate for the optimizer.
+	n_h_layers (int): Number of additional hidden layers to add.
+
+	Returns:
+	tf.keras.models.Sequential: The compiled neural network model.
+	"""
+	model = tf.keras.models.Sequential()
+	model.add(tf.keras.layers.Dense(15, activation="relu", input_dim=15))
+
+	for i in range(n_h_layers):
+		model.add(tf.keras.layers.Dense(hidden_layer_one, activation="relu"))
+
+	model.add(tf.keras.layers.Dropout(dropout))
+	model.add(tf.keras.layers.Dense(14, activation="relu"))
+
+	model.compile(
+		optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=learn_rate),
+		loss="mse",
+		metrics=["accuracy"])
+
+	return model
+
+def build_and_save_model(dataframe: pd.DataFrame) -> tf.keras.models.Sequential:
+	"""
+	Builds and saves a machine learning model using the provided dataframe.
+
+	Args:
+		dataframe (pd.DataFrame): The input dataframe containing the training data.
+
+	Returns:
+		tf.keras.models.Sequential: The trained machine learning model.
+	"""
+	combined = dataframe
 	# Split into X and y
 	X = combined[pure_stats_columns_no_minutes]
 	y = combined[output_columns]
 
-	# Split into train and test
+	# Split into train and test
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=543)
 
 	# Scale the data
@@ -62,8 +99,7 @@ def build_and_save_model():
 	X_train = X_scaler.transform(X_train)
 	X_test = X_scaler.transform(X_test)
 
-
-	# PCA where N is the number of components set above
+	# PCA where N is the number of components set above
 	pca = PCA(n_components = N, random_state=576)
 	pca.fit(X_train)
 
@@ -78,28 +114,9 @@ def build_and_save_model():
 	epochs = os.environ.get('epochs')
 	n_h_layers = os.environ.get('n_h_layers')
 
-	def get_model(hidden_layer_one, dropout, learn_rate, n_h_layers):
-
-		model = tf.keras.models.Sequential()
-		model.add(tf.keras.layers.Dense(15, activation="relu", input_dim=15))
-
-		for i in range(n_h_layers):
-			model.add(tf.keras.layers.Dense(hidden_layer_one, activation="relu"))
-
-		model.add(tf.keras.layers.Dropout(dropout))
-		model.add(tf.keras.layers.Dense(14, activation="relu"))
-
-		model.compile(
-			optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=learn_rate),
-			loss="mse",
-			metrics=["accuracy"])
-
-		return model
-
 	# Define fit, and save the model
 	model = get_model(hidden_layer_one, dropout, learn_rate, n_h_layers)
 
 	model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
 
-	# TODO: return model from function; DO NOT SAVE HERE
-	model.save("stats_regression_model.h5")
+	return model

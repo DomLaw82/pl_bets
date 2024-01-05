@@ -48,10 +48,21 @@ pure_stats_columns_no_minutes = [
 ]
 
 def get_mlp_model(hidden_layer_one=13, dropout=0.2, learn_rate=0.01, n_h_layers=1):
+	"""
+	Create a multi-layer perceptron (MLP) model with the specified parameters.
 
+	Parameters:
+	- hidden_layer_one (int): Number of neurons in the first hidden layer. Default is 13.
+	- dropout (float): Dropout rate to remove redundant nodes. Default is 0.2.
+	- learn_rate (float): Learning rate for the optimizer. Default is 0.01.
+	- n_h_layers (int): Number of hidden layers. Default is 1.
+
+	Returns:
+	- model (tf.keras.models.Sequential): The created MLP model.
+	"""
 	model = tf.keras.models.Sequential()
 
-	# input
+	# input
 	model.add(tf.keras.layers.Dense(15, activation="relu", input_dim=15))
 
 	for i in range(n_h_layers):
@@ -59,7 +70,7 @@ def get_mlp_model(hidden_layer_one=13, dropout=0.2, learn_rate=0.01, n_h_layers=
 
 	# dropout layer to remove redundant nodes
 	model.add(tf.keras.layers.Dropout(dropout))
-	
+
 	# output
 	model.add(tf.keras.layers.Dense(14, activation="relu"))
 
@@ -91,6 +102,18 @@ grid = dict(
 )
 
 def scoring(estimator, test_x: np.ndarray, test_y: pd.DataFrame) -> float:
+	"""
+	Calculate the average under rate for a given estimator using test data.
+
+	Parameters:
+	estimator (object): The estimator object used for prediction.
+	test_x (np.ndarray): The input features for testing.
+	test_y (pd.DataFrame): The actual output values for testing.
+
+	Returns:
+	float: The average under rate.
+
+	"""
 	test_y = test_y.to_numpy()
 	
 	estimator.fit(test_x, test_y);
@@ -125,9 +148,17 @@ def scoring(estimator, test_x: np.ndarray, test_y: pd.DataFrame) -> float:
 	
 	return average_under_rate
 
-def tune_model_params():
-	# TODO: remove this after added to rebuild_and_build_model.py
-	combined = pd.read_csv("../final_combined_dataframe.csv")
+def tune_model_params(dataframe: pd.DataFrame) -> tuple:
+	"""
+	Tune the parameters of a model using grid search and return the best score and parameters.
+
+	Parameters:
+		dataframe (pd.DataFrame): The input dataframe containing the data.
+
+	Returns:
+		tuple: A tuple containing the best score and best parameters found during grid search.
+	"""
+	combined = dataframe
 
 	X = combined[pure_stats_columns_no_minutes]
 	y = combined[output_columns]
@@ -148,7 +179,7 @@ def tune_model_params():
 	X_test = pca.transform(X_test)
 
 	searcher = GridSearchCV(estimator=model, n_jobs=-2, 
-		param_grid=grid, scoring=scoring, verbose=4, cv=3)
+							param_grid=grid, scoring=scoring, verbose=4, cv=3)
 
 	searchResults = searcher.fit(X_train, y_train)
 
