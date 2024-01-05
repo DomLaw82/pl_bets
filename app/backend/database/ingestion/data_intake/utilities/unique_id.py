@@ -5,9 +5,7 @@ def find_most_similar(player, options):
     return result, score
 
 def get_team_id(connector, team_name: str) -> str:
-    print(team_name)
     team_name = team_name.replace("'", " ")
-    print(team_name)
 
     # Fetch data from the database for comparison
     database_data = connector.get_list(f"SELECT id, name FROM team")

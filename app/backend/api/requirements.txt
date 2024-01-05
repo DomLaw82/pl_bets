@@ -1,6 +1,7 @@
 marshmallow
 flask
 flask_rebar
+flask_cors
 python-json-logger
 pandas
 sqlalchemy

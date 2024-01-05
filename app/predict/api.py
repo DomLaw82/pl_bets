@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import Flask, request, jsonify
 from flask_rebar import Rebar
+from flask_cors import CORS
 from api.schemas import *
 import pandas as pd
 from predict_match_outcome import predict_match_outcome
@@ -48,7 +49,8 @@ def retune():
 
 
 app = Flask(__name__)
+CORS(app, origins=["http://api:8080", "http://127.0.0.1:8080"],  supports_credentials=True)
 rebar.init_app(app)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port="8080")
+    app.run(debug=True, host='0.0.0.0', port="8008")

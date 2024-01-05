@@ -1,16 +1,15 @@
+
 window.onload = async function load() {
 	await fetch_team_data();
 }
 
 async function fetch_team_data() {
-	console.log('fetching team data: ',`${process.env.API_URL}/teams`);
-	const res = await fetch(`${process.env.API_URL}/teams`, {
+	const res = await fetch(`http://127.0.0.1:8080/teams`, {
 		method: 'GET',
 		credentials: 'include'
 	})
 	const data = await res.json()
-	
-	console.log(data);
+
 	create_team_divs(data);
 }
 
@@ -30,8 +29,9 @@ function create_team_divs(data) {
 		teamName.textContent = team.name;
 
 		// Append the badge and name elements to the team div
-		teamDiv.appendChild(teamBadge);
+		// teamDiv.appendChild(teamBadge);
 		teamDiv.appendChild(teamName);
+		teamDiv.appendChild(teamId);
 
 		// Append the team div to the teams container
 		teamsContainer.appendChild(teamDiv);

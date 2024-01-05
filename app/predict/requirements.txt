@@ -8,3 +8,4 @@ scikeras
 marshmallow
 flask
 flask_rebar
+flask_cors

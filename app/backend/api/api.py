@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 from flask_rebar import Rebar
+from flask_cors import CORS
 from schemas import *
 import pandas as pd
 from db_connection import local_pl_stats_connector
@@ -11,6 +12,25 @@ registry = rebar.create_handler_registry()
 
 # Generate Flask Rebar views, routes, etc.
 # registry.generate_swagger(generator=generator)
+
+def list_to_list_of_objects(list_of_tuples:list, column_names: list) -> dict:
+   """
+   Convert a list of tuples to a dict
+
+   Args:
+         list_of_tuples (list): list of tuples
+         column_names (list): list of column names in the order they appear in the tuples
+
+   Returns:
+         list: list of dicts
+   """
+   result_list = []
+   for row in list_of_tuples:
+      entry = {}
+      for index_b, col in enumerate(row):
+         entry[column_names[index_b]] = col
+      result_list.append(entry)
+   return result_list
 
 ### routes ###
 # index
@@ -25,13 +45,13 @@ def index():
 @registry.handles(
    rule='/teams',
    method='GET',
-   response_body_schema=TeamSchema()
+   response_body_schema=TeamSchema(many=True)
 )
 def get_teams() :
    teams = db.get_list(f"""
-      SELECT * from team
+      SELECT * from team ORDER BY name ASC
    """)
-   print(teams)
+   teams = list_to_list_of_objects(teams, ['id', 'name'])
    return jsonify(teams)
 
 # current team roster
@@ -117,6 +137,7 @@ def update_historic_per_ninety(content:str):
 # )
 
 app = Flask(__name__)
+CORS(app, origins=["http://frontend:3000", "http://localhost:3000"],  supports_credentials=True)
 rebar.init_app(app)
 
 if __name__ == '__main__':
