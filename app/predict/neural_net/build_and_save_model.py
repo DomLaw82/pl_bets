@@ -1,15 +1,11 @@
 import pandas as pd
-import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import balanced_accuracy_score
-from scikeras.wrappers import KerasRegressor
 import tensorflow as tf
-from sklearn.model_selection import GridSearchCV
 import os
 
-combined = pd.read_csv("../final_combined_dataframe.csv")
+combined = pd.read_csv("final_combined_dataframe.csv")
 N = 15
 
 output_columns = [
@@ -104,4 +100,4 @@ def build_and_save_model():
 
 	model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
 
-	model.save("../stats_regression_model.h5")
+	model.save("stats_regression_model.h5")

@@ -3,7 +3,6 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import balanced_accuracy_score
 from scikeras.wrappers import KerasRegressor
 import tensorflow as tf
 from sklearn.model_selection import GridSearchCV

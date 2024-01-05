@@ -1,13 +1,5 @@
 import pandas as pd
-import numpy as np
-from db_connection import local_pl_stats_connector
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-from sklearn.metrics import pairwise_distances_argmin_min
-from sklearn.preprocessing import StandardScaler
-import seaborn as sns
-import plotly.express as px
+from dataset_creation.db_connection import local_pl_stats_connector
 
 db = local_pl_stats_connector
 

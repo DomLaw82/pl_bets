@@ -8,3 +8,6 @@
 # Read in the model: stats_regression_model.h5
 # Use the model to predict the match stats for the game
 # Return these stats to the user
+
+def predict_match_outcome():
+	pass

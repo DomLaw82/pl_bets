@@ -2,7 +2,7 @@ from flask import Flask
 from flask import Flask, request, jsonify
 from flask_rebar import Rebar
 from flask_cors import CORS
-from api.schemas import *
+from schema.schemas import *
 import pandas as pd
 from predict_match_outcome import predict_match_outcome
 from rebuild_model import rebuild_model
