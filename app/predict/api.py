@@ -49,7 +49,7 @@ def retune():
 
 
 app = Flask(__name__)
-CORS(app, origins=["http://api:8080", "http://127.0.0.1:8080"],  supports_credentials=True)
+CORS(app, origins=["http://api:8080", "http://localhost:8080"],  supports_credentials=True)
 rebar.init_app(app)
 
 if __name__ == '__main__':
