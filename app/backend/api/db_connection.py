@@ -38,6 +38,7 @@ class SQLConnection():
 		Returns:
 				list: returned from query
 		"""
+		print(query)
 		query = sqlalchemy.text(query)
 		try:
 			res = self.conn.execute(query)

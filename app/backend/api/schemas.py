@@ -18,16 +18,17 @@ class PlayerSchema(Schema):
     id = fields.String()
     first_name = fields.String()
     last_name = fields.String()
-    birth_date = fields.Date()
+    birth_date = fields.Date(format='iso')
     position = fields.String()
 
 class PlayerTeamNameSchema(Schema):
     id = fields.String()
     first_name = fields.String()
     last_name = fields.String()
-    birth_date = fields.Date()
+    birth_date = fields.Date(format='iso')
     position = fields.String()
     team_name = fields.String()
+    active = fields.String()
 
 class TeamSchema(Schema):
     id = fields.String()

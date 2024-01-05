@@ -17,7 +17,7 @@ CREATE TABLE player (
 	id VARCHAR(7) PRIMARY KEY,
 	first_name VARCHAR,
 	last_name VARCHAR,
-	birth_date DATE NOT NULL,
+	birth_date VARCHAR(10) NOT NULL,
 	position VARCHAR NOT NULL
 );
 

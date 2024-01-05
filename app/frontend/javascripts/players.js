@@ -19,11 +19,14 @@ function create_player_divs(data) {
 		playerDiv.className = 'player';
 		playerDiv.id = `player-${player.id}`;
 
-		Object.keys(player).forEach(key => {
+		let cols = ["id", "first_name", "last_name", "birth_date", "position", "team_name", "active"]
+
+		cols.forEach(col => {
+			let value = player[col] || "";
 			const playerKeyDiv = document.createElement('div');
-			playerKeyDiv.className = `player-${key}`;
+			playerKeyDiv.className = `player-${col}`;
 			const playerKeySpan = document.createElement('span');
-			playerKeySpan.textContent = `${key}: ${player[key]}`;
+			playerKeySpan.textContent = `${value}`;
 
 			playerKeyDiv.appendChild(playerKeySpan);
 			playerDiv.appendChild(playerKeyDiv);

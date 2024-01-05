@@ -5,7 +5,6 @@ from data_intake.player import player_main
 from data_intake.country_competition import country_competition_main
 from data_intake.per_90_stats import per_90_main
 import subprocess, time
-
 # format game data [team, match, referee]
 team_ref_match_main(local_pl_stats_connector)
 print("Data Intake: team COMPLETE")
@@ -30,3 +29,5 @@ print("Data Intake: competition COMPLETE")
 per_90_main(local_pl_stats_connector)
 print("Data Intake: per_90 COMPLETE")
 print("Data Intake: COMPLETE")
+
+# TODO - SPEED UP DATA INTAKE

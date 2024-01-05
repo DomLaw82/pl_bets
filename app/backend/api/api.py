@@ -54,6 +54,32 @@ def get_teams() :
    teams = list_to_list_of_objects(teams, ['id', 'name'])
    return jsonify(teams)
 
+# all teams
+@registry.handles(
+   rule='/active-teams',
+   method='GET',
+   response_body_schema=TeamSchema(many=True)
+)
+def get_active_teams() :
+   teams = db.get_list(f"""
+      WITH current_season AS (
+         SELECT 
+            MAX(season) AS season
+         FROM
+            player_team
+      )
+      SELECT
+         DISTINCT(team.id) AS id,
+         name AS team_name
+      FROM
+         team
+      JOIN current_season ON TRUE
+      JOIN player_team ON team.id = player_team.team_id AND player_team.season = current_season.season
+      ORDER BY team_name ASC
+   """)
+   teams = list_to_list_of_objects(teams, ['id','name'])
+   return jsonify(teams)
+
 # all players
 @registry.handles(
    rule='/players',
@@ -62,35 +88,68 @@ def get_teams() :
 )
 def get_all_players() :
    players = db.get_list(f"""
-      SELECT player.*, team.name
+      WITH current_season AS (
+         SELECT 
+            MAX(season) AS season
+         FROM
+            player_team
+      )
+                         
+      SELECT 
+         DISTINCT(player.id) AS id,
+         player.first_name,
+         player.last_name,
+         player.birth_date,
+         player.position,
+         team.name AS team_name,
+         CASE WHEN pt2.season = current_season.season THEN 'True' ELSE 'False' END AS active
       FROM player
-      JOIN player_team ON player.id = player_team.player_id
-      JOIN team ON player_team.team_id = team.id
-      ORDER BY player.last_name ASC
+      JOIN current_season ON TRUE
+      JOIN (
+         SELECT player_id, MAX(season) AS max_season
+         FROM player_team
+         GROUP BY player_id
+      ) AS pt ON player.id = pt.player_id
+      JOIN player_team AS pt2 ON pt.player_id = pt2.player_id AND pt.max_season = pt2.season
+      JOIN team ON pt2.team_id = team.id
+      ORDER BY player.id ASC
    """)
-   players = list_to_list_of_objects(players, ["id", "first_name", "last_name", "birth_date", "position", "team_name"])
+   players = list_to_list_of_objects(players, ["id", "first_name", "last_name", "birth_date", "position", "team_name", "active"])
 
    return jsonify(players)
 
 # current team roster
 @registry.handles(
-   rule='/<team_id>/current',
+   rule='/active-players/<team_name>',
    method='GET',
-   response_body_schema=PlayerSchema()
+   response_body_schema=''
 )
-def get_team_current_roster(team_id:str) :
-   players = db.get_list(f"""
-      SELECT player.*
-      FROM player
-      JOIN player_team ON player.id = player_team.player_id
-      WHERE player_team.team_id = {team_id}
-      AND player_team.season = (
-         SELECT MAX(season)
-         FROM player_team
-         WHERE team_id = {team_id}
-      )
-   """)
-   return jsonify(players)
+def get_team_current_roster(team_name:str) -> list:
+   team_id = db.get_list(f"SELECT id FROM team WHERE name = '{team_name}'")[0][0] or None
+   if team_id:
+      players = db.get_list(f"""
+         WITH current_season AS (
+            SELECT 
+               MAX(season) AS season
+            FROM
+               player_team
+         )
+                            
+         SELECT
+            player.id AS id,
+            player.first_name AS first_name,
+            player.last_name AS last_name,
+            player.birth_date AS birth_date,
+            player.position AS position
+         FROM
+            player
+         JOIN current_season ON TRUE
+         JOIN player_team ON player.id = player_team.player_id
+         WHERE player_team.team_id = '{team_id}'
+         AND player_team.season = current_season.season
+      """)
+      players = list_to_list_of_objects(players, ["id", "first_name", "last_name", "birth_date", "position"])
+      return jsonify(players)
 
 # run prediction model --- /predict/run POST
 @registry.handles(
