@@ -195,11 +195,9 @@ def create_dataset():
 			else:
 				complete_player_form_stats_for_match_df = pd.concat([complete_player_form_stats_for_match_df, df])
 
-		# TODO - Some method to combine both the form and career stats together
 		career_stats = complete_player_career_stats_for_match_df.copy(deep=True)
 		form_stats = complete_player_form_stats_for_match_df.copy(deep=True)
 
-		# TODO - Some ratio to combine for and career stats rows 
 		career_stats_ratio = 0.6
 		form_stats_ratio = 0.4
 
@@ -215,6 +213,7 @@ def create_dataset():
 		combined = all_match_stats.groupby("match_id").sum().reset_index()
 		combined = combined.merge(all_match_facts, how="inner", on=["match_id"])
 
+		# TODO: return dataframe instead of saving it
 		combined.to_csv("../final_combined_dataframe.csv")
 
 	

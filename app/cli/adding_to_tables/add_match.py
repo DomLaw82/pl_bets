@@ -11,7 +11,6 @@ def collect(connector) -> None:
 	match_id = unique_id.create_id("match", connector)
 	match_facts['match_id'] = match_id
 
-	# TODO - Competition
 	competitions = connector.get_dict(f"SELECT id, name FROM competition")
 	competition_ids = [competition['id'] for competition in competitions.values()]
 	cl_output.print_dict_table(competitions)
@@ -28,11 +27,9 @@ def collect(connector) -> None:
 	selected_ref = validation.validate("id", selected_ref, "Select referee by id: ")
 	match_facts["referee_id"] = selected_ref
 
-	# TODO - Match length
 	match_length = int(validation.validate("int", input("Match length in minutes: "), "Match length in minutes: "))
 	match_facts['match_length'] = match_length
 
-	# TODO - Season
 	season = validation.validate("season", input("Season (YY/YY): "), "Season (YY/YY): ")
 	match_facts['season'] = season
 
@@ -56,7 +53,7 @@ def collect(connector) -> None:
 
 		previously_selected_players = []
 
-		# TODO - Team goals
+		# Team goals
 		goals = int(validation.validate("int", input(f"{location.title()} goals: "), f"{location.title()} goals: "))
 		match_facts[f"{location.lower()}_goals"] = goals
 		# shots
@@ -65,7 +62,7 @@ def collect(connector) -> None:
 		# shots_on_target
 		shots_on_target = int(validation.validate("int", input(f"{location.title()} shots on target: "), f"{location.title()} shots on target: "))
 		match_facts[f"{location.lower()}_shots_on_target"] = shots_on_target
-		# TODO - Team corners
+		# Team corners
 		corners = int(validation.validate("int", input(f"{location.title()} corners: "), f"{location.title()} corners: "))
 		match_facts[f"{location.lower()}_corners"] = corners
 		# fouls
@@ -78,7 +75,6 @@ def collect(connector) -> None:
 		red_cards = int(validation.validate("int", input(f"{location.title()} red cards: "), f"{location.title()} red cards: "))
 		match_facts[f"{location.lower()}_red_cards"] = red_cards
 		
-		# # TODO - Team possession
 		# possession = int(validation.validate("int", input(f"{location.title()} possession %: "), f"{location.title()} possession %: "))
 		# match_facts[f"{location.lower()}_possession"] = possession
 		

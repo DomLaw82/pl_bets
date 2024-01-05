@@ -70,7 +70,6 @@ def player_df_to_db(df:pd.DataFrame, db_connection):
 	ordered_player_df = rows_not_in_db_df[["first_name", "last_name", "birth_date", "position"]]
 	ordered_player_df.to_sql("player", db_connection.conn, if_exists="append", index=False)
 
-# TODO - Fix error "index out of range" concerning below function
 def player_team_df_to_db(df: pd.DataFrame, season: str, db_connection):
 	df.loc[:, "player_id"] = df.apply(lambda row: get_player_id(db_connection, row), axis=1)
 	df.loc[:, "team_id"] = df.apply(lambda row: get_team_id(db_connection, row.team_id), axis=1)

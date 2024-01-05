@@ -93,5 +93,4 @@ class SQLConnection():
 			print(e)
 			print('\n')
 
-# TODO - remove password from file
 local_pl_stats_connector = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))

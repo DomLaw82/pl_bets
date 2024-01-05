@@ -126,6 +126,7 @@ def scoring(estimator, test_x: np.ndarray, test_y: pd.DataFrame) -> float:
 	return average_under_rate
 
 def tune_model_params():
+	# TODO: remove this after added to rebuild_and_build_model.py
 	combined = pd.read_csv("../final_combined_dataframe.csv")
 
 	X = combined[pure_stats_columns_no_minutes]
@@ -134,7 +135,6 @@ def tune_model_params():
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=543)
 
 	X_scaler = StandardScaler(copy=True).fit(X_train)
-	y_scaler = StandardScaler(copy=True).fit(y_train)
 
 	X_train = X_scaler.transform(X_train)
 	X_test = X_scaler.transform(X_test)

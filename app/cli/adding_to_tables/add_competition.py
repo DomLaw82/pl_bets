@@ -14,7 +14,7 @@ def collect(connector) -> None:
 	print("\n")
 
 	country_id = unique_id.create_id("country", connector)
-	# TODO - Select competition(league) for match
+
 
 	country_id = validation.validate("in_list", input("\nWhat country is this competition in by id: "), "What country is this competition in by id: ", var_list=countries_ids)
 	country_id = validation.validate("int", country_id, "What country is this competition in by id: ")

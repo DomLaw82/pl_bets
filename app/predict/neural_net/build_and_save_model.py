@@ -5,6 +5,7 @@ from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 import os
 
+# TODO: remove this after added to rebuild_model.py
 combined = pd.read_csv("final_combined_dataframe.csv")
 N = 15
 
@@ -100,4 +101,5 @@ def build_and_save_model():
 
 	model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
 
+	# TODO: return model from function; DO NOT SAVE HERE
 	model.save("stats_regression_model.h5")
