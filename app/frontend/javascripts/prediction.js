@@ -52,9 +52,9 @@ function create_player_options(playerSelectId, data) {
 		playerSelect.appendChild(playerOption);
 	});
 }
-function updateSelectedPlayerList(selectId, playerListId) {
+
+function getSelectedPlayers(selectId) {
 	const playersSelectOptions = document.getElementById(selectId).childNodes;
-	const playerList = document.getElementById(playerListId);
 	
 	const playersSelected = [];
 	playersSelectOptions.forEach(option => {
@@ -62,10 +62,61 @@ function updateSelectedPlayerList(selectId, playerListId) {
 			playersSelected.push(option.value);
 		}
 	});
+	return playersSelected;
+}
+
+function updateSelectedPlayerList(selectId, playerListId) {
+	playersSelected = getSelectedPlayers(selectId);
+	const playerList = document.getElementById(playerListId);
+
 	playerList.innerHTML = '';
 	playersSelected.forEach(player => {
 		const playerListItem = document.createElement('li');
 		playerListItem.textContent = player;
 		playerList.appendChild(playerListItem);
 	});
+}
+
+async function runPrediction() {
+
+	homeTeam = document.getElementById('home-team').value;
+	homePlayersSelected = getSelectedPlayers('home-players');
+	awayTeam = document.getElementById('away-team').value;
+	awayPlayersSelected = getSelectedPlayers('away-players');
+
+
+	
+	await fetch(`http://frontend:8008/predict`, {
+		method: 'GET',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			homeTeam: homeTeam,
+			homePlayers: homePlayersSelected,
+			awayTeam: awayTeam,
+			awayPlayers: awayPlayersSelected
+		})
+	})
+		.then(res => res.json())
+		.then((data) => {
+			
+			const predictionContainer = document.getElementById('prediction-results-table');
+			
+			predictionContainer.innerHTML = '';
+			const predictionTableRow = document.createElement('tr');
+			
+			for (let key in data) {
+				const predictionTableData = document.createElement('td');
+				predictionDiv.className = 'prediction-results';
+				predictionDiv.id = key;
+	
+				predictionTableData.textContent = data[key];
+	
+				predictionTableRow.appendChild(predictionTableData);
+				predictionContainer.appendChild(predictionTableRow);
+			}
+		});
+	
 }
