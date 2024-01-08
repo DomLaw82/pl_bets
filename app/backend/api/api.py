@@ -74,7 +74,8 @@ def get_active_teams() :
       FROM
          team
       JOIN current_season ON TRUE
-      JOIN player_team ON team.id = player_team.team_id AND player_team.season = current_season.season
+      JOIN player_team ON team.id = player_team.team_id 
+         AND player_team.season = current_season.season
       ORDER BY team_name ASC
    """)
    teams = list_to_list_of_objects(teams, ['id','name'])

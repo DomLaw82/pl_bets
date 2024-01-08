@@ -46,6 +46,10 @@ navbar {
 	align-items: center;
 	padding: 2%;
 }
+.player-selector{
+	display: flex;
+	justify-content: space-evenly;
+}
 .selector-container {
 	display: flex;
 	flex-direction: column;
@@ -56,7 +60,6 @@ navbar {
 	margin-top: 2%;
 	padding: 2%;
 	border: 3px solid #eee;
-	align-items: center;
 }
 
 

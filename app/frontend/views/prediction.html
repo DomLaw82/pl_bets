@@ -33,7 +33,7 @@
 					</select>
 				</div>
 			</div>
-			<div id="home-team-selector" class="selector-container">
+			<div id="away-team-selector" class="selector-container">
 				<div class="selector-components">
 					<label for="away-team">Away Team:</label>
 				</div>
@@ -46,7 +46,7 @@
 		</div>
 		<h3>Select Players</h3>
 		<p>Select the starting lineup and subs for each team. Hold <strong>CTRL/CMD</strong> to select multiple options in the dropdown</p>
-		<div id="player-selection" class="selectors">
+		<div id="player-selection" class="player-selector">
 			<div id="home-player-selector" class="selector-container">
 				<div class="selector-components">
 					<label for="home-players">Home Players:</label>
@@ -79,12 +79,12 @@
 		<div id="prediction-button" class="selectors">
 			<div id="prediction-button-container" class="selector-container">
 				<div class="selector-components">
-					<button type="button" onclick="run_prediction()">Run Prediction</button>
+					<button type="button" onclick="runPrediction()">Run Prediction</button>
 				</div>
 			</div>
 		</div>
 	</form>
-	<div id="prediction-results">
+	<div id="prediction-results" hidden>
 		<h3>Prediction Results</h3>
 		<table id="prediction-results-table">
 		</table>

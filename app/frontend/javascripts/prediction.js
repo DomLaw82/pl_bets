@@ -20,6 +20,7 @@ function create_team_options(elementId, data) {
 	data.forEach(team => {
 		const teamOption = document.createElement('option');
 		teamOption.value = team.name;
+		teamOption.id = team.id;
 		teamOption.textContent = team.name;
 		teamSelect.appendChild(teamOption);
 	});
@@ -79,23 +80,21 @@ function updateSelectedPlayerList(selectId, playerListId) {
 
 async function runPrediction() {
 
-	homeTeam = document.getElementById('home-team').value;
+	homeTeamId = document.getElementById('home-team').childNodes[document.getElementById('home-team').selectedIndex].id;
 	homePlayersSelected = getSelectedPlayers('home-players');
-	awayTeam = document.getElementById('away-team').value;
+	awayTeamId = document.getElementById('away-team').childNodes[document.getElementById('away-team').selectedIndex].id;
 	awayPlayersSelected = getSelectedPlayers('away-players');
-
-
 	
-	await fetch(`http://frontend:8008/predict`, {
-		method: 'GET',
+	await fetch(`http://localhost:8008/predict`, {
+		method: 'POST',
 		credentials: 'include',
 		headers: {
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
-			homeTeam: homeTeam,
+			homeTeamId: homeTeamId,
 			homePlayers: homePlayersSelected,
-			awayTeam: awayTeam,
+			awayTeamId: awayTeamId,
 			awayPlayers: awayPlayersSelected
 		})
 	})
@@ -117,6 +116,8 @@ async function runPrediction() {
 				predictionTableRow.appendChild(predictionTableData);
 				predictionContainer.appendChild(predictionTableRow);
 			}
+
+			document.getElementById('prediction-results').style.display = 'block';
 		});
 	
 }

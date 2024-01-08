@@ -75,6 +75,48 @@ def get_model(hidden_layer_one, dropout, learn_rate, n_h_layers) -> tf.keras.mod
 
 	return model
 
+def x_y_split_df(df: pd.DataFrame, output_columns: list) -> tuple:
+	"""
+	Splits the input dataframe into X and y.
+
+	Parameters:
+	df (pd.DataFrame): The input dataframe.
+
+	Returns:
+	X (pd.DataFrame): The input dataframe with the output columns removed.
+	y (pd.DataFrame): The output columns.
+	"""
+	X = df.drop(output_columns, axis=1)
+	y = df[output_columns]
+	return X, y
+
+def perform_scaling_and_pca(X_train: list, X_test:list, n:int=15) -> pd.DataFrame:
+	"""
+	Perform scaling and PCA (Principal Component Analysis) on the input data.
+
+	Parameters:
+	X_train (list): The training data.
+	X_test (list): The testing data.
+	n (int): The number of components for PCA. Default is 15.
+
+	Returns:
+	X_train (pd.DataFrame): The transformed training data after scaling and PCA.
+	X_test (pd.DataFrame): The transformed testing data after scaling and PCA.
+	"""
+	# Scale the data
+	X_scaler = StandardScaler(copy=True).fit(X_train)
+
+	X_train = X_scaler.transform(X_train)
+	X_test = X_scaler.transform(X_test)
+
+	# PCA where N is the number of components set above
+	pca = PCA(n_components = n, random_state=576)
+	pca.fit(X_train)
+
+	X_train = pca.transform(X_train)
+	X_test = pca.transform(X_test)
+	return X_train, X_test
+
 def build_and_save_model(dataframe: pd.DataFrame) -> tf.keras.models.Sequential:
 	"""
 	Builds and saves a machine learning model using the provided dataframe.
@@ -87,24 +129,13 @@ def build_and_save_model(dataframe: pd.DataFrame) -> tf.keras.models.Sequential:
 	"""
 	combined = dataframe
 	# Split into X and y
-	X = combined[pure_stats_columns_no_minutes]
-	y = combined[output_columns]
+	X, y = x_y_split_df(combined, output_columns)
 
 	# Split into train and test
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=543)
 
 	# Scale the data
-	X_scaler = StandardScaler(copy=True).fit(X_train)
-
-	X_train = X_scaler.transform(X_train)
-	X_test = X_scaler.transform(X_test)
-
-	# PCA where N is the number of components set above
-	pca = PCA(n_components = N, random_state=576)
-	pca.fit(X_train)
-
-	X_train = pca.transform(X_train)
-	X_test = pca.transform(X_test)
+	X_train, X_test = perform_scaling_and_pca(X_train, X_test, N)
 
 	# Get model parameters from environment variables
 	hidden_layer_one = os.environ.get('hidden_layer_one')

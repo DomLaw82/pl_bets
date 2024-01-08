@@ -4,13 +4,32 @@ from flask_rebar import Rebar
 from flask_cors import CORS
 from schema.schemas import *
 import pandas as pd
-import json
+import sys
 from predict_match_outcome import predict_match_outcome
 from rebuild_model import rebuild_model
 from retune_and_build_model import retune_and_build_model
 
 rebar = Rebar()
 registry = rebar.create_handler_registry()
+
+def list_to_list_of_objects(list_of_tuples:list, column_names: list) -> dict:
+   """
+   Convert a list of tuples to a dict
+
+   Args:
+         list_of_tuples (list): list of tuples
+         column_names (list): list of column names in the order they appear in the tuples
+
+   Returns:
+         list: list of dicts
+   """
+   result_list = []
+   for row in list_of_tuples:
+      entry = {}
+      for index_b, col in enumerate(row):
+         entry[column_names[index_b]] = col
+      result_list.append(entry)
+   return result_list
 
 @registry.handles(
    rule='/predict/health',
@@ -25,18 +44,18 @@ def health_check():
    method='POST',
    response_body_schema=match_facts_schema()
 )
-def make_prediction(home_team: str, away_team: str, home_squad: list, away_squad: list):
+def make_prediction():
 	request_body = request.get_json()
-	player_dict = json.load(request_body)
-	
-	home_team = player_dict['homeTeam']
-	home_players = player_dict['homePlayers']
-	away_team = player_dict['awayTeam']
-	away_players = player_dict['awayPlayers']
-	
-	prediction = predict_match_outcome(home_team, home_players, away_team, away_players)
 
-	return 'Prediction made'
+	home_team_id = request_body['homeTeamId']
+	home_players = request_body['homePlayers']
+	away_team_id = request_body['awayTeamId']
+	away_players = request_body['awayPlayers']
+	
+	prediction = predict_match_outcome(home_team_id, home_players, away_team_id, away_players)
+	prediction = list_to_list_of_objects(prediction, ['home_goals', 'away_goals', 'home_shots', 'away_shots', 'home_shots_on_target', 'away_shots_on_target', 'home_corners', 'away_corners', 'home_fouls', 'away_fouls', 'home_yellow_cards', 'away_yellow_cards', 'home_red_cards', 'away_red_cards'])[0]
+
+	return jsonify(prediction)
 
 @registry.handles(
    rule='/model/rebuild',

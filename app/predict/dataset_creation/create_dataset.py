@@ -1,5 +1,6 @@
 import pandas as pd
 from dataset_creation.db_connection import local_pl_stats_connector
+import datetime
 
 db = local_pl_stats_connector
 
@@ -81,6 +82,34 @@ def create_player_stats_for_match(game_season: str, home_team_id: str, away_team
 			WHERE hpn.season {less_than_or_equal_to} '{game_season}'
 		)
 			AND hpn.season {less_than_or_equal_to} '{game_season}'
+	""")
+
+# TODO - Finish this function
+def create_prediction_player_stats_for_match(game_season: str, home_team_id: str, away_team_id: str, less_than_or_equal_to:str) -> pd.DataFrame:
+	"""
+	Create player statistics for a match.
+
+	Args:
+		game_season (str): The season of the match.
+		home_team_id (str): The ID of the home team.
+		away_team_id (str): The ID of the away team.
+		less_than_or_equal_to (str): The condition for filtering the player statistics.
+
+	Returns:
+		pd.DataFrame: The DataFrame containing the player statistics for the match.
+	"""
+	return db.get_df(f"""
+		SELECT 
+			hpn.*
+		FROM 
+			historic_player_per_ninety hpn
+		JOIN player_team pt ON (
+			pt.team_id = '{home_team_id}'
+			OR pt.team_id = '{away_team_id}'
+			)
+			AND pt.player_id = hpn.player_id
+			AND hpn.season = pt.season
+		WHERE hpn.season {less_than_or_equal_to} '{game_season}'
 	""")
 
 def get_match_column_values(all_matches: pd.DataFrame) -> list:
@@ -233,6 +262,76 @@ def convert_team_rows_to_single_row(df: pd.DataFrame) -> pd.DataFrame:
 
 	return pd.DataFrame(final_df, index=[0])
 
+def create_career_and_form_dataframes_for_database(match_values: list) -> dict:
+	"""
+	Create career and form dataframes for a given match.
+
+	Args:
+		match_values (list): A list containing the home team ID, away team ID, and season.
+
+	Returns:
+		dict: A dictionary containing the career and form dataframes.
+
+	"""
+	home_team_id = match_values[0]
+	away_team_id = match_values[1]
+	season = match_values[2]
+
+	columns_to_remove = ["_plus_", "_minus", "_divided_by_",]
+
+	career_df = create_player_stats_for_match(season, home_team_id, away_team_id, "<")
+	form_df = create_player_stats_for_match(season, home_team_id, away_team_id, "=")
+
+	dfs = {}
+
+	for key, df in {"career": career_df, "form": form_df}.items():
+		columns = [col for col in df.columns if any(word in col for word in columns_to_remove)]
+		df = df.drop(columns=columns)
+
+		df = group_stats_by_player_for_home_and_away_teams(df)
+
+		if df["team_id"].nunique() < 2:
+			continue
+
+		df = create_per_90_stats(df)
+		df = create_contribution_per_90_stats(df)
+		df = group_stats_by_team(df)
+		df = convert_team_rows_to_single_row(df)
+
+		dfs[key] = df
+
+	return dfs
+
+def combine_form_and_career_stats(dfs: tuple) -> pd.DataFrame:
+	"""
+	Combines the career and form statistics for a player.
+
+	Args:
+		dfs (tuple): A tuple containing the career and form DataFrames.
+
+	Returns:
+		pd.DataFrame: The combined DataFrame.
+	"""
+	career_df = dfs[0]
+	form_df = dfs[1]
+
+	career_stats_ratio = 0.6
+	form_stats_ratio = 0.4
+
+	career_df[pure_stats_columns_no_minutes] = career_df[pure_stats_columns_no_minutes] * career_stats_ratio
+	form_df[pure_stats_columns_no_minutes] = form_df[pure_stats_columns_no_minutes] * form_stats_ratio
+
+	all_stats = pd.concat([career_df, form_df])
+	# Combined stats for all the players on both teams
+	all_match_stats = all_stats[pure_stats_columns_no_minutes + ["match_id"]]
+	#Match facts for all games
+	all_match_facts = all_stats[match_columns].drop_duplicates(subset='match_id')
+
+	combined = all_match_stats.groupby("match_id").sum().reset_index()
+	combined = combined.merge(all_match_facts, how="inner", on=["match_id"])
+
+	return combined	
+
 def create_dataset() -> pd.DataFrame:
 	"""
 	Create a dataset for match predictions.
@@ -246,34 +345,11 @@ def create_dataset() -> pd.DataFrame:
 	complete_player_career_stats_for_match_df = pd.DataFrame()
 	complete_player_form_stats_for_match_df = pd.DataFrame()
 
-	columns_to_remove = ["_plus_", "_minus", "_divided_by_",]
-
+	
 	for match in match_values:
+		dfs = create_career_and_form_dataframes_for_database(match)
 
-		season = match[2]
-		home_team_id = match[0]
-		away_team_id = match[1]
-
-		career_df = create_player_stats_for_match(season, home_team_id, away_team_id, "<")
-		form_df = create_player_stats_for_match(season, home_team_id, away_team_id, "=")
-
-		if career_df.empty or form_df.empty:
-			continue
-		
-		for key, df in {"career": career_df, "form": form_df}.items():
-			columns = [col for col in df.columns if any(word in col for word in columns_to_remove)]
-			df = df.drop(columns=columns)
-
-			df = group_stats_by_player_for_home_and_away_teams(df)
-
-			if df["team_id"].nunique() < 2:
-				continue
-
-			df = create_per_90_stats(df)
-			df = create_contribution_per_90_stats(df)
-			df = group_stats_by_team(df)
-			df = convert_team_rows_to_single_row(df)
-
+		for key, df in dfs.items():
 			if key == "career" and complete_player_career_stats_for_match_df.empty:
 				complete_player_career_stats_for_match_df = df.copy(deep=True)
 			elif key == "form" and complete_player_form_stats_for_match_df.empty:
@@ -286,21 +362,97 @@ def create_dataset() -> pd.DataFrame:
 		career_stats = complete_player_career_stats_for_match_df.copy(deep=True)
 		form_stats = complete_player_form_stats_for_match_df.copy(deep=True)
 
-		career_stats_ratio = 0.6
-		form_stats_ratio = 0.4
+		return combine_form_and_career_stats((career_stats, form_stats))
 
-		career_stats[pure_stats_columns_no_minutes] = career_stats[pure_stats_columns_no_minutes] * career_stats_ratio
-		form_stats[pure_stats_columns_no_minutes] = form_stats[pure_stats_columns_no_minutes] * form_stats_ratio
+def get_current_season() -> str:
+	"""
+	Get the current season based on the current date.
 
-		all_stats = pd.concat([career_stats, form_stats])
-		# Combined stats for all the players on both teams
-		all_match_stats = all_stats[pure_stats_columns_no_minutes + ["match_id"]]
-		#Match facts for all games
-		all_match_facts = all_stats[match_columns].drop_duplicates(subset='match_id')
+	Returns:
+		str: The current season.
+	"""
+	current_date = datetime.datetime.now()
+	current_year = current_date.year
+	current_month = current_date.month
 
-		combined = all_match_stats.groupby("match_id").sum().reset_index()
-		combined = combined.merge(all_match_facts, how="inner", on=["match_id"])
+	if current_month < 8:
+		current_year -= 1
 
-		return combined
+	return f"{current_year}-{current_year + 1}"
+
+def remove_unavailable_players_from_df(df: pd.DataFrame, squad_list: list) -> pd.DataFrame:
+	"""
+	Removes players not in the squad list from the DataFrame.
+
+	Args:
+		df (pd.DataFrame): The DataFrame containing the player statistics.
+		squad_list (list): The list of player IDs.
+
+	Returns:
+		pd.DataFrame: The modified DataFrame.
+	"""
+	df = df[df["player_id"].isin(squad_list)]
+	return df
+
+def grouping_dataframe_rows(df: pd.DataFrame, home_team_id, away_team_id) -> pd.DataFrame:
+
+	columns_to_remove = ["_plus_", "_minus", "_divided_by_",]
+	columns = [col for col in df.columns if any(word in col for word in columns_to_remove)]
+	df = df.drop(columns=columns)
+
+	df = group_stats_by_player_for_home_and_away_teams(df, home_team_id, away_team_id)
+
+	if df["team_id"].nunique() < 2:
+		return
+
+	df = create_per_90_stats(df)
+	df = create_contribution_per_90_stats(df)
+	df = group_stats_by_team(df)
+	df = convert_team_rows_to_single_row(df)
+
+	return df
+
+def create_prediction_dataset(home_team_id: str, home_team_squad: list, away_team_id: str, away_team_squad: list) -> pd.DataFrame:
+	if not home_team_squad:
+		exit("No home team squad")
+	if not away_team_squad:
+		exit("No away team squad")
+	if not home_team_id:
+		exit("No home team ID")
+	if not away_team_id:
+		exit("No away team ID")
+		
+	home_team_squad_ids = db.get_list(f"""
+		SELECT player_id FROM player_team
+		WHERE
+			team_id = '{home_team_id}'
+			AND player_id IN ('{"','".join(home_team_squad)}')
+	""")
+	away_team_squad_ids = db.get_list(f"""
+		SELECT player_id FROM player_team
+		WHERE
+			team_id = '{away_team_id}'
+			AND player_id IN ('{"','".join(away_team_squad)}')
+	""")
+	home_team_squad_ids = [player_id[0] for player_id in home_team_squad_ids]
+	away_team_squad_ids = [player_id[0] for player_id in away_team_squad_ids]
+
+	season = get_current_season()
+
+	career = create_prediction_player_stats_for_match(season, home_team_id, away_team_id, "<")
+	form = create_prediction_player_stats_for_match(season, home_team_id, away_team_id, "=")
+	# TODO - Remove players not included in the squad lists for the home and away teams from career and form
+
+	career = remove_unavailable_players_from_df(career, home_team_squad_ids)
+	form = remove_unavailable_players_from_df(form, home_team_squad_ids)
+
+
+	career_df = grouping_dataframe_rows(career, home_team_id, away_team_id)
+	form_df = grouping_dataframe_rows(form, home_team_id, away_team_id)
+
+	if career_df.empty or form_df.empty:
+		return None
+
+	return combine_form_and_career_stats((career_df, form_df))
 
 	
