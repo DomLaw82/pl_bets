@@ -52,6 +52,13 @@ navbar {
 	align-items: center;
 	padding: 1%;
 }
+.selected-players {
+	margin-top: 2%;
+	padding: 2%;
+	border: 3px solid #eee;
+	align-items: center;
+}
+
 
 
 /* Add any additional styling for the player div here */

@@ -147,6 +147,7 @@ def get_team_current_roster(team_name:str) -> list:
          JOIN player_team ON player.id = player_team.player_id
          WHERE player_team.team_id = '{team_id}'
          AND player_team.season = current_season.season
+         ORDER BY player.last_name ASC
       """)
       players = list_to_list_of_objects(players, ["id", "first_name", "last_name", "birth_date", "position"])
       return jsonify(players)

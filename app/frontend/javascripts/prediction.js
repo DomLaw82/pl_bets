@@ -52,3 +52,20 @@ function create_player_options(playerSelectId, data) {
 		playerSelect.appendChild(playerOption);
 	});
 }
+function updateSelectedPlayerList(selectId, playerListId) {
+	const playersSelectOptions = document.getElementById(selectId).childNodes;
+	const playerList = document.getElementById(playerListId);
+	
+	const playersSelected = [];
+	playersSelectOptions.forEach(option => {
+		if (option.selected) {
+			playersSelected.push(option.value);
+		}
+	});
+	playerList.innerHTML = '';
+	playersSelected.forEach(player => {
+		const playerListItem = document.createElement('li');
+		playerListItem.textContent = player;
+		playerList.appendChild(playerListItem);
+	});
+}
