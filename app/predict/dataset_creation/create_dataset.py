@@ -1,6 +1,6 @@
 import pandas as pd
 from dataset_creation.db_connection import local_pl_stats_connector
-import datetime
+import datetime, sys
 
 db = local_pl_stats_connector
 
@@ -413,26 +413,20 @@ def grouping_dataframe_rows(df: pd.DataFrame, home_team_id, away_team_id) -> pd.
 	return df
 
 def create_prediction_dataset(home_team_id: str, home_team_squad: list, away_team_id: str, away_team_squad: list) -> pd.DataFrame:
-	if not home_team_squad:
-		exit("No home team squad")
-	if not away_team_squad:
-		exit("No away team squad")
-	if not home_team_id:
-		exit("No home team ID")
-	if not away_team_id:
-		exit("No away team ID")
 		
 	home_team_squad_ids = db.get_list(f"""
 		SELECT player_id FROM player_team
+		JOIN player ON player.id = player_team.player_id
 		WHERE
-			team_id = '{home_team_id}'
-			AND player_id IN ('{"','".join(home_team_squad)}')
+			player_team.team_id = '{home_team_id}'
+			AND CONCAT(player.first_name, ' ', player.last_name) IN ('{"','".join(home_team_squad)}')
 	""")
 	away_team_squad_ids = db.get_list(f"""
 		SELECT player_id FROM player_team
+		JOIN player ON player.id = player_team.player_id
 		WHERE
-			team_id = '{away_team_id}'
-			AND player_id IN ('{"','".join(away_team_squad)}')
+			player_team.team_id = '{away_team_id}'
+			AND CONCAT(player.first_name, ' ', player.last_name) IN ('{"','".join(away_team_squad)}')
 	""")
 	home_team_squad_ids = [player_id[0] for player_id in home_team_squad_ids]
 	away_team_squad_ids = [player_id[0] for player_id in away_team_squad_ids]
@@ -441,11 +435,9 @@ def create_prediction_dataset(home_team_id: str, home_team_squad: list, away_tea
 
 	career = create_prediction_player_stats_for_match(season, home_team_id, away_team_id, "<")
 	form = create_prediction_player_stats_for_match(season, home_team_id, away_team_id, "=")
-	# TODO - Remove players not included in the squad lists for the home and away teams from career and form
 
 	career = remove_unavailable_players_from_df(career, home_team_squad_ids)
 	form = remove_unavailable_players_from_df(form, home_team_squad_ids)
-
 
 	career_df = grouping_dataframe_rows(career, home_team_id, away_team_id)
 	form_df = grouping_dataframe_rows(form, home_team_id, away_team_id)
