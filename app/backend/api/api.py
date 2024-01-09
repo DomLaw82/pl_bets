@@ -121,37 +121,35 @@ def get_all_players() :
 
 # current team roster
 @registry.handles(
-   rule='/active-players/<team_name>',
+   rule='/active-players/<team_id>',
    method='GET',
    response_body_schema=''
 )
-def get_team_current_roster(team_name:str) -> list:
-   team_id = db.get_list(f"SELECT id FROM team WHERE name = '{team_name}'")[0][0] or None
-   if team_id:
-      players = db.get_list(f"""
-         WITH current_season AS (
-            SELECT 
-               MAX(season) AS season
-            FROM
-               player_team
-         )
-                            
-         SELECT
-            player.id AS id,
-            player.first_name AS first_name,
-            player.last_name AS last_name,
-            player.birth_date AS birth_date,
-            player.position AS position
+def get_team_current_roster(team_id:str) -> list:
+   players = db.get_list(f"""
+      WITH current_season AS (
+         SELECT 
+            MAX(season) AS season
          FROM
-            player
-         JOIN current_season ON TRUE
-         JOIN player_team ON player.id = player_team.player_id
-         WHERE player_team.team_id = '{team_id}'
-         AND player_team.season = current_season.season
-         ORDER BY player.last_name ASC
-      """)
-      players = list_to_list_of_objects(players, ["id", "first_name", "last_name", "birth_date", "position"])
-      return jsonify(players)
+            player_team
+      )
+                           
+      SELECT
+         player.id AS id,
+         player.first_name AS first_name,
+         player.last_name AS last_name,
+         player.birth_date AS birth_date,
+         player.position AS position
+      FROM
+         player
+      JOIN current_season ON TRUE
+      JOIN player_team ON player.id = player_team.player_id
+      WHERE player_team.team_id = '{team_id}'
+      AND player_team.season = current_season.season
+      ORDER BY player.last_name ASC
+   """)
+   players = list_to_list_of_objects(players, ["id", "first_name", "last_name", "birth_date", "position"])
+   return jsonify(players)
 
 # run prediction model --- /predict/run POST
 @registry.handles(

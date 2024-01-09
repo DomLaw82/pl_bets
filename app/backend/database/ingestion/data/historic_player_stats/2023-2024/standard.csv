@@ -1,4 +1,4 @@
-player,position,team,matches_played,starts,minutes_played,90s,goals,assists,goals+assists,non_penalty_goals,penalties_scored,penalties_attempted,yellow_cards,red_cards,expected_goals,non_penalty_expected_goals,expected_assisted_goals,non_penalty_expected_goals+expected_assisted_goals,progressive_carries,progressive_passes,progressive_passes_recieved
+player,position,team,matches_played,starts,minutes_played,90s,goals,assists,goals+assists,non_penalty_goals,penalties_scored,penalties_attempted,yellow_cards,red_cards,expected_goals,non_penalty_expected_goals,expected_assisted_goals,non_penalty_expected_goals+expected_assisted_goals,progressive_carries,progressive_passes,progressive_passes_received
 Max Aarons,DF,Bournemouth,13,11,995,11.1,0,1,1,0,0,0,1,0,0,0,0.8,0.8,17,36,21
 Bénie Adama Traore,"FW,MF",Sheffield Utd,8,3,387,4.3,0,0,0,0,0,0,0,0,0.3,0.3,0.5,0.8,7,9,14
 Tosin Adarabioyo,DF,Fulham,8,6,543,6,1,0,1,1,0,0,0,0,0,0,0.1,0.1,4,22,1

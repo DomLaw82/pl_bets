@@ -19,7 +19,7 @@ function create_team_options(elementId, data) {
 	const teamSelect = document.getElementById(elementId);
 	data.forEach(team => {
 		const teamOption = document.createElement('option');
-		teamOption.value = team.name;
+		teamOption.value = team.id;
 		teamOption.id = team.id;
 		teamOption.textContent = team.name;
 		teamSelect.appendChild(teamOption);
@@ -80,10 +80,15 @@ function updateSelectedPlayerList(selectId, playerListId) {
 
 async function runPrediction() {
 
-	homeTeamId = document.getElementById('home-team').childNodes[document.getElementById('home-team').selectedIndex].id;
+	homeTeamId = document.getElementById('home-team').value;
 	homePlayersSelected = getSelectedPlayers('home-players');
-	awayTeamId = document.getElementById('away-team').childNodes[document.getElementById('away-team').selectedIndex].id;
+	awayTeamId = document.getElementById('away-team').value;
 	awayPlayersSelected = getSelectedPlayers('away-players');
+
+	console.log(homeTeamId);
+	console.log(homePlayersSelected);
+	console.log(awayTeamId);
+	console.log(awayPlayersSelected);
 	
 	await fetch(`http://localhost:8008/predict`, {
 		method: 'POST',
