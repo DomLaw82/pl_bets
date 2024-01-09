@@ -104,12 +104,12 @@ def create_prediction_player_stats_for_match(game_season: str, home_team_id: str
 		FROM 
 			historic_player_per_ninety hpn
 		JOIN player_team pt ON (
-			pt.team_id = '{home_team_id}'
-			OR pt.team_id = '{away_team_id}'
+			pt.team_id = 't-00011'
+			OR pt.team_id = 't-00012'
 			)
 			AND pt.player_id = hpn.player_id
 			AND hpn.season = pt.season
-		WHERE hpn.season {less_than_or_equal_to} '{game_season}'
+		WHERE hpn.season = '2023-2024'
 	""")
 
 def get_match_column_values(all_matches: pd.DataFrame) -> list:
