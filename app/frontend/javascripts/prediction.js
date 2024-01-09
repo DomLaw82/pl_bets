@@ -84,11 +84,6 @@ async function runPrediction() {
 	homePlayersSelected = getSelectedPlayers('home-players');
 	awayTeamId = document.getElementById('away-team').value;
 	awayPlayersSelected = getSelectedPlayers('away-players');
-
-	console.log(homeTeamId);
-	console.log(homePlayersSelected);
-	console.log(awayTeamId);
-	console.log(awayPlayersSelected);
 	
 	await fetch(`http://localhost:8008/predict`, {
 		method: 'POST',

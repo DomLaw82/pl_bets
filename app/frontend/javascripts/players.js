@@ -16,15 +16,15 @@ function create_player_divs(data) {
 	const playersContainer = document.getElementById('playersContainer');
 	data.forEach(player => {
 		const playerDiv = document.createElement('div');
-		playerDiv.className = 'player';
-		playerDiv.id = `player-${player.id}`;
+		playerDiv.className = 'player-card';
+		playerDiv.id = `${player.id}`;
 
 		let cols = ["id", "first_name", "last_name", "birth_date", "position", "team_name", "active"]
 
 		cols.forEach(col => {
 			let value = player[col] || "";
 			const playerKeyDiv = document.createElement('div');
-			playerKeyDiv.className = `player-${col}`;
+			playerKeyDiv.className = `player-card-element player-card-${col}`;
 			const playerKeySpan = document.createElement('span');
 			playerKeySpan.textContent = `${value}`;
 
@@ -35,3 +35,5 @@ function create_player_divs(data) {
 		playersContainer.appendChild(playerDiv);
 	});
 }
+
+// TODO - Create reusable element for player entries, i.e. player card with colours, borders, etc.
