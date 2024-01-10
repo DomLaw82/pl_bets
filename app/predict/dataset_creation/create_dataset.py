@@ -176,8 +176,6 @@ def group_stats_by_player_for_home_and_away_teams(df: pd.DataFrame, home_team_id
 			df.loc[df["player_id"] == player_id, "team_id"] = specified_team_ids[0]
 		if specified_team_ids[1] in teams_played_for:
 			df.loc[df["player_id"] == player_id, "team_id"] = specified_team_ids[1]
-	
-	pd.set_option('display.max_columns', None)
 
 	if pred:
 
@@ -188,8 +186,6 @@ def group_stats_by_player_for_home_and_away_teams(df: pd.DataFrame, home_team_id
 			.reset_index()
 		)
 		df = df.drop(columns=["season"])
-		
-		print("df_temp\n", df)
 
 		df = (
 			df
@@ -230,7 +226,7 @@ def create_per_90_stats(df: pd.DataFrame) -> pd.DataFrame:
 	df.loc[:, pure_stats_columns] = df[pure_stats_columns].apply(lambda x: x / ninety_mins_per_season)
 	return df
 
-def create_contribution_per_90_stats(df: pd.DataFrame) -> pd.DataFrame:
+def create_contribution_per_90_stats(df: pd.DataFrame, pred:bool = False) -> pd.DataFrame:
 	"""
 	Creates contribution per 90 minutes statistics for the given DataFrame.
 
@@ -243,6 +239,11 @@ def create_contribution_per_90_stats(df: pd.DataFrame) -> pd.DataFrame:
 	"""
 	minutes_per_game = 90
 
+	if pred:
+		df.loc[:, pure_stats_columns] = df[pure_stats_columns].apply(lambda x: x * (minutes_per_game / 90))
+		df = df.drop(columns=["minutes_played"])
+		return df
+	
 	df[pure_stats_columns] = df[pure_stats_columns].apply(lambda x: x * (df["minutes_played"] / minutes_per_game))
 	df = df.drop(columns=["minutes_played"])
 	pure_stats_columns.remove("minutes_played")
@@ -348,7 +349,7 @@ def combine_form_and_career_stats(dfs: tuple, pred: bool = False) -> pd.DataFram
 	form_df[pure_stats_columns_no_minutes] = form_df[pure_stats_columns_no_minutes] * form_stats_ratio
 
 	all_stats = pd.concat([career_df, form_df])
-	
+
 	# Combined stats for all the players on both teams
 	if pred:
 		all_stats = all_stats[pure_stats_columns_no_minutes]
@@ -440,7 +441,7 @@ def grouping_dataframe_rows(df: pd.DataFrame, home_team_id, away_team_id, pred: 
 		return df
 
 	df = create_per_90_stats(df)
-	df = create_contribution_per_90_stats(df)
+	df = create_contribution_per_90_stats(df, True)
 	df = group_stats_by_team(df)
 	df = convert_team_rows_to_single_row(df, home_team_id, away_team_id)
 
@@ -479,6 +480,6 @@ def create_prediction_dataset(home_team_id: str, home_team_squad: list, away_tea
 	if career.empty or form.empty:
 		return None
 
-	return combine_form_and_career_stats((career, form))
+	return combine_form_and_career_stats((career, form), True)
 
 	

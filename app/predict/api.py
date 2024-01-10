@@ -77,6 +77,23 @@ def retune():
 	return jsonify(params)
 
 
+# Create functions to remake pca and scaler models
+@registry.handles(
+   rule='/transformation/scaling',
+   method='POST',
+   response_body_schema=retune_schema()
+)
+def recreate_scaler():
+   pass
+
+@registry.handles(
+   rule='/transformation/pca',
+   method='POST',
+   response_body_schema=retune_schema()
+)
+def recreate_pca_object():
+   pass
+
 app = Flask(__name__)
 CORS(app, origins=["http://api:8080", "http://localhost:8080", "http://localhost:3000", "http://frontend:3000"],  supports_credentials=True)
 rebar.init_app(app)

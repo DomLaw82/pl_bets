@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 import os
+from joblib import load
 
 N = 15
 
@@ -104,14 +105,15 @@ def perform_scaling_and_pca(X_train: list, X_test:list, n:int=15) -> pd.DataFram
 	X_test (pd.DataFrame): The transformed testing data after scaling and PCA.
 	"""
 	# Scale the data
-	X_scaler = StandardScaler(copy=True).fit(X_train)
+	# TODO - collect the whole dataset, then scale and PCA using ../feature_to_15_pcs.csv
+	scaler = load('../prediction_scaler.bin')
 
-	X_train = X_scaler.transform(X_train)
-	X_test = X_scaler.transform(X_test)
+	X_train = scaler.transform(X_train)
+	X_test = scaler.transform(X_test)
 
+	
 	# PCA where N is the number of components set above
-	pca = PCA(n_components = n, random_state=576)
-	pca.fit(X_train)
+	pca = load('../prediction_pca.bin')
 
 	X_train = pca.transform(X_train)
 	X_test = pca.transform(X_test)

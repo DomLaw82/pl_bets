@@ -1,6 +1,7 @@
 from dataset_creation.create_dataset import create_prediction_dataset
 from neural_net.build_and_save_model import perform_scaling_and_pca
 import tensorflow as tf
+import pandas as pd
 
 # Description: Predict the outcome of a match based on the trained model
 
@@ -14,10 +15,13 @@ import tensorflow as tf
 # Return these stats to the user
 
 def predict_match_outcome(home_team: str, home_players: list, away_team: str, away_players: list) -> dict:
+
+	pd.set_option('display.max_columns', None)
 	df = create_prediction_dataset(home_team, home_players, away_team, away_players)
-	if not df:
-		return None
 	
+	if df.empty:
+		return None
+
 	X, _ = perform_scaling_and_pca(df.values.tolist(), [])
 	
 	# Load the model
