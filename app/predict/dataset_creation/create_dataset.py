@@ -152,7 +152,7 @@ def get_all_players_in_match(season: str, home_team_id: str, away_team_id: str, 
 
 	return df
 
-def group_stats_by_player_for_home_and_away_teams(df: pd.DataFrame, home_team_id: str, away_team_id:str) -> pd.DataFrame:
+def group_stats_by_player_for_home_and_away_teams(df: pd.DataFrame, home_team_id: str, away_team_id:str, pred: bool = False) -> pd.DataFrame:
 	"""
 	Groups the statistics of players by their player_id for the specified home and away teams.
 
@@ -176,22 +176,42 @@ def group_stats_by_player_for_home_and_away_teams(df: pd.DataFrame, home_team_id
 			df.loc[df["player_id"] == player_id, "team_id"] = specified_team_ids[0]
 		if specified_team_ids[1] in teams_played_for:
 			df.loc[df["player_id"] == player_id, "team_id"] = specified_team_ids[1]
-			
-	# TODO - Understand the issue here
-	df[player_stats_columns] = (
-		df[player_stats_columns+["season"]]
-		.groupby(["player_id", "season"])
-		.sum()
-		.reset_index()
-		[player_stats_columns]
-		.groupby("player_id")
-		.mean()
-		.reset_index()
-	)
+	
+	print("before group by player", df)
+	# group by player_id and season, then player id
 
-	sys.exit(df)
+	if pred:
+		df_temp = (
+			df[df.columns.tolist().remove("team_id")]
+			.groupby(["player_id", "season"])
+			.sum()
+			.reset_index()
+			.drop(columns=["season"])
+		)
+		
 
+		df[df.columns.tolist().remove("team_id")] = (
+			df_temp[df.columns.tolist().remove("team_id")]
+			.groupby("player_id")
+			.mean()
+			.reset_index()
+		)
+
+	else:
+		df[player_stats_columns] = (
+			df[player_stats_columns+["season"]]
+			.groupby(["player_id", "season"])
+			.sum()
+			.reset_index()
+			[player_stats_columns]
+			.groupby("player_id")
+			.mean()
+			.reset_index() 
+		)
+
+	print("after gb player", df)
 	df = df[df.index < df["player_id"].nunique()]
+	print("3", df)
 
 	return df
 
@@ -402,16 +422,16 @@ def remove_unavailable_players_from_df(df: pd.DataFrame, squad_list: list) -> pd
 
 	return df
 
-def grouping_dataframe_rows(df: pd.DataFrame, home_team_id, away_team_id) -> pd.DataFrame:
+def grouping_dataframe_rows(df: pd.DataFrame, home_team_id, away_team_id, pred: bool = False) -> pd.DataFrame:
 
 	columns_to_remove = ["_plus_", "_minus", "_divided_by_",]
 	columns = [col for col in df.columns if any(word in col for word in columns_to_remove)]
 	df = df.drop(columns=columns)
 
-	df = group_stats_by_player_for_home_and_away_teams(df, home_team_id, away_team_id)
+	df = group_stats_by_player_for_home_and_away_teams(df, home_team_id, away_team_id, pred)
 
 	if df["team_id"].nunique() < 2:
-		return
+		return df
 
 	df = create_per_90_stats(df)
 	df = create_contribution_per_90_stats(df)
@@ -447,8 +467,8 @@ def create_prediction_dataset(home_team_id: str, home_team_squad: list, away_tea
 	career = remove_unavailable_players_from_df(career, home_team_squad_ids+away_team_squad_ids)
 	form = remove_unavailable_players_from_df(form, home_team_squad_ids+away_team_squad_ids)
 	
-	career = grouping_dataframe_rows(career, home_team_id, away_team_id)
-	form = grouping_dataframe_rows(form, home_team_id, away_team_id)
+	career = grouping_dataframe_rows(career, home_team_id, away_team_id, True)
+	form = grouping_dataframe_rows(form, home_team_id, away_team_id, True)
 
 	if career.empty or form.empty:
 		return None

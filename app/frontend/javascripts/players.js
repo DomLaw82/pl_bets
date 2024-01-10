@@ -1,5 +1,7 @@
 window.onload = async function load() {
 	await fetch_player_data();
+
+	// document.getElementById('submit-button').addEventListener('click', handleSearchSubmit);
 }
 
 async function fetch_player_data() {
@@ -36,4 +38,38 @@ function create_player_divs(data) {
 	});
 }
 
-// TODO - Create reusable element for player entries, i.e. player card with colours, borders, etc.
+function handleSearchSubmit() {
+	const searchInput = document.getElementById('player-search-box');
+	const searchTerm = searchInput.value;
+
+	fetch(`http://example.com/search?term=${searchTerm}`, {
+		method: 'GET',
+		credentials: 'include'
+	})
+		.then(res => res.json())
+		.then(data => {
+			// Process the fetched data
+			console.log(data);
+		})
+		.catch(error => {
+			// Handle any errors
+			console.error(error);
+		});
+}
+
+
+function showPopUp(popUpID, buttonID) {
+	const popUp = document.getElementById(popUpID);
+	const button = document.getElementById(buttonID);
+
+	// Show the filter pop-up
+	popUp.style.display = 'block';
+
+	document.addEventListener('click', function(event) {
+		// Check if the clicked element is outside the filter pop-up
+		if (!popUp.contains(event.target) && !button.contains(event.target)) {
+			// Hide the filter pop-up
+			popUp.style.display = 'none';
+		}
+	});
+}

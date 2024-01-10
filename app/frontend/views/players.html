@@ -16,9 +16,99 @@
 		<div class="navbar-button"><a href="prediction.html">Prediction</a></div>
 	</navbar>
 	<hr>
+	<h2>Players</h2>
+	<p>Search all players who have appeared in the Premier league from the start of the 2018/19 Season</p>
+	<hr>
+	<div id="searching">
+		<div id="search-box">
+			<input type="text" id="player-search-box">
+		</div>
+		<div id="search-button">
+			<button id="submit-button" onclick="handleSearchSubmit()">Search</button>
+		</div>
+	</div>
+	<div id="handling">
+		<div id="filter">
+			<button onclick="showPopUp('filter-pop-up', 'filter-button')" id="filter-button">Filter</button>
+		</div>
+		<div id="filter-pop-up" class="pop-up">
+			<div id="filter-pop-up-content">
+				<div id="filter-pop-up-header">
+					<h3>Filter</h3>
+				</div>
+				<div id="filter-pop-up-body">
+					<p>Filter by:</p>
+					<div id="filter-pop-up-options">
+						<div id="filter-pop-up-options-age" class="pop-up-label-field">
+							<div class="popup-element"><label for="age">Age:</label></div>
+							<div class="popup-element">
+								<select name="direction" id="direction">
+									<option value="" disabled selected>Select direction</option>
+									<option value=">">></option>
+									<option value="<"><</option>
+									<option value="=">=</option>
+								</select>
+							</div>
+							<div class="popup-element"><input type="text" id="age" name="age"></div>
+						</div>
+						<div id="filter-pop-up-options-team" class="pop-up-label-field">
+							<div class="popup-element"><label for="team">Team:</label></div>
+							<div class="popup-element"><input type="text" id="team" name="team"></div>
+						</div>
+						<div id="filter-pop-up-options-active" class="pop-up-label-field">
+							<div class="popup-element"><label for="active">Active:</label></div>
+							<div class="popup-element"><input type="checkbox" id="active" name="active"></div>
+						</div>
+					</div>
+				</div>
+				<div id="filter-pop-up-footer">
+					<button id="filter-pop-up-submit">Submit</button>
+				</div>
+			</div>
+		</div>
+		<div id="sort">
+			<button onclick="showPopUp('sort-pop-up', 'sort-button')" id="sort-button">Sort</button>
+		</div>
+		<div id="sort-pop-up" class="pop-up">
+			<div id="sort-pop-up-content">
+				<div id="sort-pop-up-header">
+					<h3>Sort</h3>
+				</div>
+				<div id="sort-pop-up-body">
+					<p>Sort by:</p>
+					<div id="sort-pop-up-options">
+						<div id="sort-pop-up-options-age" class="pop-up-label-field">
+							<div class="popup-element"><label for="age">Age:</label></div>
+							<div class="sorting-buttons">
+								<div class="popup-element"><button id="age-asc">ASC</button></div>
+								<div class="popup-element"><button id="age-desc">DSC</button></div>
+							</div>
+						</div>
+						<div id="sort-pop-up-options-name" class="pop-up-label-field">
+							<div class="popup-element"><label for="name">Name:</label></div>
+							<div class="sorting-buttons">
+								<div class="popup-element"><button id="name-asc">ASC</button></div>
+								<div class="popup-element"><button id="name-desc">DSC</button></div>
+							</div>
+						</div>
+						<div id="sort-pop-up-options-team" class="pop-up-label-field">
+							<div class="popup-element"><label for="team">Team:</label></div>
+							<div class="sorting-buttons">
+								<div class="popup-element"><button id="team-asc">ASC</button></div>
+								<div class="popup-element"><button id="team-desc">DSC</button></div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="sort-pop-up-footer">
+					<button id="sort-pop-up-submit">Submit</button>
+				</div>
+			</div>
+		</div>
+	</div>
 	<div id="playersContainer"></div>
 </body>
 </html>
 
-<!-- TODO - Add search box -->
-<!-- TODO - Add filter/sort box (by age, team, active status) -->
+<!-- TODO - Add searching functionality -->
+<!-- TODO - Add filter/sorting functionality -->
