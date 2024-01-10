@@ -16,12 +16,30 @@ async function fetch_player_data() {
 
 function create_player_divs(data) {
 	const playersContainer = document.getElementById('playersContainer');
+	
+	const cols = ["id", "first_name", "last_name", "birth_date", "position", "team_name", "active"]
+
+	headerDiv = document.createElement('div');
+	headerDiv.className = 'player-card';
+	headerDiv.id = 'header-card';
+
+	cols.forEach(col => {
+		const headerKeyDiv = document.createElement('div');
+		headerKeyDiv.className = `player-card-element player-card-${col}`;
+		const headerKeySpan = document.createElement('span');
+		headerKeySpan.textContent = `${col}`;
+
+		headerKeyDiv.appendChild(headerKeySpan);
+		headerDiv.appendChild(headerKeyDiv);
+	});
+	playersContainer.appendChild(headerDiv);
+
+
 	data.forEach(player => {
 		const playerDiv = document.createElement('div');
 		playerDiv.className = 'player-card';
 		playerDiv.id = `${player.id}`;
 
-		let cols = ["id", "first_name", "last_name", "birth_date", "position", "team_name", "active"]
 
 		cols.forEach(col => {
 			let value = player[col] || "";

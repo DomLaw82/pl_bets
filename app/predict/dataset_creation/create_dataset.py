@@ -177,22 +177,23 @@ def group_stats_by_player_for_home_and_away_teams(df: pd.DataFrame, home_team_id
 		if specified_team_ids[1] in teams_played_for:
 			df.loc[df["player_id"] == player_id, "team_id"] = specified_team_ids[1]
 	
-	print("before group by player", df)
-	# group by player_id and season, then player id
+	pd.set_option('display.max_columns', None)
 
 	if pred:
-		df_temp = (
-			df[df.columns.tolist().remove("team_id")]
-			.groupby(["player_id", "season"])
+
+		df = (
+			df
+			.groupby(["player_id", "season", "team_id"])
 			.sum()
 			.reset_index()
-			.drop(columns=["season"])
 		)
+		df = df.drop(columns=["season"])
 		
+		print("df_temp\n", df)
 
-		df[df.columns.tolist().remove("team_id")] = (
-			df_temp[df.columns.tolist().remove("team_id")]
-			.groupby("player_id")
+		df = (
+			df
+			.groupby(["player_id", "team_id"])
 			.mean()
 			.reset_index()
 		)
@@ -206,12 +207,10 @@ def group_stats_by_player_for_home_and_away_teams(df: pd.DataFrame, home_team_id
 			[player_stats_columns]
 			.groupby("player_id")
 			.mean()
-			.reset_index() 
+			.reset_index()
 		)
 
-	print("after gb player", df)
 	df = df[df.index < df["player_id"].nunique()]
-	print("3", df)
 
 	return df
 
@@ -264,7 +263,7 @@ def group_stats_by_team(df: pd.DataFrame) -> pd.DataFrame:
 	df[team_stats_columns] = df[team_stats_columns].groupby("team_id").sum().reset_index()
 	return df[df.index < df["team_id"].nunique()]
 
-def convert_team_rows_to_single_row(df: pd.DataFrame) -> pd.DataFrame:
+def convert_team_rows_to_single_row(df: pd.DataFrame, home_team_id: str = None, away_team_id:str = None) -> pd.DataFrame:
 	"""
 	Converts team rows in a DataFrame to a single row.
 
@@ -274,8 +273,8 @@ def convert_team_rows_to_single_row(df: pd.DataFrame) -> pd.DataFrame:
 	Returns:
 		pd.DataFrame: The DataFrame with a single row representing the teams.
 	"""
-	home = df["home_team_id"].unique().tolist()[0]
-	away = df["away_team_id"].unique().tolist()[0]
+	home = home_team_id or df["home_team_id"].unique().tolist()[0]
+	away = away_team_id or df["away_team_id"].unique().tolist()[0]
 
 	columns = df.columns.to_list()
 	final_df = {}
@@ -329,7 +328,7 @@ def create_career_and_form_dataframes_for_database(match_values: list) -> dict:
 
 	return dfs
 
-def combine_form_and_career_stats(dfs: tuple) -> pd.DataFrame:
+def combine_form_and_career_stats(dfs: tuple, pred: bool = False) -> pd.DataFrame:
 	"""
 	Combines the career and form statistics for a player.
 
@@ -349,7 +348,14 @@ def combine_form_and_career_stats(dfs: tuple) -> pd.DataFrame:
 	form_df[pure_stats_columns_no_minutes] = form_df[pure_stats_columns_no_minutes] * form_stats_ratio
 
 	all_stats = pd.concat([career_df, form_df])
+	
 	# Combined stats for all the players on both teams
+	if pred:
+		all_stats = all_stats[pure_stats_columns_no_minutes]
+		all_stats.loc[:, "match"] = "m"
+		all_stats = all_stats.groupby("match").sum().reset_index(drop=True)
+		return all_stats
+	
 	all_match_stats = all_stats[pure_stats_columns_no_minutes + ["match_id"]]
 	#Match facts for all games
 	all_match_facts = all_stats[match_columns].drop_duplicates(subset='match_id')
@@ -436,7 +442,7 @@ def grouping_dataframe_rows(df: pd.DataFrame, home_team_id, away_team_id, pred: 
 	df = create_per_90_stats(df)
 	df = create_contribution_per_90_stats(df)
 	df = group_stats_by_team(df)
-	df = convert_team_rows_to_single_row(df)
+	df = convert_team_rows_to_single_row(df, home_team_id, away_team_id)
 
 	return df
 
