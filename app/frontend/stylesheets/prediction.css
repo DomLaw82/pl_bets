@@ -19,3 +19,27 @@
 	padding: 2%;
 	border: 3px solid #eee;
 }
+
+.prediction-results {
+	display: none;
+	flex-direction: column;
+	text-align: center;
+	justify-content: center;
+	align-items: center;
+	padding: 2%;
+}
+.prediction-result {
+	text-align: center;
+	padding: 2%;
+}
+/*.prediction-results-data {
+	text-align: center;
+	padding: 1%;
+}
+.prediction-results-header {
+	text-align: center;
+	padding: 1%;
+} */
+table, th, td {
+	border: 2px solid black;
+  }

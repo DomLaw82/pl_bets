@@ -7,3 +7,6 @@ db = local_pl_stats_connector
 def recreate_local_dataset():	
 	df = create_dataset()
 	df.to_csv("../final_combined_dataframe.csv", index=False)
+
+if __name__ == "__main__":
+	recreate_local_dataset()

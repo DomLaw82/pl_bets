@@ -104,26 +104,41 @@ async function runPrediction() {
 			const predictionContainer = document.getElementById('prediction-results-table');
 			
 			predictionContainer.innerHTML = '';
-			const predictionTableHeader = document.createElement('tr');
+			const predictionTableLocationHeader = document.createElement('tr');
+			const predictionTableStatsHeader = document.createElement('tr');
 			const predictionTableRow = document.createElement('tr');
-			
-			for (let key in data) {
-				const predictionTableHeaderData = document.createElement('th');
-				predictionTableData.className = 'prediction-results';
-				predictionTableHeaderData.textContent = key;
 
-				const predictionTableData = document.createElement('td');
-				predictionTableData.className = 'prediction-results';
-				predictionTableData.id = key;
-				predictionTableData.textContent = data[key];
-	
-				predictionTableHeader.appendChild(predictionTableHeaderData);
-				predictionTableRow.appendChild(predictionTableData);
-			}
+			const stats = ["goals", "shots", "shots_on_target", "corners", "fouls", "yellow_cards", "red_cards"]
+			const locations = ["home", "away"];
 			
+			stats.forEach(stat => {
+				const predictionTableStatsHeaderData = document.createElement('th');
+				predictionTableStatsHeaderData.className = 'prediction-results-header prediction-result';
+				predictionTableStatsHeaderData.textContent = stat;
+				predictionTableStatsHeaderData.colSpan = 2;
+
+				predictionTableStatsHeader.appendChild(predictionTableStatsHeaderData);
+
+				locations.forEach(loc => {
+					const predictionTableLocationHeaderData = document.createElement('th');
+					predictionTableLocationHeaderData.className = 'prediction-results-header prediction-result';
+					predictionTableLocationHeaderData.textContent = loc;
+
+					const predictionTableData = document.createElement('td');
+					predictionTableData.className = 'prediction-results-data prediction-result';
+					predictionTableData.id = stat;
+					predictionTableData.textContent = data[loc+"_"+stat];
+		
+					predictionTableLocationHeader.appendChild(predictionTableLocationHeaderData);
+					predictionTableRow.appendChild(predictionTableData);
+				});
+			});
+			
+			predictionContainer.appendChild(predictionTableStatsHeader);
+			predictionContainer.appendChild(predictionTableLocationHeader);
 			predictionContainer.appendChild(predictionTableRow);
 
-			document.getElementById('prediction-results').style.display = 'block';
+			document.getElementById('prediction-results').style.display = 'flex';
 		});
 	
 }
