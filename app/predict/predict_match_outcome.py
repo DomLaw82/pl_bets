@@ -2,6 +2,7 @@ from dataset_creation.create_dataset import create_prediction_dataset
 from neural_net.build_and_save_model import perform_scaling_and_pca
 import tensorflow as tf
 import pandas as pd
+import numpy as np
 
 # Description: Predict the outcome of a match based on the trained model
 
@@ -22,7 +23,7 @@ def predict_match_outcome(home_team: str, home_players: list, away_team: str, aw
 	if df.empty:
 		return None
 
-	X, _ = perform_scaling_and_pca(df.values.tolist(), [])
+	X, _ = perform_scaling_and_pca(df.values, np.array([]), pred=True)
 	
 	# Load the model
 	model = tf.keras.models.load_model('stats_regression_model.h5')

@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -91,7 +92,7 @@ def x_y_split_df(df: pd.DataFrame, output_columns: list) -> tuple:
 	y = df[output_columns]
 	return X, y
 
-def perform_scaling_and_pca(X_train: list, X_test:list, n:int=15) -> pd.DataFrame:
+def perform_scaling_and_pca(X_train: np.array, X_test: np.array, n:int=15, pred: bool = False) -> pd.DataFrame:
 	"""
 	Perform scaling and PCA (Principal Component Analysis) on the input data.
 
@@ -106,17 +107,21 @@ def perform_scaling_and_pca(X_train: list, X_test:list, n:int=15) -> pd.DataFram
 	"""
 	# Scale the data
 	# TODO - collect the whole dataset, then scale and PCA using ../feature_to_15_pcs.csv
-	scaler = load('../prediction_scaler.bin')
+	scaler = load('prediction_scaler.bin')
 
-	X_train = scaler.transform(X_train)
-	X_test = scaler.transform(X_test)
+	if pred:
+		X_train = scaler.transform(X_train.reshape(1, -1))
+		# X_test = scaler.transform(X_test.reshape(1, -1))
+	else:
+		X_train = scaler.transform(X_train)
+		X_test = scaler.transform(X_test)
 
 	
 	# PCA where N is the number of components set above
-	pca = load('../prediction_pca.bin')
+	pca = load('prediction_pca.bin')
 
 	X_train = pca.transform(X_train)
-	X_test = pca.transform(X_test)
+	# X_test = pca.transform(X_test)
 	return X_train, X_test
 
 def build_and_save_model(dataframe: pd.DataFrame) -> tf.keras.models.Sequential:

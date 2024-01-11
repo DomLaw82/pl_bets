@@ -18,3 +18,6 @@ def recreate_scaler():
 	scaler = StandardScaler(copy=True).fit(df[pure_stats_columns_no_minutes])
 
 	dump(scaler, '../prediction_scaler.bin', compress=True)
+
+if __name__ == "__main__":
+	recreate_scaler()

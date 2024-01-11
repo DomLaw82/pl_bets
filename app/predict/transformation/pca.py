@@ -22,3 +22,6 @@ def recreate_pca_object(n:int = 15):
 	df = pd.read_csv("../final_combined_dataframe.csv")
 	pca_obj = create_pca_object(n, df[pure_stats_columns_no_minutes])
 	dump(pca_obj, '../prediction_pca.bin', compress=True)
+
+if __name__ == "__main__":
+	recreate_pca_object()

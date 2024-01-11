@@ -104,18 +104,24 @@ async function runPrediction() {
 			const predictionContainer = document.getElementById('prediction-results-table');
 			
 			predictionContainer.innerHTML = '';
+			const predictionTableHeader = document.createElement('tr');
 			const predictionTableRow = document.createElement('tr');
 			
 			for (let key in data) {
+				const predictionTableHeaderData = document.createElement('th');
+				predictionTableData.className = 'prediction-results';
+				predictionTableHeaderData.textContent = key;
+
 				const predictionTableData = document.createElement('td');
-				predictionDiv.className = 'prediction-results';
-				predictionDiv.id = key;
-	
+				predictionTableData.className = 'prediction-results';
+				predictionTableData.id = key;
 				predictionTableData.textContent = data[key];
 	
+				predictionTableHeader.appendChild(predictionTableHeaderData);
 				predictionTableRow.appendChild(predictionTableData);
-				predictionContainer.appendChild(predictionTableRow);
 			}
+			
+			predictionContainer.appendChild(predictionTableRow);
 
 			document.getElementById('prediction-results').style.display = 'block';
 		});
