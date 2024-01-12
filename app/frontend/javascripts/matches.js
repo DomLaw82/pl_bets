@@ -153,3 +153,6 @@ function showMatchFacts(flag) {
 		document.getElementById('add-match-facts-button-close').style.display = 'none';
 	}
 }
+
+// TODO - Autofill as many columns in the add result popup as possible
+// TODO - Add function to submit data from addResultsPopUp to database
