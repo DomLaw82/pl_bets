@@ -10,7 +10,7 @@ def clean_schedule_data(db_connection, df:pd.DataFrame) -> pd.DataFrame:
 	1. Renames the columns of the DataFrame to lowercase with underscores instead of spaces.
 	2. Renames the team names in the 'home_team' and 'away_team' columns to a standardized format.
 	3. Retrieves the team IDs from the database for the 'home_team' and 'away_team' columns.
-	4. Removes rows where the 'result' column is null.
+	4. Replaces null values in the 'result' column with "-".
 	5. Renames the 'home_team' and 'away_team' columns to 'home_team_id' and 'away_team_id' respectively.
 	6. Converts the 'date' column to a datetime format and formats it as 'YYYY/MM/DD HH:MM'.
 
@@ -29,7 +29,8 @@ def clean_schedule_data(db_connection, df:pd.DataFrame) -> pd.DataFrame:
 	df.loc[:, "home_team"] = df.apply(lambda row: get_team_id(db_connection, row.home_team), axis=1)
 	df.loc[:, "away_team"] = df.apply(lambda row: get_team_id(db_connection, row.away_team), axis=1)
 
-	df = df[~df["result"].isnull()]
+	df.loc[:, "result"] = df["result"].fillna("-")
+
 	df = df.rename(columns={"home_team": "home_team_id", "away_team": "away_team_id"})
 	df.loc[:, "date"] = pd.to_datetime(df['date'], format="%d/%m/%Y %H:%M").dt.strftime('%Y/%m/%d %H:%M')
 

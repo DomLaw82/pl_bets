@@ -5,6 +5,7 @@ from schemas import *
 import pandas as pd
 from db_connection import local_pl_stats_connector
 from flask import render_template
+from datetime import datetime
 
 db = local_pl_stats_connector
 rebar = Rebar()
@@ -150,6 +151,53 @@ def get_team_current_roster(team_id:str) -> list:
    """)
    players = list_to_list_of_objects(players, ["id", "first_name", "last_name", "birth_date", "position"])
    return jsonify(players)
+
+@registry.handles(
+   rule='/matches/all-seasons',
+   method='GET'
+)
+def get_all_seasons() -> list:
+   seasons = db.get_list(f"""
+      SELECT DISTINCT(season) FROM match ORDER BY season ASC
+   """)
+
+   seasons = [season[0] for season in seasons]
+   return jsonify(seasons)
+
+def decompose_season(season: str) -> tuple:
+   start_year, end_year = season.split('-')
+   start_month = '08'
+   end_month = '05'
+   
+   start_date = datetime.strptime(f"{start_year}-{start_month}-01", "%Y-%m-%d")
+   end_date = datetime.strptime(f"{end_year}-{end_month}-31", "%Y-%m-%d")
+   
+   return (start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"))
+
+
+@registry.handles(
+   rule='/matches/season/<season>',
+   method='GET',
+   response_body_schema=ScheduleSchema(many=True)
+)
+def get_schedule_by_season(season:str) -> list:
+   season_start, season_end = decompose_season(season)
+   schedule = db.get_list(f"""
+      SELECT 
+         CAST(s.date AS VARCHAR) AS date,
+         CAST(s.round_number AS VARCHAR) AS game_week,
+         CAST(home_team.name AS VARCHAR) AS home_team,
+         CAST(away_team.name AS VARCHAR) AS away_team,
+         CAST(s.result AS VARCHAR) AS result
+      FROM schedule s
+      JOIN team home_team ON s.home_team_id = home_team.id
+      JOIN team away_team ON s.away_team_id = away_team.id
+      WHERE DATE(s.date) > '{season_start}' AND DATE(s.date) < '{season_end}'
+      ORDER BY s.date ASC;
+   """)
+   schedule = list_to_list_of_objects(schedule, ["date", "game_week", "home_team", "away_team", "result"])
+   print(schedule)
+   return jsonify(schedule)
 
 # run prediction model --- /predict/run POST
 @registry.handles(

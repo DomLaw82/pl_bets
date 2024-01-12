@@ -39,13 +39,10 @@ class RefereeSchema(Schema):
     name = fields.String()
 
 class ScheduleSchema(Schema):
-    match_number = fields.Integer()
-    round_number = fields.Integer()
+    game_week = fields.Integer()
     date = fields.DateTime()
-    location = fields.String()
-    home_team_id = fields.String()
-    away_team_id = fields.String()
-    competition_id = fields.String()
+    home_team = fields.String()
+    away_team = fields.String()
     result = fields.String()
 
 class PlayerTeamSchema(Schema):

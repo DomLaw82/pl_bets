@@ -124,9 +124,7 @@ def get_match_column_values(all_matches: pd.DataFrame) -> list:
 	columns_to_extract = ["home_team_id", "away_team_id", "season", "id"]
 	values_list = []
 
-	for index, row in all_matches.iterrows():
-		row_values = [row[column] for column in columns_to_extract]
-		values_list.append(row_values)
+	values_list = all_matches[columns_to_extract].to_numpy().tolist()
 
 	return values_list
 

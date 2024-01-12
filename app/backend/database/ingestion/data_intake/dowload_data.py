@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup
 
 # DOWNLOADING GAMES DATA FOR EVERY SEASON
 # TODO - add url and word_to_replace as an argument to the download_csv_for_all_games_in_a_season function, have a word set in the url to replace with the season
-
+SEE_FIXTURES = "https://fixturedownload.com/results/epl-2022"
+DOWNLOAD_FIXTURE_URL = "https://fixturedownload.com/download/csv/epl-" # add on the year the season starts in, i.e. 2024
 PLAYERS_WEBSITE_ROOT = "https://www.footballsquads.co.uk/eng/"
 SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2018, 2025, 1)]
 MATCH_SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, 2025, 1)]
