@@ -29,3 +29,46 @@ navbar {
 	font-size: x-large;
 	font-weight: bold;
 }
+
+.pop-up-label-field {
+	margin: 2%;
+	padding: 5%;
+	border: #000 1px solid;
+}
+.handling {
+	display: flex;
+	justify-content: right;
+	align-items: center;
+	flex-direction: row;
+	margin-right: 5%;
+}
+#filter-pop-up-options {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	text-align: center;
+}
+.popup-element{
+	display: flex;
+	margin: 1%;
+	align-items: center;
+}
+.pop-up {
+	display: none;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	z-index: 100;
+	transform: translate(-50%, -50%);
+	background-color: #999;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	padding: 2%;
+	width: 350px;
+
+	animation: fadeIn .25s;
+	-webkit-animation: fadeIn .25s;
+	-moz-animation: fadeIn .25s;
+	-o-animation: fadeIn .25s;
+	-ms-animation: fadeIn .25s;
+}

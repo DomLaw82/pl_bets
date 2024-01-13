@@ -4,6 +4,7 @@
 	<link rel="stylesheet" type="text/css" href="../stylesheets/players.css" />
 	<link rel="stylesheet" type="text/css" href="../stylesheets/index.css" />
 	<script src="../javascripts/players.js"></script>
+	<script src="../javascripts/index.js"></script>
 	<title>Players</title>
 </head>
 <body>
@@ -27,11 +28,11 @@
 			<button id="submit-button" onclick="handleSearchSubmit()">Search</button>
 		</div>
 	</div>
-	<div id="handling">
+	<div class="handling">
 		<div id="filter">
 			<button onclick="showPopUp('filter-pop-up', 'filter-button')" id="filter-button">Filter</button>
 		</div>
-		<div id="filter-pop-up" class="pop-up">
+		<div id="filter-pop-up" class="pop-up" hidden>
 			<div id="filter-pop-up-content">
 				<div id="filter-pop-up-header">
 					<h3>Filter</h3>
@@ -98,28 +99,28 @@
 						<div id="sort-pop-up-options-age" class="pop-up-label-field">
 							<div class="popup-element"><label for="age">Age:</label></div>
 							<div class="sorting-buttons">
-								<div class="popup-element"><button id="age-asc">ASC</button></div>
-								<div class="popup-element"><button id="age-desc">DSC</button></div>
+								<div class="popup-element"><button id="age-ascending">ASCENDING</button></div>
+								<div class="popup-element"><button id="age-descending">DESCENDING</button></div>
 							</div>
 						</div>
 						<div id="sort-pop-up-options-name" class="pop-up-label-field">
 							<div class="popup-element"><label for="name">Name:</label></div>
 							<div class="sorting-buttons">
-								<div class="popup-element"><button id="name-asc">ASC</button></div>
-								<div class="popup-element"><button id="name-desc">DSC</button></div>
+								<div class="popup-element"><button id="name-ascending">ASCENDING</button></div>
+								<div class="popup-element"><button id="name-descending">DESCENDING</button></div>
 							</div>
 						</div>
 						<div id="sort-pop-up-options-team" class="pop-up-label-field">
 							<div class="popup-element"><label for="team">Team:</label></div>
 							<div class="sorting-buttons">
-								<div class="popup-element"><button id="team-asc">ASC</button></div>
-								<div class="popup-element"><button id="team-desc">DSC</button></div>
+								<div class="popup-element"><button id="team-ascending">ASCENDING</button></div>
+								<div class="popup-element"><button id="team-descending">DESCENDING</button></div>
 							</div>
 						</div>
 					</div>
 				</div>
 				<div id="sort-pop-up-footer">
-					<button id="sort-pop-up-submit">Submit</button>
+					<button id="sort-pop-up-submit" formaction="http://localhost:8080/">Submit</button>
 				</div>
 			</div>
 		</div>

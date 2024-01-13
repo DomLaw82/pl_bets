@@ -1,5 +1,19 @@
 window.onload = async function () {
 	await createSeasonButtons();
+	
+	const thisForm = document.getElementById('add-result-form');
+	thisForm.addEventListener('submit', async function (e) {
+		e.preventDefault();
+		const formData = new FormData(thisForm).entries()
+		const response = await fetch('http://localhost:8080/matches/add-result', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(Object.fromEntries(formData))
+		});
+	
+		const result = await response.json();
+		console.log(result)
+	});
 };
 
 async function createSeasonButtons() {
@@ -127,7 +141,7 @@ function addResult(gameWeekValue, date, homeTeamName, awayTeamName) {
 	const gameWeek = document.getElementById('add-result-game-week')
 	const resultPopup = document.getElementById('add-result-popup')
 
-	let onlyDate = date.split(' ')[0];
+	let onlyDate = date.split(' ')[0]+"T"+date.split(' ')[1];
 
 	homeTeam.value = homeTeamName;
 	awayTeam.value = awayTeamName;
@@ -137,7 +151,7 @@ function addResult(gameWeekValue, date, homeTeamName, awayTeamName) {
 	resultPopup.style.display = 'block';
 
 	document.addEventListener('click', function(event) {
-		if (!resultPopup.contains(event.target) && !event.target.className.includes('add-result-button')) {
+		if ((!resultPopup.contains(event.target) && !event.target.className.includes('add-result-button')) || event.target.className.includes('submission')) {
 			resultPopup.style.display = 'none';
 		}
 	});
@@ -147,11 +161,35 @@ function showMatchFacts(flag) {
 	if (flag) {
 		document.getElementById('match-facts').style.display = 'block';
 		document.getElementById('add-match-facts-button-close').style.display = 'block';
+		requiredMatchFactsFields(true);
 	}
 	else {
 		document.getElementById('match-facts').style.display = 'none';
 		document.getElementById('add-match-facts-button-close').style.display = 'none';
+		requiredMatchFactsFields(false);
 	}
+}
+function requiredMatchFactsFields(flag) {
+	if (flag) {
+		const matchFactsDiv = document.getElementById('match-facts');
+	    const inputs = matchFactsDiv.querySelectorAll('input');
+		
+		inputs.forEach(input => {
+			input.required = true;
+		});
+	}
+	else {
+		const matchFactsDiv = document.getElementById('match-facts');
+	    const inputs = matchFactsDiv.querySelectorAll('input');
+		
+		inputs.forEach(input => {
+			input.required = false;
+		});
+	}
+}
+
+function closePopUp (popup) {
+	document.getElementById(popup).style.display = 'none';
 }
 
 // TODO - Autofill as many columns in the add result popup as possible

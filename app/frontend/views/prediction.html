@@ -4,6 +4,7 @@
 	<link rel="stylesheet" type="text/css" href="../stylesheets/prediction.css" />
 	<link rel="stylesheet" type="text/css" href="../stylesheets/index.css" />
 	<script src="../javascripts/prediction.js"></script>
+	<script src="../javascripts/index.js"></script>
 	<title>Prediction</title>
 </head>
 <body>
@@ -48,32 +49,32 @@
 		<h3>Select Players</h3>
 		<p>Select the starting lineup and subs for each team. Hold <strong>CTRL/CMD</strong> to select multiple options in the dropdown</p>
 		<div id="player-selection" class="player-selector">
-			<div id="home-player-selector" class="selector-container">
-				<div class="selector-components">
-					<label for="home-players">Home Players:</label>
-				</div>
-				<div class="selector-components">
-					<select id="home-players" name="home-players" class="player-select" onchange="updateSelectedPlayerList('home-players', 'selected-home-players')" multiple>
-						<option value="" disabled selected>Select all home team squad</option>
-					</select>
-				</div>
-				<div class="selected-players">
-					<p>Selected Players:</p>
-					<ol id="selected-home-players"></ol>
+			<div class="player-selection-section">
+				<h4>Home Players</h4>
+				<div id="home-player-selector" class="selector-container">
+					<div class="selector-components">
+						<select id="home-players" name="home-players" class="player-select" size="20" onchange="updateSelectedPlayerList('home-players', 'selected-home-players')" multiple>
+							<option value="" disabled selected>Select all home team squad</option>
+						</select>
+					</div>
+					<div class="selected-players">
+						<p>Selected Players:</p>
+						<ol id="selected-home-players"></ol>
+					</div>
 				</div>
 			</div>
-			<div id="away-player-selector" class="selector-container">
-				<div class="selector-components">
-					<label for="away-players">Away Players:</label>
-				</div>
-				<div class="selector-components">
-					<select id="away-players" name="away-players" class="player-select" onchange="updateSelectedPlayerList('away-players', 'selected-away-players')" multiple>
-						<option value="" disabled selected>Select all away team squad</option>
-					</select>
-				</div>
-				<div class="selected-players">
-					<p>Selected Players:</p>
-					<ol id="selected-away-players"></ol>
+			<div class="player-selection-section">
+				<h4>Away Players</h4>
+				<div id="away-player-selector" class="selector-container">
+					<div class="selector-components">
+						<select id="away-players" name="away-players" class="player-select" size="20" onchange="updateSelectedPlayerList('away-players', 'selected-away-players')" multiple>
+							<option value="" disabled selected>Select all away team squad</option>
+						</select>
+					</div>
+					<div class="selected-players">
+						<p>Selected Players:</p>
+						<ol id="selected-away-players"></ol>
+					</div>
 				</div>
 			</div>
 		</div>

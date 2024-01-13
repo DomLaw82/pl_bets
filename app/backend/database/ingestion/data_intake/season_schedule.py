@@ -31,7 +31,10 @@ def clean_schedule_data(db_connection, df:pd.DataFrame) -> pd.DataFrame:
 
 	df.loc[:, "result"] = df["result"].fillna("-")
 
+	df = df.drop(columns=["location", "match_number"])
+
 	df = df.rename(columns={"home_team": "home_team_id", "away_team": "away_team_id"})
+	df.loc[:, "competition_id"] = "x-00001"
 	df.loc[:, "date"] = pd.to_datetime(df['date'], format="%d/%m/%Y %H:%M").dt.strftime('%Y/%m/%d %H:%M')
 
 	return df
