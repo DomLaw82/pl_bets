@@ -188,14 +188,15 @@ def get_schedule_by_season(season:str) -> list:
          CAST(s.round_number AS VARCHAR) AS game_week,
          CAST(home_team.name AS VARCHAR) AS home_team,
          CAST(away_team.name AS VARCHAR) AS away_team,
-         CAST(s.result AS VARCHAR) AS result
+         CAST(s.result AS VARCHAR) AS result,
+         s.competition_id AS competition_id
       FROM schedule s
       JOIN team home_team ON s.home_team_id = home_team.id
       JOIN team away_team ON s.away_team_id = away_team.id
       WHERE DATE(s.date) > '{season_start}' AND DATE(s.date) < '{season_end}'
       ORDER BY s.date ASC;
    """)
-   schedule = list_to_list_of_objects(schedule, ["date", "game_week", "home_team", "away_team", "result"])
+   schedule = list_to_list_of_objects(schedule, ["date", "game_week", "home_team", "away_team", "result", "competition_id"])
    print(schedule)
    return jsonify(schedule)
 

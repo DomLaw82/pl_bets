@@ -95,7 +95,7 @@ function createMatchContainer(match) {
 	if (match.result == "-") {
 		const addResultButton = createMatchElement('button', 'add-result-button', 'Add Result');
 		addResultButton.onclick = function () {
-			addResult(match.game_week, match.date, match.home_team, match.away_team);
+			addResult(match.game_week, match.date, match.home_team, match.away_team, match.competition_id);
 		}
 		matchContainer.appendChild(addResultButton);
 	}
@@ -134,11 +134,12 @@ function showMatches() {
 	}
 };
 
-function addResult(gameWeekValue, date, homeTeamName, awayTeamName) {
+function addResult(gameWeekValue, date, homeTeamName, awayTeamName, competitionIdValue) {
 	const homeTeam = document.getElementById('add-result-home-team')
 	const awayTeam = document.getElementById('add-result-away-team')
 	const matchDate = document.getElementById('add-result-match-date')
 	const gameWeek = document.getElementById('add-result-game-week')
+	const competitionId = document.getElementById('add-result-competition-id')
 	const resultPopup = document.getElementById('add-result-popup')
 
 	let onlyDate = date.split(' ')[0]+"T"+date.split(' ')[1];
@@ -147,6 +148,7 @@ function addResult(gameWeekValue, date, homeTeamName, awayTeamName) {
 	awayTeam.value = awayTeamName;
 	matchDate.value = onlyDate;
 	gameWeek.value = gameWeekValue;
+	competitionId.value = competitionIdValue;
 
 	resultPopup.style.display = 'block';
 

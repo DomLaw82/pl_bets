@@ -44,6 +44,7 @@ class ScheduleSchema(Schema):
     home_team = fields.String()
     away_team = fields.String()
     result = fields.String()
+    competition_id = fields.String()
 
 class PlayerTeamSchema(Schema):
     player_id = fields.String()
