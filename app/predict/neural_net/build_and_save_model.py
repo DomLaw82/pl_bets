@@ -105,23 +105,22 @@ def perform_scaling_and_pca(X_train: np.array, X_test: np.array, n:int=15, pred:
 	X_train (pd.DataFrame): The transformed training data after scaling and PCA.
 	X_test (pd.DataFrame): The transformed testing data after scaling and PCA.
 	"""
-	# Scale the data
-	# TODO - collect the whole dataset, then scale and PCA using ../feature_to_15_pcs.csv
 	scaler = load('prediction_scaler.bin')
+	pca = load('prediction_pca.bin')
 
 	if pred:
-		X_train = scaler.transform(X_train.reshape(1, -1))
+		X_train = scaler.transform(X_train)
 		# X_test = scaler.transform(X_test.reshape(1, -1))
+
+		X_train = pca.transform(X_train)
+
 	else:
 		X_train = scaler.transform(X_train)
 		X_test = scaler.transform(X_test)
 
+		X_train = pca.transform(X_train)
+		X_test = pca.transform(X_test)
 	
-	# PCA where N is the number of components set above
-	pca = load('prediction_pca.bin')
-
-	X_train = pca.transform(X_train)
-	# X_test = pca.transform(X_test)
 	return X_train, X_test
 
 def build_and_save_model(dataframe: pd.DataFrame) -> tf.keras.models.Sequential:
