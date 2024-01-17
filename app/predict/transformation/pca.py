@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.decomposition import PCA
 from joblib import dump
+import numpy as np
 
 
 pure_stats_columns_no_minutes = [
@@ -18,10 +19,11 @@ def create_pca_object(n:int, df:pd.DataFrame) -> PCA:
 	pca.fit(df)
 	return pca
 
-def recreate_pca_object(n:int = 15):
-	df = pd.read_csv("../final_combined_dataframe.csv")
-	pca_obj = create_pca_object(n, df[pure_stats_columns_no_minutes])
-	dump(pca_obj, '../prediction_pca.bin', compress=True)
+def recreate_pca_object(n:int = 15, data:np.array = None):
+	df = data
+	pca_obj = create_pca_object(n, df)
+	feature_to_pc_map = pd.DataFrame(pca_obj.components_, columns=pure_stats_columns_no_minutes)
+	feature_to_pc_map.to_csv("../feature_to_15_pcs.csv")
 
 if __name__ == "__main__":
 	recreate_pca_object()

@@ -14,8 +14,8 @@ def retune_and_build_model():
 	"""
 	dataset = create_dataset()
 	dataset.to_csv("../final_combined_dataframe.csv", index=False)
-	recreate_scaler()
-	recreate_pca_object()
+	X_scaled = recreate_scaler()
+	recreate_pca_object(data=X_scaled)
 	score, params = tune_model_params(dataset)
 	model = build_and_save_model(dataset)
 	model.save("stats_regression_model.h5")

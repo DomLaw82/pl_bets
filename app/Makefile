@@ -51,3 +51,6 @@ devstackbuild: ## Build docker image
 devstackreboot: devstackdown devstackup ## Reboot frontend container
 
 devstackrebuild: devstackdown devstackbuild devstackup ## Rebuild frontend container
+
+attach: 
+	@docker attach pl-bets

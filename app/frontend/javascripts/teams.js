@@ -17,8 +17,8 @@ function create_team_divs(data) {
 	const teamsContainer = document.getElementById('teamsContainer');
 	data.forEach(team => {
 		const teamDiv = document.createElement('div');
-		teamDiv.className = 'team';
-		teamDiv.id = `team-${team.id}`;
+		teamDiv.className = 'card';
+		teamDiv.id = `card-${team.id}`;
 
 		// Create an image element for the team badge
 		// const teamBadge = document.createElement('img');

@@ -20,12 +20,12 @@ function create_player_divs(data) {
 	const cols = ["id", "first_name", "last_name", "birth_date", "position", "team_name", "active"]
 
 	headerDiv = document.createElement('div');
-	headerDiv.className = 'player-card';
+	headerDiv.className = 'card';
 	headerDiv.id = 'header-card';
 
 	cols.forEach(col => {
 		const headerKeyDiv = document.createElement('div');
-		headerKeyDiv.className = `player-card-element player-card-${col}`;
+		headerKeyDiv.className = `card-element card-${col}`;
 		const headerKeySpan = document.createElement('span');
 		headerKeySpan.textContent = `${col}`;
 
@@ -37,14 +37,14 @@ function create_player_divs(data) {
 
 	data.forEach(player => {
 		const playerDiv = document.createElement('div');
-		playerDiv.className = 'player-card';
+		playerDiv.className = 'card';
 		playerDiv.id = `${player.id}`;
 
 
 		cols.forEach(col => {
 			let value = player[col] || "";
 			const playerKeyDiv = document.createElement('div');
-			playerKeyDiv.className = `player-card-element player-card-${col}`;
+			playerKeyDiv.className = `card-element card-${col}`;
 			const playerKeySpan = document.createElement('span');
 			playerKeySpan.textContent = `${value}`;
 

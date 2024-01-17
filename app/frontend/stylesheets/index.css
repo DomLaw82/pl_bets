@@ -72,3 +72,23 @@ navbar {
 	-o-animation: fadeIn .25s;
 	-ms-animation: fadeIn .25s;
 }
+
+.card {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	padding: 2%;
+	margin: 2%;
+	border: 3px solid #000;
+	border-radius: 5%;
+	transition: all 0.3s ease;
+}
+.card:hover {
+	transform: scale(0.975);
+	background-color: #999;
+}
+.card-element {
+	display: flex;
+	align-items: center;
+}

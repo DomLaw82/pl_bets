@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from joblib import dump
+import numpy as np
 
 
 pure_stats_columns_no_minutes = [
@@ -12,12 +13,17 @@ pure_stats_columns_no_minutes = [
 	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
 ]
 
-def recreate_scaler():
+def recreate_scaler() -> np.array:
 	df = pd.read_csv("../final_combined_dataframe.csv")
 
 	scaler = StandardScaler(copy=True).fit(df[pure_stats_columns_no_minutes])
 
 	dump(scaler, '../prediction_scaler.bin', compress=True)
 
+	X_scaled = scaler.transform(df[pure_stats_columns_no_minutes])
+	
+	return X_scaled
+
 if __name__ == "__main__":
 	recreate_scaler()
+	
