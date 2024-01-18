@@ -17,10 +17,19 @@ from joblib import load
 # Return these stats to the user
 
 def predict_match_outcome(home_team: str, home_players: list, away_team: str, away_players: list) -> dict:
+	"""
+	Predicts the outcome of a match between two teams based on the given home team, home players, away team, and away players.
 
-	pd.set_option('display.max_columns', None)
+	Parameters:
+	home_team (str): The name of the home team.
+	home_players (list): A list of home players.
+	away_team (str): The name of the away team.
+	away_players (list): A list of away players.
+
+	Returns:
+	dict: A dictionary containing the predicted match facts.
+	"""
 	df = create_prediction_dataset(home_team, home_players, away_team, away_players)
-	
 	
 	if df.empty:
 		return None
