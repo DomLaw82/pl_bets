@@ -23,7 +23,7 @@ def recreate_pca_object(n:int = 15, data:np.array = None):
 	df = data
 	pca_obj = create_pca_object(n, df)
 	feature_to_pc_map = pd.DataFrame(pca_obj.components_, columns=pure_stats_columns_no_minutes)
-	feature_to_pc_map.to_csv("../feature_to_15_pcs.csv")
+	feature_to_pc_map.to_csv("../feature_to_15_pcs.csv", index=False)
 
 if __name__ == "__main__":
 	recreate_pca_object()

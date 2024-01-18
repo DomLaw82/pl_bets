@@ -112,12 +112,12 @@ def perform_scaling_and_pca(X_train: np.array, X_test: np.array, n:int=15, pred:
 		X_train = scaler.transform(X_train)
 		# X_test = scaler.transform(X_test.reshape(1, -1))
 
-		# X_train = pca.transform(X_train)
+		X_train = pca.transform(X_train)
 
-		# Carrying out PCA on the train data
-		feature_to_pc_map = pd.read_csv("feature_to_15_pc_map.csv")
-		X_train = X_train * feature_to_pc_map
-		X_train = pd.DataFrame(X_train.sum(axis=1), columns=['components']).T
+		# # Carrying out PCA on the train data
+		# feature_to_pc_map = pd.read_csv("feature_to_15_pcs.csv")
+		# X_train = X_train * feature_to_pc_map
+		# X_train = pd.DataFrame(X_train.sum(axis=1), columns=['components']).T
 
 
 	else:

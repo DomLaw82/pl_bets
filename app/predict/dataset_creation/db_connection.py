@@ -1,7 +1,6 @@
 import psycopg2
 import pandas as pd
 import sqlalchemy, os
-from dotenv import load_dotenv
 
 class SQLConnection():
 	"""Create a PostgreSQL connection class
