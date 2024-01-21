@@ -44,6 +44,13 @@ async function fetchPlayerData(playerCardContainerId, team_name) {
 	attachCards(playerCardContainerId, data, keyOrderList)
 }
 
+function clearPlayerLists() {
+	const homeSelectedPlayersList = document.getElementById('home-selected-players-list');
+	const awaySelectedPlayersList = document.getElementById('away-selected-players-list');
+
+	homeSelectedPlayersList.innerHTML = '';
+	awaySelectedPlayersList.innerHTML = '';
+}
 function attachCards(playerCardContainerId, data, keyOrderList) {
 	const playerCardsContainer = document.getElementById(playerCardContainerId);
 	playerCardsContainer.innerHTML = '';
