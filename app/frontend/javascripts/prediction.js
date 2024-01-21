@@ -82,12 +82,22 @@ function createPlayerCard(playerData, keyOrder) {
 	return card;
 }
 
+function getSelectedPlayers(selectedPlayersListId) {
+	const selectedPlayersList = document.getElementById(selectedPlayersListId);
+	const selectedPlayers = [];
+
+	for (let i = 0; i < selectedPlayersList.childElementCount; i++) {
+		selectedPlayers.push(selectedPlayersList.children[i].id);
+	}
+	return selectedPlayers;
+}
+
 async function runPrediction() {
 
-	homeTeamId = document.getElementById('home-team').value;
-	homePlayersSelected = getSelectedPlayers('home-players');
+	const homeTeamId = document.getElementById('home-team').value;
+	const homePlayersSelected = getSelectedPlayers('home-selected-players-list');
 	awayTeamId = document.getElementById('away-team').value;
-	awayPlayersSelected = getSelectedPlayers('away-players');
+	awayPlayersSelected = getSelectedPlayers('away-selected-players-list');
 	
 	await fetch(`http://localhost:8008/predict`, {
 		method: 'POST',
@@ -142,7 +152,18 @@ async function runPrediction() {
 			predictionContainer.appendChild(predictionTableLocationHeader);
 			predictionContainer.appendChild(predictionTableRow);
 
-			document.getElementById('prediction-results').style.display = 'block';
+			const resultsDiv = document.getElementById('prediction-results');
+			const overlay = document.getElementById('pop-up-background');
+
+			resultsDiv.style.display = 'block';
+			overlay.style.display = 'block';
+
+			document.addEventListener('click', function(event) {
+				if ( event.target.id == 'pop-up-background' ) {
+					resultsDiv.style.display = 'none';
+					overlay.style.display = 'none';
+				}
+			});
 		});
 	
 }

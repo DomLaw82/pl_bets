@@ -449,14 +449,14 @@ def create_prediction_dataset(home_team_id: str, home_team_squad: list, away_tea
 		JOIN player ON player.id = player_team.player_id
 		WHERE
 			player_team.team_id = '{home_team_id}'
-			AND CONCAT(player.first_name, ' ', player.last_name) IN ('{"','".join(home_team_squad)}')
+			AND player_team.player_id IN ('{"','".join(home_team_squad)}')
 	""")
 	away_team_squad_ids = db.get_list(f"""
 		SELECT player_id FROM player_team
 		JOIN player ON player.id = player_team.player_id
 		WHERE
 			player_team.team_id = '{away_team_id}'
-			AND CONCAT(player.first_name, ' ', player.last_name) IN ('{"','".join(away_team_squad)}')
+			AND player_team.player_id IN ('{"','".join(away_team_squad)}')
 	""")
 	home_team_squad_ids = list(set([player_id[0] for player_id in home_team_squad_ids]))
 	away_team_squad_ids = list(set([player_id[0] for player_id in away_team_squad_ids]))

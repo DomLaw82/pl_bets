@@ -48,3 +48,21 @@ table {
 	table-layout: auto;
 	width: 100%;
 }
+.prediction-pop-up {
+	display: none;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	z-index: 100;
+	transform: translate(-50%, -50%);
+	background-color: #999;
+	border: #fff 1px solid;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	padding: 2%;
+
+	animation: fadeIn .25s;
+	-webkit-animation: fadeIn .25s;
+	-moz-animation: fadeIn .25s;
+	-o-animation: fadeIn .25s;
+	-ms-animation: fadeIn .25s;
+}
