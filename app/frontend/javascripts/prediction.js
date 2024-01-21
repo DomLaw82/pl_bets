@@ -46,6 +46,7 @@ async function fetchPlayerData(playerCardContainerId, team_name) {
 
 function attachCards(playerCardContainerId, data, keyOrderList) {
 	const playerCardsContainer = document.getElementById(playerCardContainerId);
+	playerCardsContainer.innerHTML = '';
 
 	data.forEach(player => {
 		const playerCard = createPlayerCard(player, keyOrderList);
