@@ -78,7 +78,7 @@ function allocateMatches(matches) {
 
 function createMatchContainer(match) {
 	const matchContainer = document.createElement('div');
-    matchContainer.className = 'single-match-container';
+    matchContainer.className = 'card';
 	
     const matchGameWeek = createMatchElement('div', 'match-game-week', match.game_week);
     const matchDate = createMatchElement('div', 'match-date', match.date);
@@ -141,6 +141,7 @@ function addResult(gameWeekValue, date, homeTeamName, awayTeamName, competitionI
 	const gameWeek = document.getElementById('add-result-game-week')
 	const competitionId = document.getElementById('add-result-competition-id')
 	const resultPopup = document.getElementById('add-result-popup')
+	const popUpBackground = document.getElementById('pop-up-background')
 
 	let onlyDate = date.split(' ')[0]+"T"+date.split(' ')[1];
 
@@ -150,11 +151,13 @@ function addResult(gameWeekValue, date, homeTeamName, awayTeamName, competitionI
 	gameWeek.value = gameWeekValue;
 	competitionId.value = competitionIdValue;
 
+	popUpBackground.style.display = 'block';
 	resultPopup.style.display = 'block';
 
 	document.addEventListener('click', function(event) {
-		if ((!resultPopup.contains(event.target) && !event.target.className.includes('add-result-button')) || event.target.className.includes('submission')) {
+		if (event.target.id == 'pop-up-background') {
 			resultPopup.style.display = 'none';
+			popUpBackground.style.display = 'none';
 		}
 	});
 }

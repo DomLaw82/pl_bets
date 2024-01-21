@@ -12,11 +12,14 @@ def retune_and_build_model():
 		score (float): The score of the model.
 		params (dict): The tuned parameters of the model.
 	"""
-	dataset = create_dataset()
-	dataset.to_csv("../final_combined_dataframe.csv", index=False)
-	X_scaled = recreate_scaler()
-	recreate_pca_object(data=X_scaled)
-	score, params = tune_model_params(dataset)
-	model = build_and_save_model(dataset)
-	model.save("stats_regression_model.h5")
-	return score, params
+	try:
+		dataset = create_dataset()
+		dataset.to_csv("../final_combined_dataframe.csv", index=False)
+		X_scaled = recreate_scaler()
+		recreate_pca_object(data=X_scaled)
+		score, params = tune_model_params(dataset)
+		model = build_and_save_model(dataset)
+		model.save("stats_regression_model.h5")
+		return {"score": score, "params": params}
+	except Exception as e:
+		return {'error': str(e)}

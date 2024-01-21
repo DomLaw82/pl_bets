@@ -144,8 +144,6 @@ def group_stats_by_player_for_home_and_away_teams(df: pd.DataFrame, home_team_id
 	else:
 		df['team_id'] = df.groupby('player_id')['team_id'].transform(lambda x: x.loc[x['season'].idxmax()])
 
-	print(df["team_id"].unique().tolist())
-
 	if pred:
 
 		df = (

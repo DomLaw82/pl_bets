@@ -1,9 +1,9 @@
 window.onload = async function load() {
-	await fetch_team_data();
+	await fetchTeamData();
 }
 
 
-async function fetch_team_data() {
+async function fetchTeamData() {
 	const res = await fetch(`http://localhost:8080/active-teams`, {
 		method: 'GET',
 		credentials: 'include'
@@ -12,10 +12,10 @@ async function fetch_team_data() {
 	homeTeamSelectId = 'home-team';
 	awayTeamSelectId = 'away-team';
 
-	create_team_options(homeTeamSelectId, data);
-	create_team_options(awayTeamSelectId, data);
+	createTeamOptions(homeTeamSelectId, data);
+	createTeamOptions(awayTeamSelectId, data);
 }
-function create_team_options(elementId, data) {
+function createTeamOptions(elementId, data) {
 	const teamSelect = document.getElementById(elementId);
 	data.forEach(team => {
 		const teamOption = document.createElement('option');
@@ -27,55 +27,59 @@ function create_team_options(elementId, data) {
 }
 
 
-async function update_player_dropdowns(selectId, playerSelectId) {
+async function updatePlayerCards(selectId, playerCardContainerId) {
 	const team = document.getElementById(selectId).value
-	await fetch_player_data(playerSelectId, team);
+	await fetchPlayerData(playerCardContainerId, team);
 }
-async function fetch_player_data(playerSelectId, team_name) {
+async function fetchPlayerData(playerCardContainerId, team_name) {
 	
 	const res = await fetch(`http://localhost:8080/active-players/${team_name}`, {
 		method: 'GET',
 		credentials: 'include'
 	})
 	const data = await res.json()
+
+	const keyOrderList = ["id", "first_name", "last_name"]
 	
-	create_player_options(playerSelectId, data)
-	create_player_options(playerSelectId, data)
-}
-function create_player_options(playerSelectId, data) {
-	const playerSelect = document.getElementById(playerSelectId);
-	playerSelect.innerHTML = '';
-	playerSelect.innerHTML = '<option value="" disabled selected>Select a player</option>';
-	data.forEach(player => {
-		const playerOption = document.createElement('option');
-		playerOption.value = `${player.first_name} ${player.last_name}`;
-		playerOption.textContent = `${player.first_name} ${player.last_name}`;
-		playerSelect.appendChild(playerOption);
-	});
+	attachCards(playerCardContainerId, data, keyOrderList)
 }
 
-function getSelectedPlayers(selectId) {
-	const playersSelectOptions = document.getElementById(selectId).childNodes;
+function attachCards(playerCardContainerId, data, keyOrderList) {
+	const playerCardsContainer = document.getElementById(playerCardContainerId);
+
+	data.forEach(player => {
+		const playerCard = createPlayerCard(player, keyOrderList);
+		playerCardsContainer.appendChild(playerCard);
+	});
+
+}
+function createPlayerCard(playerData, keyOrder) {
+
+	const card = document.createElement('div');
+	card.classList.add('player-card');
+	card.classList.add('card');
 	
-	const playersSelected = [];
-	playersSelectOptions.forEach(option => {
-		if (option.selected) {
-			playersSelected.push(option.value);
+	keyOrder.forEach(key => {
+		const cardElement = document.createElement('div');
+		cardElement.classList.add('card-element');
+		cardElement.textContent = `${playerData[key]}`;
+		card.appendChild(cardElement);
+	});
+
+	let isActive = false;
+
+	card.addEventListener('click', function() {
+		let isHome = card.parentElement.id == 'home-player-cards' ? true : false;
+		let isMax = moveSelectedPlayers(playerData["first_name"], playerData["last_name"], playerData["id"], isActive, isHome)
+
+		if (!isMax) {
+			isActive = !isActive;
+			card.classList.toggle('active', isActive)
 		}
 	});
-	return playersSelected;
-}
 
-function updateSelectedPlayerList(selectId, playerListId) {
-	playersSelected = getSelectedPlayers(selectId);
-	const playerList = document.getElementById(playerListId);
 
-	playerList.innerHTML = '';
-	playersSelected.forEach(player => {
-		const playerListItem = document.createElement('li');
-		playerListItem.textContent = player;
-		playerList.appendChild(playerListItem);
-	});
+	return card;
 }
 
 async function runPrediction() {
@@ -138,8 +142,62 @@ async function runPrediction() {
 			predictionContainer.appendChild(predictionTableLocationHeader);
 			predictionContainer.appendChild(predictionTableRow);
 
-			document.getElementById('prediction-results').style.display = 'flex';
+			document.getElementById('prediction-results').style.display = 'block';
 		});
 	
 }
 
+function rebuildModel() {
+	modelPopUp = document.getElementById('model-pop-up')
+	div = document.createElement('div');
+	div.className = 'model-pop-up-content';
+	div.innerHTML = '<p>Rebuilding model...</p>';
+	modelPopUp.style.display = 'block';
+}
+
+function retuneAndRebuildModel() {
+	modelPopUp = document.getElementById('model-pop-up')
+	modelPopUp.style.display = 'block';
+}
+
+function moveSelectedPlayers(firstName, lastName, id, active, isHome) {
+	const selectedPlayersList = isHome ? document.getElementById('home-selected-players-list') : document.getElementById('away-selected-players-list');
+	
+	const numberOfListElements = selectedPlayersList.childElementCount;
+
+	if (numberOfListElements >= 20 && !active) {
+		createWarningPopUp("You can only select up to 20 players.-Please deselect a player before selecting another.");
+		return true;
+	}
+
+	if (!active) {
+		const listElement = document.createElement('li');
+		listElement.id = id;
+		listElement.textContent = `${firstName} ${lastName}`;
+
+		selectedPlayersList.appendChild(listElement);
+	} else {
+		const listElement = document.getElementById(id);
+		selectedPlayersList.removeChild(listElement);
+	}
+	return false;
+	
+};
+
+function createWarningPopUp(message) {
+	const popUpBackground = document.getElementById('pop-up-background');
+	const warningPopUp = document.getElementById('warning-pop-up');
+	const warningPopUpContent = document.getElementById('warning-pop-up-content');
+
+	warningPopUpContent.innerHTML = message;
+
+	warningPopUp.style.display = 'block';
+	popUpBackground.style.display = 'block';
+
+	document.addEventListener('click', function(event) {
+		if ( event.target.id == 'pop-up-background' ) {
+			warningPopUp.style.display = 'none';
+			popUpBackground.style.display = 'none';
+		}
+	});
+}

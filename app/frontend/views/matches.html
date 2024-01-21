@@ -1,168 +1,169 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<link rel="stylesheet" type="text/css" href="../stylesheets/index.css" />
-	<link rel="stylesheet" type="text/css" href="../stylesheets/matches.css" />
-	<script src="../javascripts/matches.js"></script>
-	<script src="../javascripts/index.js"></script>
-	<title>Matches</title>
-</head>
-<body>
-	<navbar>
-		<div class="navbar-title"><h1>PL Bets</h1></div>
-		<div class="navbar-button"><a href="/">Home</a></div>
-		<div class="navbar-button"><a href="teams.html">Teams</a></div>
-		<div class="navbar-button"><a href="players.html">Players</a></div>
-		<div class="navbar-button"><a href="matches.html">Matches</a></div>
-		<div class="navbar-button"><a href="prediction.html">Prediction</a></div>
-	</navbar>
-	<hr>
-	<h2>Matches</h2>
-	<hr>
-	<p>View past and present matches for organised by season, from the 2018-19 season. </p>
-	<hr>
-	<div id="seasons"></div>
-	<div class="handling">
-		<div id="filter">
-			<button onclick="showPopUp('filter-pop-up', 'filter-button')" id="filter-button">Filter</button>
-		</div>
-		<div id="filter-pop-up" class="pop-up">
-			<div id="filter-pop-up-content">
-				<div id="filter-pop-up-header"><h3>Filter</h3></div>
-				<div id="filter-pop-up-body">
-					<p>Filter by:</p>
-					<div id="filter-pop-up-options">
-						<div id="filter-pop-up-options-team" class="pop-up-label-field">
-							<div class="popup-element"><label for="team">Team:</label></div>
-							<div class="popup-element"><input type="text" id="team" name="team"></div>
-						</div>
-						<div id="filter-pop-up-options-game-week" class="pop-up-label-field">
-							<div class="popup-element"><label for="game-week">Gameweek:</label></div>
-							<div class="popup-element"><input type="number" id="game-week" name="game-week"></div>
+	<head>
+		<link rel="stylesheet" type="text/css" href="../stylesheets/index.css" />
+		<link rel="stylesheet" type="text/css" href="../stylesheets/matches.css" />
+		<script src="../javascripts/matches.js"></script>
+		<script src="../javascripts/index.js"></script>
+		<title>Matches</title>
+	</head>
+	<body>
+		<div id="pop-up-background" class="overlay"></div>
+		<navbar>
+			<div class="navbar-title"><h1>PL Bets</h1></div>
+			<div class="navbar-button"><a href="/">Home</a></div>
+			<div class="navbar-button"><a href="teams.html">Teams</a></div>
+			<div class="navbar-button"><a href="players.html">Players</a></div>
+			<div class="navbar-button"><a href="matches.html">Matches</a></div>
+			<div class="navbar-button"><a href="prediction.html">Prediction</a></div>
+		</navbar>
+		<hr>
+		<h2>Matches</h2>
+		<hr>
+		<p>View past and present matches for organised by season, from the 2018-19 season. </p>
+		<hr>
+		<div id="seasons"></div>
+		<div class="handling">
+			<div id="filter">
+				<button onclick="showPopUp('filter-pop-up', 'filter-button')" id="filter-button">Filter</button>
+			</div>
+			<div id="filter-pop-up" class="pop-up">
+				<div id="filter-pop-up-content">
+					<div id="filter-pop-up-header"><h3>Filter</h3></div>
+					<div id="filter-pop-up-body">
+						<p>Filter by:</p>
+						<div id="filter-pop-up-options">
+							<div id="filter-pop-up-options-team" class="pop-up-label-field">
+								<div class="popup-element"><label for="team">Team:</label></div>
+								<div class="popup-element"><input type="text" id="team" name="team"></div>
+							</div>
+							<div id="filter-pop-up-options-game-week" class="pop-up-label-field">
+								<div class="popup-element"><label for="game-week">Gameweek:</label></div>
+								<div class="popup-element"><input type="number" id="game-week" name="game-week"></div>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div id="filter-pop-up-footer">
-					<button id="filter-pop-up-submit">Submit</button>
+					<div id="filter-pop-up-footer">
+						<button id="filter-pop-up-submit">Submit</button>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
-	<div id="all-match-container">
-		<div id="future-container" class="match-container-section">
-			<div><h2>Upcoming Matches</h2></div>
-			<div id="upcoming-matches"></div>
-		</div>
-		<div id="past-container" class="match-container-section">
-			<div><h2>Past Matches</h2></div>
-			<div id="past-matches"></div>
-		</div>
-	</div>
-	<div id="add-result-popup" class="pop-up">
-		<div id="add-result-popup-content">
-			<div id="add-result-popup-header">
-				<h2>Add Result</h2>
+		<div id="all-match-container">
+			<div id="future-container" class="match-container-section">
+				<div><h2>Upcoming Matches</h2></div>
+				<div id="upcoming-matches"></div>
 			</div>
-			<div id="add-result-popup-body">
-				<form id="add-result-form">
-					<div class="form-group">
-						<label for="add-result-competition-id">Competition:</label>
-						<input type="text" class="form-control" id="add-result-competition-id" name="competition-id" placeholder="Enter Competition ID" required>
-					</div>
-					<div class="form-group">
-						<label for="add-result-game-week">Game Week:</label>
-						<input type="number" class="form-control" id="add-result-game-week" name="game-week" required>
-					</div>
-					<div class="form-group">
-						<label for="add-result-match-date">Match Date:</label>
-						<input type="datetime-local" class="form-control" id="add-result-match-date" name="match-date" required>
-					</div>
-					<div class="form-group">
-						<label for="add-result-home-team">Home Team:</label>
-						<input type="text" class="form-control" name="home-team" id="add-result-home-team" required>
-					</div>
-					<div class="form-group">
-						<label for="add-result-away-team">Away Team:</label>
-						<input type="text" class="form-control" name="away-team" id="add-result-away-team" required>
-					</div>
-					<div class="form-group">
-						<label for="add-result-home-goals">Home Goals:</label>
-						<input type="number" class="form-control" id="add-result-home-goals" name="home-goals" placeholder="Enter Home Goals" required>
-					</div>
-					<div class="form-group">
-						<label for="add-result-away-goals">Away Goals:</label>
-						<input type="number" class="form-control" id="add-result-away-goals" name="away-goals" placeholder="Enter Away Goals" required>
-					</div>
-					<div id="match-facts" hidden>
-						<div class="form-group match-facts-only">
-							<label for="add-result-season">Season:</label>
-							<input type="text" class="form-control" id="add-result-season" name="season" placeholder="Enter Season">
+			<div id="past-container" class="match-container-section">
+				<div><h2>Past Matches</h2></div>
+				<div id="past-matches"></div>
+			</div>
+		</div>
+		<div id="add-result-popup" class="pop-up">
+			<div id="add-result-popup-content">
+				<div id="add-result-popup-header">
+					<h2>Add Result</h2>
+				</div>
+				<div id="add-result-popup-body">
+					<form id="add-result-form">
+						<div class="form-group">
+							<label for="add-result-competition-id">Competition:</label>
+							<input type="text" class="form-control" id="add-result-competition-id" name="competition-id" placeholder="Enter Competition ID" required>
 						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-referee-id">Referee:</label>
-							<input type="text" class="form-control" id="add-result-referee-id" name="referee-id" placeholder="Enter Referee ID">
+						<div class="form-group">
+							<label for="add-result-game-week">Game Week:</label>
+							<input type="number" class="form-control" id="add-result-game-week" name="game-week" required>
 						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-home-shots">Home Shots:</label>
-							<input type="number" class="form-control" id="add-result-home-shots" name="home-shots" placeholder="Enter Home Shots">
+						<div class="form-group">
+							<label for="add-result-match-date">Match Date:</label>
+							<input type="datetime-local" class="form-control" id="add-result-match-date" name="match-date" required>
 						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-away-shots">Away Shots:</label>
-							<input type="number" class="form-control" id="add-result-away-shots" name="away-shots" placeholder="Enter Away Shots">
+						<div class="form-group">
+							<label for="add-result-home-team">Home Team:</label>
+							<input type="text" class="form-control" name="home-team" id="add-result-home-team" required>
 						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-home-shots-on-target">Home Shots on Target:</label>
-							<input type="number" class="form-control" id="add-result-home-shots-on-target" name="home-shots-on-target" placeholder="Enter Home Shots on Target">
+						<div class="form-group">
+							<label for="add-result-away-team">Away Team:</label>
+							<input type="text" class="form-control" name="away-team" id="add-result-away-team" required>
 						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-away-shots-on-target">Away Shots on Target:</label>
-							<input type="number" class="form-control" id="add-result-away-shots-on-target" name="away-shots-on-target" placeholder="Enter Away Shots on Target">
+						<div class="form-group">
+							<label for="add-result-home-goals">Home Goals:</label>
+							<input type="number" class="form-control" id="add-result-home-goals" name="home-goals" placeholder="Enter Home Goals" required>
 						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-home-corners"> Home Corners:</label>
-							<input type="number" class="form-control" id="add-result-home-corners" name="home-corners" placeholder="Enter Home Corners">
+						<div class="form-group">
+							<label for="add-result-away-goals">Away Goals:</label>
+							<input type="number" class="form-control" id="add-result-away-goals" name="away-goals" placeholder="Enter Away Goals" required>
 						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-away-corners">Away Corners:</label>
-							<input type="number" class="form-control" id="add-result-away-corners" name="away-corners" placeholder="Enter Away Corners">
+						<div id="match-facts" hidden>
+							<div class="form-group match-facts-only">
+								<label for="add-result-season">Season:</label>
+								<input type="text" class="form-control" id="add-result-season" name="season" placeholder="Enter Season">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-referee-id">Referee:</label>
+								<input type="text" class="form-control" id="add-result-referee-id" name="referee-id" placeholder="Enter Referee ID">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-home-shots">Home Shots:</label>
+								<input type="number" class="form-control" id="add-result-home-shots" name="home-shots" placeholder="Enter Home Shots">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-away-shots">Away Shots:</label>
+								<input type="number" class="form-control" id="add-result-away-shots" name="away-shots" placeholder="Enter Away Shots">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-home-shots-on-target">Home Shots on Target:</label>
+								<input type="number" class="form-control" id="add-result-home-shots-on-target" name="home-shots-on-target" placeholder="Enter Home Shots on Target">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-away-shots-on-target">Away Shots on Target:</label>
+								<input type="number" class="form-control" id="add-result-away-shots-on-target" name="away-shots-on-target" placeholder="Enter Away Shots on Target">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-home-corners"> Home Corners:</label>
+								<input type="number" class="form-control" id="add-result-home-corners" name="home-corners" placeholder="Enter Home Corners">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-away-corners">Away Corners:</label>
+								<input type="number" class="form-control" id="add-result-away-corners" name="away-corners" placeholder="Enter Away Corners">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-home-fouls">Home Fouls:</label>
+								<input type="number" class="form-control" id="add-result-home-fouls" name="home-fouls" placeholder="Enter Home Fouls">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-away-fouls">Away Fouls:</label>
+								<input type="number" class="form-control" id="add-result-away-fouls" name="away-fouls" placeholder="Enter Away Fouls">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-home-yellow-cards">Home Yellow Cards:</label>
+								<input type="number" class="form-control" id="add-result-home-yellow-cards" name="home-yellow-cards" placeholder="Enter Home Yellow Cards">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-away-yellow-cards">Away Yellow Cards:</label>
+								<input type="number" class="form-control" id="add-result-away-yellow-cards" name="away-yellow-cards" placeholder="Enter Away Yellow Cards">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-home-red-cards">Home Red Cards:</label>
+								<input type="number" class="form-control" id="add-result-home-red-cards" name="home-red-cards" placeholder="Enter Home Red Cards">
+							</div>
+							<div class="form-group match-facts-only">
+								<label for="add-result-away-red-cards">Away Red Cards:</label>
+								<input type="number" class="form-control" id="add-result-away-red-cards" name="away-red-cards" placeholder="Enter Away Red Cards">
+							</div>
 						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-home-fouls">Home Fouls:</label>
-							<input type="number" class="form-control" id="add-result-home-fouls" name="home-fouls" placeholder="Enter Home Fouls">
+						<div class="add-match-facts popup-buttons">
+							<button type="button" class="btn btn-primary" id="add-match-facts-button-open" onclick="showMatchFacts(true)">Add Match Facts</button>
+							<button type="button" class="btn btn-primary" id="add-match-facts-button-close" onclick="showMatchFacts(false)" hidden>Collapse</button>
 						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-away-fouls">Away Fouls:</label>
-							<input type="number" class="form-control" id="add-result-away-fouls" name="away-fouls" placeholder="Enter Away Fouls">
-						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-home-yellow-cards">Home Yellow Cards:</label>
-							<input type="number" class="form-control" id="add-result-home-yellow-cards" name="home-yellow-cards" placeholder="Enter Home Yellow Cards">
-						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-away-yellow-cards">Away Yellow Cards:</label>
-							<input type="number" class="form-control" id="add-result-away-yellow-cards" name="away-yellow-cards" placeholder="Enter Away Yellow Cards">
-						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-home-red-cards">Home Red Cards:</label>
-							<input type="number" class="form-control" id="add-result-home-red-cards" name="home-red-cards" placeholder="Enter Home Red Cards">
-						</div>
-						<div class="form-group match-facts-only">
-							<label for="add-result-away-red-cards">Away Red Cards:</label>
-							<input type="number" class="form-control" id="add-result-away-red-cards" name="away-red-cards" placeholder="Enter Away Red Cards">
-						</div>
-					</div>
-					<div class="add-match-facts popup-buttons">
-						<button type="button" class="btn btn-primary" id="add-match-facts-button-open" onclick="showMatchFacts(true)">Add Match Facts</button>
-						<button type="button" class="btn btn-primary" id="add-match-facts-button-close" onclick="showMatchFacts(false)" hidden>Collapse</button>
-					</div>
 
-					<button type="submit" class="btn btn-primary" id="submission" onclick="closePopUp('add-result-popup')">Submit</button>
-				</form>
+						<button type="submit" class="btn btn-primary" id="submission" onclick="closePopUp('add-result-popup')">Submit</button>
+					</form>
+				</div>
+				<div id="add-result-popup-error"></div>
 			</div>
-			<div id="add-result-popup-error"></div>
 		</div>
-	</div>
-</body>
+	</body>
 </html>
 
 <!-- TODO - Make all form fields required -->

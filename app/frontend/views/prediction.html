@@ -1,99 +1,92 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<link rel="stylesheet" type="text/css" href="../stylesheets/prediction.css" />
-	<link rel="stylesheet" type="text/css" href="../stylesheets/index.css" />
-	<script src="../javascripts/prediction.js"></script>
-	<script src="../javascripts/index.js"></script>
-	<title>Prediction</title>
-</head>
-<body>
-	<navbar>
-		<div class="navbar-title"><h1>PL Bets</h1></div>
-		<div class="navbar-button"><a href="/">Home</a></div>
-		<div class="navbar-button"><a href="teams.html">Teams</a></div>
-		<div class="navbar-button"><a href="players.html">Players</a></div>
-		<div class="navbar-button"><a href="matches.html">Matches</a></div>
-		<div class="navbar-button"><a href="prediction.html">Prediction</a></div>
-	</navbar>
-	<hr>
-	<h2>Prediction</h2>
-	<hr>
-	<p>Select the home and away teams, with their available squads, and run the prediction model to get your match stats predicted</p>
-	<hr>
-	<form action="">
-		<h3>Select Teams</h3>
-		<p>Select the home and away teams playing in the game</p>
-		<div div="team-selection" class="selectors">
-			<div id="home-team-selector" class="selector-container">
-				<div class="selector-components">
-					<label for="home-team">Home Team:</label>
-				</div>
-				<div class="selector-components">
-					<select id="home-team" name="home-team" class="team-select" onchange="update_player_dropdowns('home-team', 'home-players')">
-						<option value="" disabled selected>Select home team</option>
-					</select>
-				</div>
-			</div>
-			<div id="away-team-selector" class="selector-container">
-				<div class="selector-components">
-					<label for="away-team">Away Team:</label>
-				</div>
-				<div class="selector-components">
-					<select id="away-team" name="away-team" class="team-select" onchange="update_player_dropdowns('away-team', 'away-players')">
-						<option value="" disabled selected>Select away team</option>
-					</select>
-				</div>
-			</div>
+	<head>
+		<link rel="stylesheet" type="text/css" href="../stylesheets/prediction.css" />
+		<link rel="stylesheet" type="text/css" href="../stylesheets/index.css" />
+		<script src="../javascripts/prediction.js"></script>
+		<script src="../javascripts/index.js"></script>
+		<title>Prediction</title>
+	</head>
+	<body>
+		<div id="pop-up-background" class="overlay"></div>
+		<navbar>
+			<div class="navbar-title"><h1>PL Bets</h1></div>
+			<div class="navbar-button"><a href="/">Home</a></div>
+			<div class="navbar-button"><a href="teams.html">Teams</a></div>
+			<div class="navbar-button"><a href="players.html">Players</a></div>
+			<div class="navbar-button"><a href="matches.html">Matches</a></div>
+			<div class="navbar-button"><a href="prediction.html">Prediction</a></div>
+		</navbar>
+		<hr>
+		<h2>Prediction</h2>
+		<hr>
+		<p>Select the home and away teams, with their available squads, and run the prediction model to get your match stats predicted</p>
+		<hr>
+		<div id="warning-pop-up" class="warning-pop-up">
+			<div id="warning-pop-up-content" class="warning-pop-up-content"></div>
 		</div>
-		<h3>Select Players</h3>
-		<p>Select the starting lineup and subs for each team. Hold <strong>CTRL/CMD</strong> to select multiple options in the dropdown</p>
-		<div id="player-selection" class="player-selector">
-			<div class="player-selection-section">
-				<h4>Home Players</h4>
-				<div id="home-player-selector" class="selector-container">
+		<div id="prediction-buttons">
+			<button id="rebuild-model" class="view-buttons" onclick="rebuildModel()">Rebuild</button>
+			<button id="retune-model" class="view-buttons" onclick="retuneAndRebuildModel()">Retune and Rebuild</button>
+		</div>
+		<div id="model-popup" class="pop-up"></div>
+		<form action="">
+			<h3>Select Teams</h3>
+			<p>Select the home and away teams playing in the game</p>
+			<div div="team-selection" class="selectors">
+				<div id="home-team-selector" class="selector-container">
 					<div class="selector-components">
-						<select id="home-players" name="home-players" class="player-select" size="20" onchange="updateSelectedPlayerList('home-players', 'selected-home-players')" multiple>
-							<option value="" disabled selected>Select all home team squad</option>
+						<select id="home-team" name="home-team" class="team-select" onchange="updatePlayerCards('home-team', 'home-player-cards')">
+							<option value="" disabled selected>SELECT HOME TEAM</option>
 						</select>
 					</div>
-					<div class="selected-players">
-						<p>Selected Players:</p>
-						<ol id="selected-home-players"></ol>
-					</div>
 				</div>
-			</div>
-			<div class="player-selection-section">
-				<h4>Away Players</h4>
-				<div id="away-player-selector" class="selector-container">
+				<div id="away-team-selector" class="selector-container">
 					<div class="selector-components">
-						<select id="away-players" name="away-players" class="player-select" size="20" onchange="updateSelectedPlayerList('away-players', 'selected-away-players')" multiple>
-							<option value="" disabled selected>Select all away team squad</option>
+						<select id="away-team" name="away-team" class="team-select" onchange="updatePlayerCards('away-team', 'away-player-cards')">
+							<option value="" disabled selected>SELECT AWAY TEAM</option>
 						</select>
 					</div>
-					<div class="selected-players">
-						<p>Selected Players:</p>
-						<ol id="selected-away-players"></ol>
+				</div>
+			</div>
+			<h3>Select Players</h3>
+			<p>Select the starting lineup and subs for each team. Hold <strong>CTRL/CMD</strong> to select multiple options in the dropdown</p>
+			<div id="player-selection" class="player-selector">
+				<div class="player-selection-section">
+					<h4>Home Players</h4>
+					<div id="home-player-selector" class="selector-container">
+						<div class="selector-components" id="home-player-cards"></div>
+					</div>
+					<div class="selected-players" id="home-selected-players">
+						<ul id="home-selected-players-list"></ul>
+					</div>
+				</div>
+				<div class="player-selection-section">
+					<h4>Away Players</h4>
+					<div id="away-player-selector" class="selector-container">
+						<div class="selector-components" id="away-player-cards"></div>
+					</div>
+					<div class="selected-players" id="away-selected-players">
+						<ul id="away-selected-players-list"></ul>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div id="prediction-button" class="selectors">
-			<div id="prediction-button-container" class="selector-container">
-				<div class="selector-components">
-					<button type="button" onclick="runPrediction()">Run Prediction</button>
+			<div id="prediction-button" class="selectors">
+				<div id="prediction-button-container" class="selector-container">
+					<div class="selector-components">
+						<button type="button" onclick="runPrediction()">Run Prediction</button>
+					</div>
 				</div>
 			</div>
+		</form>
+		<div id="prediction-results" class="pop-up" hidden>
+			<div>
+				<h3>Prediction Results</h3>
+			</div>
+			<div>
+				<table id="prediction-results-table"></table>
+			</div>
+			<p id="prediction-results-text"></p>
 		</div>
-	</form>
-	<div id="prediction-results" hidden>
-		<div>
-			<h3>Prediction Results</h3>
-		</div>
-		<div>
-			<table id="prediction-results-table"></table>
-		</div>
-		<p id="prediction-results-text"></p>
-	</div>
-</body>
+	</body>
 </html>

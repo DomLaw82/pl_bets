@@ -1,35 +1,35 @@
 .selectors {
 	display: flex;
-	justify-content: space-evenly;
-	align-items: center;
+	flex-direction: row;
 	padding: 2%;
+}
+.selector-components {
+	width: 100%;
 }
 .player-selector{
 	display: flex;
-	justify-content: space-evenly;
+	width: 100%;
 }
 .selector-container {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-evenly;
-	align-items: flex-start;
-	padding: 1%;
+	display: block;
+	width: 100%;
 }
 .player-select{
 	width: 250px;
 	border: 3px solid #eee;
 	padding: 2%;
 }
-.selected-players {
-	padding: 2%;
+.team-select{
+	width: 100%;
 	border: 3px solid #eee;
-	width: 250px;
+	padding: 2%;
+}
+.selected-players {
+	display: none;
 }
 .player-selection-section {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-evenly;
 	text-align: center;
+	width: 50%;
 }
 
 #prediction-results {

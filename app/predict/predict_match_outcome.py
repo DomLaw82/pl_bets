@@ -29,12 +29,14 @@ def predict_match_outcome(home_team: str, home_players: list, away_team: str, aw
 	Returns:
 	dict: A dictionary containing the predicted match facts.
 	"""
+	pd.set_option('display.max_columns', 10)
 	df = create_prediction_dataset(home_team, home_players, away_team, away_players)
 	
 	if df.empty:
 		return None
 
 	X, _ = perform_scaling_and_pca(df, np.array([]), pred=True)
+	
 	print(X)
 
 	model = tf.keras.models.load_model("stats_regression_model.h5")

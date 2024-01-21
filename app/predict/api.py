@@ -72,7 +72,11 @@ def rebuild():
 	response_body_schema=retune_schema()
 )
 def retune():
-	score, params = retune_and_build_model()
+	output = retune_and_build_model()
+	
+	score = output["score"]
+	params = output["params"]
+
 	params['score'] = score
 	return jsonify(params)
 
