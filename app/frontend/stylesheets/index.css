@@ -25,6 +25,17 @@ navbar {
 	color: #524632;
 }
 
+.page-title {
+	font-size: 2.5em;
+	font-weight: bold;
+	text-align: center;
+}
+.page-description {
+	font-size: 1em;
+	font-weight: bold;
+	text-align: center;
+}
+
 .navbar-button {
 	display: flex;
 	align-items: center;

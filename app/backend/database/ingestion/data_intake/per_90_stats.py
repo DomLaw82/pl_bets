@@ -12,6 +12,14 @@ def combining_datasets(season: str) -> pd.DataFrame:
 		pd.DataFrame: The combined dataset.
 
 	"""
+	columns = {
+		"goalkeeping.csv": ['player','position','team','goals_against','shots_on_target_against','saves','wins','draws','losses','clean_sheets','penalties_faced','penalties_allowed','penalties_saved','penalties_missed'],
+		"passing.csv": ['player','position','team','total_passing_distance','total_progressive_passing_distance','short_passes_completed','short_passes_attempted','medium_passes_completed','medium_passes_attempted','long_passes_completed','long_passes_attempted','expected_assisted_goals','expected_assists','assists-expected_assisted_goals','key_passes','passes_into_final_third','passes_into_penalty_area','crosses_into_penalty_area','progressive_passes'],
+		"shooting.csv": ['player','position','team','shots','shots_on_target','goals/shots','goals/shots_on_target','average_shot_distance','shots_from_free_kicks','shots_from_penalties','non_penalty_expected_goals/shots','goals-expected_goals','non_penalty_goals-non_penalty_expected_goals'],
+		"defensive_actions.csv": ['player', 'position','team','tackles','tackles_won','defensive_third_tackles','middle_third_tackles','attacking_third_tackles','dribblers_tackled','dribbler_tackles_attempted','shots_blocked','passes_blocked','interceptions','clearances','errors_leading_to_shot'],
+		"possession.csv": ['player','position','team','touches','touches_in_defensive_penalty_area','touches_in_defensive_third','touches_in_middle_third','touches_in_attacking_third','touches_in_attacking_penalty_area','live_ball_touches','take_ons_attempted','take_ons_succeeded','times_tackled_during_take_on','carries','total_carrying_distance','progressive_carrying_distance','carries_into_final_third','carries_into_penalty_area','miscontrols','dispossessed','passes_received'],
+		"standard.csv": ['player','position','team','matches_played','starts','minutes_played','ninetys','goals','assists','goals+assists','non_penalty_goals','penalties_scored','penalties_attempted','yellow_cards','red_cards','expected_goals','non_penalty_expected_goals','non_penalty_expected_goals+expected_assisted_goals','progressive_carries','progressive_passes_received']
+	}
 	data_folder_path = "./data/historic_player_stats"
 	season_folder = data_folder_path + "/" + season
 
@@ -21,6 +29,8 @@ def combining_datasets(season: str) -> pd.DataFrame:
 		dataset_path = season_folder + "/" + dataset
 
 		df = pd.read_csv(dataset_path)
+		df = df[columns[dataset]]
+
 		if complete.empty:
 			complete = df.copy(deep=True)
 		else:
@@ -48,14 +58,13 @@ def clean_historic_stats_df(db_connection, df: pd.DataFrame, season: str) -> pd.
 
 	df["team"] = df.apply(lambda row: get_team_id(db_connection, row.team), axis=1)
 
-	df = df.drop(columns=["goals_y", "expected_assisted_goals_y", "progressive_passes_y"])
-	df = df.rename(columns={"team": "team_id", "goals_x": "goals", "expected_assisted_goals_x": "expected_assisted_goals", "progressive_passes_x": "progressive_passes"})
+	df = df.rename(columns={"team": "team_id"})
 	df[goalkeeping_columns] = df[goalkeeping_columns].fillna(0)
 
 	df[["first_name", "last_name"]] = df["player"].str.split(pat=" ", n=1, expand=True).fillna('').astype(str)
 	df.loc[:, "player"] = df.apply(lambda row: get_player_id_per_ninety(db_connection, row), axis=1)
 
-	df = df.rename(columns={"player": "player_id", "90s": "ninetys"})
+	df = df.rename(columns={"player": "player_id"})
 	df.columns = [x.replace("+", "_plus_").replace("/", "_divided_by_").replace("-", "_minus_") for x in df.columns.tolist()]
 
 	df.loc[:, "season"] = season

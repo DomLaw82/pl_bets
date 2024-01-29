@@ -18,18 +18,21 @@
 			<div class="navbar-button"><a href="prediction.html">Prediction</a></div>
 		</navbar>
 		<hr>
-		<h2>Prediction</h2>
+		<h2 class="page-title">Prediction</h2>
 		<hr>
-		<p>Select the home and away teams, with their available squads, and run the prediction model to get your match stats predicted</p>
+		<p class="page-description">Select the home and away teams, with their available squads, and run the prediction model to get your match stats predicted</p>
 		<hr>
 		<div id="warning-pop-up" class="warning-pop-up">
 			<div id="warning-pop-up-content" class="warning-pop-up-content"></div>
 		</div>
-		<div id="prediction-buttons">
-			<button id="rebuild-model" class="view-buttons" onclick="rebuildModel()">Rebuild</button>
-			<button id="retune-model" class="view-buttons" onclick="retuneAndRebuildModel()">Retune and Rebuild</button>
+		<div><button onclick="showPopUp('prediction-options-pop-up', 'prediction-options-button')" id="prediction-options-button">Options</button></div>
+		<div class="pop-up" id="prediction-options-pop-up">
+			<div id="prediction-buttons">
+				<button id="rebuild-model" class="view-buttons" onclick="rebuildModel()">Rebuild</button>
+				<button id="retune-model" class="view-buttons" onclick="retuneAndRebuildModel()">Retune and Rebuild</button>
+			</div>
 		</div>
-		<div id="model-popup" class="pop-up"></div>
+		<div id="model-pop-up" class="pop-up"></div>
 		<form action="">
 			<h3>Select Teams</h3>
 			<p>Select the home and away teams playing in the game</p>
