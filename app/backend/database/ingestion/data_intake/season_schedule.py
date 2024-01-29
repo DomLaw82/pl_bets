@@ -4,38 +4,30 @@ from data_intake.utilities.unique_id import get_team_id
 from data_intake.team_ref_match import rename_team_name
 
 
-def clean_schedule_data(db_connection, df:pd.DataFrame) -> pd.DataFrame:
-	"""
-	Cleans the schedule data by performing the following operations:
-	1. Renames the columns of the DataFrame to lowercase with underscores instead of spaces.
-	2. Renames the team names in the 'home_team' and 'away_team' columns to a standardized format.
-	3. Retrieves the team IDs from the database for the 'home_team' and 'away_team' columns.
-	4. Replaces null values in the 'result' column with "-".
-	5. Renames the 'home_team' and 'away_team' columns to 'home_team_id' and 'away_team_id' respectively.
-	6. Converts the 'date' column to a datetime format and formats it as 'YYYY/MM/DD HH:MM'.
+def clean_schedule_data(db_connection, df: pd.DataFrame) -> pd.DataFrame:
+	# Rename columns to lowercase with underscores
+	df.columns = df.columns.str.lower().str.replace(" ", "_")
 
-	Parameters:
-	- db_connection: The database connection object.
-	- df: The input DataFrame containing the schedule data.
+	# Rename team names in 'home_team' and 'away_team' columns
+	df["home_team"] = df["home_team"].str.title().apply(rename_team_name)
+	df["away_team"] = df["away_team"].str.title().apply(rename_team_name)
 
-	Returns:
-	- The cleaned DataFrame.
-	"""
-	df.columns = ["_".join(col.lower().split(" ") )for col in df.columns.to_list()]
+	# Retrieve team IDs from the database
+	df["home_team"] = df["home_team"].apply(lambda team: get_team_id(db_connection, team))
+	df["away_team"] = df["away_team"].apply(lambda team: get_team_id(db_connection, team))
 
-	df.loc[:, "home_team"] = df.apply(lambda row: rename_team_name(row.home_team.title()), axis=1)
-	df.loc[:, "away_team"] = df.apply(lambda row: rename_team_name(row.away_team.title()), axis=1)
-	
-	df.loc[:, "home_team"] = df.apply(lambda row: get_team_id(db_connection, row.home_team), axis=1)
-	df.loc[:, "away_team"] = df.apply(lambda row: get_team_id(db_connection, row.away_team), axis=1)
+	# Replace null values in 'result' column with "-"
+	df["result"] = df["result"].fillna("-")
 
-	df.loc[:, "result"] = df["result"].fillna("-")
-
+	# Drop unnecessary columns
 	df = df.drop(columns=["location", "match_number"])
 
+	# Rename columns and add competition_id
 	df = df.rename(columns={"home_team": "home_team_id", "away_team": "away_team_id"})
-	df.loc[:, "competition_id"] = "x-00001"
-	df.loc[:, "date"] = pd.to_datetime(df['date'], format="%d/%m/%Y %H:%M").dt.strftime('%Y/%m/%d %H:%M')
+	df["competition_id"] = "x-00001"
+
+	# Convert 'date' column to datetime format
+	df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y %H:%M").dt.strftime("%Y/%m/%d %H:%M")
 
 	return df
 
@@ -65,12 +57,11 @@ def schedule_main(db_connection) -> None:
 	"""
 	season_schedule_folder_path = "./data/schedule_data"
 
-	season_schedules = sorted(os.listdir(season_schedule_folder_path))
-
-	for season in season_schedules:
-		path = season_schedule_folder_path + "/" + season
-		df = pd.read_csv(path)
-		df = clean_schedule_data(db_connection, df)
-		save_to_database(db_connection, df)
+	for season_schedule_file in os.scandir(season_schedule_folder_path):
+		if season_schedule_file.is_file() and season_schedule_file.name.endswith(".csv"):
+			file_path = os.path.join(season_schedule_folder_path, season_schedule_file.name)
+			df = pd.read_csv(file_path)
+			df = clean_schedule_data(db_connection, df)
+			save_to_database(db_connection, df)
 
 

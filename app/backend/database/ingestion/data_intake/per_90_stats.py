@@ -53,15 +53,12 @@ def clean_historic_stats_df(db_connection, df: pd.DataFrame, season: str) -> pd.
 	"""
 	goalkeeping_columns = ["goals_against", "shots_on_target_against", "saves", "wins", "draws", "losses", "clean_sheets", "penalties_faced", "penalties_allowed", "penalties_saved", "penalties_missed"]
 
-	columns_to_remove = ["position"]
-	df = df.drop(columns=columns_to_remove)
-
 	df["team"] = df.apply(lambda row: get_team_id(db_connection, row.team), axis=1)
 
 	df = df.rename(columns={"team": "team_id"})
 	df[goalkeeping_columns] = df[goalkeeping_columns].fillna(0)
 
-	df[["first_name", "last_name"]] = df["player"].str.split(pat=" ", n=1, expand=True).fillna('').astype(str)
+	df[["first_name", "last_name"]] = df["player"].str.extract(r'(\w+)\s*(.*)')
 	df.loc[:, "player"] = df.apply(lambda row: get_player_id_per_ninety(db_connection, row), axis=1)
 
 	df = df.rename(columns={"player": "player_id"})
@@ -69,7 +66,7 @@ def clean_historic_stats_df(db_connection, df: pd.DataFrame, season: str) -> pd.
 
 	df.loc[:, "season"] = season
 
-	df = df.drop(columns=["first_name", "last_name", "starts", "matches_played", "wins", "draws", "losses"])
+	df = df.drop(columns=["position", "first_name", "last_name", "starts", "matches_played", "wins", "draws", "losses"])
 	# 	TODO - More granular method to impute nulls
 	# 	TODO - Null and multiple player ids
 	df = df.fillna({col: 0 for col in df.columns if col not in ['player_id', 'team_id']})

@@ -16,8 +16,7 @@ def not_blank_entry(player: list) -> bool:
 	Returns:
 		bool: True if all elements in the player list are not blank, False otherwise.
 	"""
-	player = [player[0].strip("\r\n-").strip(), player[1].strip("\r\n-").strip(), player[2].strip("\r\n-").strip()]
-	return all(player)
+	return all(element.strip("\r\n-").strip() for element in player)
 
 def format_player_entries(player: list[str]) -> list[str]:
 	"""
@@ -30,17 +29,14 @@ def format_player_entries(player: list[str]) -> list[str]:
 	Returns:
 		list[str]: The formatted player information in the format [first_name, last_name, position, dob].
 	"""
-	player = [player[0].strip("\r\n-").strip(), player[1].strip("\r\n-").strip(), player[2].strip("\r\n-").strip(), player[3].strip("\r\n-").strip()]
-	
-	formatted_name = player[0].split(maxsplit=1)
-	formatted_name = formatted_name + [""] if len(formatted_name) < 2 else formatted_name
-	formatted_name = [name.strip("\r\n").strip() for name in formatted_name]
+	formatted_name = [name.strip("\r\n-").strip() for name in player[0].split(maxsplit=1)]
+	formatted_name += [""] * (2 - len(formatted_name))
 	
 	split_dob = [portion.strip("\r\n").strip() for portion in player[2].split("-")]
-	formatted_dob_year = "19" + str(split_dob[-1]) if int(str(datetime.now().year)[-2:]) < int(split_dob[-1]) else "20" + str(split_dob[-1]) 
+	formatted_dob_year = "19" + split_dob[-1] if int(str(datetime.now().year)[-2:]) < int(split_dob[-1]) else "20" + split_dob[-1]
 	new_dob = [f"{formatted_dob_year}-{split_dob[1]}-{split_dob[0]}"]
 
-	return formatted_name + [player[1]] + new_dob + [player[3]]
+	return formatted_name + [player[1].strip("\r\n-").strip()] + new_dob + [player[3].strip("\r\n-").strip()]
 
 def get_page_soup(html_text):
 	"""
@@ -64,11 +60,9 @@ def get_all_teams_for_season(soup) -> list:
 	Returns:
 	list: A list of tuples, where each tuple contains the team name and its corresponding href.
 	"""
-	h5_elements = soup.find_all("h5")
-	team_names = [ele.text for ele in h5_elements]
-	a_elements = [ele.a for ele in h5_elements]
-	hrefs = [ele.get("href") for ele in a_elements]
-	return list(zip(team_names, hrefs))
+	team_elements = soup.find_all("h5")
+	teams = [(ele.text, ele.a.get("href")) for ele in team_elements]
+	return teams
 
 def get_team_squad(html_content):
 	"""
@@ -84,25 +78,23 @@ def get_team_squad(html_content):
 	rows = soup.find_all("tr")[1:]
 	
 	all_columns = soup.find_all("tr")[0]
-	all_column_names = all_columns.find_all("td")
-	all_column_names = [elem.text.strip("\n") for elem in all_column_names]
+	all_column_names = [elem.text.strip("\n") for elem in all_columns.find_all("td")]
 
+	required_cols = [all_column_names.index("Name"), all_column_names.index("Pos"), all_column_names.index("Date of Birth")]
+
+	squad = []
 	for idx, row in enumerate(rows):
-		if "Players no longer at this club" in str(row):
+		if "Players no longer at this club" in row.text:
 			rows = rows[:idx] + rows[idx+2:-1]
 			break
-	
-	squad = []
-	for row in rows:
-		row = row.find_all("td")
-		required_cols = [all_column_names.index("Name"), all_column_names.index("Pos"),all_column_names.index("Date of Birth")]
-		try:
-			squad.append([row[i].text for i in required_cols])
-		except:
-			continue
+
+		row_data = [row_data.text for row_data in row.find_all("td")]
+		if all(col_index < len(row_data) for col_index in required_cols):
+			squad.append([row_data[col_index] for col_index in required_cols])
+
 	return squad
 
-def player_df_to_db(df:pd.DataFrame, db_connection):
+def player_df_to_db(df: pd.DataFrame, db_connection):
 	"""
 	Inserts player data from a DataFrame into the database.
 
@@ -114,8 +106,8 @@ def player_df_to_db(df:pd.DataFrame, db_connection):
 		None
 	"""
 	df = df[["first_name", "last_name", "birth_date", "position"]]
-	df.loc[:, "first_name"] = df.apply(lambda row: escape_single_quote(row.first_name), axis=1)
-	df.loc[:, "last_name"] = df.apply(lambda row: escape_single_quote(row.last_name), axis=1)
+	df["first_name"] = df["first_name"].apply(escape_single_quote)
+	df["last_name"] = df["last_name"].apply(escape_single_quote)
 	rows_not_in_db_df = remove_duplicate_rows(db_connection, df, ["first_name", "last_name", "birth_date", "position"], "player")
 	if rows_not_in_db_df.empty:
 		return
@@ -134,66 +126,49 @@ def player_team_df_to_db(df: pd.DataFrame, season: str, db_connection):
 	Returns:
 		None
 	"""
-	df.loc[:, "player_id"] = df.apply(lambda row: get_player_id(db_connection, row), axis=1)
-	df.loc[:, "team_id"] = df.apply(lambda row: get_team_id(db_connection, row.team_id), axis=1)
+	df["player_id"] = df.apply(lambda row: get_player_id(db_connection, row), axis=1)
+	df["team_id"] = df["team_id"].apply(lambda team_id: get_team_id(db_connection, team_id))
 	df["season"] = season
 	player_team_df = df[["player_id", "team_id", "season"]]
 	player_team_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
 	player_team_df.to_sql("player_team", db_connection.conn, if_exists="append", index=False)
 
 def player_main(db_connection):
-	"""
-	Main function for ingesting player data into the database.
+    data_folder_path = "./data/squad_data"
+    seasons = sorted(os.listdir(data_folder_path))
 
-	Args:
-		db_connection: The database connection object.
+    for season in seasons:
+        season_folder = os.path.join(data_folder_path, season)
+        teams = sorted(os.listdir(season_folder))
 
-	Returns:
-		None
-	"""
-	data_folder_path = "./data/squad_data"
+        for team in teams:
+            with open(os.path.join(season_folder, team), "r") as file:
+                html_content = file.read()
 
-	seasons = sorted(os.listdir(data_folder_path))
+            squad = get_team_squad(html_content)
+            squad_no_blanks = [player for player in squad if not_blank_entry(player)]
+            squad_with_team = [player + [team] for player in squad_no_blanks]
+            complete_squad = [format_player_entries(player) for player in squad_with_team]
 
-	for season in seasons:
+            player_df = pd.DataFrame(data=complete_squad, columns=["first_name", "last_name", "position", "birth_date", "team_id"])
+            player_df["birth_date"] = pd.to_datetime(player_df["birth_date"])
 
-		season_folder = data_folder_path + "/" + season 
+            player_team_df = player_df.copy()
+            player_team_df['team_id'] = player_team_df['team_id'].apply(lambda x: x.replace('.html', ''))
 
-		teams = sorted(os.listdir(season_folder))
-		
-		for team in teams:
-			html_content = ""
-			with open(f"{season_folder+'/'+team}", "r") as file:
-				html_content = file.read()
-			
-			squad = get_team_squad(html_content)
-			
-			squad_no_blanks = [player for player in squad if not_blank_entry(player)]
-			squad_with_team = [player + [team] for player in squad_no_blanks]
-			complete_squad = [format_player_entries(player) for player in squad_with_team]
+            player_df[["first_name", "last_name"]] = player_df[["first_name", "last_name"]].applymap(escape_single_quote)
+            rows_not_in_db_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date"], "player")
 
-			player_df = pd.DataFrame(data=complete_squad, columns=["first_name", "last_name", "position", "birth_date", "team_id"])
-			player_df.loc[:, "birth_date"] = player_df.apply(lambda row: datetime.date(datetime.strptime(row.birth_date, "%Y-%m-%d")), axis=1)
-			
-			player_team_df = player_df.copy(deep=True)
+            if not rows_not_in_db_df.empty:
+                save_to_database(db_connection, rows_not_in_db_df, "player")
 
-			player_df = player_df[["first_name", "last_name", "birth_date", "position"]]
-			player_df.loc[:, "first_name"] = player_df.apply(lambda row: escape_single_quote(row.first_name), axis=1)
-			player_df.loc[:, "last_name"] = player_df.apply(lambda row: escape_single_quote(row.last_name), axis=1)
-			rows_not_in_db_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date"], "player")
-			if rows_not_in_db_df.empty:
-				continue
-			save_to_database(db_connection, rows_not_in_db_df, "player")
+            player_team_df["player_id"] = player_team_df.apply(lambda row: get_player_id(db_connection, row), axis=1)
+            player_team_df["team_id"] = player_team_df["team_id"].apply(lambda x: get_team_id(db_connection, x))
+            player_team_df["season"] = season
 
-			player_team_df['team_id'] = player_team_df['team_id'].apply(lambda x: x.replace('.html', ''))
-			player_team_df.loc[:, "player_id"] = player_team_df.apply(lambda row: get_player_id(db_connection, row), axis=1)
-			player_team_df.loc[:, "team_id"] = player_team_df.apply(lambda row: get_team_id(db_connection, row.team_id), axis=1)
-
-			player_team_df["season"] = season
-
-			player_team_df = player_team_df[["player_id", "team_id", "season"]]
-			player_team_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
-			save_to_database(db_connection, player_team_df, "player_team")
+            player_team_df = player_team_df[["player_id", "team_id", "season"]]
+            player_team_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
+            save_to_database(db_connection, player_team_df, "player_team")
 		
 def save_to_database(db_connection, df: pd.DataFrame, table_name: str) -> None:
 	"""

@@ -7,7 +7,7 @@ from data_intake.utilities.string_manipulation import escape_single_quote
 SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, 2025, 1)]
 TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, 2025, 1)]
 
-def rename_team_name(team_name:str) -> str:
+def rename_team_name(team_name: str) -> str:
     """
     Renames a team name based on a predefined mapping.
 
@@ -44,7 +44,7 @@ def rename_team_name(team_name:str) -> str:
         "Huddersfield": "Huddersfield Town",
         "Norwich": "Norwich City",
     }
-    return rename_teams.get(team_name) or team_name
+    return rename_teams.get(team_name, team_name)
 
 def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> pd.DataFrame:
     """
@@ -58,30 +58,29 @@ def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> 
     Returns:
         pd.DataFrame: The modified DataFrame with renamed columns and added season and competition_id columns.
     """
-    df = df.rename(
-        {
-            "HomeTeam": "home_team_id", 
-            "FTHG": "home_goals",
-            "HS": "home_shots",
-            "HST": "home_shots_on_target",
-            "HY": "home_yellow_cards",
-            "HR": "home_red_cards",
-            "HC": "home_corners",
-            "HF": "home_fouls",
-            "AwayTeam": "away_team_id",
-            "FTAG": "away_goals",
-            "AS": "away_shots",
-            "AST": "away_shots_on_target",
-            "AC": "away_corners",
-            "AF": "away_fouls",
-            "AY": "away_yellow_cards",
-            "AR": "away_red_cards",
-            "Referee": "referee_id"
-        }, 
-        axis=1
-    )
-    df.loc[:, "season"] = season
-    df.loc[:, "competition_id"] = competition_id
+    column_mapping = {
+        "HomeTeam": "home_team_id",
+        "FTHG": "home_goals",
+        "HS": "home_shots",
+        "HST": "home_shots_on_target",
+        "HY": "home_yellow_cards",
+        "HR": "home_red_cards",
+        "HC": "home_corners",
+        "HF": "home_fouls",
+        "AwayTeam": "away_team_id",
+        "FTAG": "away_goals",
+        "AS": "away_shots",
+        "AST": "away_shots_on_target",
+        "AC": "away_corners",
+        "AF": "away_fouls",
+        "AY": "away_yellow_cards",
+        "AR": "away_red_cards",
+        "Referee": "referee_id"
+    }
+
+    df = df.rename(columns=column_mapping)
+    df["season"] = season
+    df["competition_id"] = competition_id
 
     return df
 
@@ -97,6 +96,7 @@ def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
         pd.DataFrame: The transformed DataFrame with selected columns.
 
     """
+    # Select specific columns
     new_df = df[
         [
             "season",
@@ -119,13 +119,16 @@ def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
             "home_corners",
             "away_corners",
         ]
-    ]
+    ].copy()
 
-    new_df.loc[:, "home_team_id"] = new_df.apply(lambda row: get_team_id(db_connection, row.home_team_id), axis=1)
-    new_df.loc[:, "away_team_id"] = new_df.apply(lambda row: get_team_id(db_connection, row.away_team_id), axis=1)
+    # Get team IDs using vectorized operations
+    new_df["home_team_id"] = new_df["home_team_id"].apply(lambda x: get_team_id(db_connection, x))
+    new_df["away_team_id"] = new_df["away_team_id"].apply(lambda x: get_team_id(db_connection, x))
 
-    new_df.loc[:, "referee_id"] = new_df.apply(lambda row: get_referee_id(db_connection, row.referee_id), axis=1)
+    # Get referee IDs using vectorized operations
+    new_df["referee_id"] = new_df["referee_id"].apply(lambda x: get_referee_id(db_connection, x))
 
+    # Remove duplicate rows based on specific columns
     columns_to_compare = ["season", "competition_id", "home_team_id", "away_team_id"]
     final_df = remove_duplicate_rows(db_connection, new_df, columns_to_compare, "match")
     return final_df
@@ -157,9 +160,8 @@ def create_referee_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     Returns:
         pd.DataFrame: The DataFrame containing the referee names.
     """
-    df = df.rename(columns={"referee_id": "name"})
-    df = remove_duplicate_rows(db_connection, df, ["name"], "referee")
-    referee_df = df[["name"]]
+    referee_df = df.drop_duplicates(subset="referee_id")[["referee_id"]]
+    referee_df = referee_df.rename(columns={"referee_id": "name"})
     return referee_df
 
 def clean_match_data(db_connection, table_name:str, season:str, df: pd.DataFrame) -> pd.DataFrame:
@@ -180,9 +182,9 @@ def clean_match_data(db_connection, table_name:str, season:str, df: pd.DataFrame
 
     df = df.drop(columns=["B365H","B365D","B365A","BWH","BWD","BWA","IWH","IWD","IWA","PSH","PSD","PSA","WHH","WHD","WHA","VCH","VCD","VCA","Bb1X2","BbMxH","BbAvH","BbMxD","BbAvD","BbMxA","BbAvA","BbOU","BbMx>2.5","BbAv>2.5","BbMx<2.5","BbAv<2.5","BbAH","BbAHh","BbMxAHH","BbAvAHH","BbMxAHA","BbAvAHA","PSCH","PSCD","PSCA"], errors="ignore")
 
-    df.loc[:, "home_team_id"] = df.apply(lambda row: rename_team_name(row.home_team_id), axis=1)
-    df.loc[:, "away_team_id"] = df.apply(lambda row: rename_team_name(row.away_team_id), axis=1)
-    df.loc[:, "referee_id"] = df.apply(lambda row: escape_single_quote(row.referee_id), axis=1)
+    df["home_team_id"] = rename_team_name(df["home_team_id"])
+    df["away_team_id"] = rename_team_name(df["away_team_id"])
+    df["referee_id"] = escape_single_quote(df["referee_id"])
 
     if table_name == "team":
         df = create_teams_table(df, db_connection)
