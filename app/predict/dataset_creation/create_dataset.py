@@ -17,8 +17,8 @@ match_columns = [
 	"home_red_cards", "away_red_cards"
 ]
 stats_columns = [
-	"goals","assists","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
-	"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","progressive_passes_received","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
+	"goals","assists","direct_goal_contributions","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
+	"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
 	"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
 	"penalties_made","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
 	"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","progressive_passes_received","tackles","tackles_won","defensive_third_tackles",
@@ -389,7 +389,7 @@ def remove_unavailable_players_from_df(df: pd.DataFrame, squad_list: list) -> pd
 
 def grouping_prediction_dataframe_rows(df: pd.DataFrame, home_team_id: str, home_team_squad_ids: list, away_team_id:str, pred: bool = False) -> pd.DataFrame:
 
-	columns_to_remove = ["_plus_", "_minus", "_divided_by_",]
+	columns_to_remove = ["_plus_", "_minus", "_divided_by_", "_per_"]
 	columns = [col for col in df.columns if any(word in col for word in columns_to_remove)]
 	df = df.drop(columns=columns)
 

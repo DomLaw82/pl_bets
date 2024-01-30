@@ -93,4 +93,4 @@ class SQLConnection():
 			print(e)
 			print('\n')
 
-local_pl_stats_connector = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
+local_pl_stats_connector = SQLConnection(os.environ.get("POSTGRES_USER") or "postgres", os.environ.get("POSTGRES_PASSWORD") or "password", os.environ.get("POSTGRES_CONTAINER") or "localhost", os.environ.get("POSTGRES_PORT") or "5432", os.environ.get("POSTGRES_DB") or "pl_stats")
