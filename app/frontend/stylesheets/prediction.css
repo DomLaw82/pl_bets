@@ -66,10 +66,3 @@ table {
 	-o-animation: fadeIn .25s;
 	-ms-animation: fadeIn .25s;
 }
-#run-prediction-button-container {
-	text-align: center;
-}
-#run-prediction-button {
-	padding: 1.5%;
-	border-radius: 15%;
-}

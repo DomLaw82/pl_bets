@@ -147,11 +147,16 @@ navbar {
 
 .view-buttons {
 	padding: 2%;
-	border-radius: 10px;
+	border-radius: 15px;
+	text-align: center;
 }
 .view-buttons:hover {
 	background-color: #999;
-	transform: scale(0.95);
+	transform: scale(0.975);
+}
+.view-buttons:active {
+	background-color: #777;
+	transform: scale(0.97);
 }
 
 #warning-pop-up {
