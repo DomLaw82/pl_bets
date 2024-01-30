@@ -41,14 +41,14 @@ def process_team_form(team_id, data):
     return form
 
 # Process form for all teams
-def run_data_prep(home_team_id: str, away_team_id: str):
+def run_data_prep():
 
     data = db.get_df("SELECT * FROM match")
     match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals"]
     data = data[match_columns].copy()
     print(data.tail())
 
-    teams = [home_team_id, away_team_id]
+    teams = data["home_team_id"].unique().tolist()
     process_team_form_partial = partial(process_team_form, data=data)
     form = pd.concat(map(process_team_form_partial, teams), ignore_index=True)
 
@@ -66,4 +66,4 @@ def run_data_prep(home_team_id: str, away_team_id: str):
     print(data.tail())
     # data.to_csv('../match_and_form_data.csv', index=False)
 
-run_data_prep('t-00001', 't-00018')
+run_data_prep()
