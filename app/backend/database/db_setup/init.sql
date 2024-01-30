@@ -49,6 +49,7 @@ CREATE TABLE player_team (
 CREATE TABLE match (
 	id VARCHAR(7) PRIMARY KEY,
 	season VARCHAR(9) NOT NULL,
+	date VARCHAR(10) NOT NULL,
 	competition_id VARCHAR(7) NOT NULL,
 	home_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
 	away_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,

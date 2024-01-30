@@ -75,7 +75,8 @@ def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> 
         "AF": "away_fouls",
         "AY": "away_yellow_cards",
         "AR": "away_red_cards",
-        "Referee": "referee_id"
+        "Referee": "referee_id",
+        "Date": "date",
     }
 
     df = df.rename(columns=column_mapping)
@@ -100,6 +101,7 @@ def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     new_df = df[
         [
             "season",
+            "date",
             "competition_id",
             "home_team_id",
             "away_team_id",
@@ -125,6 +127,8 @@ def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     new_df["home_team_id"] = new_df["home_team_id"].apply(lambda x: get_team_id(db_connection, x))
     new_df["away_team_id"] = new_df["away_team_id"].apply(lambda x: get_team_id(db_connection, x))
 
+    new_df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
+    
     # Get referee IDs using vectorized operations
     new_df["referee_id"] = new_df["referee_id"].apply(lambda x: get_referee_id(db_connection, x))
 

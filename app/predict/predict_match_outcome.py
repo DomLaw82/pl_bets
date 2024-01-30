@@ -1,5 +1,7 @@
 from dataset_creation.create_dataset import create_prediction_dataset
+from win_prediction.data_modelling_one import run_data_modelling_part_one
 from neural_net.build_and_save_model import perform_scaling_and_pca
+from win_prediction.data_preparation import run_data_prep
 import tensorflow as tf
 import pandas as pd
 import numpy as np
@@ -16,7 +18,7 @@ from joblib import load
 # Use the model to predict the match stats for the game
 # Return these stats to the user
 
-def predict_match_outcome(home_team: str, home_players: list, away_team: str, away_players: list) -> dict:
+def predict_match_outcome(home_team_id: str, home_players: list, away_team_id: str, away_players: list) -> dict:
 	"""
 	Predicts the outcome of a match between two teams based on the given home team, home players, away team, and away players.
 
@@ -29,8 +31,10 @@ def predict_match_outcome(home_team: str, home_players: list, away_team: str, aw
 	Returns:
 	dict: A dictionary containing the predicted match facts.
 	"""
+
+	# Neural network prediction
 	pd.set_option('display.max_columns', 10)
-	df = create_prediction_dataset(home_team, home_players, away_team, away_players)
+	df = create_prediction_dataset(home_team_id, home_players, away_team_id, away_players)
 	
 	if df.empty:
 		return None
@@ -41,5 +45,10 @@ def predict_match_outcome(home_team: str, home_players: list, away_team: str, aw
 
 	model = tf.keras.models.load_model("stats_regression_model.h5")
 	prediction = model.predict(X)
+
+	# Logistic regression prediction
+	run_data_prep(home_team_id, away_team_id)
+	data = pd.read_csv('../match_and_form_data.csv')
+	lr_results = run_data_modelling_part_one(data)
 
 	return prediction

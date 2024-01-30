@@ -9,3 +9,7 @@ marshmallow
 flask
 flask_rebar
 flask_cors
+statsmodels
+matplotlib
+seaborn
+scipy
