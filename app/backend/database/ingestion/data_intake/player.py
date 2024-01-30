@@ -108,10 +108,10 @@ def player_df_to_db(df: pd.DataFrame, db_connection):
 	df = df[["first_name", "last_name", "birth_date", "position"]]
 	df["first_name"] = df["first_name"].apply(escape_single_quote)
 	df["last_name"] = df["last_name"].apply(escape_single_quote)
-	rows_not_in_db_df = remove_duplicate_rows(db_connection, df, ["first_name", "last_name", "birth_date", "position"], "player")
-	if rows_not_in_db_df.empty:
+	player_rows_not_in_db_df = remove_duplicate_rows(db_connection, df, ["first_name", "last_name", "birth_date", "position"], "player")
+	if player_rows_not_in_db_df.empty:
 		return
-	ordered_player_df = rows_not_in_db_df[["first_name", "last_name", "birth_date", "position"]]
+	ordered_player_df = player_rows_not_in_db_df[["first_name", "last_name", "birth_date", "position"]]
 	ordered_player_df.to_sql("player", db_connection.conn, if_exists="append", index=False)
 
 def player_team_df_to_db(df: pd.DataFrame, season: str, db_connection):
@@ -134,41 +134,42 @@ def player_team_df_to_db(df: pd.DataFrame, season: str, db_connection):
 	player_team_df.to_sql("player_team", db_connection.conn, if_exists="append", index=False)
 
 def player_main(db_connection):
-    data_folder_path = "./data/squad_data"
-    seasons = sorted(os.listdir(data_folder_path))
+	data_folder_path = "./data/squad_data"
+	seasons = sorted(os.listdir(data_folder_path))
 
-    for season in seasons:
-        season_folder = os.path.join(data_folder_path, season)
-        teams = sorted(os.listdir(season_folder))
+	for season in seasons:
+		season_folder = os.path.join(data_folder_path, season)
+		teams = sorted(os.listdir(season_folder))
 
-        for team in teams:
-            with open(os.path.join(season_folder, team), "r") as file:
-                html_content = file.read()
+		for team in teams:
+			with open(os.path.join(season_folder, team), "r") as file:
+				html_content = file.read()
 
-            squad = get_team_squad(html_content)
-            squad_no_blanks = [player for player in squad if not_blank_entry(player)]
-            squad_with_team = [player + [team] for player in squad_no_blanks]
-            complete_squad = [format_player_entries(player) for player in squad_with_team]
+			squad = get_team_squad(html_content)
+			squad_no_blanks = [player for player in squad if not_blank_entry(player)]
+			squad_with_team = [player + [team] for player in squad_no_blanks]
+			complete_squad = [format_player_entries(player) for player in squad_with_team]
 
-            player_df = pd.DataFrame(data=complete_squad, columns=["first_name", "last_name", "position", "birth_date", "team_id"])
-            player_df["birth_date"] = pd.to_datetime(player_df["birth_date"])
+			player_df = pd.DataFrame(data=complete_squad, columns=["first_name", "last_name", "position", "birth_date", "team_id"])
+			player_df["birth_date"] = pd.to_datetime(player_df["birth_date"], format="%Y-%m-%d").dt.strftime("%Y-%m-%d")
 
-            player_team_df = player_df.copy()
-            player_team_df['team_id'] = player_team_df['team_id'].apply(lambda x: x.replace('.html', ''))
+			player_team_df = player_df.copy()
+			player_team_df['team_id'] = player_team_df['team_id'].apply(lambda x: x.replace('.html', ''))
 
-            player_df[["first_name", "last_name"]] = player_df[["first_name", "last_name"]].applymap(escape_single_quote)
-            rows_not_in_db_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date"], "player")
+			player_df[["first_name", "last_name"]] = player_df[["first_name", "last_name"]].map(escape_single_quote)
+			player_rows_not_in_db_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date"], "player")
+			
+			if not player_rows_not_in_db_df.empty:
+				player_rows_not_in_db_df = player_rows_not_in_db_df[["first_name", "last_name", "birth_date", "position"]]
+				save_to_database(db_connection, player_rows_not_in_db_df, "player")
 
-            if not rows_not_in_db_df.empty:
-                save_to_database(db_connection, rows_not_in_db_df, "player")
+			player_team_df["player_id"] = player_team_df.apply(lambda row: get_player_id(db_connection, row), axis=1)
+			player_team_df["team_id"] = player_team_df["team_id"].apply(lambda x: get_team_id(db_connection, x))
+			player_team_df["season"] = season
 
-            player_team_df["player_id"] = player_team_df.apply(lambda row: get_player_id(db_connection, row), axis=1)
-            player_team_df["team_id"] = player_team_df["team_id"].apply(lambda x: get_team_id(db_connection, x))
-            player_team_df["season"] = season
-
-            player_team_df = player_team_df[["player_id", "team_id", "season"]]
-            player_team_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
-            save_to_database(db_connection, player_team_df, "player_team")
+			player_team_df = player_team_df[["player_id", "team_id", "season"]]
+			player_team_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
+			save_to_database(db_connection, player_team_df, "player_team")
 		
 def save_to_database(db_connection, df: pd.DataFrame, table_name: str) -> None:
 	"""

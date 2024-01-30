@@ -1,4 +1,4 @@
-rank,player,nation,position,team,age,born,ninetys,goals,shots,shots_on_target,shots_on_target_pct,shots_per_90,shots_on_target_per_90,goals_per_shot,goals_per_shot_on_target,average_shot_distance,shots_from_free_kicks,penalties_made,penalties_attempted,expected_goals,non_penalty_expected_goals,non_penalty_expected_goal/shots,goals-expected_goals,non_penalty_goals-non_penalty_expected_goals
+rank,player,nation,position,team,age,born,ninetys,goals,shots,shots_on_target,shots_on_target_pct,shots_per_90,shots_on_target_per_90,goals_per_shot,goals_per_shot_on_target,average_shot_distance,shots_from_free_kicks,penalties_made,penalties_attempted,expected_goals,non_penalty_expected_goals,non_penalty_expected_goals_per_shot,goals-expected_goals,non_penalty_goals-non_penalty_expected_goals
 1,Max Aarons,eng ENG,DF,Bournemouth,24-025,2000,12.1,0,1,0,0,0.08,0,0,,23.9,0,0,0,0,0,0.02,0,0
 2,Bénie Adama Traore,ci CIV,"FW,MF",Sheffield Utd,21-060,2002,4.3,0,1,1,100,0.23,0.23,0,0,15.3,0,0,0,0.3,0.3,0.27,-0.3,-0.3
 3,Tosin Adarabioyo,eng ENG,DF,Fulham,26-127,1997,7,1,4,1,25,0.57,0.14,0.25,1,24.5,0,0,0,0.1,0.1,0.01,0.9,0.9

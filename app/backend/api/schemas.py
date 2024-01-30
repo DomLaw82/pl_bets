@@ -112,7 +112,7 @@ class HistoricPlayerPerNinetySchema(Schema):
     goals_divided_by_shots_on_target = fields.Float()
     average_shot_distance = fields.Float()
     shots_from_free_kicks = fields.Float()
-    shots_from_penalties = fields.Float()
+    penalties_made = fields.Float()
     non_penalty_expected_goals_divided_by_shots = fields.Float()
     goals_minus_expected_goals = fields.Float()
     non_penalty_goals_minus_non_penalty_expected_goals = fields.Float()

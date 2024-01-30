@@ -1,4 +1,4 @@
-rank,player,nation,position,team,age,born,ninetys,goals,shots,shots_on_target,shots_on_target_pct,shots_per_90,shots_on_target_per_90,goals_per_shot,goals_per_shot_on_target,average_shot_distance,shots_from_free_kicks,penalties_made,penalties_attempted,expected_goals,non_penalty_expected_goals,non_penalty_expected_goal/shots,goals-expected_goals,non_penalty_goals-non_penalty_expected_goals
+rank,player,nation,position,team,age,born,ninetys,goals,shots,shots_on_target,shots_on_target_pct,shots_per_90,shots_on_target_per_90,goals_per_shot,goals_per_shot_on_target,average_shot_distance,shots_from_free_kicks,penalties_made,penalties_attempted,expected_goals,non_penalty_expected_goals,non_penalty_expected_goals_per_shot,goals-expected_goals,non_penalty_goals-non_penalty_expected_goals
 1,Brenden Aaronson,us USA,"MF,FW",Leeds United,21,2000,26.4,1,41,9,22,1.56,0.34,0.02,0.11,18.4,2,0,0,3.9,3.9,0.09,-2.9,-2.9
 2,George Abbott,eng ENG,MF,Tottenham,16,2005,0,0,0,0,,0,0,,,,0,0,0,0,0,,0,0
 3,Che Adams,sct SCO,FW,Southampton,26,1996,22.1,5,47,14,29.8,2.12,0.63,0.11,0.36,13.8,0,0,0,6.6,6.6,0.14,-1.6,-1.6

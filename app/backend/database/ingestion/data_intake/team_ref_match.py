@@ -182,9 +182,9 @@ def clean_match_data(db_connection, table_name:str, season:str, df: pd.DataFrame
 
     df = df.drop(columns=["B365H","B365D","B365A","BWH","BWD","BWA","IWH","IWD","IWA","PSH","PSD","PSA","WHH","WHD","WHA","VCH","VCD","VCA","Bb1X2","BbMxH","BbAvH","BbMxD","BbAvD","BbMxA","BbAvA","BbOU","BbMx>2.5","BbAv>2.5","BbMx<2.5","BbAv<2.5","BbAH","BbAHh","BbMxAHH","BbAvAHH","BbMxAHA","BbAvAHA","PSCH","PSCD","PSCA"], errors="ignore")
 
-    df["home_team_id"] = rename_team_name(df["home_team_id"])
-    df["away_team_id"] = rename_team_name(df["away_team_id"])
-    df["referee_id"] = escape_single_quote(df["referee_id"])
+    df["home_team_id"] = df["home_team_id"].apply(rename_team_name)
+    df["away_team_id"] = df["away_team_id"].apply(rename_team_name)
+    df["referee_id"] = df["referee_id"].apply(escape_single_quote)
 
     if table_name == "team":
         df = create_teams_table(df, db_connection)
