@@ -6,6 +6,7 @@ import pandas as pd
 from db_connection import local_pl_stats_connector
 from flask import render_template
 from datetime import datetime
+from download_data import download_data
 
 db = local_pl_stats_connector
 rebar = Rebar()
