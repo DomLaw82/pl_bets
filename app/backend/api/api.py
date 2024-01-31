@@ -313,6 +313,17 @@ def update_historic_per_ninety(content:str):
 #    response_body_schema=TodoSchema()  # for versions <= 1.7.0, use marshal_schema
 # )
 
+@registry.handles(
+   rule='/download-latest-data',
+   method='GET',
+   response_body_schema=''
+)
+def download_latest_data():
+   #TODO - download latest data and ingest into db
+   
+   return jsonify('Latest data downloaded successfully')
+
+
 app = Flask(__name__)
 CORS(app, origins=["http://frontend:3000", "http://localhost:3000"],  supports_credentials=True)
 rebar.init_app(app)

@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 SEE_FIXTURES = "https://fixturedownload.com/results/epl-2022"
 DOWNLOAD_FIXTURE_URL = "https://fixturedownload.com/download/csv/epl-" # add on the year the season starts in, i.e. 2024
 PLAYERS_WEBSITE_ROOT = "https://www.footballsquads.co.uk/eng/"
+
+FIXTURE_SEASON_ARRAY = [str(year) for year in range(2017, 2024, 1)]
 SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2018, 2025, 1)]
 MATCH_SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, 2025, 1)]
 
@@ -124,7 +126,33 @@ def player_data():
 		None
 	"""
 	# Function code here
-	pass
+	for SEASON in SEASONS_ARRAY:
+		try:
+			squad_url = PLAYERS_WEBSITE_ROOT+SEASON+LEAGUE_NAMES[0]
+			page_content = requests.get(squad_url).text
+		except Exception as e:
+			try:
+				squad_url = PLAYERS_WEBSITE_ROOT+SEASON+LEAGUE_NAMES[1]
+				page_content = requests.get(squad_url).text
+			except Exception as e:
+				print(f"ERROR: {SEASON}\n")
+				print(e)
+		finally:
+			soup = get_page_soup(page_content)
+			teams_links = get_all_teams_for_season(soup)
+
+			for team_link in teams_links:
+				team = team_link[0]
+				link = team_link[1]
+
+				squad_url = PLAYERS_WEBSITE_ROOT+SEASON+link
+				page_content = requests.get(squad_url).text
+				if (not os.path.exists(f"./data/squad_data/{SEASON.replace('/', '')}")):
+					os.mkdir(f"./data/squad_data/{SEASON.replace('/', '')}") 
+				with open(f"./data/squad_data/{SEASON}/{team}.html", 'w') as file:
+					file.write(page_content)
+
+
 def player_data():
 	
 	for SEASON in SEASONS_ARRAY:
@@ -137,7 +165,7 @@ def player_data():
 				response = requests.get(engprem_url)
 				if response.status_code != 200:
 					raise Exception
-			html_content = response.text
+			html_content = response.text 
 			soup = BeautifulSoup(html_content, "html.parser")
 
 
@@ -156,3 +184,10 @@ def player_data():
 		except Exception as e:
 			print(f"ERROR: {SEASON}\n")
 			print(e)
+
+def download_latest_data():
+	# game data
+	for season in MATCH_SITE_SEASONS:
+		download_csv_for_all_games_in_a_season(season)
+
+	
