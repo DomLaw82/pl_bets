@@ -1,6 +1,21 @@
+/* 
+	#009A17 - Forest Green
+	#151515 - Night
+	#F8F4E3 - Cosmic Latte
+	#6E8894 - Slate Gray
+	#64A6BD - Moonstone 
+*/
+
 html {
-	background-color: #009A17;
-	border-color: #fff;
+	background-color: #F8F4E3;
+	border: #151515 5px solid;
+}
+
+.page-titles-div {
+	background-color: #6E8894 ;
+	padding: 2%;
+	border-radius: 10px;
+	border: #151515 2px solid;
 }
 
 .team {
@@ -16,13 +31,16 @@ html {
 }
 
 navbar {
-	background-color: #DBD3AD;
-	border-bottom: 1px solid #fff;
+	background-color: #009A17;
+	border-bottom: 3px solid #151515;
+	border-left: 2px solid #151515;
+	border-right: 2px solid #151515;
+	border-top: 2px solid #151515;
 	display: flex;
 	justify-content: space-between;
 	padding: 1.5%;
-	border-radius: 35px;
-	color: #524632;
+	border-radius: 20px;
+	color: #151515;
 }
 
 .page-title {
