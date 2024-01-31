@@ -1,6 +1,7 @@
 .selectors {
 	display: flex;
 	flex-direction: row;
+	justify-content: space-between;
 	padding: 2%;
 }
 .selector-components {
@@ -21,7 +22,8 @@
 }
 .team-select{
 	width: 100%;
-	border: 3px solid #eee;
+	border: 3px solid #6E8894;
+	background-color: #64A6BD;
 	padding: 2%;
 }
 .selected-players {
@@ -65,4 +67,8 @@ table {
 	-moz-animation: fadeIn .25s;
 	-o-animation: fadeIn .25s;
 	-ms-animation: fadeIn .25s;
+}
+.prediction-button-container {
+	display: flex;
+	flex-direction: row;
 }
