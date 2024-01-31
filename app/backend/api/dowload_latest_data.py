@@ -186,6 +186,7 @@ def player_data():
 			print(e)
 
 def download_latest_data():
+	
 	# game data
 	for season in MATCH_SITE_SEASONS:
 		download_csv_for_all_games_in_a_season(season)
