@@ -191,36 +191,12 @@ def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_r
 		print(f'An error occurred while downloading season {season}:', str(e))
 		return False
 
-def get_data_intake_directory():
-    current_directory = os.getcwd()
-
-    # Check if "data_intake" directory exists
-    data_intake_path = os.path.join(current_directory, 'data_intake')
-    if os.path.exists(data_intake_path) and os.path.isdir(data_intake_path):
-        return os.path.basename(data_intake_path)
-
-    # Check if "remote_data_intake" directory exists
-    remote_data_intake_path = os.path.join(current_directory, 'remote_data_intake')
-    if os.path.exists(remote_data_intake_path) and os.path.isdir(remote_data_intake_path):
-        return os.path.basename(remote_data_intake_path)
-
-    # If neither directory exists, return None or handle accordingly
-    sys.exit(f"ERROR: No data_intake directory found; current directory: {os.getcwd()}")
-
 def download_latest_data():
 	
 	# This code is used to initially download the data from the web, but also to update the data on the fly from the frontend
-	# This code sequence checks where the code is being run from, and sets the file paths accordingly
 	GAME_SAVE_PATH_ROOT = "../data/game_data/"
 	SCHEDULE_SAVE_PATH_ROOT = "../data/schedule_data/"
 	PLAYER_SAVE_PATH_ROOT = "../data/squad_data/"
-
-	run_location = get_data_intake_directory()
-
-	if run_location == "remote_data_intake":
-		GAME_SAVE_PATH_ROOT = "remote_data_intake/data/game_data/"
-		SCHEDULE_SAVE_PATH_ROOT = "remote_data_intake/data/schedule_data/"
-		PLAYER_SAVE_PATH_ROOT = "remote_data_intake/data/squad_data/"
 
 	# game data download
 	for season in MATCH_SITE_SEASONS:
