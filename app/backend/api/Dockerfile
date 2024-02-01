@@ -10,6 +10,11 @@ COPY . .
 
 COPY ../database/ingestion/data_intake ./remote_data_intake
 
+COPY ../database/ingestion/__init__.py ./remote_data_intake.py
+
+# Replace "data_intake" with "remote_data_intake" in the script
+RUN sed -i 's/data_intake/remote_data_intake/g' ./remote_data_intake.py
+
 RUN mkdir ./remote_data_intake/data
 
 EXPOSE 8080

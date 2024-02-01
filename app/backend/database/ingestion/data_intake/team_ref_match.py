@@ -236,3 +236,6 @@ def team_ref_match_main(db_connection):
             df = pd.read_csv(path)
             df = clean_match_data(db_connection, table, full_season, df)
             save_to_database(db_connection, table, df)
+
+# TODO - Add deduplication to original data_intake functions
+# TODO - Add logging for more visibility of data_intake process

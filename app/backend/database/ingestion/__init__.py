@@ -5,7 +5,6 @@ from data_intake.player import player_main
 from data_intake.country_competition import country_competition_main
 from data_intake.per_90_stats import per_90_main
 from app.backend.database.ingestion.data_intake.download_latest_data import download_latest_data
-import subprocess, time
 
 # download latest data locally
 download_latest_data()

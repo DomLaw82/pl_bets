@@ -65,3 +65,5 @@ def schedule_main(db_connection) -> None:
 			save_to_database(db_connection, df)
 
 
+# TODO - Add deduplication to original data_intake functions
+# TODO - Add logging for more visibility of data_intake process
