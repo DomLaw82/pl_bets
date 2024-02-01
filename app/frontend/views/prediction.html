@@ -29,10 +29,16 @@
 		<div id="warning-pop-up" class="warning-pop-up">
 			<div id="warning-pop-up-content" class="warning-pop-up-content"></div>
 		</div>
+		<div id="download-pop-up" class="pop-up">
+			<div id="download-pop-up-content"></div>
+			<button id="download-pop-up-button" class="view-buttons">Confirm</button>
+		</div>
+		<div><button onclick="showPopUp('prediction-options-pop-up', 'prediction-options-button')" id="prediction-options-button" class="view-buttons">Options</button></div>
 		<div class="pop-up" id="prediction-options-pop-up">
 			<div id="prediction-buttons">
 				<button id="rebuild-model" class="view-buttons" onclick="rebuildModel()">Rebuild</button>
 				<button id="retune-model" class="view-buttons" onclick="retuneAndRebuildModel()">Retune and Rebuild</button>
+				<button id="download-latest" class="view-buttons" onclick="downloadLatestData()">Download Latest Data</button>
 			</div>
 		</div>
 		<div id="model-pop-up" class="pop-up"></div>

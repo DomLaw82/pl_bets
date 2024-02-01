@@ -231,8 +231,15 @@ def team_ref_match_main(db_connection):
         
         path = data_folder_path+"/"+year
         order = ["team", "referee", "match"]
+        comparison_columns = [["name"], ["name"], ["season","home_team_id","away_team_id"]]
 
-        for table in order:
+        for idx, table in enumerate(order):
             df = pd.read_csv(path)
             df = clean_match_data(db_connection, table, full_season, df)
-            save_to_database(db_connection, table, df)
+            deduplicated_df = remove_duplicate_rows(db_connection, df, comparison_columns[idx], table)
+            
+            if not deduplicated_df.empty:
+                save_to_database(db_connection, table, deduplicated_df)
+                print(f"Inserted into {table} table for {season}.")
+
+# TODO - Add logging for more visibility of data_intake process

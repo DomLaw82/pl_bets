@@ -1,7 +1,5 @@
 import pandas as pd
-from data_intake.team_ref_match import rename_team_name
-from data_intake.utilities.unique_id import get_team_id
-import os
+from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 
 def clean_country_competition_data() -> pd.DataFrame:
 	"""
@@ -47,6 +45,13 @@ def country_competition_main(db_connection):
 	"""
 	dfs = clean_country_competition_data()
 	tables = ["country", "competition"]
+	comparison_columns = [["name"], ["country_id", "name"]]
 	
 	for idx, df in enumerate(dfs):
-		save_to_database(db_connection, df, tables[idx])
+		deduplicated_df = remove_duplicate_rows(db_connection, df, comparison_columns[idx], tables[idx])
+		if not deduplicated_df.empty:
+			save_to_database(db_connection, deduplicated_df, tables[idx])
+		print(f"Inserted into {tables[idx]} table.")
+		
+
+# TODO - Add logging for more visibility of data_intake process

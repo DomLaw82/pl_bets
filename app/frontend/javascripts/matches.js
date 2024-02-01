@@ -197,6 +197,4 @@ function closePopUp (popup) {
 	document.getElementById(popup).style.display = 'none';
 }
 
-// TODO - Autofill as many columns in the add result popup as possible
-// TODO - Add function to submit data from addResultsPopUp to database
 // TODO - Add filtering to the matches page, on team, gameweek, date(month/year)

@@ -230,3 +230,25 @@ function createWarningPopUp(message) {
 		}
 	});
 }
+
+async function downloadLatestData() {
+	const popUpBackground = document.getElementById('pop-up-background');
+	const downloadPopUp = document.getElementById('download-pop-up');
+	const downloadPopUpContent = document.getElementById('download-pop-up-content');
+	const downloadPopUpButton = document.getElementById('download-pop-up-button');
+
+	downloadPopUpContent.innerHTML = '<p>Downloading latest data...</p>';
+	downloadPopUpButton.style.display = 'none';
+	downloadPopUp.style.display = 'block';
+	popUpBackground.style.display = 'block';
+
+	await fetch(`http://localhost:8080/download-latest-data`, {
+		method: 'GET',
+		credentials: 'include'
+	})
+		.then(res => res.json())
+		.then((data) => {
+			downloadPopUpContent.innerHTML = `<p>${data.message}</p>`;
+			downloadPopUpButton.style.display = 'block';
+		});
+}
