@@ -8,4 +8,4 @@ RUN pip install --no-cache-dir -r ./requirements.txt
 
 COPY . .
 
-CMD ["python3", "__init__.py"]
+CMD ["python3", "-u", "__init__.py"]
