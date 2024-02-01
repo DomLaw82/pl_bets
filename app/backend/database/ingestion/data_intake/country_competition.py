@@ -53,5 +53,4 @@ def country_competition_main(db_connection):
 			save_to_database(db_connection, deduplicated_df, tables[idx])
 		
 
-# TODO - Add deduplication to original data_intake functions
 # TODO - Add logging for more visibility of data_intake process

@@ -251,33 +251,6 @@ def add_match_result():
    except Exception as e:
       return jsonify({"error": str(e)}), 500
 
-# run prediction model --- /predict/run POST
-@registry.handles(
-   rule='/predict',
-   method='POST',
-   response_body_schema=''
-)
-def show_prediction_form():
-   return render_template('../views/prediction_form.html')
-   # confirm lineups
-# confirm lineups --- /predict/confirm-lineups
-   	# set home team lineup --- /predict/confirm-lineups/home-start POST
-      # set home team subs --- /predict/confirm-lineups/home-sub POST
-      # set away team lineup  --- /predict/confirm-lineups/away-start POST
-      # set away team subs  --- /predict/confirm-lineups/away-sub POST
-
-# check current gameweek fixtures --- /gameweek/current
-   # display predicted and actual (if inputted) stats
-   # flag for whether lineups have been selected
-   # pre lineup prediction (based on historic game time) and actual lineup
-# check next gameweek fixtures --- /gameweek/next
-# check entire schedule --- /schedule
-# input match facts --- /update/match-facts
-# update squads --- /update/squads
-
-# data
-   # update historic player stats
-      # upload csv and handle operations in the backend
 @registry.handles(
    rule='/update/historic_per_ninety/submit',
    method='POST',
@@ -299,19 +272,6 @@ def update_historic_per_ninety(content:str):
    
    except Exception as e:
         return jsonify({'error': str(e)}), 500
-   # re-ingest squad data
-   # re-ingest team data
-   # re-ingest schedule data
-   # re-ingest match facts
-   # add player injury
-
-
-
-# @registry.handles(
-#    rule='/add/teams',
-#    method='POST',
-#    response_body_schema=TodoSchema()  # for versions <= 1.7.0, use marshal_schema
-# )
 
 @registry.handles(
    rule='/download-latest-data',
@@ -319,9 +279,10 @@ def update_historic_per_ninety(content:str):
    response_body_schema=''
 )
 def download_latest_data():
-   #TODO - download latest data and ingest into db
-   
-   return jsonify('Latest data downloaded successfully')
+   # module will be available in the container, but is not in the path locally (see app/backend/database/ingestion/__init__.py)
+   # TODO - refactor this so that the module is available locally/create empty file locally
+   download_and_insert_latest_data()
+   return jsonify('Latest data downloaded and inserted into database successfully')
 
 
 app = Flask(__name__)

@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 import datetime
 
 # DOWNLOADING GAMES DATA FOR EVERY SEASON
-# TODO - add url and word_to_replace as an argument to the download_csv_for_all_games_in_a_season function, have a word set in the url to replace with the season
 SEE_FIXTURES = "https://fixturedownload.com/download/csv/epl-" # + year the season starts in, i.e. 2024
 
 GAME_DATA_DOWNLOAD_ROOT = "https://www.football-data.co.uk/mmz4281/"
