@@ -6,7 +6,7 @@ import datetime
 SEE_FIXTURES = "https://fixturedownload.com/download/csv/epl-" # + year the season starts in, i.e. 2024
 
 GAME_DATA_DOWNLOAD_ROOT = "https://www.football-data.co.uk/mmz4281/"
-DOWNLOAD_FIXTURE_URL_ROOT = "https://fixturedownload.com/download/csv/epl-" # add on the year the season starts in, i.e. 2024
+DOWNLOAD_FIXTURE_URL_ROOT = "https://fixturedownload.com/download/epl-" # add on the year the season starts in, i.e. 2024
 PLAYER_DOWNLOAD_ROOT = "https://www.footballsquads.co.uk/eng/"
 
 
@@ -23,7 +23,7 @@ def download_csv_for_all_games_in_a_season(season: str, url: str, save_path_root
 	Arguments:
 		season (str): last 2 digits of each year the season encompasses, e.g. "16/17"
 	"""
-      
+	  
 	try:
 		# MATCH_SITE_SEASONS
 		save_path = os.path.join(save_path_root, f"E0 - {season}.csv")
@@ -173,20 +173,25 @@ def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_r
 	Arguments:
 		season (str): last 2 digits of each year the season encompasses, e.g. "16/17"
 	"""
-      
+	  
 	try:
-			# MATCH_SITE_SEASONS
-		save_path = os.path.join(save_path_root, f"epl_{season}-{str(int(season)+1)[-2:]}.csv")
-		response = requests.get(url+season)
-		if response.status_code == 200:
-			csv_data = response.text
-			with open(save_path, 'w') as file:
-				file.write(csv_data)
-			print(f'Fixture csv file for season {season} downloaded and saved to {save_path}')
-			return True
-		else:
-			print(f'Failed to download the fixture CSV file for season {season}. Status code:', response.status_code)
+		response = requests.get(f"{url}{season}-UTC.csv")
+		save_path = os.path.join(save_path_root, f"epl_{season}-{str(int(season) + 1)[-2:]}.csv") if response.status_code == 200 else None
+
+		if not save_path:
+			response = requests.get(f"{url}{season}-GMTStandardTime.csv")
+			save_path = os.path.join(save_path_root, f"epl_{season}-{str(int(season) + 1)[-2:]}.csv") if response.status_code == 200 else None
+
+		if not save_path:
+			print(f'Failed to download the fixture CSV file for season {season}. Message:', response.text)
 			return False
+
+		with open(save_path, 'w') as file:
+			file.write(response.text)
+
+		print(f'Fixture CSV file for season {season} downloaded and saved to {save_path}')
+		return True
+
 	except Exception as e:
 		print(f'An error occurred while downloading fixtures for season {season}:', str(e))
 		return False
