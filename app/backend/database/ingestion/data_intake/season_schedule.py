@@ -1,6 +1,7 @@
 import pandas as pd
-import os, datetime
+import os
 from data_intake.utilities.unique_id import get_team_id
+from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 from data_intake.team_ref_match import rename_team_name
 
 
@@ -62,6 +63,10 @@ def schedule_main(db_connection) -> None:
 			file_path = os.path.join(season_schedule_folder_path, season_schedule_file.name)
 			df = pd.read_csv(file_path)
 			df = clean_schedule_data(db_connection, df)
-			save_to_database(db_connection, df)
+			
+			deduplicated_df = remove_duplicate_rows(db_connection, df, ["round_number", "date", "home_team_id", "away_team_id"], "schedule")
+			if not deduplicated_df.empty:
+				save_to_database(db_connection, deduplicated_df)
+				print(f"Inserted into schedule table for {season_schedule_file.name}")
 
-
+# TODO - Add logging for more visibility of data_intake process
