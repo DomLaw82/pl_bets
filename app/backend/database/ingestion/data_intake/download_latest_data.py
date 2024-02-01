@@ -1,4 +1,4 @@
-import requests, os, time
+import requests, os, time, sys
 from bs4 import BeautifulSoup
 import datetime
 
@@ -17,7 +17,7 @@ FIXTURE_SEASON_ARRAY = [str(year) for year in range(2017, current_year, 1)]
 SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2017, current_year+1)]
 MATCH_SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, current_year+1)]
 
-def download_csv_for_all_games_in_a_season(season: str, url: str):
+def download_csv_for_all_games_in_a_season(season: str, url: str, save_path_root: str):
 	"""
 	Downloads match facts for every game for the specified season data as a single csv
 
@@ -27,7 +27,7 @@ def download_csv_for_all_games_in_a_season(season: str, url: str):
       
 	try:
 			# MATCH_SITE_SEASONS
-		save_path = f"../data/game_data/E0 - {season}.csv"
+		save_path = os.path.join(save_path_root, f"E0 - {season}.csv")
 		url = url+{season}+'/E0.csv'
 		response = requests.get(url)
 		if response.status_code == 200:
@@ -107,7 +107,7 @@ def get_team_squad(endpoint: str, SEASON: str, site_root: str):
 			continue
 	return squad
 
-def download_html_for_squad_player_data(season: str, url_root: str):
+def download_html_for_squad_player_data(season: str, url_root: str, save_path_root: str):
 	"""
 	Downloads player data for each season and team.
 
@@ -133,6 +133,9 @@ def download_html_for_squad_player_data(season: str, url_root: str):
 
 	LEAGUE_NAMES = ["faprem.htm", "engprem.htm"]
 
+	file_save_path = os.path.join(save_path_root, f"{season}{team}.html")
+	year_dir_path = os.path.join(save_path_root, f"{season.replace('/', '')}")
+
 	faprem_url = url_root+season+LEAGUE_NAMES[0]
 	engprem_url = url_root+season+LEAGUE_NAMES[1]
 	time.sleep(2)
@@ -155,15 +158,15 @@ def download_html_for_squad_player_data(season: str, url_root: str):
 
 			squad_url = url_root+season+link
 			page_content = requests.get(squad_url).text
-			if (not os.path.exists(f"../data/squad_data/{season.replace('/', '')}")):
-				os.mkdir(f"../data/squad_data/{season.replace('/', '')}") 
-			with open(f"../data/squad_data/{season}{team}.html", 'w') as file:
+			if (not os.path.exists(year_dir_path)):
+				os.mkdir(year_dir_path) 
+			with open(file_save_path, 'w') as file:
 				file.write(page_content)
 	except Exception as e:
 		print(f"ERROR: {season}\n")
 		print(e)
 
-def download_csv_for_all_fixtures_in_a_season(season: str, url: str):
+def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_root: str):
 	"""
 	Downloads match facts for every game for the specified season data as a single csv
 
@@ -173,7 +176,7 @@ def download_csv_for_all_fixtures_in_a_season(season: str, url: str):
       
 	try:
 			# MATCH_SITE_SEASONS
-		save_path = f"../data/schedule_data/epl_{season}-{season[-2:]}.csv"
+		save_path = os.path.join(save_path_root, f"epl_{season}-{season[-2:]}.csv")
 		response = requests.get(url)
 		if response.status_code == 200:
 			csv_data = response.text
@@ -188,19 +191,48 @@ def download_csv_for_all_fixtures_in_a_season(season: str, url: str):
 		print(f'An error occurred while downloading season {season}:', str(e))
 		return False
 
+def get_data_intake_directory():
+    current_directory = os.getcwd()
+
+    # Check if "data_intake" directory exists
+    data_intake_path = os.path.join(current_directory, 'data_intake')
+    if os.path.exists(data_intake_path) and os.path.isdir(data_intake_path):
+        return os.path.basename(data_intake_path)
+
+    # Check if "remote_data_intake" directory exists
+    remote_data_intake_path = os.path.join(current_directory, 'remote_data_intake')
+    if os.path.exists(remote_data_intake_path) and os.path.isdir(remote_data_intake_path):
+        return os.path.basename(remote_data_intake_path)
+
+    # If neither directory exists, return None or handle accordingly
+    sys.exit(f"ERROR: No data_intake directory found; current directory: {os.getcwd()}")
+
 def download_latest_data():
 	
-	# game data
+	# This code is used to initially download the data from the web, but also to update the data on the fly from the frontend
+	# This code sequence checks where the code is being run from, and sets the file paths accordingly
+	GAME_SAVE_PATH_ROOT = "../data/game_data/"
+	SCHEDULE_SAVE_PATH_ROOT = "../data/schedule_data/"
+	PLAYER_SAVE_PATH_ROOT = "../data/squad_data/"
+
+	run_location = get_data_intake_directory()
+
+	if run_location == "remote_data_intake":
+		GAME_SAVE_PATH_ROOT = "remote_data_intake/data/game_data/"
+		SCHEDULE_SAVE_PATH_ROOT = "remote_data_intake/data/schedule_data/"
+		PLAYER_SAVE_PATH_ROOT = "remote_data_intake/data/squad_data/"
+
+	# game data download
 	for season in MATCH_SITE_SEASONS:
-		download_csv_for_all_games_in_a_season(season, GAME_DATA_DOWNLOAD_ROOT)
+		download_csv_for_all_games_in_a_season(season, GAME_DATA_DOWNLOAD_ROOT, GAME_SAVE_PATH_ROOT)
 
-	# fixture data
+	# fixture data download
 	for season in FIXTURE_SEASON_ARRAY:
-		download_csv_for_all_fixtures_in_a_season(season, DOWNLOAD_FIXTURE_URL_ROOT)
+		download_csv_for_all_fixtures_in_a_season(season, DOWNLOAD_FIXTURE_URL_ROOT, SCHEDULE_SAVE_PATH_ROOT)
 
-	# player data
+	# player data download
 	for season in SEASONS_ARRAY:
-		download_html_for_squad_player_data(season, PLAYER_DOWNLOAD_ROOT)
+		download_html_for_squad_player_data(season, PLAYER_DOWNLOAD_ROOT, PLAYER_SAVE_PATH_ROOT)
 
 		
 
