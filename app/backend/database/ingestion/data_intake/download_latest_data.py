@@ -27,7 +27,7 @@ def download_csv_for_all_games_in_a_season(season: str, url: str, save_path_root
 	try:
 			# MATCH_SITE_SEASONS
 		save_path = os.path.join(save_path_root, f"E0 - {season}.csv")
-		url = url+{season}+'/E0.csv'
+		url = url+season+'/E0.csv'
 		response = requests.get(url)
 		if response.status_code == 200:
 			csv_data = response.text
@@ -132,9 +132,6 @@ def download_html_for_squad_player_data(season: str, url_root: str, save_path_ro
 
 	LEAGUE_NAMES = ["faprem.htm", "engprem.htm"]
 
-	file_save_path = os.path.join(save_path_root, f"{season}{team}.html")
-	year_dir_path = os.path.join(save_path_root, f"{season.replace('/', '')}")
-
 	faprem_url = url_root+season+LEAGUE_NAMES[0]
 	engprem_url = url_root+season+LEAGUE_NAMES[1]
 	time.sleep(2)
@@ -154,6 +151,9 @@ def download_html_for_squad_player_data(season: str, url_root: str, save_path_ro
 		for team_link in teams_links:
 			team = team_link[0]
 			link = team_link[1]
+
+			file_save_path = os.path.join(save_path_root, f"{season}{team}.html")
+			year_dir_path = os.path.join(save_path_root, f"{season.replace('/', '')}")
 
 			squad_url = url_root+season+link
 			page_content = requests.get(squad_url).text

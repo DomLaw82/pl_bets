@@ -1,3 +1,5 @@
+beautifulsoup4
+python-Levenshtein
 marshmallow
 flask
 flask_rebar
@@ -6,3 +8,5 @@ python-json-logger
 pandas
 sqlalchemy
 psycopg2-binary
+fuzzywuzzy
+requests
