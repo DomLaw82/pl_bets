@@ -176,8 +176,8 @@ def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_r
       
 	try:
 			# MATCH_SITE_SEASONS
-		save_path = os.path.join(save_path_root, f"epl_{season}-{season[-2:]}.csv")
-		response = requests.get(url)
+		save_path = os.path.join(save_path_root, f"epl_{season}-{str(int(season)+1)[-2:]}.csv")
+		response = requests.get(url+season)
 		if response.status_code == 200:
 			csv_data = response.text
 			with open(save_path, 'w') as file:
@@ -197,25 +197,31 @@ def download_latest_data():
 	print("---Fetching latest data---")
 	print("--- --- --- --- --- --- --- ---")
 	print("\n")
+	
 	# This code is used to initially download the data from the web, but also to update the data on the fly from the frontend
 	GAME_SAVE_PATH_ROOT = "data/game_data/"
 	SCHEDULE_SAVE_PATH_ROOT = "data/schedule_data/"
 	PLAYER_SAVE_PATH_ROOT = "data/squad_data/"
-
+	
+	# Create directories if they don't exist
+	for path_root in [GAME_SAVE_PATH_ROOT, SCHEDULE_SAVE_PATH_ROOT, PLAYER_SAVE_PATH_ROOT]:
+		if not os.path.exists(path_root):
+			os.makedirs(path_root)
+	
 	# game data download
 	print("Downloading game data...")
 	for season in MATCH_SITE_SEASONS:
 		time.sleep(0.2)
 		download_csv_for_all_games_in_a_season(season, GAME_DATA_DOWNLOAD_ROOT, GAME_SAVE_PATH_ROOT)
 	print("--- --- --- --- --- --- --- ---\n")
-
+	
 	# fixture data download
 	print("Downloading fixture data...")
 	for season in FIXTURE_SEASON_ARRAY:
 		time.sleep(0.2)
 		download_csv_for_all_fixtures_in_a_season(season, DOWNLOAD_FIXTURE_URL_ROOT, SCHEDULE_SAVE_PATH_ROOT)
 	print("--- --- --- --- --- --- --- ---\n")
-
+	
 	# player data download
 	print("Downloading player data...")
 	for season in SEASONS_ARRAY:
