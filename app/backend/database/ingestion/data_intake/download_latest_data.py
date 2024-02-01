@@ -192,23 +192,33 @@ def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_r
 		return False
 
 def download_latest_data():
-	
+	print("\n")
+	print("--- --- --- --- --- --- --- ---")
+	print("---Fetching latest data---")
+	print("--- --- --- --- --- --- --- ---")
+	print("\n")
 	# This code is used to initially download the data from the web, but also to update the data on the fly from the frontend
 	GAME_SAVE_PATH_ROOT = "data/game_data/"
 	SCHEDULE_SAVE_PATH_ROOT = "data/schedule_data/"
 	PLAYER_SAVE_PATH_ROOT = "data/squad_data/"
 
 	# game data download
+	print("\n")
+	print("Downloading game data...")
 	for season in MATCH_SITE_SEASONS:
 		time.sleep(0.2)
 		download_csv_for_all_games_in_a_season(season, GAME_DATA_DOWNLOAD_ROOT, GAME_SAVE_PATH_ROOT)
 
 	# fixture data download
+	print("\n")
+	print("Downloading fixture data...")
 	for season in FIXTURE_SEASON_ARRAY:
 		time.sleep(0.2)
 		download_csv_for_all_fixtures_in_a_season(season, DOWNLOAD_FIXTURE_URL_ROOT, SCHEDULE_SAVE_PATH_ROOT)
 
 	# player data download
+	print("\n")
+	print("Downloading player data...")
 	for season in SEASONS_ARRAY:
 		time.sleep(0.2)
 		download_html_for_squad_player_data(season, PLAYER_DOWNLOAD_ROOT, PLAYER_SAVE_PATH_ROOT)
