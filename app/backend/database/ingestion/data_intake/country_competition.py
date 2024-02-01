@@ -48,12 +48,10 @@ def country_competition_main(db_connection):
 	comparison_columns = [["name"], ["country_id", "name"]]
 	
 	for idx, df in enumerate(dfs):
-		print(f"Processing {tables[idx]} data...")
 		deduplicated_df = remove_duplicate_rows(db_connection, df, comparison_columns[idx], tables[idx])
 		if not deduplicated_df.empty:
 			save_to_database(db_connection, deduplicated_df, tables[idx])
 		print(f"Inserted into {tables[idx]} table.")
-		print("\n")
 		
 
 # TODO - Add logging for more visibility of data_intake process
