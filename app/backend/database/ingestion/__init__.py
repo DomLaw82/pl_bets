@@ -18,34 +18,34 @@ def download_and_insert_latest_data():
 
 	# [country, competition]
 	country_competition_main(local_pl_stats_connector)
-	print("Data Intake: country COMPLETE")
+	print("\nData Intake: country COMPLETE")
 	print("Data Intake: competition COMPLETE")
-	print("--- --- --- --- --- --- --- ---")
+	print("--- --- --- --- --- --- --- ---\n")
 
 	# format game data [team, match, referee]
 	team_ref_match_main(local_pl_stats_connector)
-	print("Data Intake: team COMPLETE")
+	print("\nData Intake: team COMPLETE")
 	print("Data Intake: match COMPLETE")
 	print("Data Intake: referee COMPLETE")
-	print("--- --- --- --- --- --- --- ---")
+	print("--- --- --- --- --- --- --- ---\n")
 
 	# format season schedule [schedule]
 	schedule_main(local_pl_stats_connector)
-	print("Data Intake: schedule COMPLETE")
-	print("--- --- --- --- --- --- --- ---")
+	print("\nData Intake: schedule COMPLETE")
+	print("--- --- --- --- --- --- --- ---\n")
 		
 	# format squad data [player, player_team]
 	player_main(local_pl_stats_connector)
-	print("Data Intake: player_team COMPLETE")
+	print("\nData Intake: player_team COMPLETE")
 	print("Data Intake: player COMPLETE")
-	print("--- --- --- --- --- --- --- ---")
+	print("--- --- --- --- --- --- --- ---\n")
 		
 	# [historic_player_per_ninety]
 	per_90_main(local_pl_stats_connector)
-	print("Data Intake: per_90 COMPLETE")
+	print("\nData Intake: per_90 COMPLETE")
 	print("Data Intake: COMPLETE")
 	print("--- --- --- --- --- --- --- ---")
-	print("--- --- --- --- --- --- --- ---")
+	print("--- --- --- --- --- --- --- ---\n")
 
 if __name__ == "__main__":
 	download_and_insert_latest_data()

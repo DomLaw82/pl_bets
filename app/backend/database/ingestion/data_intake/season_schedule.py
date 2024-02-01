@@ -68,6 +68,5 @@ def schedule_main(db_connection) -> None:
 			if not deduplicated_df.empty:
 				save_to_database(db_connection, deduplicated_df)
 				print(f"Inserted into schedule table for {season_schedule_file.name}")
-	print("\n")
 
 # TODO - Add logging for more visibility of data_intake process

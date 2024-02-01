@@ -207,24 +207,22 @@ def download_latest_data():
 	for season in MATCH_SITE_SEASONS:
 		time.sleep(0.2)
 		download_csv_for_all_games_in_a_season(season, GAME_DATA_DOWNLOAD_ROOT, GAME_SAVE_PATH_ROOT)
-	print("--- --- --- --- --- --- --- ---")
+	print("--- --- --- --- --- --- --- ---\n")
 
 	# fixture data download
-	print("\n")
 	print("Downloading fixture data...")
 	for season in FIXTURE_SEASON_ARRAY:
 		time.sleep(0.2)
 		download_csv_for_all_fixtures_in_a_season(season, DOWNLOAD_FIXTURE_URL_ROOT, SCHEDULE_SAVE_PATH_ROOT)
-	print("--- --- --- --- --- --- --- ---")
+	print("--- --- --- --- --- --- --- ---\n")
 
 	# player data download
-	print("\n")
 	print("Downloading player data...")
 	for season in SEASONS_ARRAY:
 		time.sleep(0.2)
 		download_html_for_squad_player_data(season, PLAYER_DOWNLOAD_ROOT, PLAYER_SAVE_PATH_ROOT)
 	print("--- --- --- --- --- --- --- ---")
-	print("--- --- --- --- --- --- --- ---")
+	print("--- --- --- --- --- --- --- ---\n")
 
 		
 

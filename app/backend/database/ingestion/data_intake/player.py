@@ -174,8 +174,6 @@ def player_main(db_connection):
 			if not deduplicated_df.empty:
 				save_to_database(db_connection, deduplicated_df, "player_team")
 				print(f"Inserted into player_team table for {team} for {season}")
-		print("\n")
-	print("\n")
 		
 def save_to_database(db_connection, df: pd.DataFrame, table_name: str) -> None:
 	"""

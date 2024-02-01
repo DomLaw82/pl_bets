@@ -106,4 +106,3 @@ def per_90_main(db_connection):
 		df = clean_historic_stats_df(db_connection, df, season)
 		save_to_database(db_connection, df)
 		print(f"Inserted into historic_player_per_ninety table for {season}.")
-	print("\n")
