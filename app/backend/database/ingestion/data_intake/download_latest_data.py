@@ -25,7 +25,7 @@ def download_csv_for_all_games_in_a_season(season: str, url: str, save_path_root
 	"""
       
 	try:
-			# MATCH_SITE_SEASONS
+		# MATCH_SITE_SEASONS
 		save_path = os.path.join(save_path_root, f"E0 - {season}.csv")
 		url = url+season+'/E0.csv'
 		response = requests.get(url)
@@ -33,13 +33,13 @@ def download_csv_for_all_games_in_a_season(season: str, url: str, save_path_root
 			csv_data = response.text
 			with open(save_path, 'w') as file:
 				file.write(csv_data)
-			print(f'CSV file for season {season} downloaded and saved to {save_path}')
+			print(f'Game csv file for season {season} downloaded and saved to {save_path}')
 			return True
 		else:
 			print(f'Failed to download the CSV file for season {season}. Status code:', response.status_code)
 			return False
 	except Exception as e:
-		print(f'An error occurred while downloading season {season}:', str(e))
+		print(f'An error occurred while downloading games for season {season}:', str(e))
 		return False
 	
 def get_page_soup(html_text):
@@ -161,8 +161,9 @@ def download_html_for_squad_player_data(season: str, url_root: str, save_path_ro
 				os.mkdir(year_dir_path) 
 			with open(file_save_path, 'w') as file:
 				file.write(page_content)
+			print(f'Fixture csv file for season {season} downloaded and saved to {file_save_path}')
 	except Exception as e:
-		print(f"ERROR: {season}\n")
+		print(f'An error occurred while downloading squad for season {season}:', str(e))
 		print(e)
 
 def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_root: str):
@@ -181,32 +182,35 @@ def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_r
 			csv_data = response.text
 			with open(save_path, 'w') as file:
 				file.write(csv_data)
-			print(f'CSV file for season {season} downloaded and saved to {save_path}')
+			print(f'Fixture csv file for season {season} downloaded and saved to {save_path}')
 			return True
 		else:
-			print(f'Failed to download the CSV file for season {season}. Status code:', response.status_code)
+			print(f'Failed to download the fixture CSV file for season {season}. Status code:', response.status_code)
 			return False
 	except Exception as e:
-		print(f'An error occurred while downloading season {season}:', str(e))
+		print(f'An error occurred while downloading fixtures for season {season}:', str(e))
 		return False
 
 def download_latest_data():
 	
 	# This code is used to initially download the data from the web, but also to update the data on the fly from the frontend
-	GAME_SAVE_PATH_ROOT = "../data/game_data/"
-	SCHEDULE_SAVE_PATH_ROOT = "../data/schedule_data/"
-	PLAYER_SAVE_PATH_ROOT = "../data/squad_data/"
+	GAME_SAVE_PATH_ROOT = "data/game_data/"
+	SCHEDULE_SAVE_PATH_ROOT = "data/schedule_data/"
+	PLAYER_SAVE_PATH_ROOT = "data/squad_data/"
 
 	# game data download
 	for season in MATCH_SITE_SEASONS:
+		time.sleep(0.2)
 		download_csv_for_all_games_in_a_season(season, GAME_DATA_DOWNLOAD_ROOT, GAME_SAVE_PATH_ROOT)
 
 	# fixture data download
 	for season in FIXTURE_SEASON_ARRAY:
+		time.sleep(0.2)
 		download_csv_for_all_fixtures_in_a_season(season, DOWNLOAD_FIXTURE_URL_ROOT, SCHEDULE_SAVE_PATH_ROOT)
 
 	# player data download
 	for season in SEASONS_ARRAY:
+		time.sleep(0.2)
 		download_html_for_squad_player_data(season, PLAYER_DOWNLOAD_ROOT, PLAYER_SAVE_PATH_ROOT)
 
 		
