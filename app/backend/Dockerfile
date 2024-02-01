@@ -27,6 +27,13 @@ RUN sed -i 's/data_intake/remote_data_intake/g' \
 	./remote_data_intake/team_ref_match.py \
 	./remote_data_intake/per_90_stats.py
 
+RUN sed -i 's/\".\/data/\".\/remote_data_intake\/data/g' \
+	./remote_data_intake/country_competition.py \
+	./remote_data_intake/player.py \
+	./remote_data_intake/season_schedule.py \
+	./remote_data_intake/team_ref_match.py \
+	./remote_data_intake/per_90_stats.py
+
 
 RUN sed -i 's/\"data\//\".\/remote_data_intake\/data\//g' ./remote_data_intake/download_latest_data.py
 
