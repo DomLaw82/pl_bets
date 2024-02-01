@@ -67,5 +67,7 @@ def schedule_main(db_connection) -> None:
 			deduplicated_df = remove_duplicate_rows(db_connection, df, ["round_number", "date", "home_team_id", "away_team_id"], "schedule")
 			if not deduplicated_df.empty:
 				save_to_database(db_connection, deduplicated_df)
+				print(f"Inserted into schedule table for {season_schedule_file.name}")
+	print("\n")
 
 # TODO - Add logging for more visibility of data_intake process

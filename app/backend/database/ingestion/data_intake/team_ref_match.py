@@ -240,5 +240,8 @@ def team_ref_match_main(db_connection):
             
             if not deduplicated_df.empty:
                 save_to_database(db_connection, table, deduplicated_df)
+                print(f"Inserted into {table} table for {season}.")
+        print("\n")
+    print("\n")
 
 # TODO - Add logging for more visibility of data_intake process

@@ -162,6 +162,7 @@ def player_main(db_connection):
 			if not deduplicated_df.empty:
 				deduplicated_df = deduplicated_df[["first_name", "last_name", "birth_date", "position"]]
 				save_to_database(db_connection, deduplicated_df, "player")
+				print(f"Inserted into player table for {team} for {season}")
 
 			player_team_df["player_id"] = player_team_df.apply(lambda row: get_player_id(db_connection, row), axis=1)
 			player_team_df["team_id"] = player_team_df["team_id"].apply(lambda x: get_team_id(db_connection, x))
@@ -172,6 +173,9 @@ def player_main(db_connection):
 			deduplicated_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
 			if not deduplicated_df.empty:
 				save_to_database(db_connection, deduplicated_df, "player_team")
+				print(f"Inserted into player_team table for {team} for {season}")
+		print("\n")
+	print("\n")
 		
 def save_to_database(db_connection, df: pd.DataFrame, table_name: str) -> None:
 	"""
