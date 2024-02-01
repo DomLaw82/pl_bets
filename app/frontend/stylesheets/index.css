@@ -17,7 +17,7 @@ html {
 	border-radius: 10px;
 	border: #151515 2px solid;
 	text-align: center;
-	overflow: auto;
+	overflow: hidden;
 	transition: height 0.3s ease;
 	height: 100px;
 }
@@ -34,7 +34,7 @@ html {
 	width: 60%;
 	height: 50px;
 	margin: auto;
-	overflow: auto;
+	overflow: hidden;
 	transition: height 0.3s ease;
 }
 
