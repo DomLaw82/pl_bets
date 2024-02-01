@@ -1,4 +1,4 @@
-import requests, os, time, sys
+import requests, os, time
 from bs4 import BeautifulSoup
 import datetime
 
