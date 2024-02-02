@@ -30,6 +30,7 @@ function createTeamOptions(elementId, data) {
 async function updatePlayerCards(selectId, playerCardContainerId) {
 	const team = document.getElementById(selectId).value
 	await fetchPlayerData(playerCardContainerId, team);
+	clearPlayerLists();
 }
 async function fetchPlayerData(playerCardContainerId, team_name) {
 	
@@ -51,6 +52,7 @@ function clearPlayerLists() {
 	homeSelectedPlayersList.innerHTML = '';
 	awaySelectedPlayersList.innerHTML = '';
 }
+
 function attachCards(playerCardContainerId, data, keyOrderList) {
 	const playerCardsContainer = document.getElementById(playerCardContainerId);
 	playerCardsContainer.innerHTML = '';
