@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" type="text/css" href="../stylesheets/players.css" />
 		<link rel="stylesheet" type="text/css" href="../stylesheets/index.css" />
 		<script src="../javascripts/players.js"></script>
@@ -10,17 +12,19 @@
 	<body>
 		<div id="pop-up-background" class="overlay"></div>
 		<navbar>
-			<div class="navbar-title"><h1>PL Bets</h1></div>
-			<div class="navbar-button"><a href="/">Home</a></div>
-			<div class="navbar-button"><a href="teams.html">Teams</a></div>
-			<div class="navbar-button"><a href="players.html">Players</a></div>
-			<div class="navbar-button"><a href="matches.html">Matches</a></div>
-			<div class="navbar-button"><a href="prediction.html">Prediction</a></div>
+			<div class="navbar-element navbar-title" ><h1>PL Bets</h1></div>
+			<a class="navbar-element navbar-button" href="/"><p>Home</p></a>
+			<a class="navbar-element navbar-button" href="teams.html"><p>Teams</p></a>
+			<a class="navbar-element navbar-button" href="players.html"><p>Players</p></a>
+			<a class="navbar-element navbar-button" href="matches.html"><p>Matches</p></a>
+			<a class="navbar-element navbar-button" href="prediction.html"><p>Prediction</p></a>
 		</navbar>
 		<hr>
-		<h2 class="page-title">Players</h2>
-		<hr>
-		<p class="page-description">Search all players who have appeared in the Premier league from the start of the 2018/19 Season</p>
+		<div class="page-titles-div">
+			<h2 class="page-title">Players</h2>
+			<hr>
+			<p class="page-description">Search all players who have appeared in the Premier league from the start of the 2018/19 Season</p>
+		</div>
 		<hr>
 		<div id="searching">
 			<div id="search-box">
@@ -127,7 +131,7 @@
 				</div>
 			</div>
 		</div>
-		<div id="playersContainer"></div>
+		<div id="playersContainer" class="full-width-overflow-selector-components"></div>
 	</body>
 </html>
 

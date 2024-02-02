@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" type="text/css" href="../stylesheets/index.css" />
 		<link rel="stylesheet" type="text/css" href="../stylesheets/matches.css" />
 		<script src="../javascripts/matches.js"></script>
@@ -10,17 +12,19 @@
 	<body>
 		<div id="pop-up-background" class="overlay"></div>
 		<navbar>
-			<div class="navbar-title"><h1>PL Bets</h1></div>
-			<div class="navbar-button"><a href="/">Home</a></div>
-			<div class="navbar-button"><a href="teams.html">Teams</a></div>
-			<div class="navbar-button"><a href="players.html">Players</a></div>
-			<div class="navbar-button"><a href="matches.html">Matches</a></div>
-			<div class="navbar-button"><a href="prediction.html">Prediction</a></div>
+			<div class="navbar-element navbar-title"><h1>PL Bets</h1></div>
+			<a class="navbar-element navbar-button" href="/"><p>Home</p></a>
+			<a class="navbar-element navbar-button" href="teams.html"><p>Teams</p></a>
+			<a class="navbar-element navbar-button" href="players.html"><p>Players</p></a>
+			<a class="navbar-element navbar-button" href="matches.html"><p>Matches</p></a>
+			<a class="navbar-element navbar-button" href="prediction.html"><p>Prediction</p></a>
 		</navbar>
 		<hr>
-		<h2 class="page-title">Matches</h2>
-		<hr>
-		<p class="page-description">View past and present matches for organised by season, from the 2018-19 season. </p>
+		<div class="page-titles-div">
+			<h2 class="page-title">Matches</h2>
+			<hr>
+			<p class="page-description">View past and present matches for organised by season, from the 2018-19 season. </p>
+		</div>
 		<hr>
 		<div id="seasons"></div>
 		<div class="handling">
@@ -52,11 +56,11 @@
 		<div id="all-match-container">
 			<div id="future-container" class="match-container-section">
 				<div><h2>Upcoming Matches</h2></div>
-				<div id="upcoming-matches"></div>
+				<div id="upcoming-matches" class="full-width-overflow-selector-components"></div>
 			</div>
 			<div id="past-container" class="match-container-section">
 				<div><h2>Past Matches</h2></div>
-				<div id="past-matches"></div>
+				<div id="past-matches" class="full-width-overflow-selector-components"></div>
 			</div>
 		</div>
 		<div id="add-result-popup" class="pop-up">
@@ -165,5 +169,3 @@
 		</div>
 	</body>
 </html>
-
-<!-- TODO - Make all form fields required -->

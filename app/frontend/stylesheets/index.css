@@ -1,8 +1,47 @@
+/* 
+	#009A17 - Forest Green
+	#151515 - Night
+	#F8F4E3 - Cosmic Latte
+	#6E8894 - Slate Gray
+	#64A6BD - Moonstone 
+*/
+
 html {
-	background-color: #009A17;
-	border-color: #fff;
+	background-color: #F8F4E3;
+	border: #151515 5px solid;
 }
 
+.page-titles-div {
+	background-color: #6E8894 ;
+	padding: 1%;
+	border-radius: 10px;
+	border: #151515 2px solid;
+	text-align: center;
+	overflow: hidden;
+	transition: height 0.3s ease 0.2s;
+	height: 100px;
+}
+.page-titles-div:hover {
+	height: 150px;
+}
+
+.page-sub-titles-div {
+	background-color: #6E8894 ;
+	padding: 0.5%;
+	border-radius: 10px;
+	border: #151515 2px solid;
+	text-align: center;
+	width: 60%;
+	height: 50px;
+	margin: auto;
+	overflow: hidden;
+	transition: height 0.3s ease 0.2s;
+}
+
+.page-sub-titles-div:hover {
+	height: 95px;
+}
+	
 .team {
 	display: flex;
 	align-items: center;
@@ -16,13 +55,17 @@ html {
 }
 
 navbar {
-	background-color: #DBD3AD;
-	border-bottom: 1px solid #fff;
+	background-color: #009A17;
+	border-bottom: 4px solid #151515;
+	border-left: 3px solid #151515;
+	border-right: 3px solid #151515;
+	border-top: 3px solid #151515;
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 	padding: 1.5%;
-	border-radius: 35px;
-	color: #524632;
+	border-radius: 20px;
+	color: #F8F4E3;
 }
 
 .page-title {
@@ -37,16 +80,26 @@ navbar {
 }
 
 .navbar-button {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin: 1%;
+	text-align: center;
+	padding: 2%;
+	background-color: #64A6BD;
+	color: #F8F4E3;
+	border: #6E8894 3px solid;
+	border-radius: 20px;
+}
+.navbar-button:hover {
+	background-color: #4C8C9B;
+	transform: scale(0.975);
+}
+.navbar-button:active {
+	background-color: #3A6B7A;
+	transform: scale(0.96);
 }
 
-.navbar-button a {
+.navbar-button p {
 	text-decoration: none;
-	font-size: xx-large;
 	font-weight: bold;
+	color: #F8F4E3;
 }
 
 #welcome {
@@ -106,6 +159,7 @@ navbar {
 	border: #fff 1px solid;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	padding: 2%;
+	margin: 2%;
 	width: 350px;
 
 	animation: fadeIn .25s;
@@ -135,6 +189,7 @@ navbar {
 	transform: scale(0.97);
 	background-color: #777;
 }
+
 .active {
 	background-color: #08a9f3;
 	transform: scale(1.025);
@@ -147,11 +202,17 @@ navbar {
 
 .view-buttons {
 	padding: 2%;
-	border-radius: 10px;
+	border-radius: 15px;
+	text-align: center;
+	margin: auto;
 }
 .view-buttons:hover {
 	background-color: #999;
-	transform: scale(0.95);
+	transform: scale(0.975);
+}
+.view-buttons:active {
+	background-color: #777;
+	transform: scale(0.97);
 }
 
 #warning-pop-up {
@@ -175,4 +236,55 @@ navbar {
 	height: 100%;
 	background-color: #000;
 	opacity: 0.75;
+}
+
+.half-width-overflow-selector-components {
+	overflow: auto;
+	width: 100%;
+	height: 350px;
+	text-align: center;
+}
+.full-width-overflow-selector-components {
+	overflow: auto;
+	width: 100%;
+	height: 450px;
+	text-align: center;
+}
+
+#run-prediction-button-container{
+	text-align: center;
+}
+
+.full-card-selection-section {
+	text-align: center;
+	width: 100%;
+}
+.half-card-selection-section {
+	text-align: center;
+	width: 50%;
+}
+
+@keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@-moz-keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@-webkit-keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@-o-keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@-ms-keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
 }

@@ -30,6 +30,7 @@ function createTeamOptions(elementId, data) {
 async function updatePlayerCards(selectId, playerCardContainerId) {
 	const team = document.getElementById(selectId).value
 	await fetchPlayerData(playerCardContainerId, team);
+	clearPlayerLists();
 }
 async function fetchPlayerData(playerCardContainerId, team_name) {
 	
@@ -51,6 +52,7 @@ function clearPlayerLists() {
 	homeSelectedPlayersList.innerHTML = '';
 	awaySelectedPlayersList.innerHTML = '';
 }
+
 function attachCards(playerCardContainerId, data, keyOrderList) {
 	const playerCardsContainer = document.getElementById(playerCardContainerId);
 	playerCardsContainer.innerHTML = '';
@@ -229,4 +231,32 @@ function createWarningPopUp(message) {
 			popUpBackground.style.display = 'none';
 		}
 	});
+}
+
+async function downloadLatestData() {
+	const popUpBackground = document.getElementById('pop-up-background');
+	popUpBackground.setAttribute('style', 'pointer-events: none;');
+	popUpBackground.style.display = 'block';
+
+	const predictionOptionsPopUp = document.getElementById('prediction-options-pop-up')
+	const downloadPopUp = document.getElementById('download-pop-up');
+	const downloadPopUpContent = document.getElementById('download-pop-up-content');
+	const downloadPopUpButton = document.getElementById('download-pop-up-button');
+
+	downloadPopUpContent.innerHTML = '<p>Downloading latest data...This may take 4-5 mins</p>';
+	downloadPopUpButton.style.display = 'none';
+	predictionOptionsPopUp.style.display = 'none';
+	downloadPopUp.style.display = 'block';
+
+	await fetch(`http://localhost:8080/download-latest-data`, {
+		method: 'GET',
+		credentials: 'include'
+	})
+		.then(res => res.json())
+		.then((data) => {
+			downloadPopUpContent.innerHTML = `<p>${data.message}</p>`;
+			downloadPopUpButton.style.display = 'block';
+			popUpBackground.style.pointerEvents = '';
+			popUpBackground.style.display = 'none';
+		});
 }
