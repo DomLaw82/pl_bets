@@ -29,10 +29,6 @@
 .selected-players {
 	display: none;
 }
-.player-selection-section {
-	text-align: center;
-	width: 50%;
-}
 
 #prediction-results {
 	display: none;
@@ -71,4 +67,33 @@ table {
 .prediction-button-container {
 	display: flex;
 	flex-direction: row;
+}
+
+#run-prediction-button-container {
+	padding: 1%;
+}
+
+@keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@-moz-keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@-webkit-keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@-o-keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@-ms-keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
 }

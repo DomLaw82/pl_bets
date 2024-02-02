@@ -85,7 +85,7 @@ navbar {
 	background-color: #64A6BD;
 	color: #F8F4E3;
 	border: #6E8894 3px solid;
-	border-radius: 10px;
+	border-radius: 20px;
 }
 .navbar-button:hover {
 	background-color: #4C8C9B;
@@ -96,7 +96,7 @@ navbar {
 	transform: scale(0.96);
 }
 
-.navbar-button a {
+.navbar-button p {
 	text-decoration: none;
 	font-weight: bold;
 	color: #F8F4E3;
@@ -238,12 +238,53 @@ navbar {
 	opacity: 0.75;
 }
 
-.overflow-selector-components {
+.half-width-overflow-selector-components {
 	overflow: auto;
 	width: 100%;
 	height: 350px;
+	text-align: center;
+}
+.full-width-overflow-selector-components {
+	overflow: auto;
+	width: 100%;
+	height: 450px;
+	text-align: center;
 }
 
 #run-prediction-button-container{
 	text-align: center;
+}
+
+.full-card-selection-section {
+	text-align: center;
+	width: 100%;
+}
+.half-card-selection-section {
+	text-align: center;
+	width: 50%;
+}
+
+@keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@-moz-keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@-webkit-keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@-o-keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@-ms-keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
 }
