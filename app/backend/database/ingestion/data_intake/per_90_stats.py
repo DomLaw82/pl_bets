@@ -101,7 +101,6 @@ def per_90_main(db_connection):
 	seasons = sorted(os.listdir(data_folder_path))
 
 	for season in seasons:
-		print(f"Processing {season} per 90 data...")
 		df = combining_datasets(season)
 		df = clean_historic_stats_df(db_connection, df, season)
 		save_to_database(db_connection, df)

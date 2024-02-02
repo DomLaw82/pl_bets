@@ -281,8 +281,8 @@ def update_historic_per_ninety(content:str):
 def download_latest_data():
    # module will be available in the container, but is not in the path locally (see app/backend/database/ingestion/__init__.py)
    # TODO - refactor this so that the module is available locally/create empty file locally
-   download_and_insert_latest_data()
-   return jsonify('Latest data downloaded and inserted into database successfully')
+   message = download_and_insert_latest_data()
+   return jsonify(message)
 
 
 app = Flask(__name__)
