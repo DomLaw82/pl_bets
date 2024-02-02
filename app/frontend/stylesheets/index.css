@@ -18,7 +18,7 @@ html {
 	border: #151515 2px solid;
 	text-align: center;
 	overflow: hidden;
-	transition: height 0.3s ease;
+	transition: height 0.3s ease 0.2s;
 	height: 100px;
 }
 .page-titles-div:hover {
@@ -35,7 +35,7 @@ html {
 	height: 50px;
 	margin: auto;
 	overflow: hidden;
-	transition: height 0.3s ease;
+	transition: height 0.3s ease 0.2s;
 }
 
 .page-sub-titles-div:hover {

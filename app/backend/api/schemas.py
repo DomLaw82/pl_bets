@@ -40,7 +40,7 @@ class RefereeSchema(Schema):
 
 class ScheduleSchema(Schema):
     game_week = fields.Integer()
-    date = fields.DateTime()
+    date = fields.String()
     home_team = fields.String()
     away_team = fields.String()
     result = fields.String()
