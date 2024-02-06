@@ -44,7 +44,7 @@ def process_team_form(team_id, data):
 def run_data_prep():
 
     data = db.get_df("SELECT * FROM match")
-    match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals","home_odds","draw_odds","away_odds"]
+    match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals","closing_home_odds","closing_draw_odds","closing_away_odds"]
     data = data[match_columns].copy()
     print(data.tail())
 

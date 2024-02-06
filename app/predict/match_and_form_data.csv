@@ -1,4 +1,4 @@
-season,date,home_team_id,away_team_id,home_goals,away_goals,home_odds,draw_odds,away_odds,gd_form_home,gd_form_away,match_rating,full_time_result,home_win,draw,away_win
+season,date,home_team_id,away_team_id,home_goals,away_goals,closing_home_odds,closing_draw_odds,closing_away_odds,gd_form_home,gd_form_away,match_rating,full_time_result,home_win,draw,away_win
 2017-2018,2017-09-09,t-00001,t-00002,3,0,1.31,6.4,10.0,,,,H,1,0,0
 2017-2018,2017-10-01,t-00001,t-00003,2,0,1.26,6.65,13.5,,,,H,1,0,0
 2017-2018,2018-05-06,t-00001,t-00004,5,0,1.47,4.79,7.45,,,,H,1,0,0
