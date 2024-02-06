@@ -34,24 +34,25 @@ def run_data_modelling_part_one(data: pd.DataFrame) -> dict:
 
     # Create a predicted home win probabilities plot
     sns.regplot(x='match_rating', y='home_win', data=data_train, logistic=True)
-    plt.title('Home win probability plot')
+    plt.title('Outcome probability plot')
     plt.xlabel('Match Rating')
     plt.ylabel('Probability')
-    plt.savefig('plots/home_win_probability_plot.png', dpi=300)
+    # plt.savefig('win_prediction/plots/home_win_probability_plot.png', dpi=300)
 
     # Create a predicted draw probabilities plot
     sns.regplot(x='match_rating', y='draw', data=data_train, logistic=True)
-    plt.title('Draw probability plot')
-    plt.xlabel('Match Rating')
-    plt.ylabel('Probability')
-    plt.savefig('plots/draw_probability_plot.png', dpi=300)
+    # plt.title('Draw probability plot')
+    # plt.xlabel('Match Rating')
+    # plt.ylabel('Probability')
+    # plt.savefig('win_prediction/plots/draw_probability_plot.png', dpi=300)
 
     # Create a predicted away win probabilities plot
     sns.regplot(x='match_rating', y='away_win', data=data_train, logistic=True)
-    plt.title('Away win probability plot')
-    plt.xlabel('Match Rating')
-    plt.ylabel('Probability')
-    plt.savefig('plots/away_win_probability_plot.png', dpi=300)
+    # plt.title('Away win probability plot')
+    # plt.xlabel('Match Rating')
+    # plt.ylabel('Probability')
+    plt.legend(['Home Win', 'Draw', 'Away Win'], title = "Outcome")
+    plt.savefig('win_prediction/plots/outcome_probability_plot.png', dpi=300)
 
     # Predict probabilities for each outcome
     data_test['home_win_prob'] = home_win_model.predict(data_test)
@@ -65,9 +66,11 @@ def run_data_modelling_part_one(data: pd.DataFrame) -> dict:
     data_test_enriched['fair_d'] = 1 / data_test_enriched['draw_prob']
     data_test_enriched['fair_a'] = 1 / data_test_enriched['away_win_prob']
 
-    data_test_enriched['value_h'] = (data_test_enriched['home_odds'] - data_test_enriched['fair_h']) / data_test_enriched['fair_h']
-    data_test_enriched['value_d'] = (data_test_enriched['draw_odds'] - data_test_enriched['fair_d']) / data_test_enriched['fair_d']
-    data_test_enriched['value_a'] = (data_test_enriched['away_odds'] - data_test_enriched['fair_a']) / data_test_enriched['fair_a']
+    #TODO - Where do home odds, draw odds and away odds come from?
+
+    data_test_enriched['value_h'] = (data_test_enriched['closing_home_odds'] - data_test_enriched['fair_h']) / data_test_enriched['fair_h']
+    data_test_enriched['value_d'] = (data_test_enriched['closing_draw_odds'] - data_test_enriched['fair_d']) / data_test_enriched['fair_d']
+    data_test_enriched['value_a'] = (data_test_enriched['closing_away_odds'] - data_test_enriched['fair_a']) / data_test_enriched['fair_a']
 
     data_test_enriched['H'] = (data_test_enriched['value_h'] > 0).astype(int)
     data_test_enriched['D'] = (data_test_enriched['value_d'] > 0).astype(int)
@@ -80,8 +83,8 @@ def run_data_modelling_part_one(data: pd.DataFrame) -> dict:
 
     data_test_enriched['value'] = data_test_enriched.apply(lambda row: row['value_h'] if row['prediction'] == 'H' else (row['value_d'] if row['prediction'] == 'D' else row['value_a']), axis=1)
     data_test_enriched['odds_prediction'] = data_test_enriched.apply(lambda row: row['fair_h'] if row['prediction'] == 'H' else (row['fair_d'] if row['prediction'] == 'D' else row['fair_a']), axis=1)
-    data_test_enriched['odds'] = data_test_enriched.apply(lambda row: row['fair_h'] if row['ftr'] == 'H' else (row['fair_a'] if row['ftr'] == 'A' else row['fair_d']), axis=1)
-    data_test_enriched['won'] = (data_test_enriched['ftr'] == data_test_enriched['prediction']).astype(int)
+    data_test_enriched['odds'] = data_test_enriched.apply(lambda row: row['fair_h'] if row['full_time_result'] == 'H' else (row['fair_a'] if row['full_time_result'] == 'A' else row['fair_d']), axis=1)
+    data_test_enriched['won'] = (data_test_enriched['full_time_result'] == data_test_enriched['prediction']).astype(int)
     data_test_enriched['profit'] = data_test_enriched['odds'] * data_test_enriched['won'] - 1
 
     print(data_test_enriched.head())

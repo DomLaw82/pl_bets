@@ -77,6 +77,12 @@ def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> 
         "AR": "away_red_cards",
         "Referee": "referee_id",
         "Date": "date",
+        "PSH": "home_odds",
+        "PSD": "draw_odds",
+        "PSA": "away_odds",
+        "PSCH": "closing_home_odds",
+        "PSCD": "closing_draw_odds",
+        "PSCA": "closing_away_odds",
     }
 
     df = df.rename(columns=column_mapping)
@@ -120,6 +126,12 @@ def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
             "away_red_cards",
             "home_corners",
             "away_corners",
+            "home_odds",
+            "draw_odds",
+            "away_odds",
+            "closing_home_odds",
+            "closing_draw_odds",
+            "closing_away_odds",
         ]
     ].copy()
 

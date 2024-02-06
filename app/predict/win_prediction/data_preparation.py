@@ -44,7 +44,7 @@ def process_team_form(team_id, data):
 def run_data_prep():
 
     data = db.get_df("SELECT * FROM match")
-    match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals"]
+    match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals","home_odds","draw_odds","away_odds"]
     data = data[match_columns].copy()
     print(data.tail())
 
@@ -64,6 +64,4 @@ def run_data_prep():
     data['away_win'] = (data['full_time_result'] == 'A').astype(int)
 
     print(data.tail())
-    # data.to_csv('../match_and_form_data.csv', index=False)
-
-run_data_prep()
+    data.to_csv('match_and_form_data.csv', index=False)

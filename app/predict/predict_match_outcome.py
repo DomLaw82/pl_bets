@@ -1,7 +1,7 @@
 from dataset_creation.create_dataset import create_prediction_dataset
 from win_prediction.data_modelling_one import run_data_modelling_part_one
 from neural_net.build_and_save_model import perform_scaling_and_pca
-from win_prediction.data_preparation import run_data_prep
+from win_prediction.win_prediction import run_win_prediction
 import tensorflow as tf
 import pandas as pd
 import numpy as np
@@ -47,8 +47,6 @@ def predict_match_outcome(home_team_id: str, home_players: list, away_team_id: s
 	prediction = model.predict(X)
 
 	# Logistic regression prediction
-	run_data_prep(home_team_id, away_team_id)
-	data = pd.read_csv('../match_and_form_data.csv')
-	lr_results = run_data_modelling_part_one(data)
+	odds = run_win_prediction(home_team_id, away_team_id)
 
-	return prediction
+	return prediction, odds

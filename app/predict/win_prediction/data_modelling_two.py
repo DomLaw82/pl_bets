@@ -7,7 +7,6 @@ Created on Mon May  1 10:23:31 2023
 
 import pandas as pd
 import numpy as np
-import os
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from scipy.stats import t
@@ -15,9 +14,12 @@ from scipy.stats import t
 # Start the loop for the desired seasons
 def run_data_modelling_part_two(data: pd.DataFrame):
     season_results = []
+    print("\n\n\ndata_\n\n\n",data)
 
     for season in sorted(data["season"].unique().tolist()):
         data_train = data[data['season'] < season]
+        if data_train.empty:
+            continue
         data_test = data[data['season'] == season]
         
         # Drop rows with NaN values
@@ -43,9 +45,9 @@ def run_data_modelling_part_two(data: pd.DataFrame):
         data_test_enriched['fair_d'] = 1 / data_test_enriched['draw_prob']
         data_test_enriched['fair_a'] = 1 / data_test_enriched['away_win_prob']
         
-        data_test_enriched['value_h'] = (data_test_enriched['home_odds'] - data_test_enriched['fair_h']) / data_test_enriched['fair_h']
-        data_test_enriched['value_d'] = (data_test_enriched['draw_odds'] - data_test_enriched['fair_d']) / data_test_enriched['fair_d']
-        data_test_enriched['value_a'] = (data_test_enriched['away_odds'] - data_test_enriched['fair_a']) / data_test_enriched['fair_a']
+        data_test_enriched['value_h'] = (data_test_enriched['closing_home_odds'] - data_test_enriched['fair_h']) / data_test_enriched['fair_h']
+        data_test_enriched['value_d'] = (data_test_enriched['closing_draw_odds'] - data_test_enriched['fair_d']) / data_test_enriched['fair_d']
+        data_test_enriched['value_a'] = (data_test_enriched['closing_away_odds'] - data_test_enriched['fair_a']) / data_test_enriched['fair_a']
         
         data_test_enriched['H'] = (data_test_enriched['value_h'] > 0).astype(int)
         data_test_enriched['D'] = (data_test_enriched['value_d'] > 0).astype(int)
@@ -58,8 +60,8 @@ def run_data_modelling_part_two(data: pd.DataFrame):
         
         data_test_enriched['value'] = data_test_enriched.apply(lambda row: row['value_h'] if row['prediction'] == 'H' else (row['value_d'] if row['prediction'] == 'D' else row['value_a']), axis=1)
         data_test_enriched['odds_prediction'] = data_test_enriched.apply(lambda row: row['fair_h'] if row['prediction'] == 'H' else (row['fair_d'] if row['prediction'] == 'D' else row['fair_a']), axis=1)
-        data_test_enriched['odds'] = data_test_enriched.apply(lambda row: row['fair_h'] if row['ftr'] == 'H' else (row['fair_a'] if row['ftr'] == 'A' else row['fair_d']), axis=1)
-        data_test_enriched['won'] = (data_test_enriched['ftr'] == data_test_enriched['prediction']).astype(int)
+        data_test_enriched['odds'] = data_test_enriched.apply(lambda row: row['fair_h'] if row['full_time_result'] == 'H' else (row['fair_a'] if row['full_time_result'] == 'A' else row['fair_d']), axis=1)
+        data_test_enriched['won'] = (data_test_enriched['full_time_result'] == data_test_enriched['prediction']).astype(int)
         data_test_enriched['profit'] = data_test_enriched['odds'] * data_test_enriched['won'] - 1
         
         print(data_test_enriched.head())
@@ -118,7 +120,7 @@ def run_data_modelling_part_two(data: pd.DataFrame):
     result_all['season'] = "all"
 
     # See overall results
-    combined_season_results_df = pd.concat(season_results_df, result_all)
+    combined_season_results_df = pd.concat([season_results_df, result_all], ignore_index=True)
 
     return combined_season_results_df
 

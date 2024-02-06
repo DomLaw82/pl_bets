@@ -67,7 +67,13 @@ CREATE TABLE match (
 	home_yellow_cards INTEGER NOT NULL,
 	away_yellow_cards INTEGER NOT NULL,
 	home_red_cards INTEGER NOT NULL,
-	away_red_cards INTEGER NOT NULL
+	away_red_cards INTEGER NOT NULL,
+	home_odds FLOAT NOT NULL,
+	draw_odds FLOAT NOT NULL,
+	away_odds FLOAT NOT NULL,
+	closing_home_odds FLOAT NOT NULL,
+	closing_draw_odds FLOAT NOT NULL,
+	closing_away_odds FLOAT NOT NULL
 );
 
 CREATE TABLE historic_player_per_ninety (

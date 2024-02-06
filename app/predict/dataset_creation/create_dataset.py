@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from dataset_creation.db_connection import local_pl_stats_connector
+from db_connection import local_pl_stats_connector
 import datetime, sys
 
 db = local_pl_stats_connector
