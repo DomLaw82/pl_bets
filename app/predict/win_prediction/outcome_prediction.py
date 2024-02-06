@@ -5,7 +5,7 @@ Created on Sat Apr 29 13:57:43 2023
 @author: antoinejwmartin
 """
 
-import os
+import os, sys
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
@@ -87,6 +87,9 @@ def predict_fixture_outcome_odds(data: pd.DataFrame, home_team_id: str, away_tea
                 .rename(columns={'hometeam': 'home', 'awayteam': 'away', 'psh': 'home_odds', 'psd': 'draw_odds', 'psa': 'away_odds'})
             )
     
+    if fixtures.empty:
+        sys.exit("No fixtures found for EPL for this gameweek/for the selected teams. Please try again later.")
+
     if home_team_id and away_team_id:
         fixtures["home"] = home_team_id
         fixtures["away"] = away_team_id

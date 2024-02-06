@@ -269,7 +269,21 @@ def convert_team_rows_to_single_row(df: pd.DataFrame, home_team_id: str = None, 
 
     return final_df
 
+def get_team_form(team_id: str, is_home: bool) -> float:
+	home_or_away_form_data = db.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE {'home_team_id =' if is_home else 'away_team_id ='} '{team_id}'  ORDER BY date DESC LIMIT 5")
+	overall_form = db.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE home_team_id = '{team_id}' OR away_team_id = '{team_id}' ORDER BY date DESC LIMIT 5")
 
+	# Show the form for the last 5 home or away matches for a team, depending if they are home or away for the current match
+	home_or_away_mean_goal_difference = (home_or_away_form_data["home_goals"].sum() - home_or_away_form_data["away_goals"].sum())/5 if is_home else (home_or_away_form_data["away_goals"].sum() - home_or_away_form_data["home_goals"].sum())/5
+	# Show the form for the last 5 matches for a team, regardless of whether they are home or away for the current match
+	overall_mean_goal_difference = ((overall_form.loc[overall_form["home_team_id"] == team_id, "home_goals"].sum() + overall_form.loc[overall_form["away_team_id"] == team_id, "away_goals"].sum()) - (overall_form.loc[overall_form["home_team_id"] != team_id, "home_goals"].sum() + overall_form.loc[overall_form["away_team_id"] != team_id, "away_goals"].sum()))/5
+	return home_or_away_mean_goal_difference, overall_mean_goal_difference
+
+def get_last_five_head_to_head_matches(home_team_id: str, away_team_id: str) -> pd.DataFrame:
+	# The more negative the value, the better the away team has performed w.r.t the home team in the last 5 head-to-head matches
+	data = db.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE (home_team_id = '{home_team_id}' AND away_team_id = '{away_team_id}') OR (home_team_id = '{away_team_id}' AND away_team_id = '{home_team_id}') ORDER BY date DESC LIMIT 5")
+	head_to_head_goal_difference = (data.loc[data["home_team_id"] == home_team_id, "home_goals"].sum() + data.loc[data["away_team_id"] == home_team_id, "away_goals"].sum()) - (data.loc[data["home_team_id"] == away_team_id, "home_goals"].sum() + data.loc[data["away_team_id"] == away_team_id, "away_goals"].sum())
+	return head_to_head_goal_difference
 
 def create_career_and_form_dataframes_for_database(match_values: list) -> dict:
 	"""
@@ -329,7 +343,7 @@ def combine_form_and_career_stats(dfs: tuple, pred: bool = False, columns_to_eva
 	form_df = dfs[1]
 
 	career_stats_ratio = 0.6
-	form_stats_ratio = 0.4
+	form_stats_ratio = 1 - career_stats_ratio
 
 	career_df[columns_to_evaluate] = career_df[columns_to_evaluate] * career_stats_ratio
 	form_df[columns_to_evaluate] = form_df[columns_to_evaluate] * form_stats_ratio
