@@ -1,6 +1,6 @@
 from dataset_creation.create_dataset import create_prediction_dataset
 from win_prediction.data_modelling_one import run_data_modelling_part_one
-from neural_net.build_and_save_model import perform_scaling_and_pca
+from neural_net.build_and_save_model import perform_scaling
 from win_prediction.win_prediction import run_win_prediction
 import tensorflow as tf
 import pandas as pd
@@ -39,9 +39,8 @@ def predict_match_outcome(home_team_id: str, home_players: list, away_team_id: s
 	if df.empty:
 		return None
 
-	X, _ = perform_scaling_and_pca(df, np.array([]), pred=True)
+	X, _ = perform_scaling(df, np.array([]), pred=True)
 	
-	print(X)
 
 	model = tf.keras.models.load_model("stats_regression_model.h5")
 	prediction = model.predict(X)

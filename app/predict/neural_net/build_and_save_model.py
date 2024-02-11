@@ -26,7 +26,8 @@ stats_columns = [
 	"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
 	"penalties_made","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
 	"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","progressive_passes_received","tackles","tackles_won","defensive_third_tackles",
-	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
+	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed",
+	"home_team_at_home_mean_goal_difference","home_team_overall_mean_goal_difference","away_team_at_away_mean_goal_difference","away_team_overall_mean_goal_difference","head_to_head_goal_difference"
 ]
 player_stats_columns = ["player_id", "minutes_played","ninetys"] + stats_columns
 pure_stats_columns = ["minutes_played"] + stats_columns
@@ -76,27 +77,23 @@ def x_y_split_df(df: pd.DataFrame, output_columns: list) -> tuple:
 	y = df[output_columns]
 	return X, y
 
-def perform_scaling_and_pca(X_train: np.array, X_test: np.array, n:int=15, pred: bool = False) -> pd.DataFrame:
+def perform_scaling(X_train: np.array, X_test: np.array, pred: bool = False) -> pd.DataFrame:
 	"""
-	Perform scaling and PCA (Principal Component Analysis) on the input data.
+	Perform scaling on the input data.
 
 	Parameters:
 	X_train (list): The training data.
 	X_test (list): The testing data.
-	n (int): The number of components for PCA. Default is 15.
 
 	Returns:
 	X_train (pd.DataFrame): The transformed training data after scaling and PCA.
 	X_test (pd.DataFrame): The transformed testing data after scaling and PCA.
 	"""
 	scaler = load('prediction_scaler.bin')
-	pca = load('prediction_pca.bin')
 
 	if pred:
 		X_train = scaler.transform(X_train)
 		# X_test = scaler.transform(X_test.reshape(1, -1))
-
-		X_train = pca.transform(X_train)
 
 		# # Carrying out PCA on the train data
 		# feature_to_pc_map = pd.read_csv("feature_to_15_pcs.csv")
@@ -107,9 +104,6 @@ def perform_scaling_and_pca(X_train: np.array, X_test: np.array, n:int=15, pred:
 	else:
 		X_train = scaler.transform(X_train)
 		X_test = scaler.transform(X_test)
-
-		X_train = pca.transform(X_train)
-		X_test = pca.transform(X_test)
 	
 	return X_train, X_test
 
@@ -131,7 +125,7 @@ def build_and_save_model(dataframe: pd.DataFrame) -> tf.keras.models.Sequential:
 	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=543)
 
 	# Scale the data
-	X_train, X_test = perform_scaling_and_pca(X_train, X_test, N)
+	X_train, X_test = perform_scaling(X_train, X_test, N)
 
 	# Get model parameters from environment variables
 	hidden_layer_one = os.environ.get('hidden_layer_one')
