@@ -45,7 +45,13 @@ def predict_match_outcome(home_team_id: str, home_players: list, away_team_id: s
 	model = tf.keras.models.load_model("stats_regression_model.h5")
 	prediction = model.predict(X)
 
-	# Logistic regression prediction
-	odds = run_win_prediction(home_team_id, away_team_id)
+	return prediction
 
-	return prediction, odds
+	# Logistic regression prediction
+	# try:
+	# 	odds = run_win_prediction(home_team_id, away_team_id)
+	# except Exception as e:
+	# 	print(e)
+	# 	odds = None
+
+	# return prediction, odds

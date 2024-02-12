@@ -88,7 +88,7 @@ def predict_fixture_outcome_odds(data: pd.DataFrame, home_team_id: str, away_tea
             )
     
     if fixtures.empty:
-        sys.exit("No fixtures found for EPL for this gameweek/for the selected teams. Please try again later.")
+        raise Exception("No fixtures found for EPL for this gameweek/for the selected teams. Please try again later.")
 
     if home_team_id and away_team_id:
         fixtures["home"] = home_team_id
