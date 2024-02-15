@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from dataset_creation.db_connection import local_pl_stats_connector
+from db_connection import local_pl_stats_connector
 import datetime, sys
 
 db = local_pl_stats_connector
@@ -269,7 +269,29 @@ def convert_team_rows_to_single_row(df: pd.DataFrame, home_team_id: str = None, 
 
     return final_df
 
+def get_team_form(team_id: str, is_home: bool, match_id: str = "") -> float:
+	if match_id:
+		date = db.get_list(f"SELECT date FROM match WHERE id == {match_id}")[0][0]
+	else:
+		date = datetime.datetime.now().strftime("%Y-%m-%d")
+	home_or_away_form_data = db.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE {'home_team_id =' if is_home else 'away_team_id ='} '{team_id}' AND date <= '{date}' ORDER BY date DESC LIMIT 5")
+	overall_form = db.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE home_team_id = '{team_id}' OR away_team_id = '{team_id}' AND date <= '{date}' ORDER BY date DESC LIMIT 5")
 
+	# Show the form for the last 5 home or away matches for a team, depending if they are home or away for the current match
+	home_or_away_mean_goal_difference = (home_or_away_form_data["home_goals"].sum() - home_or_away_form_data["away_goals"].sum())/5 if is_home else (home_or_away_form_data["away_goals"].sum() - home_or_away_form_data["home_goals"].sum())/5
+	# Show the form for the last 5 matches for a team, regardless of whether they are home or away for the current match
+	overall_mean_goal_difference = ((overall_form.loc[overall_form["home_team_id"] == team_id, "home_goals"].sum() + overall_form.loc[overall_form["away_team_id"] == team_id, "away_goals"].sum()) - (overall_form.loc[overall_form["home_team_id"] != team_id, "home_goals"].sum() + overall_form.loc[overall_form["away_team_id"] != team_id, "away_goals"].sum()))/5
+	return home_or_away_mean_goal_difference, overall_mean_goal_difference
+
+def get_last_five_head_to_head_matches(home_team_id: str, away_team_id: str, match_id: str = "") -> pd.DataFrame:
+	if match_id:
+		date = db.get_list(f"SELECT date FROM match WHERE id == {match_id}")[0][0]
+	else:
+		date = datetime.datetime.now().strftime("%Y-%m-%d")
+	# The more negative the value, the better the away team has performed w.r.t the home team in the last 5 head-to-head matches
+	data = db.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE ((home_team_id = '{home_team_id}' AND away_team_id = '{away_team_id}') OR (home_team_id = '{away_team_id}' AND away_team_id = '{home_team_id}')) AND date <= '{date}' ORDER BY date DESC LIMIT 5")
+	head_to_head_goal_difference = (data.loc[data["home_team_id"] == home_team_id, "home_goals"].sum() + data.loc[data["away_team_id"] == home_team_id, "away_goals"].sum()) - (data.loc[data["home_team_id"] == away_team_id, "home_goals"].sum() + data.loc[data["away_team_id"] == away_team_id, "away_goals"].sum())
+	return head_to_head_goal_difference
 
 def create_career_and_form_dataframes_for_database(match_values: list) -> dict:
 	"""
@@ -329,7 +351,7 @@ def combine_form_and_career_stats(dfs: tuple, pred: bool = False, columns_to_eva
 	form_df = dfs[1]
 
 	career_stats_ratio = 0.6
-	form_stats_ratio = 0.4
+	form_stats_ratio = 1 - career_stats_ratio
 
 	career_df[columns_to_evaluate] = career_df[columns_to_evaluate] * career_stats_ratio
 	form_df[columns_to_evaluate] = form_df[columns_to_evaluate] * form_stats_ratio
@@ -409,8 +431,6 @@ def grouping_prediction_dataframe_rows(df: pd.DataFrame, home_team_id: str, home
 
 	return df
 
-
-
 def create_dataset() -> pd.DataFrame:
 	"""
 	Create a dataset for match predictions.
@@ -437,10 +457,13 @@ def create_dataset() -> pd.DataFrame:
 			else:
 				complete_player_form_stats_for_match_df = pd.concat([complete_player_form_stats_for_match_df, df])
 
-		career_stats = complete_player_career_stats_for_match_df.copy(deep=True)
-		form_stats = complete_player_form_stats_for_match_df.copy(deep=True)
+	df = combine_form_and_career_stats((complete_player_career_stats_for_match_df, complete_player_form_stats_for_match_df), columns_to_evaluate=stats_columns)
 
-		return combine_form_and_career_stats((career_stats, form_stats), columns_to_evaluate=stats_columns)
+	df[["home_team_at_home_mean_goal_difference", "home_team_overall_mean_goal_difference"]] = df.apply(lambda row: get_team_form(row["home_team_id"], True, row["match_id"]), axis=1, result_type="expand")
+	df[["away_team_at_away_mean_goal_difference", "away_team_overall_mean_goal_difference"]] = df.apply(lambda row: get_team_form(row["away_team_id"], False, row["match_id"]), axis=1, result_type="expand")
+	df["head_to_head_goal_difference"] = df.apply(lambda row: get_last_five_head_to_head_matches(row["home_team_id"], row["away_team_id"], row["match_id"]), axis=1) 
+
+	return df
 	
 def create_prediction_dataset(home_team_id: str, home_team_squad: list, away_team_id: str, away_team_squad: list) -> pd.DataFrame:
 		
@@ -476,6 +499,12 @@ def create_prediction_dataset(home_team_id: str, home_team_squad: list, away_tea
 	if career.empty or form.empty:
 		return None
 
-	return combine_form_and_career_stats((career, form), pred=True, columns_to_evaluate=stats_columns)
+	df = combine_form_and_career_stats((career, form), pred=True, columns_to_evaluate=stats_columns)
+
+	df[["home_team_at_home_mean_goal_difference", "home_team_overall_mean_goal_difference"]] = df.apply(lambda row: get_team_form(home_team_id, True), axis=1, result_type="expand")
+	df[["away_team_at_away_mean_goal_difference", "away_team_overall_mean_goal_difference"]] = df.apply(lambda row: get_team_form(away_team_id, False), axis=1, result_type="expand")
+	df["head_to_head_goal_difference"] = df.apply(lambda row: get_last_five_head_to_head_matches(home_team_id, away_team_id), axis=1) 
+
+	return df
 
 	

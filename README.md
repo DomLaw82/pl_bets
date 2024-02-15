@@ -2,29 +2,57 @@
 
 ## Description
 
-This repository contains the source code and documentation for the PL Bets project. The project aims to [describe the main goal or purpose of the project].
+### Summary
+This repository contains the source code and documentation for the PL Bets project, a machine learning full stack docker application written with Python, CSS, HTML.
+
+The project uses Neural Network modeled with Tensorflow and Keras to predict the outcomes of future match based on team form, head-to-head form and individual player statistics for each of the squads.
+
+### Structure
+- Frontend container - Hosts web server
+- Postgres container - Holds all player data
+- Prediction container - Contains model and scripts to create and recreate model, and API to handle and serve predictions
+- API container - Connecting frontend to database
 
 ## Table of Contents
-
+- [Data Sources](#sources)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [License](#license)
+
+
+## Sources
+
+[Player stats](https://fbref.com/)  
+[Match facts](https://www.football-data.co.uk)  
+[Fixtures](https://fixturedownload.com/)  
+[Squads](https://www.footballsquads.co.uk/)  
 
 ## Installation
 
 ### Dependencies
+Ensure you have docker installed on your machine.
 
-[Provide instructions on how to install and set up the project.]
 
 ## Usage
+Makefile contains commands to setup and run the docker compose for this project
 
-[Explain how to use the project, including any important features or functionalities.]
+### Start project
+```
+make devstackbuild
+make devstackup
+```
+
+### Rebuild project
+```
+make devstackrebuild
+```
+
+### Restart project
+```
+make devstackreboot
+```
+After the containers have started, navigate to the [frontend](http://localhost:3000) at localhost:3000
 
 ## Contributing
 
-[Provide guidelines for contributing to the project, including how to submit pull requests or report issues.]
-
-## License
-
-[Specify the license under which the project is distributed.]
+[Dominic Lawson](https://github.com/DomLaw82)

@@ -49,6 +49,7 @@ CREATE TABLE player_team (
 CREATE TABLE match (
 	id VARCHAR(7) PRIMARY KEY,
 	season VARCHAR(9) NOT NULL,
+	date VARCHAR(16) NOT NULL,
 	competition_id VARCHAR(7) NOT NULL,
 	home_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
 	away_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
@@ -66,7 +67,13 @@ CREATE TABLE match (
 	home_yellow_cards INTEGER NOT NULL,
 	away_yellow_cards INTEGER NOT NULL,
 	home_red_cards INTEGER NOT NULL,
-	away_red_cards INTEGER NOT NULL
+	away_red_cards INTEGER NOT NULL,
+	home_odds FLOAT NOT NULL,
+	draw_odds FLOAT NOT NULL,
+	away_odds FLOAT NOT NULL,
+	closing_home_odds FLOAT NOT NULL,
+	closing_draw_odds FLOAT NOT NULL,
+	closing_away_odds FLOAT NOT NULL
 );
 
 CREATE TABLE historic_player_per_ninety (
