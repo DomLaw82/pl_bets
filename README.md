@@ -56,6 +56,14 @@ make devstackrebuild
 ```
 make devstackreboot
 ```
+
+### Stop
+```
+make devstackdown
+```
+
+See [Makefile](./app/Makefile) to see all commands available
+
 After the containers have started, navigate to the [frontend](http://localhost:3000) at localhost:3000
 
 ## Contributing
