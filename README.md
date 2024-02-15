@@ -36,6 +36,11 @@ Ensure you have docker installed on your machine.
 ## Usage
 Makefile contains commands to setup and run the docker compose for this project
 
+Enter app folder
+```
+cd app
+```
+
 ### Start project
 ```
 make devstackbuild
