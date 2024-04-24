@@ -14,11 +14,11 @@ pure_stats_columns_no_minutes = [
 ]
 
 def recreate_scaler() -> np.array:
-	df = pd.read_csv("../final_combined_dataframe.csv")
+	df = pd.read_csv("../files/final_combined_dataframe.csv")
 
 	scaler = StandardScaler(copy=True).fit(df[pure_stats_columns_no_minutes])
 
-	dump(scaler, '../prediction_scaler.bin', compress=True)
+	dump(scaler, '../files/prediction_scaler.bin', compress=True)
 
 	X_scaled = scaler.transform(df[pure_stats_columns_no_minutes])
 	

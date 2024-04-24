@@ -13,11 +13,11 @@ def rebuild_model():
 	"""
 	try:
 		dataset = create_dataset()
-		dataset.to_csv("../final_combined_dataframe.csv", index=False)
+		dataset.to_csv("../files/final_combined_dataframe.csv", index=False)
 		recreate_scaler()
 		recreate_pca_object()
 		model = build_and_save_model(dataset)
-		model.save("stats_regression_model.h5")
+		model.save("files/stats_regression_model.h5")
 		return {'message': 'Model rebuilt'}
 	except Exception as e:
 		return {'error': str(e)}
