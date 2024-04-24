@@ -14,26 +14,8 @@ registry = rebar.create_handler_registry()
 # Generate Flask Rebar views, routes, etc.
 # registry.generate_swagger(generator=generator)
 
-def list_to_list_of_objects(list_of_tuples:list, column_names: list) -> dict:
-   """
-   Convert a list of tuples to a dict
-
-   Args:
-         list_of_tuples (list): list of tuples
-         column_names (list): list of column names in the order they appear in the tuples
-
-   Returns:
-         list: list of dicts
-   """
-   result_list = []
-   for row in list_of_tuples:
-      entry = {}
-      for index_b, col in enumerate(row):
-         entry[column_names[index_b]] = col
-      result_list.append(entry)
-   return result_list
-
 ### routes ###
+
 # index
 @registry.handles(
    rule='/',
@@ -49,10 +31,9 @@ def index():
    response_body_schema=TeamSchema(many=True)
 )
 def get_teams() :
-   teams = db.get_list(f"""
+   teams = db.get_dict(f"""
       SELECT * from team ORDER BY name ASC
    """)
-   teams = list_to_list_of_objects(teams, ['id', 'name'])
    return jsonify(teams)
 
 # all teams
@@ -62,7 +43,7 @@ def get_teams() :
    response_body_schema=TeamSchema(many=True)
 )
 def get_active_teams() :
-   teams = db.get_list(f"""
+   teams = db.get_dict(f"""
       WITH current_season AS (
          SELECT 
             MAX(season) AS season
@@ -71,15 +52,14 @@ def get_active_teams() :
       )
       SELECT
          DISTINCT(team.id) AS id,
-         name AS team_name
+         name
       FROM
          team
       JOIN current_season ON TRUE
       JOIN player_team ON team.id = player_team.team_id 
          AND player_team.season = current_season.season
-      ORDER BY team_name ASC
+      ORDER BY name ASC
    """)
-   teams = list_to_list_of_objects(teams, ['id','name'])
    return jsonify(teams)
 
 # all players
@@ -89,7 +69,7 @@ def get_active_teams() :
    response_body_schema=PlayerTeamNameSchema(many=True)
 )
 def get_all_players() :
-   players = db.get_list(f"""
+   players = db.get_dict(f"""
       WITH current_season AS (
          SELECT 
             MAX(season) AS season
@@ -116,8 +96,6 @@ def get_all_players() :
       JOIN team ON pt2.team_id = team.id
       ORDER BY player.id ASC
    """)
-   players = list_to_list_of_objects(players, ["id", "first_name", "last_name", "birth_date", "position", "team_name", "active"])
-
    return jsonify(players)
 
 # current team roster
@@ -127,7 +105,7 @@ def get_all_players() :
    response_body_schema=''
 )
 def get_team_current_roster(team_id:str) -> list:
-   players = db.get_list(f"""
+   players = db.get_dict(f"""
       WITH current_season AS (
          SELECT 
             MAX(season) AS season
@@ -149,7 +127,6 @@ def get_team_current_roster(team_id:str) -> list:
       AND player_team.season = current_season.season
       ORDER BY player.last_name ASC
    """)
-   players = list_to_list_of_objects(players, ["id", "first_name", "last_name", "birth_date", "position"])
    return jsonify(players)
 
 @registry.handles(
@@ -182,7 +159,7 @@ def decompose_season(season: str) -> tuple:
 )
 def get_schedule_by_season(season:str) -> list:
    season_start, season_end = decompose_season(season)
-   schedule = db.get_list(f"""
+   schedule = db.get_dict(f"""
       SELECT 
          CAST(s.date AS VARCHAR) AS date,
          CAST(s.round_number AS VARCHAR) AS game_week,
@@ -196,7 +173,6 @@ def get_schedule_by_season(season:str) -> list:
       WHERE DATE(s.date) > '{season_start}' AND DATE(s.date) < '{season_end}'
       ORDER BY s.date ASC;
    """)
-   schedule = list_to_list_of_objects(schedule, ["date", "game_week", "home_team", "away_team", "result", "competition_id"])
    print(schedule)
    return jsonify(schedule)
 
@@ -273,16 +249,16 @@ def update_historic_per_ninety(content:str):
    except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@registry.handles(
-   rule='/download-latest-data',
-   method='GET',
-   response_body_schema=''
-)
-def download_latest_data():
-   # module will be available in the container, but is not in the path locally (see app/backend/database/ingestion/__init__.py)
-   # TODO - refactor this so that the module is available locally/create empty file locally
-   message = download_and_insert_latest_data()
-   return jsonify(message)
+# @registry.handles(
+#    rule='/download-latest-data',
+#    method='GET',
+#    response_body_schema=''
+# )
+# def download_latest_data():
+#    # module will be available in the container, but is not in the path locally (see app/backend/database/ingestion/__init__.py)
+#    # TODO - refactor this so that the module is available locally/create empty file locally
+#    message = download_and_insert_latest_data()
+#    return jsonify(message)
 
 
 app = Flask(__name__)

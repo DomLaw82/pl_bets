@@ -2,95 +2,60 @@ import psycopg2
 import pandas as pd
 import sqlalchemy, os
 
-class SQLConnection():
-	"""Create a PostgreSQL connection class
-	"""
-	def __init__(self, username:str, password:str, host:str, port:str, db_name:str) -> None:
-		self.engine = sqlalchemy.create_engine(f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}', isolation_level='AUTOCOMMIT')
-		self.conn = self.engine.connect()
-	
-	def get_df(self, query:str) -> pd.DataFrame:
-		"""
-		query the database
+import os
+import pandas as pd
+import sqlalchemy
+from sqlalchemy.exc import SQLAlchemyError
 
-		Args:
-			query (str): string used to query the database
+class SQLConnection:
+    """Create a PostgreSQL connection class."""
+    def __init__(self, username: str, password: str, host: str, port: str, db_name: str) -> None:
+        connection_string = f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}'
+        self.engine = sqlalchemy.create_engine(connection_string, isolation_level='AUTOCOMMIT')
+        self.conn = self.engine.connect()
 
-		Returns:
-			pd.DataFrame: result of the query
-		"""
-		query = sqlalchemy.text(query)
-		try:
-			res = pd.read_sql_query(query, self.conn)
-			return res
-		except Exception as e:
-			print('Exception Thrown:')
-			print(e)
-			print('\n')
+    def get_df(self, query: str) -> pd.DataFrame:
+        """Query the database and return a DataFrame."""
+        query = sqlalchemy.text(query)
+        try:
+            res = pd.read_sql_query(query, self.conn)
+            if res.empty:
+                raise ValueError('No data returned')
+            return res
+        except SQLAlchemyError as e:
+            print('Database error:', e)
+        except ValueError as e:
+            print(e)
 
-	def get_list(self, query:str) -> list:
-		"""
-		Execute a query on the db
+    def get_list(self, query: str) -> list:
+        """Execute a query and return a list."""
+        return self._execute_query(query, fetch='all')
 
-		Args:
-				query (str): query string
+    def execute(self, query: str) -> None:
+        """Execute a non-return query."""
+        self._execute_query(query, fetch=None)
 
-		Returns:
-				list: returned from query
-		"""
-		query = sqlalchemy.text(query)
-		try:
-			res = self.conn.execute(query)
-			res = res.fetchall()
-			return res
-		except Exception as e:
-			print('Exception Thrown:')
-			print(e)
-			print('\n')
+    def get_dict(self, query: str) -> dict:
+        """Execute a query and return a list of dictionaries."""
+        return self._execute_query(query, fetch='dict')
 
-	def execute(self, query:str) -> None:
-		"""
-		Execute a query on the db
+    def _execute_query(self, query: str, fetch: str = 'all'):
+        """Helper method to execute queries and manage fetch types."""
+        query = sqlalchemy.text(query)
+        try:
+            result = self.conn.execute(query)
+            if fetch == 'all':
+                return result.fetchall()
+            elif fetch == 'dict':
+                columns = result.keys()
+                return [dict(zip(columns, row)) for row in result.fetchall()]
+        except SQLAlchemyError as e:
+            print('Database error:', e)
 
-		Args:
-				query (str): query string
-		"""
-		query = sqlalchemy.text(query)
-		try:
-			res = self.conn.execute(query)
-			return res
-		except Exception as e:
-			print('Exception Thrown:')
-			print(e)
-			print('\n')
-	
-	def get_dict(self, query:str) -> dict:
-		"""
-		Execute a query on the db
+    def close(self):
+        """Close connection to the database."""
+        self.conn.close()
+        self.engine.dispose()
 
-		Args:
-				query (str): query string
-
-		Returns:
-				list: returned from query
-		"""
-		query = sqlalchemy.text(query)
-		try:
-			res = self.conn.execute(query)
-			res_columns = list(self.conn.execute(query).keys())
-			res = res.fetchall()
-			
-			result_dict = {}
-			for index_a, row in enumerate(res):
-				entry = {}
-				for index_b, col in enumerate(row):
-					entry[res_columns[index_b]] = col
-				result_dict[index_a] = entry
-
-			return result_dict
-		except Exception as e:
-			print('Exception Thrown:')
-			print(e)
-			print('\n')
-
+# Usage
 local_pl_stats_connector = SQLConnection(os.environ.get("POSTGRES_USER") or "postgres", os.environ.get("POSTGRES_PASSWORD") or "password", os.environ.get("POSTGRES_CONTAINER") or "localhost", os.environ.get("POSTGRES_PORT") or "5432", os.environ.get("POSTGRES_DB") or "pl_stats")

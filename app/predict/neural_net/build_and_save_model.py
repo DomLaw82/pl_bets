@@ -21,11 +21,11 @@ match_columns = [
 	"home_red_cards", "away_red_cards"
 ]
 stats_columns = [
-	"goals","assists","direct_goal_contributions","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
+	"goals","assists","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
 	"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
 	"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
-	"penalties_made","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
-	"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","progressive_passes_received","tackles","tackles_won","defensive_third_tackles",
+	"touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded",
+	"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","progressive_passes_received","tackles_won","defensive_third_tackles",
 	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed",
 	"home_team_at_home_mean_goal_difference","home_team_overall_mean_goal_difference","away_team_at_away_mean_goal_difference","away_team_overall_mean_goal_difference","head_to_head_goal_difference"
 ]
@@ -96,7 +96,7 @@ def perform_scaling(X_train: np.array, X_test: np.array, pred: bool = False) -> 
 		# X_test = scaler.transform(X_test.reshape(1, -1))
 
 		# # Carrying out PCA on the train data
-		# feature_to_pc_map = pd.read_csv("feature_to_15_pcs.csv")
+		# feature_to_pc_map = pd.read_csv("files/feature_to_15_pcs.csv")
 		# X_train = X_train * feature_to_pc_map
 		# X_train = pd.DataFrame(X_train.sum(axis=1), columns=['components']).T
 

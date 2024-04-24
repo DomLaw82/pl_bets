@@ -69,3 +69,15 @@ After the containers have started, navigate to the [frontend](http://localhost:3
 ## Contributing
 
 [Dominic Lawson](https://github.com/DomLaw82)
+
+## Notes
+- Compatibility issues between PyPi, Tensorflow and h5py mean that h5py==3.9.0 & tensorflow==2.12.0 must be the versions used with these packages
+
+## TODO
+- Migrate frontend to React.js
+- General code cleanup and re-factoring
+- Add logging
+- Build regression model to purely predict the winner of each match
+- Review "Separation of concerns"
+- Add file upload route
+- Deploy to AWS with CDK

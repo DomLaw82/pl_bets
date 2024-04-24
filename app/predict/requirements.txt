@@ -2,7 +2,8 @@ pandas
 numpy
 sqlalchemy
 psycopg2-binary
-tensorflow
+h5py==3.9.0
+tensorflow==2.12.0
 scikit-learn
 scikeras
 marshmallow

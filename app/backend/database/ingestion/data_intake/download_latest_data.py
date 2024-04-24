@@ -11,6 +11,8 @@ PLAYER_DOWNLOAD_ROOT = "https://www.footballsquads.co.uk/eng/"
 
 
 current_year = datetime.datetime.now().year
+separator = "--- --- --- --- --- --- --- ---\n"
+new_line = "\n"
 
 FIXTURE_SEASON_ARRAY = [str(year) for year in range(2017, current_year, 1)]
 SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2017, current_year+1)]
@@ -197,11 +199,11 @@ def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_r
 		return False
 
 def download_latest_data():
-	print("\n")
-	print("--- --- --- --- --- --- --- ---")
+	print(new_line)
+	print(separator)
 	print("---Fetching latest data---")
-	print("--- --- --- --- --- --- --- ---")
-	print("\n")
+	print(separator)
+	print(new_line)
 	
 	# This code is used to initially download the data from the web, but also to update the data on the fly from the frontend
 	GAME_SAVE_PATH_ROOT = "data/game_data/"
@@ -218,22 +220,22 @@ def download_latest_data():
 	for season in MATCH_SITE_SEASONS:
 		time.sleep(0.2)
 		download_csv_for_all_games_in_a_season(season, GAME_DATA_DOWNLOAD_ROOT, GAME_SAVE_PATH_ROOT)
-	print("--- --- --- --- --- --- --- ---\n")
+	print(separator)
 	
 	# fixture data download
 	print("Downloading fixture data...")
 	for season in FIXTURE_SEASON_ARRAY:
 		time.sleep(0.2)
 		download_csv_for_all_fixtures_in_a_season(season, DOWNLOAD_FIXTURE_URL_ROOT, SCHEDULE_SAVE_PATH_ROOT)
-	print("--- --- --- --- --- --- --- ---\n")
+	print(separator)
 	
 	# player data download
 	print("Downloading player data...")
 	for season in SEASONS_ARRAY:
 		time.sleep(0.2)
 		download_html_for_squad_player_data(season, PLAYER_DOWNLOAD_ROOT, PLAYER_SAVE_PATH_ROOT)
-	print("--- --- --- --- --- --- --- ---")
-	print("--- --- --- --- --- --- --- ---\n")
+	print(separator)
+	print(separator)
 
 		
 
