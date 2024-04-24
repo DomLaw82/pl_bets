@@ -262,7 +262,7 @@ def update_historic_per_ninety(content:str):
 
 
 app = Flask(__name__)
-CORS(app, origins="*", supports_credentials=True)
+CORS(app, origins=["http://localhost", "http://10.127.67.163", "http://frontend"], supports_credentials=True)
 rebar.init_app(app)
 
 if __name__ == '__main__':

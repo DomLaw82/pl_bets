@@ -10,18 +10,28 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 
 export default function Matches() {
 
-    const [selectedSeason, setSelectedSeason] = useState('2023/2024');
+    const [selectedSeason, setSelectedSeason] = useState('2023-2024');
     const [seasons, setSeasons] = useState([]);
     const [matches, setMatches] = useState([]);
 
     async function getMatches(season) {
-        const response = await fetch(`http://localhost:8080/matches/season/${season}`);
+        const response = await fetch(`http://localhost:8080/matches/season/${season}`, {
+            headers: {
+                'Access-Control-Allow-Origin': '*'
+            }
+        });
         const matches = await response.json();
         return matches;
     }
 
     async function getSeasons() {
-        const response = await fetch('http://localhost:8080/matches/all-seasons');
+        const response = await fetch('http://localhost:8080/matches/all-seasons',
+            {
+                headers: {
+                    'Access-Control-Allow-Origin': '*'
+                }
+            }
+        );
         const seasons = await response.json();
         return seasons;
     }
