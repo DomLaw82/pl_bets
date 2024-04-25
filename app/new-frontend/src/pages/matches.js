@@ -19,14 +19,14 @@ export default function Matches() {
     const [isMatchFactsModalOpen, setIsMatchFactsModalOpen] = useState(false);
     
     async function getMatchFacts(date, homeTeamName, awayTeamName) {
-        const response = await fetch(`http://localhost:8080/matches/match-facts/?date=${date}&home_team=${homeTeamName}&away_team=${awayTeamName}`, {
+        const formattedDate = date.split(' ')[0].replace(/\//g, '-');
+        const response = await fetch(`http://localhost:8080/matches/match-facts?date=${formattedDate}&home_team=${homeTeamName}&away_team=${awayTeamName}`, {
             headers: {
                 'Access-Control-Allow-Origin': '*'
             }
         });
         const matchFacts = await response.json();
-        console.log(matchFacts);
-        return matchFacts;
+        return matchFacts[0];
     }
     
     const handleOpenMatchFactsModal = useCallback(async (date, homeTeamName, awayTeamName) => {
@@ -61,33 +61,33 @@ export default function Matches() {
         return seasons;
     }
 
-    function addResult(gameWeekValue, date, homeTeamName, awayTeamName, competitionIdValue) {
-        const homeTeam = document.getElementById('add-result-home-team')
-        const awayTeam = document.getElementById('add-result-away-team')
-        const matchDate = document.getElementById('add-result-match-date')
-        const gameWeek = document.getElementById('add-result-game-week')
-        const competitionId = document.getElementById('add-result-competition-id')
-        const resultPopup = document.getElementById('add-result-popup')
-        const popUpBackground = document.getElementById('pop-up-background')
+    // function addResult(gameWeekValue, date, homeTeamName, awayTeamName, competitionIdValue) {
+    //     const homeTeam = document.getElementById('add-result-home-team')
+    //     const awayTeam = document.getElementById('add-result-away-team')
+    //     const matchDate = document.getElementById('add-result-match-date')
+    //     const gameWeek = document.getElementById('add-result-game-week')
+    //     const competitionId = document.getElementById('add-result-competition-id')
+    //     const resultPopup = document.getElementById('add-result-popup')
+    //     const popUpBackground = document.getElementById('pop-up-background')
     
-        let onlyDate = date.split(' ')[0]+"T"+date.split(' ')[1];
+    //     let onlyDate = date.split(' ')[0]+"T"+date.split(' ')[1];
     
-        homeTeam.value = homeTeamName;
-        awayTeam.value = awayTeamName;
-        matchDate.value = onlyDate;
-        gameWeek.value = gameWeekValue;
-        competitionId.value = competitionIdValue;
+    //     homeTeam.value = homeTeamName;
+    //     awayTeam.value = awayTeamName;
+    //     matchDate.value = onlyDate;
+    //     gameWeek.value = gameWeekValue;
+    //     competitionId.value = competitionIdValue;
     
-        popUpBackground.style.display = 'block';
-        resultPopup.style.display = 'block';
+    //     popUpBackground.style.display = 'block';
+    //     resultPopup.style.display = 'block';
     
-        document.addEventListener('click', function(event) {
-            if (event.target.id === 'pop-up-background') {
-                resultPopup.style.display = 'none';
-                popUpBackground.style.display = 'none';
-            }
-        });
-    }
+    //     document.addEventListener('click', function(event) {
+    //         if (event.target.id === 'pop-up-background') {
+    //             resultPopup.style.display = 'none';
+    //             popUpBackground.style.display = 'none';
+    //         }
+    //     });
+    // }
 
     useEffect(() => {
         const fetchData = async () => {

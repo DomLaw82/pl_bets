@@ -1,13 +1,10 @@
-import React, {useEffect, useState} from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
-import Divider from '@mui/material/Divider';
 
 export function MatchModal(props) {
 	const { isMatchFactsModalOpen, handleCloseMatchFactsModal, matchFacts } = props;
-	console.log(matchFacts)
+	const uniqueStats = ["vs", "goals", "shots", "shots_on_target", "corners", "fouls", "yellow_cards", "red_cards"];
 
 	return (
 		<Modal
@@ -22,52 +19,51 @@ export function MatchModal(props) {
 					top: '50%',
 					left: '50%',
 					transform: 'translate(-50%, -50%)',
-					width: 400,
+					width: 600,
 					bgcolor: 'background.paper',
 					border: '2px solid #000',
 					boxShadow: 24,
 					p: 4,
 					display: "flex",
 					flexDirection: "row",
-					alignText: "center"
+					justifyContent: "space-evenly",
 				}}
 			>
-				<Box sx={{ display: "flex", flexDirection: "column" }}>
+				<Box sx={{ display: "flex", flexDirection: "column", textAlign: "center", width: 200  }}>
 					
-					<Typography key={matchFacts.homeTeam} id={`modal-modal-home-team`} variant="body1" component="h4">
-						{matchFacts.homeTeam}
+					<Typography key={matchFacts.home_team} id="modal-modal-home-team" variant="body1" component="p" style={{ height: 20 }}>
+						{matchFacts.home_team}
 					</Typography>
-					{Object.keys(matchFacts).map((key) => {
-						if (key.includes("home") && key !== "home_team" ) {
+					{uniqueStats.map((key) => {
+						if (!key.includes("vs")) {
 							return (
-								<Typography key={key} id={`modal-modal-${key}`} variant="body2" component="p">
-									{matchFacts[key]}
+								<Typography key={"home_"+key} id={`modal-modal-${"home_"+key}`} variant="body1" component="p" style={{ height: 20 }}>
+									{matchFacts["home_"+key]}
 								</Typography>
 							);
 						}
 						return null;
 					})}
 				</Box>
-				<Divider orientation="vertical" sx={{ height: '100%' }} />
-				<Box>
-					{Object.keys(matchFacts).map((key) => {
+				<Box sx={{display: "flex", flexDirection: "column", textAlign: "center", width: 150 }}>
+					{	
+						uniqueStats.map((key) => {
 						return (
-							<Typography key={`${key}-label`} id={`modal-modal-${key}-label`} variant="body1" component="h3">
+							<Typography key={`${key}-label`} id={`modal-modal-${key}-label`} variant="body1" component="p" style={{ height: 20 }}>
 								{key}
 							</Typography>
 						);
 					})}
 				</Box>
-				<Divider orientation="vertical" sx={{ height: '100%' }} />
-				<Box sx={{display: "flex", flexDirection: "column"}}>
-					<Typography key={matchFacts.awayTeam} id={`modal-modal-away-team`} variant="body1" component="h4">
-						{matchFacts.awayTeam}
+				<Box sx={{ display: "flex", flexDirection: "column", textAlign: "center", width: 200 }}>
+					<Typography key={matchFacts.away_team} id="modal-modal-away-team" variant="body1" component="p" style={{ height: 20 }}>
+						{matchFacts.away_team}
 					</Typography>
-					{Object.keys(matchFacts).map((key) => {
-						if (key.includes("away") && key !== "away_team") {
+					{uniqueStats.map((key) => {
+						if (!key.includes("vs")) {
 							return (
-								<Typography key={key} id={`modal-modal-${key}`} variant="body2" component="p">
-									{matchFacts[key]}
+								<Typography key={"away_"+key} id={`modal-modal-${"away_"+key}`} variant="body1" component="p" style={{ height: 20}}>
+									{matchFacts["away_"+key]}
 								</Typography>
 							);
 						}

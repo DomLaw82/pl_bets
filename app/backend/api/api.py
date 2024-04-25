@@ -6,6 +6,7 @@ import pandas as pd
 from db_connection import local_pl_stats_connector
 from flask import render_template
 from datetime import datetime
+import urllib.parse
 
 db = local_pl_stats_connector
 rebar = Rebar()
@@ -250,13 +251,17 @@ def update_historic_per_ninety(content:str):
         return jsonify({'error': str(e)}), 500
 
 @registry.handles(
-   rule='matches/match-facts',
+   rule='/matches/match-facts',
    method='GET',
 )
 def get_match_facts():
-   date = request.args.get('date') 
+   date = request.args.get('date')
    home_team = request.args.get('home_team')
    away_team = request.args.get('away_team')
+
+   date = urllib.parse.unquote(date)
+   home_team = urllib.parse.unquote(home_team)
+   away_team = urllib.parse.unquote(away_team)
    try:
       data = db.get_dict(f"""
          SELECT 
