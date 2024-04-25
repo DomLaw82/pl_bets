@@ -1,4 +1,4 @@
-import {useState } from "react";
+import {useEffect, useState } from "react";
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -12,12 +12,31 @@ export default function Prediction(props) {
 	const [homeTeam, setHomeTeam] = useState('');
 	const [awayTeam, setAwayTeam] = useState('');
 
+	const [homeTeamFormStats, setHomeTeamFormStats] = useState([]);
+	const [awayTeamFormStats, setAwayTeamFormStats] = useState([]);
+	const [homeTeamAverageStats, setHomeTeamAverageStats] = useState([]);
+	const [awayTeamAverageStats, setAwayTeamAverageStats] = useState([]);
+	
+
 	const runPrediction = () => {
 		fetch('http://localhost:8080/predict')
 			.then(response => response.json())
 			.then(data => console.log(data))
 			.catch(error => console.log(error));
 	}
+
+	const getPredictionStats = () => {
+		fetch('http://localhost:8080/prediction/stats')
+			.then(response => response.json())
+			.then(data => {
+				console.log(data)
+			})
+			.catch(error => console.log(error));
+	}
+
+	useEffect(() => {
+
+	}, [homeTeam, awayTeam]);
 
 	return (
 		<Container component="main">

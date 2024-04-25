@@ -6,7 +6,6 @@ import pandas as pd
 from db_connection import local_pl_stats_connector
 from flask import render_template
 from datetime import datetime
-import urllib.parse
 
 db = local_pl_stats_connector
 rebar = Rebar()
@@ -105,7 +104,7 @@ def get_all_players() :
    method='GET',
    response_body_schema=''
 )
-def get_all_current_players(team_id:str) -> list:
+def get_all_active_players() -> list:
    players = db.get_dict(f"""
       WITH current_season AS (
          SELECT 
@@ -280,19 +279,15 @@ def update_historic_per_ninety(content:str):
    
    except Exception as e:
         return jsonify({'error': str(e)}), 500
-
+   
 @registry.handles(
    rule='/matches/match-facts',
    method='GET',
 )
 def get_match_facts():
-   date = request.args.get('date')
+   date = request.args.get('date') 
    home_team = request.args.get('home_team')
    away_team = request.args.get('away_team')
-
-   date = urllib.parse.unquote(date)
-   home_team = urllib.parse.unquote(home_team)
-   away_team = urllib.parse.unquote(away_team)
    try:
       data = db.get_dict(f"""
          SELECT 
@@ -323,6 +318,88 @@ def get_match_facts():
       return jsonify(data)
    except Exception as e:
       return jsonify({'error': str(e)}), 500
+   
+@registry.handles(
+   rule='/prediction/stats',
+   method='GET',
+)
+def get_prediction_stats():
+   home_team = request.args.get('home_team')
+   away_team = request.args.get('away_team')
+   try:
+      home_team_form = db.get_dict(f"""
+         SELECT 
+            home_team.name AS home_team,
+            away_team.name AS away_team,
+            IF(home_team.name = '{home_team}', "true", "false") AS isHome,
+            m.home_goals,
+            m.away_goals
+         FROM match m
+         JOIN team home_team ON m.home_team_id = home_team.id
+         JOIN team away_team ON m.away_team_id = away_team.id
+         WHERE
+            home_team.name = '{home_team}' OR
+            away_team.name = '{home_team}'
+         ORDER BY date DESC
+         LIMIT 5
+      """)
+      away_team_form = db.get_dict(f"""
+         SELECT 
+            home_team.name AS home_team,
+            away_team.name AS away_team,
+            IF(home_team.name = '{away_team}', "true", "false") AS isHome,
+            m.home_goals,
+            m.away_goals
+         FROM match m
+         JOIN team home_team ON m.home_team_id = home_team.id
+         JOIN team away_team ON m.away_team_id = away_team.id
+         WHERE
+            home_team.name = '{away_team}' OR
+            away_team.name = '{away_team}'
+         ORDER BY date DESC
+         LIMIT 5
+      """)
+
+      home_team_average_stats = db.get_dict(f"""
+         SELECT 
+            AVG(home_goals) AS home_goals,
+            AVG(home_shots) AS home_shots,
+            AVG(home_shots_on_target) AS home_shots_on_target,
+            AVG(home_corners) AS home_corners,
+            AVG(home_fouls) AS home_fouls,
+            AVG(home_yellow_cards) AS home_yellow_cards,
+            AVG(home_red_cards) AS home_red_cards
+         FROM match m
+         JOIN team home_team ON m.home_team_id = home_team.id
+         WHERE home_team.name = '{home_team}'
+         LIMIT 5
+      """)
+      away_team_average_stats = db.get_dict(f"""
+         SELECT 
+            AVG(away_goals) AS away_goals,
+            AVG(away_shots) AS away_shots,
+            AVG(away_shots_on_target) AS away_shots_on_target,
+            AVG(away_corners) AS away_corners,
+            AVG(away_fouls) AS away_fouls,
+            AVG(away_yellow_cards) AS away_yellow_cards,
+            AVG(away_red_cards) AS away_red_cards
+         FROM match m
+         JOIN team away_team ON m.away_team_id = away_team.id
+         WHERE away_team.name = '{away_team}'
+         LIMIT 5
+      """)
+
+      
+      return jsonify(
+         {
+            "home_team_form": home_team_form, 
+            "away_team_form": away_team_form,
+            "home_team_average_stats": home_team_average_stats, 
+            "away_team_average_stats": away_team_average_stats
+         }
+      )
+   except Exception as e:
+      return jsonify({'error': str(e)}), 500
 
 # @registry.handles(
 #    rule='/download-latest-data',
@@ -337,7 +414,7 @@ def get_match_facts():
 
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000", "http://10.127.67.163:3001", "http://frontend:3000"], supports_credentials=True)
+CORS(app, origins=["http://frontend:3000", "http://localhost:3000", "http://localhost:3001"],  supports_credentials=True)
 rebar.init_app(app)
 
 if __name__ == '__main__':
