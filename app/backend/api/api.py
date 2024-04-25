@@ -101,6 +101,35 @@ def get_all_players() :
 
 # current team roster
 @registry.handles(
+   rule='/all-active-players',
+   method='GET',
+   response_body_schema=''
+)
+def get_all_current_players(team_id:str) -> list:
+   players = db.get_dict(f"""
+      WITH current_season AS (
+         SELECT 
+            MAX(season) AS season
+         FROM
+            player_team
+      )
+                           
+      SELECT
+         player.id AS id,
+         player.first_name AS first_name,
+         player.last_name AS last_name,
+         player.birth_date AS birth_date,
+         player.position AS position
+      FROM
+         player
+      JOIN current_season ON TRUE
+      JOIN player_team ON player.id = player_team.player_id
+      WHERE player_team.season = current_season.season
+      ORDER BY player.last_name ASC
+   """)
+   return jsonify(players)
+
+@registry.handles(
    rule='/active-players/<team_id>',
    method='GET',
    response_body_schema=''

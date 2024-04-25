@@ -8,15 +8,37 @@ import { Box } from '@mui/material';
 import Divider from '@mui/material/Divider';
 
 
-export function TeamCards(team) {
-	return (
-		<Card></Card>
-	)
-}
+export function PlayerCards(props) {
 
-export function PlayerCards(player) {
+    const { id, firstName, lastName, birthDate, position } = props;
+
 	return (
-		<Card></Card>
+        <Card sx={{ margin: 2 }} variant="outlined">
+            <CardContent>
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-evenly',
+                    alignItems: "center"
+                }}>
+                    <Box sx={{alignItems: "center", textAlign: "center", width: "33%"}}>
+                        <Typography variant="h5" component="div">
+                            {firstName} {lastName}
+                        </Typography>
+                    </Box>
+                    <Box sx={{alignItems: "center", textAlign: "center", width: "33%"}}>
+                        <Typography variant="body1">
+                            DOB: {birthDate}
+                        </Typography>
+                    </Box>
+                    <Box sx={{alignItems: "center", textAlign: "center", width: "33%"}}>
+                        <Typography variant="body1">
+                            Position: {position}
+                        </Typography>
+                    </Box>
+                </Box>
+            </CardContent>
+        </Card>
 	)
 }
 
@@ -53,6 +75,32 @@ export function MatchCards(props) {
             <CardActions sx={{ justifyContent: "center" }}>
                 <Button size="small" onClick={() => handleOpenMatchFactsModal(date, homeTeam, awayTeam)}>View Match Facts</Button>
             </CardActions>
+        </Card>
+    );
+}
+
+export function TeamCards(props) {
+    const { teamName, teamLogo } = props;
+
+    return (
+        <Card sx={{ margin: 2, minWidth: "70%" }} variant="outlined">
+            <CardContent>
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: "center"
+                }}>
+                    <Box sx={{alignItems: "center"}}>
+                        <Typography variant="h4" component="div">
+                            {teamName}
+                        </Typography>
+                    </Box>
+                    <Box sx={{ alignContent: "center" }}>
+                        <img src={teamLogo} alt={teamName} />
+                    </Box>
+                </Box>
+            </CardContent>
         </Card>
     );
 }

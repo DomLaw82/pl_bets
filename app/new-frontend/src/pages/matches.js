@@ -125,25 +125,23 @@ export default function Matches() {
                     </Container>
                     <Divider sx={{ width: '100%', height: 2 }} />
                     <Divider sx={{ width: '100%', height: 2 }} />
-                    <Box>
-                        <Box id="past-matches">
-                            {
-                                matches.map((match) => {
-                                    return (
-                                        <MatchCards
-                                            key={`${match.home_team}-${match.away_team}-${match.game_week}`} // Ensure keys are unique and well-formed
-                                            gameWeek={match.game_week}
-                                            date={match.date}
-                                            homeTeam={match.home_team}
-                                            awayTeam={match.away_team}
-                                            result={match.result}
-                                            handleOpenMatchFactsModal={handleOpenMatchFactsModal}
-                                        />
-                                    );
-                                })
-                            }
-                        </Box>
-                    </Box>  
+                    <Box id="past-matches">
+                        {
+                            matches.map((match) => {
+                                return (
+                                    <MatchCards
+                                        key={`${match.home_team}-${match.away_team}-${match.game_week}`} // Ensure keys are unique and well-formed
+                                        gameWeek={match.game_week}
+                                        date={match.date}
+                                        homeTeam={match.home_team}
+                                        awayTeam={match.away_team}
+                                        result={match.result}
+                                        handleOpenMatchFactsModal={handleOpenMatchFactsModal}
+                                    />
+                                );
+                            })
+                        }
+                    </Box>
                 </Box>
             </Box>
             {<MatchModal isMatchFactsModalOpen={isMatchFactsModalOpen} handleCloseMatchFactsModal={handleCloseMatchFactsModal} matchFacts={matchFacts}/>}
