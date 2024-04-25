@@ -248,6 +248,45 @@ def update_historic_per_ninety(content:str):
    
    except Exception as e:
         return jsonify({'error': str(e)}), 500
+   
+@registry.handles(
+   rule='matches/match-facts',
+   method='GET',
+)
+def get_match_facts():
+   date = request.args.get('date') 
+   home_team = request.args.get('home_team')
+   away_team = request.args.get('away_team')
+   try:
+      data = db.get_dict(f"""
+         SELECT 
+            home_team.name AS home_team,
+            away_team.name AS away_team,
+            m.home_goals,
+            m.away_goals,
+            m.home_shots,
+            m.away_shots,
+            m.home_shots_on_target,
+            m.away_shots_on_target,
+            m.home_corners,
+            m.away_corners,
+            m.home_fouls,
+            m.away_fouls,
+            m.home_yellow_cards,
+            m.away_yellow_cards,
+            m.home_red_cards,
+            m.away_red_cards
+         FROM match m
+         JOIN team home_team ON m.home_team_id = home_team.id
+         JOIN team away_team ON m.away_team_id = away_team.id
+         WHERE
+            date = '{date}' AND
+            home_team.name = '{home_team}' AND
+            away_team.name = '{away_team}'
+      """)
+      return jsonify(data)
+   except Exception as e:
+      return jsonify({'error': str(e)}), 500
 
 # @registry.handles(
 #    rule='/download-latest-data',
