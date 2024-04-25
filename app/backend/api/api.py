@@ -301,7 +301,7 @@ def get_match_facts():
 
 
 app = Flask(__name__)
-CORS(app, origins=["http://frontend:3000", "http://10.127.67.163:3001", "http://localhost:3000"],  supports_credentials=True)
+CORS(app, origins=["http://frontend", "http://10.127.67.163", "http://localhost"],  supports_credentials=True)
 rebar.init_app(app)
 
 if __name__ == '__main__':
