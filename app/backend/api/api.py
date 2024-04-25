@@ -119,11 +119,13 @@ def get_all_current_players(team_id:str) -> list:
          player.first_name AS first_name,
          player.last_name AS last_name,
          player.birth_date AS birth_date,
-         player.position AS position
+         player.position AS position,
+         team.name AS team_name
       FROM
          player
       JOIN current_season ON TRUE
       JOIN player_team ON player.id = player_team.player_id
+      JOIN team ON player_team.team_id = team.id
       WHERE player_team.season = current_season.season
       ORDER BY player.last_name ASC
    """)

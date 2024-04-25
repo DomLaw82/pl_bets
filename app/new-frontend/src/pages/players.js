@@ -53,6 +53,7 @@ export default function Players() {
 										lastName={player.last_name}
 										birthDate={player.birth_date}
 										position={player.position}
+										teamName={player.team_name}
 									/>
 								);
 							})
