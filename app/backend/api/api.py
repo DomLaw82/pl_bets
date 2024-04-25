@@ -328,36 +328,40 @@ def get_prediction_stats():
    away_team = request.args.get('away_team')
    try:
       home_team_form = db.get_dict(f"""
-         SELECT 
+         SELECT
             home_team.name AS home_team,
             away_team.name AS away_team,
-            IF(home_team.name = '{home_team}', "true", "false") AS isHome,
+            CASE
+               WHEN home_team.name = '{home_team}' THEN true
+               ELSE false
+            END AS isHome,
             m.home_goals,
             m.away_goals
          FROM match m
          JOIN team home_team ON m.home_team_id = home_team.id
          JOIN team away_team ON m.away_team_id = away_team.id
-         WHERE
-            home_team.name = '{home_team}' OR
-            away_team.name = '{home_team}'
+         WHERE home_team.name = '{home_team}'
+            OR away_team.name = '{home_team}'
          ORDER BY date DESC
-         LIMIT 5
+         LIMIT 5;
       """)
       away_team_form = db.get_dict(f"""
-         SELECT 
+         SELECT
             home_team.name AS home_team,
             away_team.name AS away_team,
-            IF(home_team.name = '{away_team}', "true", "false") AS isHome,
+            CASE
+               WHEN home_team.name = '{away_team}' THEN true
+               ELSE false
+            END AS isHome,
             m.home_goals,
             m.away_goals
          FROM match m
          JOIN team home_team ON m.home_team_id = home_team.id
          JOIN team away_team ON m.away_team_id = away_team.id
-         WHERE
-            home_team.name = '{away_team}' OR
-            away_team.name = '{away_team}'
+         WHERE home_team.name = '{away_team}'
+            OR away_team.name = '{away_team}'
          ORDER BY date DESC
-         LIMIT 5
+         LIMIT 5;
       """)
 
       home_team_average_stats = db.get_dict(f"""
@@ -393,20 +397,20 @@ def get_prediction_stats():
          SELECT
             home_team.name AS home_team,
             away_team.name AS away_team,
-            AVG(home_goals) AS home_goals,
-            AVG(away_goals) AS away_goals,
-            AVG(home_shots) AS home_shots,
-            AVG(away_shots) AS away_shots,
-            AVG(home_shots_on_target) AS home_shots_on_target,
-            AVG(away_shots_on_target) AS away_shots_on_target,
-            AVG(home_corners) AS home_corners,
-            AVG(away_corners) AS away_corners,
-            AVG(home_fouls) AS home_fouls,
-            AVG(away_fouls) AS away_fouls,
-            AVG(home_yellow_cards) AS home_yellow_cards,
-            AVG(away_yellow_cards) AS away_yellow_cards,
-            AVG(home_red_cards) AS home_red_cards,
-            AVG(away_red_cards) AS away_red_cards
+            home_goals AS home_goals,
+            away_goals AS away_goals,
+            home_shots AS home_shots,
+            away_shots AS away_shots,
+            home_shots_on_target AS home_shots_on_target,
+            away_shots_on_target AS away_shots_on_target,
+            home_corners AS home_corners,
+            away_corners AS away_corners,
+            home_fouls AS home_fouls,
+            away_fouls AS away_fouls,
+            home_yellow_cards AS home_yellow_cards,
+            away_yellow_cards AS away_yellow_cards,
+            home_red_cards AS home_red_cards,
+            away_red_cards AS away_red_cards
          FROM match m
          JOIN team home_team ON m.home_team_id = home_team.id
          JOIN team away_team ON m.away_team_id = away_team.id
