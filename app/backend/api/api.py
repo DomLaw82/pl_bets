@@ -250,7 +250,7 @@ def update_historic_per_ninety(content:str):
         return jsonify({'error': str(e)}), 500
    
 @registry.handles(
-   rule='matches/match-facts',
+   rule='/matches/match-facts',
    method='GET',
 )
 def get_match_facts():
