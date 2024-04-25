@@ -104,7 +104,7 @@ def get_all_players() :
    method='GET',
    response_body_schema=''
 )
-def get_all_active_players(team_id:str) -> list:
+def get_all_active_players() -> list:
    players = db.get_dict(f"""
       WITH current_season AS (
          SELECT 
