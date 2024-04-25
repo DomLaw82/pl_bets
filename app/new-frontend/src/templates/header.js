@@ -12,16 +12,25 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { routeOptions, settingsOptions } from '../navigator'
 import { useNavigate } from 'react-router-dom';
+import MenuIcon from '@mui/icons-material/Menu';
 
 const settings = Object.keys(settingsOptions);
 
 function ResponsiveAppBar() {
+  const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
 
+  const handleOpenNavMenu = (event) => {
+    setAnchorElNav(event.currentTarget);
+  };
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
 
+  const handleCloseNavMenu = (path) => {
+    setAnchorElNav(null);
+    navigate(path)
+  };
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
@@ -36,7 +45,7 @@ function ResponsiveAppBar() {
             variant="h4"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href="/"
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
@@ -49,11 +58,47 @@ function ResponsiveAppBar() {
           >
             PL BETS
           </Typography>
+          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleOpenNavMenu}
+              color="inherit"
+            >
+              <MenuIcon />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorElNav}
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+              open={Boolean(anchorElNav)}
+              onClose={handleCloseNavMenu}
+              sx={{
+                display: { xs: 'block', md: 'none' },
+              }}
+            >
+              {Object.entries(routeOptions).map(([route, obj]) => (
+                <MenuItem key={route} onClick={() => handleCloseNavMenu(obj.path)}>
+                  <Typography textAlign="center">{route.toUpperCase()}</Typography>
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
           <Typography
             variant="h5"
             noWrap
             component="a"
-            href="#app-bar-with-responsive-menu"
+            href="/"
             sx={{
               mr: 2,
               display: { xs: 'flex', md: 'none' },
@@ -65,7 +110,7 @@ function ResponsiveAppBar() {
               textDecoration: 'none',
             }}
           >
-            LOGO
+            PL BETS
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {Object.entries(routeOptions).map(([route, obj]) => (

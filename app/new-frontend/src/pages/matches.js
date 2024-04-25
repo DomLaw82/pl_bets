@@ -34,7 +34,7 @@ export default function Matches() {
         setIsMatchFactsModalOpen(true);
         setMatchFacts(facts)
     }, [setIsMatchFactsModalOpen, setMatchFacts]);
-    
+
     const handleCloseMatchFactsModal = useCallback(() => {
         setIsMatchFactsModalOpen(false);
     }, []);
@@ -60,34 +60,6 @@ export default function Matches() {
         const seasons = await response.json();
         return seasons;
     }
-
-    // function addResult(gameWeekValue, date, homeTeamName, awayTeamName, competitionIdValue) {
-    //     const homeTeam = document.getElementById('add-result-home-team')
-    //     const awayTeam = document.getElementById('add-result-away-team')
-    //     const matchDate = document.getElementById('add-result-match-date')
-    //     const gameWeek = document.getElementById('add-result-game-week')
-    //     const competitionId = document.getElementById('add-result-competition-id')
-    //     const resultPopup = document.getElementById('add-result-popup')
-    //     const popUpBackground = document.getElementById('pop-up-background')
-    
-    //     let onlyDate = date.split(' ')[0]+"T"+date.split(' ')[1];
-    
-    //     homeTeam.value = homeTeamName;
-    //     awayTeam.value = awayTeamName;
-    //     matchDate.value = onlyDate;
-    //     gameWeek.value = gameWeekValue;
-    //     competitionId.value = competitionIdValue;
-    
-    //     popUpBackground.style.display = 'block';
-    //     resultPopup.style.display = 'block';
-    
-    //     document.addEventListener('click', function(event) {
-    //         if (event.target.id === 'pop-up-background') {
-    //             resultPopup.style.display = 'none';
-    //             popUpBackground.style.display = 'none';
-    //         }
-    //     });
-    // }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -152,11 +124,6 @@ export default function Matches() {
                         </ButtonGroup>
                     </Container>
                     <Divider sx={{ width: '100%', height: 2 }} />
-                    <Box sx={{textAlign: 'center',}}>  
-                        <Typography variant="h5">
-                            Past Matches
-                        </Typography>
-                    </Box>
                     <Divider sx={{ width: '100%', height: 2 }} />
                     <Box>
                         <Box id="past-matches">
@@ -179,7 +146,7 @@ export default function Matches() {
                     </Box>  
                 </Box>
             </Box>
-          {<MatchModal isMatchFactsModalOpen={isMatchFactsModalOpen} handleCloseMatchFactsModal={handleCloseMatchFactsModal} matchFacts={matchFacts}/>}
+            {<MatchModal isMatchFactsModalOpen={isMatchFactsModalOpen} handleCloseMatchFactsModal={handleCloseMatchFactsModal} matchFacts={matchFacts}/>}
         </Container>
   );
 }

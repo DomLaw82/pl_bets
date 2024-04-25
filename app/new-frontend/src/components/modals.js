@@ -12,6 +12,7 @@ export function MatchModal(props) {
 			onClose={handleCloseMatchFactsModal}
 			aria-labelledby="modal-modal-title"
 			aria-describedby="modal-modal-description"
+			sx={{border: '2px solid #000'}}
 		>
 			<Box
 				sx={{
@@ -74,5 +75,3 @@ export function MatchModal(props) {
 		</Modal>
 	);
 }
-
-export function AddResultModal() {}

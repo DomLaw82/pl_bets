@@ -5,6 +5,7 @@ import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { Box } from '@mui/material';
+import Divider from '@mui/material/Divider';
 
 
 export function TeamCards(team) {
@@ -23,7 +24,7 @@ export function MatchCards(props) {
     const { gameWeek, date, homeTeam, awayTeam, result, handleOpenMatchFactsModal } = props;
     
     return (
-        <Card sx={{ margin: 2 }}>
+        <Card sx={{ margin: 2 }} variant="outlined">
             <CardContent>
                 <Box sx={{
                     display: 'flex',
@@ -35,10 +36,10 @@ export function MatchCards(props) {
                             {homeTeam} vs {awayTeam}
                         </Typography>
                         <Typography variant="body2">
-                            {date}
+                            Date: {date}
                         </Typography>
                         <Typography variant="body2">
-                            {gameWeek}
+                            Game Week: {gameWeek}
                         </Typography>
                     </Box>
                     <Box sx={{ alignContent: "center" }}>
@@ -48,9 +49,9 @@ export function MatchCards(props) {
                     </Box>
                 </Box>
             </CardContent>
+            <Divider sx={{ width: '100%', height: 2 }} />
             <CardActions sx={{ justifyContent: "center" }}>
                 <Button size="small" onClick={() => handleOpenMatchFactsModal(date, homeTeam, awayTeam)}>View Match Facts</Button>
-                <Button size="small">Add Result</Button>
             </CardActions>
         </Card>
     );
