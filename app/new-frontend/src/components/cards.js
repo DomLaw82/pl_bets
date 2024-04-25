@@ -10,7 +10,7 @@ import Divider from '@mui/material/Divider';
 
 export function PlayerCards(props) {
 
-    const { id, firstName, lastName, birthDate, position } = props;
+    const { id, firstName, lastName, birthDate, position, teamName, badge } = props;
 
 	return (
         <Card sx={{ margin: 2 }} variant="outlined">
@@ -21,20 +21,23 @@ export function PlayerCards(props) {
                     justifyContent: 'space-evenly',
                     alignItems: "center"
                 }}>
-                    <Box sx={{alignItems: "center", textAlign: "center", width: "33%"}}>
+                    <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
                         <Typography variant="h5" component="div">
                             {firstName} {lastName}
                         </Typography>
                     </Box>
-                    <Box sx={{alignItems: "center", textAlign: "center", width: "33%"}}>
+                    <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
                         <Typography variant="body1">
                             DOB: {birthDate}
                         </Typography>
                     </Box>
-                    <Box sx={{alignItems: "center", textAlign: "center", width: "33%"}}>
+                    <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
                         <Typography variant="body1">
                             Position: {position}
                         </Typography>
+                    </Box>
+                    <Box sx={{ alignItems: "center", height: 60}}>
+                        <img src={badge} alt={teamName} height="60" />
                     </Box>
                 </Box>
             </CardContent>

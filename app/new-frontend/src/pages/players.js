@@ -54,6 +54,7 @@ export default function Players() {
 										birthDate={player.birth_date}
 										position={player.position}
 										teamName={player.team_name}
+										badge={`/logos/${player.team_name}.png`}
 									/>
 								);
 							})
