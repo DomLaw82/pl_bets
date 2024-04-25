@@ -318,6 +318,88 @@ def get_match_facts():
       return jsonify(data)
    except Exception as e:
       return jsonify({'error': str(e)}), 500
+   
+@registry.handles(
+   rule='/prediction/stats',
+   method='GET',
+)
+def get_prediction_stats():
+   home_team = request.args.get('home_team')
+   away_team = request.args.get('away_team')
+   try:
+      home_team_form = db.get_dict(f"""
+         SELECT 
+            home_team.name AS home_team,
+            away_team.name AS away_team,
+            IF(home_team.name = '{home_team}', "true", "false") AS isHome,
+            m.home_goals,
+            m.away_goals
+         FROM match m
+         JOIN team home_team ON m.home_team_id = home_team.id
+         JOIN team away_team ON m.away_team_id = away_team.id
+         WHERE
+            home_team.name = '{home_team}' OR
+            away_team.name = '{home_team}'
+         ORDER BY date DESC
+         LIMIT 5
+      """)
+      away_team_form = db.get_dict(f"""
+         SELECT 
+            home_team.name AS home_team,
+            away_team.name AS away_team,
+            IF(home_team.name = '{away_team}', "true", "false") AS isHome,
+            m.home_goals,
+            m.away_goals
+         FROM match m
+         JOIN team home_team ON m.home_team_id = home_team.id
+         JOIN team away_team ON m.away_team_id = away_team.id
+         WHERE
+            home_team.name = '{away_team}' OR
+            away_team.name = '{away_team}'
+         ORDER BY date DESC
+         LIMIT 5
+      """)
+
+      home_team_average_stats = db.get_dict(f"""
+         SELECT 
+            AVG(home_goals) AS home_goals,
+            AVG(home_shots) AS home_shots,
+            AVG(home_shots_on_target) AS home_shots_on_target,
+            AVG(home_corners) AS home_corners,
+            AVG(home_fouls) AS home_fouls,
+            AVG(home_yellow_cards) AS home_yellow_cards,
+            AVG(home_red_cards) AS home_red_cards
+         FROM match m
+         JOIN team home_team ON m.home_team_id = home_team.id
+         WHERE home_team.name = '{home_team}'
+         LIMIT 5
+      """)
+      away_team_average_stats = db.get_dict(f"""
+         SELECT 
+            AVG(away_goals) AS away_goals,
+            AVG(away_shots) AS away_shots,
+            AVG(away_shots_on_target) AS away_shots_on_target,
+            AVG(away_corners) AS away_corners,
+            AVG(away_fouls) AS away_fouls,
+            AVG(away_yellow_cards) AS away_yellow_cards,
+            AVG(away_red_cards) AS away_red_cards
+         FROM match m
+         JOIN team away_team ON m.away_team_id = away_team.id
+         WHERE away_team.name = '{away_team}'
+         LIMIT 5
+      """)
+
+      
+      return jsonify(
+         {
+            "home_team_form": home_team_form, 
+            "away_team_form": away_team_form,
+            "home_team_average_stats": home_team_average_stats, 
+            "away_team_average_stats": away_team_average_stats
+         }
+      )
+   except Exception as e:
+      return jsonify({'error': str(e)}), 500
 
 # @registry.handles(
 #    rule='/download-latest-data',
