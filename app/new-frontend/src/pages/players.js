@@ -15,7 +15,7 @@ export default function Players() {
 			.then(response => response.json())
 			.then(data => setPlayers(data))
 			.catch(error => console.log(error));
-	}, []);
+	}, [setPlayers]);
 
 	return (
 		<Container component="main">

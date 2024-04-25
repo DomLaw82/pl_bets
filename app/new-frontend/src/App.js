@@ -3,11 +3,21 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Header from './templates/header';
 import {routeOptions} from './navigator';
 import './App.css';
 
 function App() {
+  const [teams, setTeams] = useState([]);
+  
+  useEffect(() => {
+		fetch('http://localhost:8080/active-teams')
+			.then(response => response.json())
+			.then(data => setTeams(data))
+			.catch(error => console.log(error));
+	}, []);
+
   return (
     <Router>
       <Header />
@@ -19,7 +29,7 @@ function App() {
               <Route
                 key={index}
                 path={path}
-                element={<Component />}
+                element={<Component teams={teams} setTeams={setTeams} />}
               />
             );
           })

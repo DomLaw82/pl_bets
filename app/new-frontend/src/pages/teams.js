@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -6,15 +6,15 @@ import Typography from '@mui/material/Typography';
 import { Divider } from "@mui/material";
 import { TeamCards } from "../components/cards";
 
-export default function Teams() {
-	const [teams, setTeams] = useState([]);
+export default function Teams(props) {
+	const {teams, setTeams} = props;
 
 	useEffect(() => {
 		fetch('http://localhost:8080/active-teams')
 			.then(response => response.json())
 			.then(data => setTeams(data))
 			.catch(error => console.log(error));
-	}, []);
+	}, [setTeams]);
 
 
     return (

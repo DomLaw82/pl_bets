@@ -10,7 +10,7 @@ import Divider from '@mui/material/Divider';
 
 export function PlayerCards(props) {
 
-    const { id, firstName, lastName, birthDate, position, teamName, badge } = props;
+    const { firstName, lastName, birthDate, position, teamName, badge } = props;
 
 	return (
         <Card sx={{ margin: 2 }} variant="outlined">
