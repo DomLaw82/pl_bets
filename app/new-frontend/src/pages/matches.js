@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -7,12 +7,37 @@ import { Divider } from "@mui/material";
 import { MatchCards } from "../components/cards";
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
+import { MatchModal } from '../components/modals';
 
 export default function Matches() {
 
     const [selectedSeason, setSelectedSeason] = useState('2023-2024');
     const [seasons, setSeasons] = useState([]);
     const [matches, setMatches] = useState([]);
+    const [matchFacts, setMatchFacts] = useState([]);
+
+    const [isMatchFactsModalOpen, setIsMatchFactsModalOpen] = useState(false);
+    
+    async function getMatchFacts(date, homeTeamName, awayTeamName) {
+        const response = await fetch(`http://localhost:8080/matches/match-facts/?date=${date}&home_team=${homeTeamName}&away_team=${awayTeamName}`, {
+            headers: {
+                'Access-Control-Allow-Origin': '*'
+            }
+        });
+        const matchFacts = await response.json();
+        console.log(matchFacts);
+        return matchFacts;
+    }
+    
+    const handleOpenMatchFactsModal = useCallback(async (date, homeTeamName, awayTeamName) => {
+        const facts = await getMatchFacts(date, homeTeamName, awayTeamName);
+        setIsMatchFactsModalOpen(true);
+        setMatchFacts(facts)
+    }, [setIsMatchFactsModalOpen, setMatchFacts]);
+    
+    const handleCloseMatchFactsModal = useCallback(() => {
+        setIsMatchFactsModalOpen(false);
+    }, []);
 
     async function getMatches(season) {
         const response = await fetch(`http://localhost:8080/matches/season/${season}`, {
@@ -68,16 +93,27 @@ export default function Matches() {
         const fetchData = async () => {
             try {
                 const matches = await getMatches(selectedSeason);
-                const seasons = await getSeasons();
                 setMatches(matches);
-                setSeasons(seasons);
             } catch (error) {
                 console.error('Error:', error);
             }
         };
 
         fetchData();
-    }, [matches, selectedSeason]);
+    }, [selectedSeason]);
+
+    useEffect(() => {
+        const fetchSeasons = async () => {
+            try {
+                const seasons = await getSeasons();
+                setSeasons(seasons);
+            } catch (error) {
+                console.error('Error fetching seasons:', error);
+            }
+        };
+    
+        fetchSeasons();
+    }, []);
 
   return (
 	<Container component="main">
@@ -104,31 +140,46 @@ export default function Matches() {
 			</Typography>
               <Divider sx={{ width: '100%', height: 2 }} />
               <Box>
-                  <Box>
-                    <ButtonGroup size="large" aria-label="Large button group">
-                          {
-                                seasons.map((season) => {
-                                    return (
-                                        <Button key={season} onClick={() => setSelectedSeason(season)}>{season}</Button>
-                                    )
-                                })  
-                          }
-                    </ButtonGroup>
-                  </Box>  
-                <Box>
-                    <Typography variant="h3">
-                        Past Matches
-                    </Typography>
-                    <Box id="past-matches">
-                        {
-                            matches.map((match) => {
-                                return MatchCards(match.game_week, match.date, match.home_team, match.away_team, match.result);
-                            })
-                        }
+                    <Container sx={{marginTop: 2, marginBottom: 2}}>
+                        <ButtonGroup size="large" aria-label="Large button group">
+                            {
+                                    seasons.map((season) => {
+                                        return (
+                                            <Button key={season} onClick={() => setSelectedSeason(season)}>{season}</Button>
+                                        )
+                                    })  
+                            }
+                        </ButtonGroup>
+                    </Container>
+                    <Divider sx={{ width: '100%', height: 2 }} />
+                    <Box sx={{textAlign: 'center',}}>  
+                        <Typography variant="h5">
+                            Past Matches
+                        </Typography>
                     </Box>
-                </Box>  
+                    <Divider sx={{ width: '100%', height: 2 }} />
+                    <Box>
+                        <Box id="past-matches">
+                            {
+                                matches.map((match) => {
+                                    return (
+                                        <MatchCards
+                                            key={`${match.home_team}-${match.away_team}-${match.game_week}`} // Ensure keys are unique and well-formed
+                                            gameWeek={match.game_week}
+                                            date={match.date}
+                                            homeTeam={match.home_team}
+                                            awayTeam={match.away_team}
+                                            result={match.result}
+                                            handleOpenMatchFactsModal={handleOpenMatchFactsModal}
+                                        />
+                                    );
+                                })
+                            }
+                        </Box>
+                    </Box>  
+                </Box>
             </Box>
-        </Box>
-        </Container>  
+          {<MatchModal isMatchFactsModalOpen={isMatchFactsModalOpen} handleCloseMatchFactsModal={handleCloseMatchFactsModal} matchFacts={matchFacts}/>}
+        </Container>
   );
 }
