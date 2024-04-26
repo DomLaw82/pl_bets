@@ -324,8 +324,8 @@ def get_match_facts():
    method='GET',
 )
 def get_prediction_stats():
-   home_team = request.args.get('home_team').replace("%20", " ")
-   away_team = request.args.get('away_team').replace("%20", " ")
+   home_team = request.args.get('home_team')
+   away_team = request.args.get('away_team')
    try:
       home_team_form = db.get_dict(f"""
          SELECT
@@ -435,6 +435,58 @@ def get_prediction_stats():
       )
    except Exception as e:
       return jsonify({'error': str(e)}), 500
+   
+@registry.handles(
+   rule='/prediction/squads',
+   method='GET',
+   response_body_schema=''
+)
+def get_prediction_squads() -> list:
+   home_team = request.args.get('home_team')
+   away_team = request.args.get('away_team')
+
+   home_team_squad = db.get_dict(f"""
+      WITH current_season AS (
+         SELECT 
+            MAX(season) AS season
+         FROM
+            player_team
+      )
+                                 
+      SELECT
+         player.first_name,
+         player.last_name,
+         player.position
+      FROM player
+      JOIN player_team ON player.id = player_team.player_id
+      JOIN team ON player_team.team_id = team.id
+      JOIN current_season ON TRUE
+      WHERE team.name = '{home_team}'
+         AND player_team.season = current_season.season
+      ORDER BY player.last_name ASC
+   """)
+   
+   away_team_squad = db.get_dict(f"""
+      WITH current_season AS (
+         SELECT 
+            MAX(season) AS season
+         FROM
+            player_team
+      )
+                                 
+      SELECT
+         player.first_name,
+         player.last_name,
+         player.position
+      FROM player
+      JOIN player_team ON player.id = player_team.player_id
+      JOIN team ON player_team.team_id = team.id
+      JOIN current_season ON TRUE
+      WHERE team.name = '{away_team}'
+         AND player_team.season = current_season.season
+      ORDER BY player.last_name ASC
+   """)
+   return jsonify({"home_team_squad": home_team_squad, "away_team_squad": away_team_squad})
 
 # @registry.handles(
 #    rule='/download-latest-data',

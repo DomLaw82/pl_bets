@@ -6,11 +6,12 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
 import { Grid, Button, FormControl, Divider, Select, InputLabel, MenuItem } from "@mui/material";
 import { Tabs, Tab } from "@mui/material";
-import SwipeableViews from 'react-swipeable-views';
 import { useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
-import { FormStats } from "../components/formStats";
-import { AverageStats } from "../components/averages";
+import { FormStats } from "../components/predictionFormStats";
+import { AverageStats } from "../components/predictionAverages";
+import { HeadToHead } from "../components/predictionHeadToHead";
+import { Squads } from "../components/predictionSquads";
 
 
 function TabPanel(props) {
@@ -57,10 +58,6 @@ export default function Prediction(props) {
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
 	  };
-	
-	  const handleChangeIndex = (index) => {
-		setValue(index);
-	  };
 
 	const [homeTeam, setHomeTeam] = useState('');
 	const [awayTeam, setAwayTeam] = useState('');
@@ -70,6 +67,8 @@ export default function Prediction(props) {
 	const [homeTeamAverageStats, setHomeTeamAverageStats] = useState([]);
 	const [awayTeamAverageStats, setAwayTeamAverageStats] = useState([]);
 	const [headToHeadStats, setHeadToHeadStats] = useState([]);
+	const [homeTeamSquad, setHomeTeamSquad] = useState([]);
+	const [awayTeamSquad, setAwayTeamSquad] = useState([]);
 
 	const theme = useTheme();
 
@@ -80,7 +79,7 @@ export default function Prediction(props) {
 			.catch(error => console.log(error));
 	}
 
-	const getPredictionStats = (homeTeam, awayTeam) => {
+	const getPredictionStats = async (homeTeam, awayTeam) => {
 
 		fetch(`http://localhost:8080/prediction/stats?home_team=${homeTeam.replace(/&/g, "%26")}&away_team=${awayTeam.replace(/&/g, "%26")}`)
 			.then(response => response.json())
@@ -93,12 +92,27 @@ export default function Prediction(props) {
 				setHeadToHeadStats(data.head_to_head_stats);
 			})
 			.catch(error => console.log(error));
-		}
+	}
+	const getPredictionSquads = async (homeTeam, awayTeam) => {
+		fetch(`http://localhost:8080/prediction/squads?home_team=${homeTeam.replace(/&/g, "%26")}&away_team=${awayTeam.replace(/&/g, "%26")}`)
+			.then(response => response.json())
+			.then(data => {
+				console.log(data);
+				setHomeTeamSquad(data.home_team_squad);
+				setAwayTeamSquad(data.away_team_squad);
+			})
+			.catch(error => console.log(error));
+		
+	}
 
 	useEffect(() => {
-		if (homeTeam && awayTeam && homeTeam !== awayTeam) {
-			getPredictionStats(homeTeam, awayTeam);
+		const getStats = async (homeTeam, awayTeam) => {
+			if (homeTeam && awayTeam && homeTeam !== awayTeam) {
+				await getPredictionStats(homeTeam, awayTeam);
+				await getPredictionSquads(homeTeam, awayTeam);
+			}
 		}
+		getStats(homeTeam, awayTeam);
 	}, [homeTeam, awayTeam]);
 
 	return (
@@ -193,9 +207,12 @@ export default function Prediction(props) {
 									<TabPanel key="averageAtLocationStats" value={value} index={1} dir={theme.direction}>
 										<AverageStats homeTeamAverageStats={homeTeamAverageStats} awayTeamAverageStats={ awayTeamAverageStats } />
 									</TabPanel>
-									{/* <TabPanel key="form" value={value} index={2} dir={theme.direction}>
-										<FormStats/>
-									</TabPanel> */}
+									<TabPanel key="form" value={value} index={2} dir={theme.direction}>
+										<HeadToHead headToHeadStats={ headToHeadStats } />
+									</TabPanel>
+									<TabPanel key="squads" value={value} index={3} dir={theme.direction}>
+										<Squads homeTeamSquad={homeTeamSquad} awayTeamSquad={awayTeamSquad} />
+									</TabPanel>
 								</Grid>
 							</Grid>
 								{homeTeam && awayTeam && homeTeam !== awayTeam && (
