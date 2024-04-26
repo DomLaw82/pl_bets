@@ -495,8 +495,8 @@ def get_prediction_squads() -> list:
 )
 def get_team_id():
    team_name = request.args.get('team_name')
-   team_id = db.get_list(f"SELECT id FROM team WHERE name = '{team_name}'")[0]
-   return jsonify({"team_id": team_id})
+   team_id = db.get_dict(f"SELECT id FROM team WHERE name = '{team_name}'")[0]
+   return jsonify(team_id)
 
 # @registry.handles(
 #    rule='/download-latest-data',
@@ -511,7 +511,7 @@ def get_team_id():
 
 
 app = Flask(__name__)
-CORS(app, origins=["http://frontend:3000", "http://localhost:3000", "http://localhost:3001"],  supports_credentials=True)
+CORS(app, origins=["http://frontend:3000", "http://localhost:3000", "http://frontend:3001", "http://localhost:3001"],  supports_credentials=True)
 rebar.init_app(app)
 
 if __name__ == '__main__':
