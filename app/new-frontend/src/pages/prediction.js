@@ -9,7 +9,7 @@ import { Tabs, Tab } from "@mui/material";
 import SwipeableViews from 'react-swipeable-views';
 import { useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
-// import { FormStats } from "../components/formStats";
+import { FormStats } from "../components/formStats";
 
 
 function TabPanel(props) {
@@ -186,10 +186,10 @@ export default function Prediction(props) {
 									index={value}
 									onChangeIndex={handleChangeIndex}
 								>
-									{/* <TabPanel key="form" value={value} index={0} dir={theme.direction}>
-										<FormStats/>
+									<TabPanel key="form" value={value} index={0} dir={theme.direction}>
+										<FormStats homeTeamFormStats={ homeTeamFormStats } awayTeamFormStats={awayTeamFormStats} />
 									</TabPanel>
-									<TabPanel key="form" value={value} index={1} dir={theme.direction}>
+									{/* <TabPanel key="form" value={value} index={1} dir={theme.direction}>
 										<FormStats/>
 									</TabPanel>
 									<TabPanel key="form" value={value} index={2} dir={theme.direction}>
