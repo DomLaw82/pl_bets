@@ -324,8 +324,8 @@ def get_match_facts():
    method='GET',
 )
 def get_prediction_stats():
-   home_team = request.args.get('home_team')
-   away_team = request.args.get('away_team')
+   home_team = request.args.get('home_team').replace("%20", " ")
+   away_team = request.args.get('away_team').replace("%20", " ")
    try:
       home_team_form = db.get_dict(f"""
          SELECT
@@ -366,13 +366,13 @@ def get_prediction_stats():
 
       home_team_average_stats = db.get_dict(f"""
          SELECT 
-            AVG(home_goals) AS home_goals,
-            AVG(home_shots) AS home_shots,
-            AVG(home_shots_on_target) AS home_shots_on_target,
-            AVG(home_corners) AS home_corners,
-            AVG(home_fouls) AS home_fouls,
-            AVG(home_yellow_cards) AS home_yellow_cards,
-            AVG(home_red_cards) AS home_red_cards
+            ROUND(AVG(home_goals), 2) AS home_goals,
+            ROUND(AVG(home_shots), 2) AS home_shots,
+            ROUND(AVG(home_shots_on_target), 2) AS home_shots_on_target,
+            ROUND(AVG(home_corners), 2) AS home_corners,
+            ROUND(AVG(home_fouls), 2) AS home_fouls,
+            ROUND(AVG(home_yellow_cards), 2) AS home_yellow_cards,
+            ROUND(AVG(home_red_cards), 2) AS home_red_cards
          FROM match m
          JOIN team home_team ON m.home_team_id = home_team.id
          WHERE home_team.name = '{home_team}'
@@ -380,13 +380,13 @@ def get_prediction_stats():
       """)
       away_team_average_stats = db.get_dict(f"""
          SELECT 
-            AVG(away_goals) AS away_goals,
-            AVG(away_shots) AS away_shots,
-            AVG(away_shots_on_target) AS away_shots_on_target,
-            AVG(away_corners) AS away_corners,
-            AVG(away_fouls) AS away_fouls,
-            AVG(away_yellow_cards) AS away_yellow_cards,
-            AVG(away_red_cards) AS away_red_cards
+            ROUND(AVG(away_goals), 2) AS away_goals,
+            ROUND(AVG(away_shots), 2) AS away_shots,
+            ROUND(AVG(away_shots_on_target), 2) AS away_shots_on_target,
+            ROUND(AVG(away_corners), 2) AS away_corners,
+            ROUND(AVG(away_fouls), 2) AS away_fouls,
+            ROUND(AVG(away_yellow_cards), 2) AS away_yellow_cards,
+            ROUND(AVG(away_red_cards), 2) AS away_red_cards
          FROM match m
          JOIN team away_team ON m.away_team_id = away_team.id
          WHERE away_team.name = '{away_team}'
