@@ -99,7 +99,7 @@ def recreate_pca_object():
 	pass
 
 app = Flask(__name__)
-CORS(app, origins=["http://api:8080", "http://localhost:8080", "http://localhost:3000", "http://frontend:3000"],  supports_credentials=True)
+CORS(app, origins=["http://api:8080", "http://localhost:8080", "http://localhost:3000", "http://localhost:3001", "http://frontend:3000", "http://frontend:3001"],  supports_credentials=True)
 rebar.init_app(app)
 
 if __name__ == '__main__':

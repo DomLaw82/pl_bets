@@ -488,6 +488,16 @@ def get_prediction_squads() -> list:
    """)
    return jsonify({"home_team_squad": home_team_squad, "away_team_squad": away_team_squad})
 
+@registry.handles(
+   rule="/prediction/team-id",
+   method="GET",
+   response_body_schema=""
+)
+def get_team_id():
+   team_name = request.args.get('team_name')
+   team_id = db.get_list(f"SELECT id FROM team WHERE name = '{team_name}'")[0]
+   return jsonify({"team_id": team_id})
+
 # @registry.handles(
 #    rule='/download-latest-data',
 #    method='GET',
