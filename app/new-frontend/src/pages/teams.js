@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -17,47 +17,49 @@ export default function Teams(props) {
 	}, [setTeams]);
 
 
-    return (
-		<Container component="main">
-			<CssBaseline />
-			<Box
-				sx={{
-					marginTop: 8,
-					display: 'flex',
-					flexDirection: 'column',
-					alignItems: 'center'
-				}}
-			>
-				<Typography
-					variant="h1"
+	return (
+		<Fragment>
+			<Container component="main">
+				<CssBaseline />
+				<Box
 					sx={{
+						marginTop: 8,
 						display: 'flex',
-						flexDirection: { xs: 'column', md: 'row' },
-						alignSelf: 'center',
-						textAlign: 'center',
-						fontSize: 'clamp(3.5rem, 10vw, 4rem)',
+						flexDirection: 'column',
+						alignItems: 'center'
 					}}
 				>
-					Teams
-				</Typography>
-				<Divider sx={{ width: '100%', height: 2 }} />
-				<Box sx={{ width: '100%', height: 2 }}>
+					<Typography
+						variant="h1"
+						sx={{
+							display: 'flex',
+							flexDirection: { xs: 'column', md: 'row' },
+							alignSelf: 'center',
+							textAlign: 'center',
+							fontSize: 'clamp(3.5rem, 10vw, 4rem)',
+						}}
+					>
+						Teams
+					</Typography>
 					<Divider sx={{ width: '100%', height: 2 }} />
-					<Box id="active-teams">
-						{
-							teams.map((team) => {
-								return (
-									<TeamCards
-										key={team.id}
-										teamName={team.name}
-										teamLogo={`/logos/${team.name}.png`}
-									/>
-								);
-							})
-						}
+					<Box sx={{ width: '100%', height: 2 }}>
+						<Divider sx={{ width: '100%', height: 2 }} />
+						<Box id="active-teams">
+							{
+								teams.map((team) => {
+									return (
+										<TeamCards
+											key={team.id}
+											teamName={team.name}
+											teamLogo={`/logos/${team.name}.png`}
+										/>
+									);
+								})
+							}
+						</Box>
 					</Box>
 				</Box>
-			</Box>
-		</Container>
+			</Container>
+		</Fragment>
 	);
 }

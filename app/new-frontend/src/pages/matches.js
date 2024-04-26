@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Fragment } from "react";
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -87,64 +87,66 @@ export default function Matches() {
         fetchSeasons();
     }, []);
 
-  return (
-	<Container component="main">
-		<CssBaseline />
-		<Box
-            sx={{
-                marginTop: 8,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-            }}
-          >
-            <Typography
-                variant="h1"
-                sx={{
-                    display: 'flex',
-                    flexDirection: { xs: 'column', md: 'row' },
-                    alignSelf: 'center',
-                    textAlign: 'center',
-                    fontSize: 'clamp(3.5rem, 10vw, 4rem)',
-                }}
-            >
-                Matches
-			</Typography>
-              <Divider sx={{ width: '100%', height: 2 }} />
-              <Box>
-                    <Container sx={{marginTop: 2, marginBottom: 2}}>
-                        <ButtonGroup size="large" aria-label="Large button group">
+    return (
+        <Fragment>
+            <Container component="main">
+                <CssBaseline />
+                <Box
+                    sx={{
+                        marginTop: 8,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Typography
+                        variant="h1"
+                        sx={{
+                            display: 'flex',
+                            flexDirection: { xs: 'column', md: 'row' },
+                            alignSelf: 'center',
+                            textAlign: 'center',
+                            fontSize: 'clamp(3.5rem, 10vw, 4rem)',
+                        }}
+                    >
+                        Matches
+                    </Typography>
+                    <Divider sx={{ width: '100%', height: 2 }} />
+                    <Box>
+                        <Container sx={{marginTop: 2, marginBottom: 2}}>
+                            <ButtonGroup size="large" aria-label="Large button group">
+                                {
+                                        seasons.map((season) => {
+                                            return (
+                                                <Button key={season} onClick={() => setSelectedSeason(season)}>{season}</Button>
+                                            )
+                                        })  
+                                }
+                            </ButtonGroup>
+                        </Container>
+                        <Divider sx={{ width: '100%', height: 2 }} />
+                        <Divider sx={{ width: '100%', height: 2 }} />
+                        <Box id="past-matches">
                             {
-                                    seasons.map((season) => {
-                                        return (
-                                            <Button key={season} onClick={() => setSelectedSeason(season)}>{season}</Button>
-                                        )
-                                    })  
+                                matches.map((match) => {
+                                    return (
+                                        <MatchCards
+                                            key={`${match.home_team}-${match.away_team}-${match.game_week}`} // Ensure keys are unique and well-formed
+                                            gameWeek={match.game_week}
+                                            date={match.date}
+                                            homeTeam={match.home_team}
+                                            awayTeam={match.away_team}
+                                            result={match.result}
+                                            handleOpenMatchFactsModal={handleOpenMatchFactsModal}
+                                        />
+                                    );
+                                })
                             }
-                        </ButtonGroup>
-                    </Container>
-                    <Divider sx={{ width: '100%', height: 2 }} />
-                    <Divider sx={{ width: '100%', height: 2 }} />
-                    <Box id="past-matches">
-                        {
-                            matches.map((match) => {
-                                return (
-                                    <MatchCards
-                                        key={`${match.home_team}-${match.away_team}-${match.game_week}`} // Ensure keys are unique and well-formed
-                                        gameWeek={match.game_week}
-                                        date={match.date}
-                                        homeTeam={match.home_team}
-                                        awayTeam={match.away_team}
-                                        result={match.result}
-                                        handleOpenMatchFactsModal={handleOpenMatchFactsModal}
-                                    />
-                                );
-                            })
-                        }
+                        </Box>
                     </Box>
                 </Box>
-            </Box>
-            {<MatchModal isMatchFactsModalOpen={isMatchFactsModalOpen} handleCloseMatchFactsModal={handleCloseMatchFactsModal} matchFacts={matchFacts}/>}
-        </Container>
-  );
+                {<MatchModal isMatchFactsModalOpen={isMatchFactsModalOpen} handleCloseMatchFactsModal={handleCloseMatchFactsModal} matchFacts={matchFacts}/>}
+            </Container>
+        </Fragment>
+  );    
 }
