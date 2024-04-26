@@ -81,7 +81,8 @@ export default function Prediction(props) {
 	}
 
 	const getPredictionStats = (homeTeam, awayTeam) => {
-		fetch(`http://localhost:8080/prediction/stats?home_team=${homeTeam}&away_team=${awayTeam}`)
+
+		fetch(`http://localhost:8080/prediction/stats?home_team=${homeTeam.replace(/&/g, "%26")}&away_team=${awayTeam.replace(/&/g, "%26")}`)
 			.then(response => response.json())
 			.then(data => {
 				console.log(data);
@@ -92,7 +93,7 @@ export default function Prediction(props) {
 				setHeadToHeadStats(data.head_to_head_stats);
 			})
 			.catch(error => console.log(error));
-	}
+		}
 
 	useEffect(() => {
 		if (homeTeam && awayTeam && homeTeam !== awayTeam) {
