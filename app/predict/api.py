@@ -47,10 +47,10 @@ def health_check():
 def make_prediction():
 	request_body = request.get_json()
 
-	home_team_id = request_body['homeTeamId']
-	home_players = request_body['homePlayers']
-	away_team_id = request_body['awayTeamId']
-	away_players = request_body['awayPlayers']
+	home_team_id = request_body.get('homeTeamId')
+	home_players = request_body.get('homePlayers')
+	away_team_id = request_body.get('awayTeamId')
+	away_players = request_body.get('awayPlayers')
 	
 	prediction = predict_match_outcome(home_team_id, home_players, away_team_id, away_players)
 	prediction = list_to_list_of_objects(prediction, ['home_goals', 'away_goals', 'home_shots', 'away_shots', 'home_shots_on_target', 'away_shots_on_target', 'home_corners', 'away_corners', 'home_fouls', 'away_fouls', 'home_yellow_cards', 'away_yellow_cards', 'home_red_cards', 'away_red_cards'])[0]
@@ -99,7 +99,7 @@ def recreate_pca_object():
 	pass
 
 app = Flask(__name__)
-CORS(app, origins=["http://api:8080", "http://localhost:8080", "http://localhost:3000", "http://localhost:3001", "http://frontend:3000", "http://frontend:3001"],  supports_credentials=True)
+CORS(app, origins=["http://api:8080", "http://localhost:8080", "http://localhost:3000", "http://frontend:3000"],  supports_credentials=True)
 rebar.init_app(app)
 
 if __name__ == '__main__':
