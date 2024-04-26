@@ -13,7 +13,7 @@ export function HeadToHead(props) {
 						<Box component="div" key={`awayForm-${index}`}>
 							<Box component="div" key={`awayFormTeams-${index}`} sx={{ display:"flex", flexDirection: "row", justifyContent: "space-evenly", alignItems:"center" }}>
 								<Box component="div" sx={{ width: "45%", alignItems:"center" }} >
-									<Typography variant="body1" component="span" color={obj.home_goals > obj.away_goals ? "green" : "inherit"}>
+									<Typography variant="body1" component="span" color={obj.home_goals > obj.away_goals ? "green" : obj.home_goals === obj.away_goals ? "orange" :"inherit"}>
 										{obj.home_team}
 									</Typography>
 								</Box>
@@ -23,7 +23,7 @@ export function HeadToHead(props) {
 									</Typography>
 								</Box>
 								<Box component="div" sx={{ width: "45%", alignItems:"center" }} >
-									<Typography variant="body1" component="span" color={obj.home_goals < obj.away_goals ? "green" : "inherit"}>
+									<Typography variant="body1" component="span" color={obj.home_goals < obj.away_goals ? "green" : obj.home_goals === obj.away_goals ? "orange" :"inherit"}>
 										{obj.away_team}
 									</Typography>
 								</Box>

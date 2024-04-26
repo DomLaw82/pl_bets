@@ -2,6 +2,7 @@ import React, { Fragment } from 'react';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
+import CardActionArea from '@mui/material/CardActionArea';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { Box } from '@mui/material';
@@ -15,33 +16,68 @@ export function PlayerCards(props) {
     return (
         <Fragment>
             <Card sx={{ margin: 2 }} variant="outlined">
-                <CardContent>
-                    <Box sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-evenly',
-                        alignItems: "center"
-                    }}>
-                        <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
-                            <Typography variant="h5" component="div">
-                                {firstName} {lastName}
-                            </Typography>
+                <CardActionArea>
+                    <CardContent>
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'space-evenly',
+                            alignItems: "center"
+                        }}>
+                            <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
+                                <Typography variant="h5" component="div">
+                                    {firstName} {lastName}
+                                </Typography>
+                            </Box>
+                            <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
+                                <Typography variant="body1">
+                                    DOB: {birthDate}
+                                </Typography>
+                            </Box>
+                            <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
+                                <Typography variant="body1">
+                                    Position: {position}
+                                </Typography>
+                            </Box>
+                            <Box sx={{ alignItems: "center", height: 60}}>
+                                <img src={badge} alt={teamName} height="60" />
+                            </Box>
                         </Box>
-                        <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
-                            <Typography variant="body1">
-                                DOB: {birthDate}
-                            </Typography>
+                    </CardContent>
+                </CardActionArea>
+            </Card>
+        </Fragment>
+	)
+}
+
+export function PredictionPlayerCards(props) {
+
+    const { firstName, lastName, position } = props;
+
+    return (
+        <Fragment>
+            <Card sx={{ margin: 2 }} variant="outlined">
+                <CardActionArea>
+                    <CardContent>
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'space-evenly',
+                            alignItems: "center"
+                        }}>
+                            <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
+                                <Typography variant="body5" component="div">
+                                    {firstName} {lastName}
+                                </Typography>
+                            </Box>
+                            <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
+                                <Typography variant="body5">
+                                    Position: {position}
+                                </Typography>
+                            </Box>
                         </Box>
-                        <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
-                            <Typography variant="body1">
-                                Position: {position}
-                            </Typography>
-                        </Box>
-                        <Box sx={{ alignItems: "center", height: 60}}>
-                            <img src={badge} alt={teamName} height="60" />
-                        </Box>
-                    </Box>
-                </CardContent>
+                    </CardContent>
+                </CardActionArea>
             </Card>
         </Fragment>
 	)
@@ -53,34 +89,36 @@ export function MatchCards(props) {
     return (
         <Fragment>
             <Card sx={{ margin: 2 }} variant="outlined">
-                <CardContent>
-                    <Box sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between'
-                    }}>
-                        <Box>
-                            <Typography variant="h5" component="div">
-                                {homeTeam} vs {awayTeam}
-                            </Typography>
-                            <Typography variant="body2">
-                                Date: {date}
-                            </Typography>
-                            <Typography variant="body2">
-                                Game Week: {gameWeek}
-                            </Typography>
+            <CardActionArea>
+                    <CardContent>
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'space-between'
+                        }}>
+                            <Box>
+                                <Typography variant="h5" component="div">
+                                    {homeTeam} vs {awayTeam}
+                                </Typography>
+                                <Typography variant="body2">
+                                    Date: {date}
+                                </Typography>
+                                <Typography variant="body2">
+                                    Game Week: {gameWeek}
+                                </Typography>
+                            </Box>
+                            <Box sx={{ alignContent: "center" }}>
+                                <Typography variant="h5">
+                                    {result}
+                                </Typography>
+                            </Box>
                         </Box>
-                        <Box sx={{ alignContent: "center" }}>
-                            <Typography variant="h5">
-                                {result}
-                            </Typography>
-                        </Box>
-                    </Box>
-                </CardContent>
-                <Divider sx={{ width: '100%', height: 2 }} />
-                <CardActions sx={{ justifyContent: "center" }}>
-                    <Button size="small" onClick={() => handleOpenMatchFactsModal(date, homeTeam, awayTeam)}>View Match Facts</Button>
-                </CardActions>
+                    </CardContent>
+                    <Divider sx={{ width: '100%', height: 2 }} />
+                    <CardActions sx={{ justifyContent: "center" }}>
+                        <Button size="small" onClick={() => handleOpenMatchFactsModal(date, homeTeam, awayTeam)}>View Match Facts</Button>
+                    </CardActions>
+                </CardActionArea>
             </Card>
         </Fragment>
     );
@@ -91,24 +129,26 @@ export function TeamCards(props) {
 
     return (
         <Fragment>
-            <Card sx={{ margin: 2, minWidth: "70%" }} variant="outlined">
-                <CardContent>
-                    <Box sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: "center"
-                    }}>
-                        <Box sx={{alignItems: "center"}}>
-                            <Typography variant="h4" component="div">
-                                {teamName}
-                            </Typography>
+            <Card sx={{ margin: 2}} variant="outlined">
+                <CardActionArea>
+                    <CardContent>
+                        <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            justifyContent: 'space-evenly',
+                            alignItems: "center"
+                        }}>
+                            <Box sx={{alignItems: "center", textAlign: "center", width: "60%"}}>
+                                <Typography variant="h4" component="div">
+                                    {teamName}
+                                </Typography>
+                            </Box>
+                            <Box sx={{ alignContent: "center", textAlign: "center", width: "40%"}}>
+                                <img src={teamLogo} alt={teamName} height={50} />
+                            </Box>
                         </Box>
-                        <Box sx={{ alignContent: "center" }}>
-                            <img src={teamLogo} alt={teamName} />
-                        </Box>
-                    </Box>
-                </CardContent>
+                    </CardContent>
+                </CardActionArea>
             </Card>
         </Fragment>
     );

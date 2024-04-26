@@ -1,7 +1,7 @@
 import React, {Fragment} from 'react';
-import { Divider, Typography } from '@mui/material';
+import { Divider } from '@mui/material';
 import Box from '@mui/material/Box';
-import { PlayerCards } from './cards';
+import { PredictionPlayerCards } from './cards';
 
 export function Squads(props) {
 	const { homeTeamSquad, awayTeamSquad } = props;
@@ -10,9 +10,19 @@ export function Squads(props) {
 		<Fragment>
 			<Box key="squads" sx={{ textAlign: "center", display: "flex", flexDirection: "row" }}>
 				<Box key={"home-squads"} sx={{ width: "100%" }}>
+					{homeTeamSquad && homeTeamSquad.map((player, index) => {
+						return (
+							<PredictionPlayerCards key={index} firstName={player.first_name} lastName={player.last_name} position={player.position} />
+						)
+					})};
 				</Box>
 				<Divider orientation="vertical" flexItem />
 				<Box key={"away-squads"} sx={{ width: "100%" }}>
+					{awayTeamSquad && awayTeamSquad.map((player, index) => {
+						return (
+							<PredictionPlayerCards key={index} firstName={player.first_name} lastName={player.last_name} position={player.position} />
+						)
+					})};
 				</Box>
 			</Box>
 		</Fragment>

@@ -60,7 +60,9 @@ export default function Prediction(props) {
 	  };
 
 	const [homeTeam, setHomeTeam] = useState('');
+	const [homeTeamId, setHomeTeamId] = useState('');
 	const [awayTeam, setAwayTeam] = useState('');
+	const [awayTeamId, setAwayTeamId] = useState('');
 
 	const [homeTeamFormStats, setHomeTeamFormStats] = useState([]);
 	const [awayTeamFormStats, setAwayTeamFormStats] = useState([]);
@@ -70,17 +72,43 @@ export default function Prediction(props) {
 	const [homeTeamSquad, setHomeTeamSquad] = useState([]);
 	const [awayTeamSquad, setAwayTeamSquad] = useState([]);
 
+	const [predictionOutput, setPredictionOutput] = useState([]);
+
 	const theme = useTheme();
 
-	const runPrediction = () => {
-		fetch('http://localhost:8080/predict')
-			.then(response => response.json())
-			.then(data => console.log(data))
-			.catch(error => console.log(error));
-	}
+	const getTeamIdFromName = async (teamName) => {
+		try {
+		  const response = await fetch(`http://localhost:8080/prediction/team_id?team_name=${encodeURIComponent(teamName)}`);
+		  const data = await response.json();
+		  return data.id;
+		} catch (error) {
+		  console.error("Failed to fetch team ID:", error);
+		  return null;
+		}
+	};
+	  
+
+	const runPrediction = async (event) => {
+		try {
+			const response = await fetch(`http://localhost:8008/predict`, {
+				method: 'POST',
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					homeTeamId: homeTeamId,
+					awayTeamId: awayTeamId
+				})
+			});
+			const data = await response.json();
+			setPredictionOutput(data); // or set some state
+		} catch (error) {
+			console.error('Prediction failed:', error);
+		}
+	};
 
 	const getPredictionStats = async (homeTeam, awayTeam) => {
-
 		fetch(`http://localhost:8080/prediction/stats?home_team=${homeTeam.replace(/&/g, "%26")}&away_team=${awayTeam.replace(/&/g, "%26")}`)
 			.then(response => response.json())
 			.then(data => {
@@ -106,12 +134,24 @@ export default function Prediction(props) {
 	}
 
 	useEffect(() => {
+		const getTeamIds = async (homeTeam, awayTeam) => {
+			if (homeTeam) {
+				const homeTeamId = await getTeamIdFromName(homeTeam)
+				setHomeTeamId(homeTeamId);
+			}
+			if (awayTeam) {
+				const awayTeamId = await getTeamIdFromName(awayTeam)
+				setAwayTeamId(awayTeamId);
+			}
+		}
 		const getStats = async (homeTeam, awayTeam) => {
 			if (homeTeam && awayTeam && homeTeam !== awayTeam) {
 				await getPredictionStats(homeTeam, awayTeam);
 				await getPredictionSquads(homeTeam, awayTeam);
 			}
 		}
+
+		getTeamIds(homeTeam, awayTeam);
 		getStats(homeTeam, awayTeam);
 	}, [homeTeam, awayTeam]);
 
@@ -142,7 +182,7 @@ export default function Prediction(props) {
 					<Divider sx={{ width: '100%', height: 2 }} />
 					<Box sx={{ width: '100%', height: 2 }}>
 						<Divider sx={{ width: '100%', height: 2 }} />
-						<Box component="form" noValidate onSubmit={runPrediction} sx={{ mt: 3 }}>
+						<Box component="div" sx={{ mt: 3 }}>
 							<Grid container spacing={2}>
 								<Grid item xs={12} sm={6}>
 									<FormControl key={"home-team-select"} required fullWidth>
@@ -186,7 +226,7 @@ export default function Prediction(props) {
 										</Select>
 									</FormControl>
 								</Grid>
-								<Grid item xs={12}>
+								<Grid item xs={12} sx={{ height:300, overflow:"hidden", alignItems: "center" }} >
 									<AppBar position="static">
 										<Tabs
 											value={value}
@@ -201,30 +241,31 @@ export default function Prediction(props) {
 											))}
 										</Tabs>
 									</AppBar>
-									<TabPanel key="formStats" value={value} index={0} dir={theme.direction}>
-										<FormStats homeTeamFormStats={ homeTeamFormStats } awayTeamFormStats={awayTeamFormStats} />
-									</TabPanel>
-									<TabPanel key="averageAtLocationStats" value={value} index={1} dir={theme.direction}>
-										<AverageStats homeTeamAverageStats={homeTeamAverageStats} awayTeamAverageStats={ awayTeamAverageStats } />
-									</TabPanel>
-									<TabPanel key="form" value={value} index={2} dir={theme.direction}>
-										<HeadToHead headToHeadStats={ headToHeadStats } />
-									</TabPanel>
-									<TabPanel key="squads" value={value} index={3} dir={theme.direction}>
+									<Box sx={{ height: '100%', overflowY: 'auto', alignItems: "center" }}>
+										<TabPanel key="formStats" value={value} index={0} dir={theme.direction}>
+										<FormStats homeTeamFormStats={homeTeamFormStats} awayTeamFormStats={awayTeamFormStats} />
+										</TabPanel>
+										<TabPanel key="averageAtLocationStats" value={value} index={1} dir={theme.direction}>
+										<AverageStats homeTeamAverageStats={homeTeamAverageStats} awayTeamAverageStats={awayTeamAverageStats} />
+										</TabPanel>
+										<TabPanel key="form" value={value} index={2} dir={theme.direction}>
+										<HeadToHead headToHeadStats={headToHeadStats} />
+										</TabPanel>
+										<TabPanel key="squads" value={value} index={3} dir={theme.direction}>
 										<Squads homeTeamSquad={homeTeamSquad} awayTeamSquad={awayTeamSquad} />
-									</TabPanel>
+										</TabPanel>
+									</Box>
 								</Grid>
 							</Grid>
-								{homeTeam && awayTeam && homeTeam !== awayTeam && (
-									<Button
-										type="submit"
-										fullWidth
-										variant="contained"
-										sx={{ mt: 3, mb: 2 }}
-									>
-										Run Prediction
-									</Button>
-								)}
+							{homeTeam && awayTeam && homeTeam !== awayTeam && (
+								<Button
+									fullWidth
+									onClick={() => { runPrediction(homeTeam, awayTeam) }}
+									variant="outlined"
+								>
+									<span>Run Prediction</span>
+								</Button>
+							)}
 							<Grid container justifyContent="flex-end">
 							</Grid>
 						</Box>

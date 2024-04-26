@@ -20,7 +20,7 @@ export default function Matches() {
     
     async function getMatchFacts(date, homeTeamName, awayTeamName) {
         const formattedDate = date.split(' ')[0].replace(/\//g, '-');
-        const response = await fetch(`http://localhost:8080/matches/match-facts?date=${formattedDate}&home_team=${homeTeamName}&away_team=${awayTeamName}`, {
+        const response = await fetch(`http://localhost:8080/matches/match-facts?date=${formattedDate}&home_team=${homeTeamName.replace(/&/g, "%26")}&away_team=${awayTeamName.replace(/&/g, "%26")}`, {
             headers: {
                 'Access-Control-Allow-Origin': '*'
             }
