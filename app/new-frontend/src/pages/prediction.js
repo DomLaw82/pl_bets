@@ -99,7 +99,9 @@ export default function Prediction(props) {
 				},
 				body: JSON.stringify({
 					homeTeamId: homeTeamId,
-					awayTeamId: awayTeamId
+					awayTeamId: awayTeamId,
+					homePlayers: [],
+					awayPlayers: []
 				})
 			});
 			const data = await response.json();
