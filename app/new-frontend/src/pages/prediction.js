@@ -110,7 +110,7 @@ export default function Prediction(props) {
 	};
 
 	const getPredictionStats = async (homeTeam, awayTeam) => {
-		fetch(`http://localhost:8080/prediction/stats?home_team=${homeTeam.replace(/&/g, "%26")}&away_team=${awayTeam.replace(/&/g, "%26")}`)
+		fetch(`http://localhost:8080/prediction/stats?home_team=${encodeURIComponent(homeTeam)}&away_team=${encodeURIComponent(awayTeam)}`)
 			.then(response => response.json())
 			.then(data => {
 				console.log(data);
@@ -123,7 +123,7 @@ export default function Prediction(props) {
 			.catch(error => console.log(error));
 	}
 	const getPredictionSquads = async (homeTeam, awayTeam) => {
-		fetch(`http://localhost:8080/prediction/squads?home_team=${homeTeam.replace(/&/g, "%26")}&away_team=${awayTeam.replace(/&/g, "%26")}`)
+		fetch(`http://localhost:8080/prediction/squads?home_team=${encodeURIComponent(homeTeam)}&away_team=${encodeURIComponent(awayTeam)}`)
 			.then(response => response.json())
 			.then(data => {
 				console.log(data);
