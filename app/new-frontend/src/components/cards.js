@@ -1,9 +1,7 @@
 import React, { Fragment } from 'react';
 import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardActionArea from '@mui/material/CardActionArea';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { Box } from '@mui/material';
 import Divider from '@mui/material/Divider';
@@ -89,7 +87,7 @@ export function MatchCards(props) {
     return (
         <Fragment>
             <Card sx={{ margin: 2 }} variant="outlined">
-            <CardActionArea>
+            <CardActionArea  onClick={() => handleOpenMatchFactsModal(date, homeTeam, awayTeam)}>
                     <CardContent>
                         <Box sx={{
                             display: 'flex',
@@ -115,9 +113,6 @@ export function MatchCards(props) {
                         </Box>
                     </CardContent>
                     <Divider sx={{ width: '100%', height: 2 }} />
-                    <CardActions sx={{ justifyContent: "center" }}>
-                        <Button size="small" onClick={() => handleOpenMatchFactsModal(date, homeTeam, awayTeam)}>View Match Facts</Button>
-                    </CardActions>
                 </CardActionArea>
             </Card>
         </Fragment>
@@ -152,4 +147,14 @@ export function TeamCards(props) {
             </Card>
         </Fragment>
     );
+}
+
+export function PredictionOutputCard(props) {
+    const { homeTeam, awayTeam, predictionOutput } = props;
+
+    return (
+        <Fragment>
+            {predictionOutput}
+        </Fragment>
+    )
 }

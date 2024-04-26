@@ -12,6 +12,7 @@ import { FormStats } from "../components/predictionFormStats";
 import { AverageStats } from "../components/predictionAverages";
 import { HeadToHead } from "../components/predictionHeadToHead";
 import { Squads } from "../components/predictionSquads";
+import { PredictionOutputCard } from "../components/cards";
 
 
 function TabPanel(props) {
@@ -78,7 +79,7 @@ export default function Prediction(props) {
 
 	const getTeamIdFromName = async (teamName) => {
 		try {
-		  const response = await fetch(`http://localhost:8080/prediction/team_id?team_name=${encodeURIComponent(teamName)}`);
+		  const response = await fetch(`http://localhost:8080/prediction/team-id?team_name=${encodeURIComponent(teamName)}`);
 		  const data = await response.json();
 		  return data.id;
 		} catch (error) {
@@ -269,6 +270,9 @@ export default function Prediction(props) {
 							<Grid container justifyContent="flex-end">
 							</Grid>
 						</Box>
+					</Box>
+					<Box sx={{ width: '100%', height: 2 }}>
+						<PredictionOutputCard homeTeam={ homeTeam } awayTeam={awayTeam} predictionOutput={predictionOutput} />
 					</Box>
 				</Box>
 			</Container>
