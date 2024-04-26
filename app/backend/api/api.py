@@ -324,8 +324,8 @@ def get_match_facts():
    method='GET',
 )
 def get_prediction_stats():
-   home_team = request.args.get('home_team').replace("%20", " ")
-   away_team = request.args.get('away_team').replace("%20", " ")
+   home_team = request.args.get('home_team')
+   away_team = request.args.get('away_team')
    try:
       home_team_form = db.get_dict(f"""
          SELECT
