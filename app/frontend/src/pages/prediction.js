@@ -6,7 +6,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
 import { Grid, Button, FormControl, Divider, Select, InputLabel, MenuItem } from "@mui/material";
 import { Tabs, Tab } from "@mui/material";
-import { useTheme } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import { FormStats } from "../components/predictionFormStats";
 import { AverageStats } from "../components/predictionAverages";
@@ -75,7 +74,6 @@ export default function Prediction(props) {
 
 	const [predictionOutput, setPredictionOutput] = useState([]);
 
-	const theme = useTheme();
 
 	const getTeamIdFromName = async (teamName) => {
 		try {
@@ -105,6 +103,7 @@ export default function Prediction(props) {
 				})
 			});
 			const data = await response.json();
+			console.log(data);
 			setPredictionOutput(data); // or set some state
 		} catch (error) {
 			console.error('Prediction failed:', error);
@@ -229,7 +228,7 @@ export default function Prediction(props) {
 										</Select>
 									</FormControl>
 								</Grid>
-								<Grid item xs={12} sx={{ height:300, overflow:"hidden", alignItems: "center" }} >
+								<Grid item xs={12} sx={{ maxHeight:300, height:"min-content", overflow:"hidden", alignItems: "center" }} >
 									<AppBar position="static">
 										<Tabs
 											value={value}
@@ -237,7 +236,7 @@ export default function Prediction(props) {
 											indicatorColor="secondary"
 											textColor="inherit"
 											variant="fullWidth"
-											aria-label="full width tabs example"
+											aria-label="full width tabs"
 										>
 											{tabs.map((tab, index) => (
 												<Tab key={index} label={tab} {...a11yProps(index)} />
@@ -245,36 +244,41 @@ export default function Prediction(props) {
 										</Tabs>
 									</AppBar>
 									<Box sx={{ height: '100%', overflowY: 'auto', alignItems: "center" }}>
-										<TabPanel key="formStats" value={value} index={0} dir={theme.direction}>
+										<TabPanel key="formStats" value={value} index={0} dir={"right"}>
 										<FormStats homeTeamFormStats={homeTeamFormStats} awayTeamFormStats={awayTeamFormStats} />
 										</TabPanel>
-										<TabPanel key="averageAtLocationStats" value={value} index={1} dir={theme.direction}>
+										<TabPanel key="averageAtLocationStats" value={value} index={1} dir={"right"}>
 										<AverageStats homeTeamAverageStats={homeTeamAverageStats} awayTeamAverageStats={awayTeamAverageStats} />
 										</TabPanel>
-										<TabPanel key="form" value={value} index={2} dir={theme.direction}>
+										<TabPanel key="form" value={value} index={2} dir={"right"}>
 										<HeadToHead headToHeadStats={headToHeadStats} />
 										</TabPanel>
-										<TabPanel key="squads" value={value} index={3} dir={theme.direction}>
+										<TabPanel key="squads" value={value} index={3} dir={"right"}>
 										<Squads homeTeamSquad={homeTeamSquad} awayTeamSquad={awayTeamSquad} />
 										</TabPanel>
 									</Box>
 								</Grid>
-							</Grid>
-							{homeTeam && awayTeam && homeTeam !== awayTeam && (
-								<Button
-									fullWidth
-									onClick={() => { runPrediction(homeTeam, awayTeam) }}
-									variant="outlined"
-								>
-									<span>Run Prediction</span>
-								</Button>
-							)}
-							<Grid container justifyContent="flex-end">
+								<Grid item xs={12} sx={{ alignItems: "center" }} >
+									{homeTeam && awayTeam && homeTeam !== awayTeam && (
+										<Button
+											fullWidth
+											onClick={() => { runPrediction(homeTeam, awayTeam) }}
+											variant="outlined"
+										>
+											<span>Run Prediction</span>
+										</Button>
+									)}
+									{homeTeam && awayTeam && predictionOutput &&
+										<Grid item xs={12} sx={{ alignItems: "center", textAlign: "center" }} >				
+											<Box sx={{ width: '100%', height: 2 }}>
+												<PredictionOutputCard homeTeam={ homeTeam } awayTeam={awayTeam} predictionOutput={predictionOutput} />
+											</Box>
+										</Grid>
+									}
+								</Grid>
+								
 							</Grid>
 						</Box>
-					</Box>
-					<Box sx={{ width: '100%', height: 2 }}>
-						<PredictionOutputCard homeTeam={ homeTeam } awayTeam={awayTeam} predictionOutput={predictionOutput} />
 					</Box>
 				</Box>
 			</Container>

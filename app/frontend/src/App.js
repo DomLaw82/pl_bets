@@ -7,9 +7,24 @@ import { useState, useEffect } from "react";
 import Header from './templates/header';
 import {routeOptions} from './navigator';
 import './App.css';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeSwitcher } from "./components/themeSwitcher";
+
 
 function App() {
   const [teams, setTeams] = useState([]);
+  const [currentTheme, setCurrentTheme] = useState("dark");
+
+  useEffect(() => {
+    localStorage.setItem('currentTheme', currentTheme);
+  }, [currentTheme]);
+
+  const theme = createTheme({
+    palette: {
+      mode: localStorage.getItem('currentTheme') || currentTheme,
+    },
+  });
   
   useEffect(() => {
 		fetch('http://localhost:8080/active-teams')
@@ -20,21 +35,25 @@ function App() {
 
   return (
     <Router>
-      <Header />
-      <Routes>
-        {
-          Object.keys(routeOptions).map((key, index) => {
-            const { path, component: Component} = routeOptions[key];
-            return (
-              <Route
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Header />
+        <ThemeSwitcher currentTheme={currentTheme} setCurrentTheme={setCurrentTheme} />
+        <Routes>
+          {
+            Object.keys(routeOptions).map((key, index) => {
+              const { path, component: Component} = routeOptions[key];
+              return (
+                <Route
                 key={index}
                 path={path}
                 element={<Component teams={teams} setTeams={setTeams} />}
-              />
-            );
-          })
-        }
-      </Routes>
+                />
+              );
+            })
+          }
+        </Routes>
+      </ThemeProvider>
     </Router>
   );
 }

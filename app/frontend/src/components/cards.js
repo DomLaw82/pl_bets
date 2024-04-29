@@ -7,6 +7,8 @@ import { Box } from '@mui/material';
 import Divider from '@mui/material/Divider';
 
 
+const predictionResultColumns = ["goals","shots","shots_on_target","corners","fouls","yellow_cards","red_cards"]
+
 export function PlayerCards(props) {
 
     const { firstName, lastName, birthDate, position, teamName, badge } = props;
@@ -154,7 +156,62 @@ export function PredictionOutputCard(props) {
 
     return (
         <Fragment>
-            {predictionOutput}
+            <Card sx={{ margin: 2 }} variant="outlined">
+                <CardContent sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-evenly',
+                    alignItems: "center"
+                }}>
+                    <Box sx={{alignItems: "center", width: "100%"}}>
+                        {/* <Typography variant="h4" component="div">
+                            Prediction Output
+                        </Typography> */}
+                        <Box sx={{display:"flex", flexDirection:"row"}}>
+                            <Box sx={{alignItems: "center", textAlign: "center", width: "32.5%"}}>
+                                <Typography variant="h4" component="div">
+                                    {homeTeam}
+                                </Typography>
+                            </Box>
+                            <Box sx={{alignItems: "center", textAlign: "center", width: "17.5%"}}></Box>
+                            <Box sx={{alignItems: "center", textAlign: "center"}}>
+                                <Divider orientation="vertical" flexItem />
+                            </Box>
+                            <Divider orientation="vertical" flexItem />
+                            <Box sx={{alignItems: "center", textAlign: "center", width: "17.5%"}}></Box>
+                            <Box sx={{alignItems: "center", textAlign: "center", width: "32.5%"}}>
+                                <Typography variant="h4" component="div">
+                                    {awayTeam}
+                                </Typography>
+                            </Box>
+                        </Box>
+
+                        {predictionOutput && predictionResultColumns.map((column, index) => {
+                            return (
+                                <Box sx={{ display: "flex", flexDirection: "row" }}>
+                                    <Box sx={{ alignItems: "center", textAlign: "center", width: "32.5%" }}>
+                                        <Typography variant="body1" component="div">
+                                            {predictionOutput[`home_${column}`]}
+                                        </Typography>
+                                    </Box>
+                                    <Divider orientation="vertical" flexItem />
+                                    <Box sx={{ alignItems: "center", textAlign: "center", width: "35%" }}>
+                                        <Typography variant="h6" component="div">
+                                            {`${column}`.toUpperCase()}
+                                        </Typography>
+                                    </Box>
+                                    <Divider orientation="vertical" flexItem />
+                                    <Box sx={{ alignItems: "center", textAlign: "center", width: "32.5%" }}>
+                                        <Typography variant="body1" component="div">
+                                            {predictionOutput[`away_${column}`]}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            )
+                        })}
+                    </Box>
+                </CardContent>
+            </Card>
         </Fragment>
     )
 }

@@ -84,6 +84,8 @@ services:
         # condition: service_healthy
     ports:
       - 3000:3000
+    volumes:
+      - /Users/dominiclawson/Documents/projects/pl_bets/app/frontend:/usr/src/app
     environment:
       - POSTGRES_DB=pl_stats
       - POSTGRES_USER=postgres
