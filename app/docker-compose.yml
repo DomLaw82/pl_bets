@@ -83,7 +83,7 @@ services:
       - api
         # condition: service_healthy
     ports:
-      - 3000:80
+      - 3000:3000
     environment:
       - POSTGRES_DB=pl_stats
       - POSTGRES_USER=postgres
@@ -91,4 +91,6 @@ services:
       - POSTGRES_CONTAINER=database
       - POSTGRES_PORT=5432
       - API_URL=http://api:8080
+      - PREDICT_API_URL=http://predict:8008
+      - PUBLIC_URL=/
 
