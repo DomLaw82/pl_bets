@@ -1,10 +1,14 @@
-FROM httpd:2.4
+# Use an official Node.js image for development
+FROM node:21-alpine as development
 
-COPY ./views /usr/local/apache2/htdocs/static
-COPY ./stylesheets /usr/local/apache2/htdocs/static/stylesheets
-COPY ./javascripts /usr/local/apache2/htdocs/static/javascripts
-COPY ./assets /usr/local/apache2/htdocs/static/assets
+# Install dependencies
+WORKDIR /app
+COPY package*.json ./
+COPY webpack.config.js ./
+RUN npm install 
 
-RUN sed -i 's#DocumentRoot "/usr/local/apache2/htdocs"#DocumentRoot "/usr/local/apache2/htdocs/static"#' /usr/local/apache2/conf/httpd.conf
+# Copy source code
+COPY . .
 
-EXPOSE 3000
+# Start development server
+CMD ["npm", "start"]

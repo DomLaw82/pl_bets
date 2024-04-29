@@ -75,6 +75,7 @@ After the containers have started, navigate to the [frontend](http://localhost:3
 
 ## TODO
 - Migrate frontend to React.js
+	- Create new scaler and PCA running .ipynb files
 - General code cleanup and re-factoring
 - Add logging
 - Build regression model to purely predict the winner of each match
