@@ -510,6 +510,9 @@ def create_prediction_dataset(home_team_id: str, home_team_squad: list, away_tea
 	df[["away_team_at_away_mean_goal_difference", "away_team_overall_mean_goal_difference"]] = df.apply(lambda row: get_team_form(away_team_id, False), axis=1, result_type="expand")
 	df["head_to_head_goal_difference"] = df.apply(lambda row: get_last_five_head_to_head_matches(home_team_id, away_team_id), axis=1) 
 
+	print("\n\nFinal DataFrame:\n")
+	print(df)
+
 	return df
 
 	
