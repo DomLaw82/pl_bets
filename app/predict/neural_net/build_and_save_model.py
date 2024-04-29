@@ -89,7 +89,7 @@ def perform_scaling(X_train: np.array, X_test: np.array, pred: bool = False) -> 
 	X_train (pd.DataFrame): The transformed training data after scaling and PCA.
 	X_test (pd.DataFrame): The transformed testing data after scaling and PCA.
 	"""
-	scaler = load('prediction_scaler.bin')
+	scaler = load('files/prediction_scaler.bin')
 
 	if pred:
 		X_train = scaler.transform(X_train)
