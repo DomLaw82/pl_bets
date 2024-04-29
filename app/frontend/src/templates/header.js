@@ -87,11 +87,16 @@ function ResponsiveAppBar() {
                 display: { xs: 'block', md: 'none' },
               }}
             >
-              {Object.entries(routeOptions).map(([route, obj]) => (
-                <MenuItem key={route} onClick={() => handleCloseNavMenu(obj.path)}>
-                  <Typography textAlign="center">{route.toUpperCase()}</Typography>
-                </MenuItem>
-              ))}
+              {Object.entries(routeOptions).map(([route, obj]) => {
+                if (route !== "home") {
+                  return (
+                    <MenuItem key={route} onClick={() => handleCloseNavMenu(obj.path)}>
+                      <Typography textAlign="center">{route.toUpperCase()}</Typography>
+                    </MenuItem>
+                  );
+                }
+                return null;
+              })}
             </Menu>
           </Box>
           <Typography
@@ -113,15 +118,20 @@ function ResponsiveAppBar() {
             PL BETS
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {Object.entries(routeOptions).map(([route, obj]) => (
-              <Button
-                key={route}
-                onClick={() => navigate(obj.path)}
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                {route}
-              </Button>
-            ))}
+            {Object.entries(routeOptions).map(([route, obj]) => {
+              if (route !== "home") {
+                return (
+                  <Button
+                    key={route}
+                    onClick={() => navigate(obj.path)}
+                    sx={{ my: 2, color: 'white', display: 'block' }}
+                  >
+                    {route}
+                  </Button>
+                );
+              }
+              return null;
+            })}
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
