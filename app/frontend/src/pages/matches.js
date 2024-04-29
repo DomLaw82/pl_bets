@@ -9,10 +9,9 @@ import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import { MatchModal } from '../components/modals';
 
-export default function Matches() {
-
-    const [selectedSeason, setSelectedSeason] = useState('2023-2024');
+export default function Matches(props) {
     const [seasons, setSeasons] = useState([]);
+    const [selectedSeason, setSelectedSeason] = useState('2023-2024');
     const [matches, setMatches] = useState([]);
     const [matchFacts, setMatchFacts] = useState([]);
 
@@ -85,7 +84,7 @@ export default function Matches() {
         };
     
         fetchSeasons();
-    }, []);
+    }, [setSeasons]);
 
     return (
         <Fragment>

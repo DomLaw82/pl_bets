@@ -47,7 +47,7 @@ function App() {
                 <Route
                 key={index}
                 path={path}
-                element={<Component teams={teams} setTeams={setTeams} />}
+                  element={<Component teams={teams} setTeams={setTeams} />}
                 />
               );
             })

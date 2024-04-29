@@ -13,6 +13,7 @@ import MenuItem from '@mui/material/MenuItem';
 import { routeOptions, settingsOptions } from '../navigator'
 import { useNavigate } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
+import { UploadModal } from '../components/modals';
 
 const settings = Object.keys(settingsOptions);
 
@@ -164,6 +165,7 @@ function ResponsiveAppBar() {
             </Menu>
           </Box>
         </Toolbar>
+        <UploadModal />
       </Container>
     </AppBar>
   );
