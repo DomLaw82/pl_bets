@@ -1,7 +1,7 @@
 import React, {Fragment} from 'react';
 import { Divider } from '@mui/material';
 import Box from '@mui/material/Box';
-import { PredictionPlayerCards } from './cards';
+import { PredictionPlayerCards } from '../cards';
 
 export function Squads(props) {
 	const { homeTeamSquad, awayTeamSquad } = props;

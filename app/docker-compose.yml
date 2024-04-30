@@ -77,15 +77,13 @@ services:
 
   frontend:
     container_name: frontend
-    build: ./frontend/
+    build: ./frontend
     image: frontend
     depends_on:
       - api
         # condition: service_healthy
     ports:
       - 3000:3000
-    volumes:
-      - /Users/dominiclawson/Documents/projects/pl_bets/app/frontend:/usr/src/app
     environment:
       - POSTGRES_DB=pl_stats
       - POSTGRES_USER=postgres

@@ -14,7 +14,7 @@ import { ThemeSwitcher } from "./components/themeSwitcher";
 
 function App() {
   const [teams, setTeams] = useState([]);
-  const [currentTheme, setCurrentTheme] = useState("dark");
+  const [currentTheme, setCurrentTheme] = useState(localStorage.getItem('currentTheme') || "dark");
 
   useEffect(() => {
     localStorage.setItem('currentTheme', currentTheme);

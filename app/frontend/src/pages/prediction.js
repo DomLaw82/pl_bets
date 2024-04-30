@@ -1,5 +1,4 @@
 import { Fragment, useEffect, useState } from "react";
-import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -7,45 +6,13 @@ import Typography from '@mui/material/Typography';
 import { Grid, Button, FormControl, Divider, Select, InputLabel, MenuItem } from "@mui/material";
 import { Tabs, Tab } from "@mui/material";
 import AppBar from '@mui/material/AppBar';
-import { FormStats } from "../components/predictionFormStats";
-import { AverageStats } from "../components/predictionAverages";
-import { HeadToHead } from "../components/predictionHeadToHead";
-import { Squads } from "../components/predictionSquads";
+import { FormStats } from "../components/predictionTabs/predictionFormStats";
+import { AverageStats } from "../components/predictionTabs/predictionAverages";
+import { HeadToHead } from "../components/predictionTabs/predictionHeadToHead";
+import { Squads } from "../components/predictionTabs/predictionSquads";
 import { PredictionOutputCard } from "../components/cards";
+import { TabPanel, a11yProps } from "../components/tabs";
 
-
-function TabPanel(props) {
-	const { children, value, index, ...other } = props;
-  
-	return (
-	  <div
-		role="tabpanel"
-		hidden={value !== index}
-		id={`full-width-tabpanel-${index}`}
-		aria-labelledby={`full-width-tab-${index}`}
-		{...other}
-	  >
-		{value === index && (
-		  <Box sx={{ p: 3 }}>
-			<Box>{children}</Box>
-		  </Box>
-		)}
-	  </div>
-	);
-}
-  
-TabPanel.propTypes = {
-	children: PropTypes.node,
-	index: PropTypes.number.isRequired,
-	value: PropTypes.number.isRequired,
-};
-
-function a11yProps(index) {
-	return {
-	  id: `full-width-tab-${index}`,
-	  'aria-controls': `full-width-tabpanel-${index}`,
-	};
-}
 
 export default function Prediction(props) {
 

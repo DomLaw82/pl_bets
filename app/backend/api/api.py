@@ -498,6 +498,137 @@ def get_team_id():
    team_id = db.get_dict(f"SELECT id FROM team WHERE name = '{team_name}'")[0]
    return jsonify(team_id)
 
+@registry.handles(
+   rule='/players/historic-stats/<player_id>',
+   method='GET',
+   response_body_schema=''
+)
+def get_player_historic_stats_by_season(player_id:str) -> list:
+   return db.get_dict(f"""
+      SELECT 
+         historic_player_per_ninety.season,
+         player.first_name,
+         player.last_name,
+         team.name AS team,
+         MAX(minutes_played) AS minutes,
+         MAX(goals/ninetys) AS goals_per_90,
+         MAX(assists/ninetys) AS assists_per_90,
+         MAX(direct_goal_contributions/ninetys) AS direct_goal_contributions_per_90,
+         MAX(non_penalty_goals/ninetys) AS non_penalty_goals_per_90,
+         MAX(penalties_scored/ninetys) AS penalties_scored_per_90,
+         MAX(penalties_attempted/ninetys) AS penalties_attempted_per_90,
+         MAX(yellow_cards/ninetys) AS yellow_cards_per_90,
+         MAX(red_cards/ninetys) AS red_cards_per_90,
+         MAX(expected_goals/ninetys) AS expected_goals_per_90,
+         MAX(non_penalty_expected_goals/ninetys) AS non_penalty_expected_goals_per_90,
+         MAX(expected_assisted_goals/ninetys) AS expected_assisted_goals_per_90,
+         MAX(non_penalty_expected_goals_plus_expected_assisted_goals/ninetys) AS non_penalty_expected_goals_plus_expected_assisted_goals_per_90,
+         MAX(progressive_carries/ninetys) AS progressive_carries_per_90,
+         MAX(progressive_passes/ninetys) AS progressive_passes_per_90,
+         MAX(progressive_passes_received/ninetys) AS progressive_passes_received_per_90,
+         MAX(total_passing_distance/ninetys) AS total_passing_distance_per_90,
+         MAX(total_progressive_passing_distance/ninetys) AS total_progressive_passing_distance_per_90,
+         MAX(short_passes_completed/ninetys) AS short_passes_completed_per_90,
+         MAX(short_passes_attempted/ninetys) AS short_passes_attempted_per_90,
+         MAX(medium_passes_completed/ninetys) AS medium_passes_completed_per_90,
+         MAX(medium_passes_attempted/ninetys) AS medium_passes_attempted_per_90,
+         MAX(long_passes_completed/ninetys) AS long_passes_completed_per_90,
+         MAX(long_passes_attempted/ninetys) AS long_passes_attempted_per_90,
+         MAX(expected_assists/ninetys) AS expected_assists_per_90,
+         MAX(assists_minus_expected_assisted_goals/ninetys) AS assists_minus_expected_assisted_goals_per_90,
+         MAX(key_passes/ninetys) AS key_passes_per_90,
+         MAX(passes_into_final_third/ninetys) AS passes_into_final_third_per_90,
+         MAX(passes_into_penalty_area/ninetys) AS passes_into_penalty_area_per_90,
+         MAX(crosses_into_penalty_area/ninetys) AS crosses_into_penalty_area_per_90,
+         MAX(shots/ninetys) AS shots_per_90,
+         MAX(shots_on_target/ninetys) AS shots_on_target_per_90,
+         MAX(goals_per_shot/ninetys) AS goals_per_shot_per_90,
+         MAX(goals_per_shot_on_target/ninetys) AS goals_per_shot_on_target_per_90,
+         MAX(average_shot_distance/ninetys) AS average_shot_distance_per_90,
+         MAX(shots_from_free_kicks/ninetys) AS shots_from_free_kicks_per_90,
+         MAX(penalties_made/ninetys) AS penalties_made_per_90,
+         MAX(non_penalty_expected_goals_per_shot/ninetys) AS non_penalty_expected_goals_per_shot_per_90,
+         MAX(goals_minus_expected_goals/ninetys) AS goals_minus_expected_goals_per_90,
+         MAX(non_penalty_goals_minus_non_penalty_expected_goals/ninetys) AS non_penalty_goals_minus_non_penalty_expected_goals_per_90,
+         MAX(touches/ninetys) AS touches_per_90,
+         MAX(touches_in_defensive_penalty_area/ninetys) AS touches_in_defensive_penalty_area_per_90,
+         MAX(touches_in_defensive_third/ninetys) AS touches_in_defensive_third_per_90,
+         MAX(touches_in_middle_third/ninetys) AS touches_in_middle_third_per_90,
+         MAX(touches_in_attacking_third/ninetys) AS touches_in_attacking_third_per_90,
+         MAX(touches_in_attacking_penalty_area/ninetys) AS touches_in_attacking_penalty_area_per_90,
+         MAX(live_ball_touches/ninetys) AS live_ball_touches_per_90,
+         MAX(take_ons_attempted/ninetys) AS take_ons_attempted_per_90,
+         MAX(take_ons_succeeded/ninetys) AS take_ons_succeeded_per_90,
+         MAX(times_tackled_during_take_on/ninetys) AS times_tackled_during_take_on_per_90,
+         MAX(carries/ninetys) AS carries_per_90,
+         MAX(total_carrying_distance/ninetys) AS total_carrying_distance_per_90,
+         MAX(progressive_carrying_distance/ninetys) AS progressive_carrying_distance_per_90,
+         MAX(carries_into_final_third/ninetys) AS carries_into_final_third_per_90,
+         MAX(carries_into_penalty_area/ninetys) AS carries_into_penalty_area_per_90,
+         MAX(miscontrols/ninetys) AS miscontrols_per_90,
+         MAX(dispossessed/ninetys) AS dispossessed_per_90,
+         MAX(passes_received/ninetys) AS passes_received_per_90,
+         MAX(tackles/ninetys) AS tackles_per_90,
+         MAX(tackles_won/ninetys) AS tackles_won_per_90,
+         MAX(defensive_third_tackles/ninetys) AS defensive_third_tackles_per_90,
+         MAX(middle_third_tackles/ninetys) AS middle_third_tackles_per_90,
+         MAX(attacking_third_tackles/ninetys) AS attacking_third_tackles_per_90,
+         MAX(dribblers_tackled/ninetys) AS dribblers_tackled_per_90,
+         MAX(dribbler_tackles_attempted/ninetys) AS dribbler_tackles_attempted_per_90,
+         MAX(shots_blocked/ninetys) AS shots_blocked_per_90,
+         MAX(passes_blocked/ninetys) AS passes_blocked_per_90,
+         MAX(interceptions/ninetys) AS interceptions_per_90,
+         MAX(clearances/ninetys) AS clearances_per_90,
+         MAX(errors_leading_to_shot/ninetys) AS errors_leading_to_shot_per_90,
+         MAX(goals_against/ninetys) AS goals_against_per_90,
+         MAX(shots_on_target_against/ninetys) AS shots_on_target_against_per_90,
+         MAX(saves/ninetys) AS saves_per_90,
+         MAX(clean_sheets/ninetys) AS clean_sheets_per_90,
+         MAX(penalties_faced/ninetys) AS penalties_faced_per_90,
+         MAX(penalties_allowed/ninetys) AS penalties_allowed_per_90,
+         MAX(penalties_saved/ninetys) AS penalties_saved_per_90,
+         MAX(penalties_missed/ninetys) AS penalties_missed_per_90
+      FROM
+         historic_player_per_ninety
+      JOIN
+         player_team ON historic_player_per_ninety.player_id = player_team.player_id
+      JOIN
+         team ON player_team.team_id = team.id
+      JOIN
+         player ON historic_player_per_ninety.player_id = player.id
+      WHERE
+         historic_player_per_ninety.player_id = 'p-00001'
+      GROUP BY
+         historic_player_per_ninety.season,
+         team.name,
+		 player.first_name,
+		 player.last_name
+      ORDER BY
+         historic_player_per_ninety.season ASC;
+   """)
+
+@registry.handles(
+   rule='/players/recent-minutes/<player_id>',
+   method='GET',
+   response_body_schema=''
+)
+def get_player_recent_minutes_stats_by_season(player_id:str) -> list:
+   return db.get_dict(f"""
+      SELECT 
+         season,
+         minutes_played AS minutes,
+         ninetys AS ninetys
+      FROM
+         historic_player_per_ninety
+      WHERE
+         player_id = 'p-00001'
+         AND season = (SELECT MAX(season) FROM historic_player_per_ninety)
+      ORDER BY
+         season ASC;
+   """)
+
+
+
 # @registry.handles(
 #    rule='/download-latest-data',
 #    method='GET',

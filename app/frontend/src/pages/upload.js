@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 import { UploadModal } from '../components/modals';
 import { Container, CssBaseline, Grid } from '@mui/material';
 import { Select } from '@mui/material';
-import Divider from '@mui/material';
+import {Divider} from '@mui/material';
 import { Input } from '@mui/material';
 
 export default function Upload(props) {

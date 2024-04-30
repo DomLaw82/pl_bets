@@ -5,15 +5,50 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
 import { Divider } from "@mui/material";
 import { PlayerCards } from "../components/cards";
+import { PlayerStatsModal } from "../components/modals";
 
 
 export default function Players() {
 	const [players, setPlayers] = useState([]);
+	const [historicStats, setHistoricStats] = useState([{}]);
+	const [minutesPlayed, setMinutesPlayed] = useState([{}]);
+	const [isPlayerStatsModalOpen, setIsPlayerStatsModalOpen] = useState(false);
+	const [modalPlayerId, setModalPlayerId] = useState(0);
+	
+	useEffect(() => {
+        fetch(`http://localhost:8080/players/historic-stats/${modalPlayerId}`)
+        .then(response => response.json())
+			.then(data => {
+				setHistoricStats(data)
+				console.log("Historic Stats: ")
+				console.log(data)
+			})
+        .catch(error => console.log(error));
+	}, [setHistoricStats, modalPlayerId]);
+	
+	useEffect((player_id) => {
+		fetch(`http://localhost:8080/players/recent-minutes/${modalPlayerId}`)
+		.then(response => response.json())
+			.then(data => {
+				setMinutesPlayed(data)
+				console.log("Minutes Played: ")
+				console.log(data)
+			})
+		.catch(error => console.log(error));
+	}, [setMinutesPlayed, modalPlayerId]);
+
+    function showPlayerModal(playerId) {
+		setIsPlayerStatsModalOpen(true);
+		setModalPlayerId(playerId);
+    }
 
 	useEffect(() => {
 		fetch('http://localhost:8080/all-active-players')
 			.then(response => response.json())
-			.then(data => setPlayers(data))
+			.then(data => {
+				setPlayers(data)
+				console.log(data)
+			})
 			.catch(error => console.log(error));
 	}, [setPlayers]);
 
@@ -50,12 +85,14 @@ export default function Players() {
 									return (
 										<PlayerCards
 											key={player.id}
+											playerId={player.id}
 											firstName={player.first_name}
 											lastName={player.last_name}
 											birthDate={player.birth_date}
 											position={player.position}
 											teamName={player.team_name}
 											badge={`/logos/${player.team_name}.png`}
+											showPlayerModal={showPlayerModal}
 										/>
 									);
 								})
@@ -63,6 +100,12 @@ export default function Players() {
 						</Box>
 					</Box>
 				</Box>
+				<PlayerStatsModal
+					isOpen={isPlayerStatsModalOpen}
+					setIsOpen={setIsPlayerStatsModalOpen}
+					historicStats={historicStats}
+					minutesPlayed={minutesPlayed}
+				/>
 			</Container>
 		</Fragment>
 	);

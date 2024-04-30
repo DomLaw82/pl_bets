@@ -6,17 +6,15 @@ import Typography from '@mui/material/Typography';
 import { Box } from '@mui/material';
 import Divider from '@mui/material/Divider';
 
-
-const predictionResultColumns = ["goals","shots","shots_on_target","corners","fouls","yellow_cards","red_cards"]
+const predictionResultColumns = ["goals", "shots", "shots_on_target", "corners", "fouls", "yellow_cards", "red_cards"]
 
 export function PlayerCards(props) {
-
-    const { firstName, lastName, birthDate, position, teamName, badge } = props;
-
+    const { playerId, firstName, lastName, birthDate, position, teamName, badge, showPlayerModal } = props;
+    
     return (
         <Fragment>
             <Card sx={{ margin: 2 }} variant="outlined">
-                <CardActionArea>
+                <CardActionArea onClick={ () => showPlayerModal(playerId) }>
                     <CardContent>
                         <Box sx={{
                             display: 'flex',
