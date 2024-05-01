@@ -2,12 +2,8 @@ import React, { Fragment, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
-import Passing from './historicStatsTabs/passing';
-import Possession from './historicStatsTabs/possession';
-import DefensiveActions from './historicStatsTabs/defensiveActions';
-import Goalkeeping from './historicStatsTabs/goalkeeping';
-import Standard from './historicStatsTabs/standard';
-import Shooting from './historicStatsTabs/shooting';
+import HistoricStatsTabTemplate from './historicStats/historicStatsTabTemplate';
+import { tabs, standard, shooting, passing, defensiveActions, goalkeeping, possession } from './historicStats/statHeadings';
 import { Grid } from '@mui/material';
 import { AppBar } from '@mui/material';
 import { Tabs } from '@mui/material';
@@ -93,7 +89,11 @@ export function MatchModal(props) {
 }
 
 export function PlayerStatsModal(props) {
-	const { isOpen, setIsOpen, historicStats, minutesPlayed } = props;
+	const { isOpen, historicStats, minutesPlayed, closePlayerStatsModal } = props;
+	console.log("Historic stats in modal");
+	console.log(historicStats);
+	console.log("Minutes played in modal");
+	console.log(minutesPlayed);
 
 	const [value, setValue] = useState(0);
 
@@ -101,28 +101,11 @@ export function PlayerStatsModal(props) {
 		setValue(newValue);
 	};
 
-	const tabs = ["Passing", "Shooting", "Defensive Actions", "Goalkeeping", "Possession", "Standard"];
-
-	const shooting = [
-		"shots_per_90",
-		"shots_on_target_per_90",
-		"goals_per_shot_per_90",
-		"goals_per_shot_on_target_per_90",
-		"average_shot_distance_per_90",
-		"shots_from_free_kicks_per_90",
-		"penalties_made_per_90",
-		"non_penalty_expected_goals_per_shot_per_90",
-		"goals_minus_expected_goals_per_90",
-		"non_penalty_goals_minus_non_penalty_expected_goals_per_90",
-	];
-
-
-
 	return (
 		<Fragment>
 			<Modal
 				open={isOpen}
-				onClose={() => setIsOpen(!isOpen)}
+				onClose={() => closePlayerStatsModal()}
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 				sx={{ border: '2px solid #000' }}
@@ -133,8 +116,8 @@ export function PlayerStatsModal(props) {
 						top: '50%',
 						left: '50%',
 						transform: 'translate(-50%, -50%)',
-						width: "min-content",
-						maxWidth: 1000,
+						width: "max-content",
+						maxWidth: 1200,
 						overflow: "hidden",
 						bgcolor: 'background.paper',
 						border: '2px solid #000',
@@ -158,24 +141,12 @@ export function PlayerStatsModal(props) {
 								</Typography>
 							</Box>
 						</Box>
-						<Box sx={{ width: "80%", display:"flex", flexDirection:"row" }}>
-							<Box sx={{ width: "33%" }}>
-								<Typography variant="body1" component="div">
-									Most Recent Season: {minutesPlayed.season}
-								</Typography>
-							</Box>
-							<Box sx={{width:"33%"}}>
-								<Typography variant="body1" component="div">
-									Minutes: {minutesPlayed.minutes}
-								</Typography>
-							</Box>
-							<Box sx={{width:"33%"}}>
-								<Typography variant="body1" component="div">
-									90 mins: {minutesPlayed.ninetys}
-								</Typography>
-							</Box>
+						<Box sx={{ width: "80%", display:"flex", flexDirection:"row", margin: 2 }}>
+							<Typography variant="body1" component="div">
+								Per 90 Stats
+							</Typography>
 						</Box>
-						<Grid item xs={12} sx={{ maxHeight:300, height:"min-content", overflowX:"auto", alignItems: "center" }} >
+						<Grid item xs={12} sx={{ maxHeight:500, height:"min-content", overflowX:"auto", alignItems: "center" }} >
 							<AppBar position="static">
 								<Tabs
 									value={value}
@@ -191,23 +162,23 @@ export function PlayerStatsModal(props) {
 								</Tabs>
 							</AppBar>
 							<Box sx={{ height: '100%', overflowY: 'auto', alignItems: "center" }}>
-								<TabPanel key="averageAtLocationStats" value={value} index={1} dir={"right"}>
-									<Standard historicStats={historicStats} />
+								<TabPanel key="standardStats" value={value} index={0} dir={"right"}>
+									<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={standard} key={"standard"} />
 								</TabPanel>
-								<TabPanel key="averageAtLocationStats" value={value} index={1} dir={"right"}>
-									<Shooting historicStats={historicStats} />
+								<TabPanel key="shootingStats" value={value} index={1} dir={"right"}>
+									<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={shooting} key={"shooting"} />
 								</TabPanel>
-								<TabPanel key="formStats" value={value} index={0} dir={"right"}>
-									<Passing historicStats={historicStats} />
+								<TabPanel key="passingStats" value={value} index={2} dir={"right"}>
+									<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={passing} key={"passing"} />
 								</TabPanel>
-								<TabPanel key="averageAtLocationStats" value={value} index={1} dir={"right"}>
-									<Possession historicStats={historicStats} />
+								<TabPanel key="possessionStats" value={value} index={3} dir={"right"}>
+									<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={possession} key={"possession"} />
 								</TabPanel>
-								<TabPanel key="averageAtLocationStats" value={value} index={1} dir={"right"}>
-									<DefensiveActions historicStats={historicStats} />
+								<TabPanel key="defensiveActionStats" value={value} index={4} dir={"right"}>
+									<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={defensiveActions} key={"defensiveActions"} />
 								</TabPanel>
-								<TabPanel key="averageAtLocationStats" value={value} index={1} dir={"right"}>
-									<Goalkeeping historicStats={historicStats} />
+								<TabPanel key="goalkeepingStats" value={value} index={5} dir={"right"}>
+									<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={goalkeeping} key={"goalkeeping"} />
 								</TabPanel>
 							</Box>
 						</Grid>
@@ -240,7 +211,7 @@ export function UploadModal(props) {
 	}
 	
 	const handleFileUpload = (event) => {
-		const file = event.target.files[0];
+		const file = event.target.files;
 		// Process the file here
 	};
 

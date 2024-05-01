@@ -1,0 +1,101 @@
+export const tabs = ["Standard", "Shooting", "Passing", "Possession", "Defensive Actions", "Goalkeeping" ];
+
+export const defensiveActions = [
+	"season",
+	"tackles_per_90",
+	"tackles_won_per_90",
+	"defensive_third_tackles_per_90",
+	"middle_third_tackles_per_90",
+	"attacking_third_tackles_per_90",
+	"dribblers_tackled_per_90",
+	"dribbler_tackles_attempted_per_90",
+	"shots_blocked_per_90",
+	"passes_blocked_per_90",
+	"interceptions_per_90",
+	"clearances_per_90",
+	"errors_leading_to_shot_per_90"
+]
+
+export const passing = [
+	"season",
+	"progressive_passes_per_90",
+	"progressive_passes_received_per_90",	
+	"total_passing_distance_per_90",
+	"total_progressive_passing_distance_per_90",
+	"short_passes_completed_per_90",
+	"short_passes_attempted_per_90",
+	"medium_passes_completed_per_90",
+	"medium_passes_attempted_per_90",
+	"long_passes_completed_per_90",
+	"long_passes_attempted_per_90",
+	"expected_assists_per_90",
+	"assists_minus_expected_assisted_goals_per_90",
+	"key_passes_per_90",
+	"passes_into_final_third_per_90",
+	"passes_into_penalty_area_per_90",
+	"crosses_into_penalty_area_per_90"
+];
+
+export const shooting = [
+	"shots_per_90",
+	"shots_on_target_per_90",
+	"goals_per_shot_per_90",
+	"goals_per_shot_on_target_per_90",
+	"average_shot_distance_per_90",
+	"shots_from_free_kicks_per_90",
+	"penalties_made_per_90",
+	"non_penalty_expected_goals_per_shot_per_90",
+	"goals_minus_expected_goals_per_90",
+	"non_penalty_goals_minus_non_penalty_expected_goals_per_90",
+];
+
+export const possession = [
+	"season",
+	"touches_per_90",
+	"touches_in_defensive_penalty_area_per_90",
+	"touches_in_defensive_third_per_90",
+	"touches_in_middle_third_per_90",
+	"touches_in_attacking_third_per_90",
+	"touches_in_attacking_penalty_area_per_90",
+	"live_ball_touches_per_90",
+	"take_ons_attempted_per_90",
+	"take_ons_succeeded_per_90",
+	"times_tackled_during_take_on_per_90",
+	"carries_per_90",
+	"total_carrying_distance_per_90",
+	"progressive_carrying_distance_per_90",
+	"carries_into_final_third_per_90",
+	"carries_into_penalty_area_per_90",
+	"miscontrols_per_90",
+	"dispossessed_per_90",
+	"passes_received_per_90",
+]	
+
+export const goalkeeping = [
+	"season",
+	"goals_against_per_90",
+	"shots_on_target_against_per_90",
+	"saves_per_90",
+	"clean_sheets_per_90",
+	"penalties_faced_per_90",
+	"penalties_allowed_per_90",
+	"penalties_saved_per_90",
+	"penalties_missed_per_90"
+];
+
+export const standard = [
+	"season",
+	"goals_per_90",
+	"assists_per_90",
+	"direct_goal_contributions_per_90",
+	"non_penalty_goals_per_90",
+	"penalties_scored_per_90",
+	"penalties_attempted_per_90",
+	"yellow_cards_per_90",
+	"red_cards_per_90",
+	"expected_goals_per_90",
+	"non_penalty_expected_goals_per_90",
+	"expected_assisted_goals_per_90",
+	"non_penalty_expected_goals_plus_expected_assisted_goals_per_90",
+	"progressive_carries_per_90"
+];

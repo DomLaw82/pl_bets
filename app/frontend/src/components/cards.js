@@ -9,12 +9,12 @@ import Divider from '@mui/material/Divider';
 const predictionResultColumns = ["goals", "shots", "shots_on_target", "corners", "fouls", "yellow_cards", "red_cards"]
 
 export function PlayerCards(props) {
-    const { playerId, firstName, lastName, birthDate, position, teamName, badge, showPlayerModal } = props;
+    const { playerId, firstName, lastName, birthDate, position, teamName, badge, setModalPlayerId } = props;
     
     return (
         <Fragment>
             <Card sx={{ margin: 2 }} variant="outlined">
-                <CardActionArea onClick={ () => showPlayerModal(playerId) }>
+                <CardActionArea onClick={ () => setModalPlayerId(playerId) }>
                     <CardContent>
                         <Box sx={{
                             display: 'flex',
