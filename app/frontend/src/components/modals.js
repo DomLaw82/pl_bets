@@ -4,29 +4,37 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import HistoricStatsTabTemplate from './historicStats/historicStatsTabTemplate';
 import { tabNames, tabColumns } from './historicStats/statHeadings';
-import { Grid } from '@mui/material';
+import { CssBaseline, Grid, duration } from '@mui/material';
 import { AppBar } from '@mui/material';
 import { Tabs } from '@mui/material';
 import { Tab } from '@mui/material';
 import { TabPanel, a11yProps } from './tabs';
 import { animated, useTransition, useSpring } from '@react-spring/web';
+import { ThemeProvider } from '@emotion/react';
+import { Select, Input, Divider } from '@mui/material';
+
 
 
 export function MatchModal(props) {
-	const { isMatchFactsModalOpen, handleCloseMatchFactsModal, matchFacts} = props;
+	const { isMatchFactsModalOpen, handleCloseMatchFactsModal, matchFacts, originX, originY} = props;
 	const uniqueStats = ["vs", "goals", "shots", "shots_on_target", "corners", "fouls", "yellow_cards", "red_cards"];
 
 	const modalSpring = useSpring({
+		reset: isMatchFactsModalOpen,
 		from: {
 			opacity: 0,
 			size: '0%',
-			transform: 'translate(-50%, -50%) scale(0.9)'
+			transform: 'translate(-50%, -50%) scale(0.9)',
+			top: originY,
+			left: originX,
 		},
         to: {
             transform: isMatchFactsModalOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0.95)',
 			opacity: isMatchFactsModalOpen ? 1 : 0,
 			size: isMatchFactsModalOpen ? '100%' : '0%',
 			backgroundColor: isMatchFactsModalOpen ? 'black' : 'transparent',
+			top: isMatchFactsModalOpen ? document.documentElement.clientHeight/2 : originY,
+			left: isMatchFactsModalOpen ? document.documentElement.clientWidth/2 : originX,
         },
 	});
 
@@ -105,29 +113,34 @@ export function MatchModal(props) {
 }
 
 export function PlayerStatsModal(props) {
-	const { isOpen, historicStats, closePlayerStatsModal } = props;
+	const { isOpen, historicStats, closePlayerStatsModal, originX, originY } = props;
 
 	const [value, setValue] = useState(0);
 
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
 	};
-
+	
 	const modalAnimation = useSpring({
+		reset: isOpen,
 		from: {
 			opacity: 0,
-			size: '0%',
-			transform: 'translate(-50%, -50%) scale(0.95)',
+			transform: 'translate(-50%, -50%) scale(0.9)',
 			height: 0,
+			width: 0,
+			top: originY,
+			left: originX,
 		},
 		to: {
-			transform: isOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0.95)',
+			transform: isOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0.9)',
 			opacity: isOpen ? 1 : 0,
-			size: isOpen ? '100%' : '0%',
 			backgroundColor: isOpen ? 'black' : 'transparent',
 			height: isOpen ? "max-content" : 0,
+			width: isOpen ? 1150 : 0,
+			top: isOpen ? document.documentElement.clientHeight/2 : originY,
+			left: isOpen ? document.documentElement.clientWidth/2 : originX,
 		},
-		config: { tension: 300, friction: 30 }
+		config: { tension: 280, friction: 120 }
 	});
 
 	const transitions = useTransition(value, {
@@ -139,23 +152,17 @@ export function PlayerStatsModal(props) {
 
 	return (
 		<Fragment>
+			<CssBaseline />
 			<Modal
 				open={isOpen}
 				onClose={closePlayerStatsModal}
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
-				sx={{
-					border: '2px solid #000'
-				}}
 			>
 				<animated.div
 					style={{
 						position: 'absolute',
-						top: '50%',
-						left: '50%',
-						width: 1150,
 						height: "max-content",
-						maxWidth: 1200,
 						display: "flex",
 						flexDirection: "row",
 						justifyContent: "center",
@@ -179,7 +186,7 @@ export function PlayerStatsModal(props) {
 								aria-label="full width tabs"
 							>
 								{tabNames.map((tab, index) => (
-									<Tab key={index} label={tab} {...a11yProps(index)} />
+									<Tab key={index} label={tab} sx={{whiteSpace: 'nowrap',overflow: 'hidden',textOverflow:"hidden"}} {...a11yProps(index)} />
 								))}
 							</Tabs>
 						</AppBar>
@@ -204,6 +211,7 @@ export function UploadModal(props) {
 	const { seasons, setSeasons } = props;
 	const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 	const [selectedSeason, setSelectedSeason] = useState('2023-2024');
+	const [selectedPlayerFile, setSelectedPlayerFile] = useState('defensive_action');
 
 	const playerFileNames = ["defensive_action", "goalkeeping", "passing", "possession", "shooting", "standard"];
 
@@ -217,7 +225,6 @@ export function UploadModal(props) {
         );
 		const seasons = await response.json();
 		setSeasons(seasons);
-        return seasons;
 	}
 	
 	const handleFileUpload = (event) => {
@@ -227,16 +234,12 @@ export function UploadModal(props) {
 
 	const handleDropdownChange = (event) => {
 		const selectedOption = event.target.value;
-		// Update the selected option here
+		event.target.id === 'season-dropdown' ? setSelectedSeason(selectedOption) : setSelectedPlayerFile(selectedOption);
 	};
 
-	const handleSave = () => {
-		// Save the file here
-	};
-	
 	return (
 		<Fragment>
-			{/* <Modal
+			<Modal
 				open={isUploadModalOpen}
 				onClose={() => setIsUploadModalOpen(!isUploadModalOpen)}
 				aria-labelledby="modal-modal-title"
@@ -259,7 +262,6 @@ export function UploadModal(props) {
 						justifyContent: "space-evenly",
 					}}
 				>
-					<CssBaseline />
 					<Box
 						sx={{
 							marginTop: 8,
@@ -295,8 +297,9 @@ export function UploadModal(props) {
 										<Select
 											value={selectedSeason}
 											onChange={handleDropdownChange}
+											id='season-dropdown'
 										>
-											{
+											{	seasons &&
 												seasons.map((season, index) => (
 													<option key={index} value={season}>{season}</option>
 												))
@@ -306,6 +309,7 @@ export function UploadModal(props) {
 									<Grid item xs={12}>
 										<Select
 											onChange={handleDropdownChange}
+											id='player-file-dropdown'
 										>
 											{
 												playerFileNames.map((fileName, index) => (
@@ -319,7 +323,7 @@ export function UploadModal(props) {
 						</Box>
 					</Box>
 				</Box>
-			</Modal> */}
+			</Modal>
 		</Fragment>
 	);
 }

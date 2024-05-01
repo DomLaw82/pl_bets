@@ -14,6 +14,8 @@ export default function Matches(props) {
     const [selectedSeason, setSelectedSeason] = useState('2023-2024');
     const [matches, setMatches] = useState([]);
     const [matchFacts, setMatchFacts] = useState([]);
+    const [originX, setOriginX] = useState(0);
+    const [originY, setOriginY] = useState(0);
 
     const [isMatchFactsModalOpen, setIsMatchFactsModalOpen] = useState(false);
     
@@ -28,7 +30,9 @@ export default function Matches(props) {
         return matchFacts[0];
     }
     
-    const handleOpenMatchFactsModal = useCallback(async (date, homeTeamName, awayTeamName) => {
+    const handleOpenMatchFactsModal = useCallback(async (event, date, homeTeamName, awayTeamName) => {
+        setOriginX(event.clientX);
+        setOriginY(event.clientY);
         const facts = await getMatchFacts(date, homeTeamName, awayTeamName);
         setIsMatchFactsModalOpen(true);
         setMatchFacts(facts)
@@ -144,7 +148,7 @@ export default function Matches(props) {
                         </Box>
                     </Box>
                 </Box>
-                {<MatchModal isMatchFactsModalOpen={isMatchFactsModalOpen} handleCloseMatchFactsModal={handleCloseMatchFactsModal} matchFacts={matchFacts}/>}
+                {<MatchModal isMatchFactsModalOpen={isMatchFactsModalOpen} handleCloseMatchFactsModal={handleCloseMatchFactsModal} matchFacts={matchFacts} originX={originX} originY={originY} />}
             </Container>
         </Fragment>
   );    

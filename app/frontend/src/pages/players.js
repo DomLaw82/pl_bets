@@ -11,7 +11,9 @@ export default function Players() {
     const [players, setPlayers] = useState([]);
     const [historicStats, setHistoricStats] = useState([]);
     const [isPlayerStatsModalOpen, setIsPlayerStatsModalOpen] = useState(false);
-    const [modalPlayerId, setModalPlayerId] = useState("");
+	const [modalPlayerId, setModalPlayerId] = useState("");
+	const [modalOriginX, setModalOriginX] = useState(0);
+	const [modalOriginY, setModalOriginY] = useState(0);
 
     // Function to fetch player stats
     const fetchPlayerData = async (playerId) => {
@@ -45,14 +47,20 @@ export default function Players() {
 
     // Effect for handling modal data fetching
     useEffect(() => {
-        if (modalPlayerId) {
+        if (modalPlayerId && modalOriginX !== 0 && modalOriginY !== 0) {
             fetchPlayerData(modalPlayerId);
         }
-	}, [modalPlayerId]);
+	}, [modalPlayerId, modalOriginX, modalOriginY]);
 	
 	const closePlayerStatsModal = () => {
 		setIsPlayerStatsModalOpen(false);
 		setModalPlayerId("");
+	}
+
+	const setModalPlayer = (event, playerId) => {
+		setModalOriginX(event.clientX);
+		setModalOriginY(event.clientY);
+		setModalPlayerId(playerId);
 	}
 
     return (
@@ -77,7 +85,7 @@ export default function Players() {
 									position={player.position}
 									teamName={player.team_name}
 									badge={`/logos/${player.team_name}.png`}
-									setModalPlayerId={setModalPlayerId}
+									setModalPlayer={setModalPlayer}
                                 />
                             ))}
                         </Box>
@@ -88,6 +96,8 @@ export default function Players() {
                     setIsOpen={setIsPlayerStatsModalOpen}
                     historicStats={historicStats}
 					closePlayerStatsModal={closePlayerStatsModal}
+					originX={modalOriginX}
+					originY={modalOriginY}
                 />
             </Container>
         </Fragment>
