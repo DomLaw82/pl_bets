@@ -24,18 +24,18 @@ export function MatchModal(props) {
 		from: {
 			opacity: 0,
 			size: '0%',
-			transform: 'translate(-50%, -50%) scale(0.9)',
+			transform: 'translate(-50%, -50%) scale(0)',
 			top: originY,
 			left: originX,
 		},
         to: {
-            transform: isMatchFactsModalOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0.95)',
+            transform: isMatchFactsModalOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0)',
 			opacity: isMatchFactsModalOpen ? 1 : 0,
 			size: isMatchFactsModalOpen ? '100%' : '0%',
 			backgroundColor: isMatchFactsModalOpen ? 'black' : 'transparent',
 			top: isMatchFactsModalOpen ? document.documentElement.clientHeight/2 : originY,
 			left: isMatchFactsModalOpen ? document.documentElement.clientWidth/2 : originX,
-        },
+		},
 	});
 
 	return (
@@ -45,7 +45,8 @@ export function MatchModal(props) {
                 onClose={handleCloseMatchFactsModal}
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
-                sx={{ border: '2px solid #000' }}
+				sx={{ border: '2px solid #000' }}
+				
             >
                 <animated.div
                     style={{
@@ -125,14 +126,14 @@ export function PlayerStatsModal(props) {
 		reset: isOpen,
 		from: {
 			opacity: 0,
-			transform: 'translate(-50%, -50%) scale(0.9)',
+			transform: 'translate(-50%, -50%) scale(0)',
 			height: 0,
 			width: 0,
 			top: originY,
 			left: originX,
 		},
 		to: {
-			transform: isOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0.9)',
+			transform: isOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0)',
 			opacity: isOpen ? 1 : 0,
 			backgroundColor: isOpen ? 'black' : 'transparent',
 			height: isOpen ? "max-content" : 0,
@@ -140,7 +141,7 @@ export function PlayerStatsModal(props) {
 			top: isOpen ? document.documentElement.clientHeight/2 : originY,
 			left: isOpen ? document.documentElement.clientWidth/2 : originX,
 		},
-		config: { tension: 280, friction: 120 }
+		config: { tension: 280, friction: 120 },
 	});
 
 	const transitions = useTransition(value, {
