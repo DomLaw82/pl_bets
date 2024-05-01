@@ -3,97 +3,109 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import HistoricStatsTabTemplate from './historicStats/historicStatsTabTemplate';
-import { tabs, standard, shooting, passing, defensiveActions, goalkeeping, possession } from './historicStats/statHeadings';
+import { tabNames, tabColumns } from './historicStats/statHeadings';
 import { Grid } from '@mui/material';
 import { AppBar } from '@mui/material';
 import { Tabs } from '@mui/material';
 import { Tab } from '@mui/material';
 import { TabPanel, a11yProps } from './tabs';
-
+import { animated, useTransition, useSpring } from '@react-spring/web';
 
 
 export function MatchModal(props) {
 	const { isMatchFactsModalOpen, handleCloseMatchFactsModal, matchFacts} = props;
 	const uniqueStats = ["vs", "goals", "shots", "shots_on_target", "corners", "fouls", "yellow_cards", "red_cards"];
 
+	const modalSpring = useSpring({
+		from: {
+			opacity: 0,
+			size: '0%',
+			transform: 'translate(-50%, -50%) scale(0.9)'
+		},
+        to: {
+            transform: isMatchFactsModalOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0.95)',
+			opacity: isMatchFactsModalOpen ? 1 : 0,
+			size: isMatchFactsModalOpen ? '100%' : '0%',
+			backgroundColor: isMatchFactsModalOpen ? 'black' : 'transparent',
+        },
+	});
+
 	return (
-		<Fragment>
-			<Modal
-				open={isMatchFactsModalOpen}
-				onClose={handleCloseMatchFactsModal}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
-				sx={{border: '2px solid #000'}}
-			>
-				<Box
-					sx={{
-						position: 'absolute',
-						top: '50%',
-						left: '50%',
-						transform: 'translate(-50%, -50%)',
-						width: 600,
-						bgcolor: 'background.paper',
-						border: '2px solid #000',
-						boxShadow: 24,
+        <Fragment>
+            <Modal
+                open={isMatchFactsModalOpen}
+                onClose={handleCloseMatchFactsModal}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+                sx={{ border: '2px solid #000' }}
+            >
+                <animated.div
+                    style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        width: 600,
+                        bgcolor: 'background.paper',
+                        border: '2px solid #000',
+                        boxShadow: 24,
 						p: 4,
-						display: "flex",
-						flexDirection: "row",
+						padding: 20,
+                        display: "flex",
+                        flexDirection: "row",
 						justifyContent: "space-evenly",
-					}}
-				>
-					<Box sx={{ display: "flex", flexDirection: "column", textAlign: "center", width: 200  }}>
-						
-						<Typography key={matchFacts.home_team} id="modal-modal-home-team" variant="body1" component="p" style={{ height: 20 }}>
-							{matchFacts.home_team}
-						</Typography>
-						{uniqueStats.map((key) => {
-							if (!key.includes("vs")) {
-								return (
-									<Typography key={"home_"+key} id={`modal-modal-${"home_"+key}`} variant="body1" component="p" style={{ height: 20 }}>
-										{matchFacts["home_"+key]}
-									</Typography>
-								);
-							}
-							return null;
-						})}
-					</Box>
-					<Box sx={{display: "flex", flexDirection: "column", textAlign: "center", width: 150 }}>
-						{	
-							uniqueStats.map((key) => {
-							return (
-								<Typography key={`${key}-label`} id={`modal-modal-${key}-label`} variant="body1" component="p" style={{ height: 20 }}>
-									{key}
-								</Typography>
-							);
-						})}
-					</Box>
-					<Box sx={{ display: "flex", flexDirection: "column", textAlign: "center", width: 200 }}>
-						<Typography key={matchFacts.away_team} id="modal-modal-away-team" variant="body1" component="p" style={{ height: 20 }}>
-							{matchFacts.away_team}
-						</Typography>
-						{uniqueStats.map((key) => {
-							if (!key.includes("vs")) {
-								return (
-									<Typography key={"away_"+key} id={`modal-modal-${"away_"+key}`} variant="body1" component="p" style={{ height: 20}}>
-										{matchFacts["away_"+key]}
-									</Typography>
-								);
-							}
-							return null;
-						})}
-					</Box>
-				</Box>
-			</Modal>
-		</Fragment>
+						...modalSpring
+                    }}
+                >
+                    {/* Content box for home team stats */}
+                    <Box sx={{ display: "flex", flexDirection: "column", textAlign: "center", width: 200 }}>
+                        <Typography key={matchFacts.home_team} id="modal-modal-home-team" variant="body1" component="p" style={{ height: 20 }}>
+                            {matchFacts.home_team}
+                        </Typography>
+                        {uniqueStats.map((key) => {
+                            if (!key.includes("vs")) {
+                                return (
+                                    <Typography key={"home_"+key} id={`modal-modal-${"home_"+key}`} variant="body1" component="p" style={{ height: 20 }}>
+                                        {matchFacts["home_"+key]}
+                                    </Typography>
+                                );
+                            }
+                            return null;
+                        })}
+                    </Box>
+
+                    {/* Center box for labels */}
+                    <Box sx={{display: "flex", flexDirection: "column", textAlign: "center", width: 150 }}>
+                        {uniqueStats.map((key) => (
+                            <Typography key={`${key}-label`} id={`modal-modal-${key}-label`} variant="body1" component="p" style={{ height: 20 }}>
+                                {key}
+                            </Typography>
+                        ))}
+                    </Box>
+
+                    {/* Content box for away team stats */}
+                    <Box sx={{ display: "flex", flexDirection: "column", textAlign: "center", width: 200 }}>
+                        <Typography key={matchFacts.away_team} id="modal-modal-away-team" variant="body1" component="p" style={{ height: 20 }}>
+                            {matchFacts.away_team}
+                        </Typography>
+                        {uniqueStats.map((key) => {
+                            if (!key.includes("vs")) {
+                                return (
+                                    <Typography key={"away_"+key} id={`modal-modal-${"away_"+key}`} variant="body1" component="p" style={{ height: 20}}>
+                                        {matchFacts["away_"+key]}
+                                    </Typography>
+                                );
+                            }
+                            return null;
+                        })}
+                    </Box>
+                </animated.div>
+            </Modal>
+        </Fragment>
 	);
 }
 
 export function PlayerStatsModal(props) {
-	const { isOpen, historicStats, minutesPlayed, closePlayerStatsModal } = props;
-	console.log("Historic stats in modal");
-	console.log(historicStats);
-	console.log("Minutes played in modal");
-	console.log(minutesPlayed);
+	const { isOpen, historicStats, closePlayerStatsModal } = props;
 
 	const [value, setValue] = useState(0);
 
@@ -101,91 +113,89 @@ export function PlayerStatsModal(props) {
 		setValue(newValue);
 	};
 
+	const modalAnimation = useSpring({
+		from: {
+			opacity: 0,
+			size: '0%',
+			transform: 'translate(-50%, -50%) scale(0.95)',
+			height: 0,
+		},
+		to: {
+			transform: isOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0.95)',
+			opacity: isOpen ? 1 : 0,
+			size: isOpen ? '100%' : '0%',
+			backgroundColor: isOpen ? 'black' : 'transparent',
+			height: isOpen ? "max-content" : 0,
+		},
+		config: { tension: 300, friction: 30 }
+	});
+
+	const transitions = useTransition(value, {
+		from: { opacity: 0, transform: 'translate3d(100%,0,0)' },
+		enter: { opacity: 1, transform: 'translate3d(0%,0,0)' },
+		leave: { opacity: 0, transform: 'translate3d(-100%,0,0)' },
+		keys: value
+	});
+
 	return (
 		<Fragment>
 			<Modal
 				open={isOpen}
-				onClose={() => closePlayerStatsModal()}
+				onClose={closePlayerStatsModal}
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
-				sx={{ border: '2px solid #000' }}
+				sx={{
+					border: '2px solid #000'
+				}}
 			>
-				<Box
-					sx={{
+				<animated.div
+					style={{
 						position: 'absolute',
 						top: '50%',
 						left: '50%',
-						transform: 'translate(-50%, -50%)',
-						width: "max-content",
+						width: 1150,
+						height: "max-content",
 						maxWidth: 1200,
-						overflow: "hidden",
-						bgcolor: 'background.paper',
-						border: '2px solid #000',
-						boxShadow: 24,
-						p: 4,
 						display: "flex",
 						flexDirection: "row",
-						justifyContent: "space-evenly",
+						justifyContent: "center",
+						...modalAnimation
 					}}
 				>
 					<Box sx={{ display: "flex", flexDirection: "column", textAlign: "center", width: "100%" }}>
-						<Box sx={{width:"100%"}}>
-							<Box sx={{ width: "80%", display:"flex", flexDirection:"row" }}>
-								<Typography variant="body1" component="div">
-									{historicStats.first_name} {historicStats.last_name}
-								</Typography>
-							</Box>
-							<Box sx={{width:"20%"}}>
-								<Typography variant="body1" component="div">
-									{historicStats.team}
-								</Typography>
-							</Box>
-						</Box>
-						<Box sx={{ width: "80%", display:"flex", flexDirection:"row", margin: 2 }}>
-							<Typography variant="body1" component="div">
-								Per 90 Stats
-							</Typography>
-						</Box>
-						<Grid item xs={12} sx={{ maxHeight:500, height:"min-content", overflowX:"auto", alignItems: "center" }} >
-							<AppBar position="static">
-								<Tabs
-									value={value}
-									onChange={handleChange}
-									indicatorColor="secondary"
-									textColor="inherit"
-									variant="fullWidth"
-									aria-label="full width tabs"
-								>
-									{tabs.map((tab, index) => (
-										<Tab key={index} label={tab} {...a11yProps(index)} />
-									))}
-								</Tabs>
-							</AppBar>
-							<Box sx={{ height: '100%', overflowY: 'auto', alignItems: "center" }}>
-								<TabPanel key="standardStats" value={value} index={0} dir={"right"}>
-									<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={standard} key={"standard"} />
-								</TabPanel>
-								<TabPanel key="shootingStats" value={value} index={1} dir={"right"}>
-									<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={shooting} key={"shooting"} />
-								</TabPanel>
-								<TabPanel key="passingStats" value={value} index={2} dir={"right"}>
-									<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={passing} key={"passing"} />
-								</TabPanel>
-								<TabPanel key="possessionStats" value={value} index={3} dir={"right"}>
-									<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={possession} key={"possession"} />
-								</TabPanel>
-								<TabPanel key="defensiveActionStats" value={value} index={4} dir={"right"}>
-									<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={defensiveActions} key={"defensiveActions"} />
-								</TabPanel>
-								<TabPanel key="goalkeepingStats" value={value} index={5} dir={"right"}>
-									<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={goalkeeping} key={"goalkeeping"} />
-								</TabPanel>
-							</Box>
+						<Typography variant="body1" component="div">
+							{historicStats.first_name} {historicStats.last_name}
+						</Typography>
+						<Typography variant="body1" component="div">
+							{historicStats.team}
+						</Typography>
+						<AppBar position="static">
+							<Tabs
+								value={value}
+								onChange={handleChange}
+								indicatorColor="secondary"
+								textColor="inherit"
+								variant="fullWidth"
+								aria-label="full width tabs"
+							>
+								{tabNames.map((tab, index) => (
+									<Tab key={index} label={tab} {...a11yProps(index)} />
+								))}
+							</Tabs>
+						</AppBar>
+						<Grid item xs={12} sx={{ maxHeight:500, height:"min-content", overflowX:"auto", alignItems: "center" }}>
+							{transitions((style, index) => (
+								<animated.div style={style}>
+									<TabPanel value={value} index={index}>
+										<HistoricStatsTabTemplate historicStats={historicStats} statHeadings={tabColumns[tabNames[index]]} />
+									</TabPanel>
+								</animated.div>
+							))}
 						</Grid>
 					</Box>
-				</Box>
+				</animated.div>
 			</Modal>
-		</Fragment>
+        </Fragment>
 	)
 }
 

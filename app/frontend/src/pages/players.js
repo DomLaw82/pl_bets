@@ -10,7 +10,6 @@ import { PlayerStatsModal } from "../components/modals";
 export default function Players() {
     const [players, setPlayers] = useState([]);
     const [historicStats, setHistoricStats] = useState([]);
-    const [minutesPlayed, setMinutesPlayed] = useState([]);
     const [isPlayerStatsModalOpen, setIsPlayerStatsModalOpen] = useState(false);
     const [modalPlayerId, setModalPlayerId] = useState("");
 
@@ -19,13 +18,10 @@ export default function Players() {
         try {
             const statsResponse = await fetch(`http://localhost:8080/players/historic-stats/${playerId}`);
             const statsData = await statsResponse.json();
-            const minutesResponse = await fetch(`http://localhost:8080/players/recent-minutes/${playerId}`);
-            const minutesData = await minutesResponse.json();
 
             setHistoricStats(statsData);
-            setMinutesPlayed(minutesData[0]);
 
-            if (statsData.length > 0 && minutesData.length > 0) {
+            if (statsData.length > 0) {
                 setIsPlayerStatsModalOpen(true);
             }
         } catch (error) {
@@ -91,7 +87,6 @@ export default function Players() {
                     isOpen={isPlayerStatsModalOpen}
                     setIsOpen={setIsPlayerStatsModalOpen}
                     historicStats={historicStats}
-					minutesPlayed={minutesPlayed}
 					closePlayerStatsModal={closePlayerStatsModal}
                 />
             </Container>
