@@ -16,13 +16,15 @@ function App() {
   const [teams, setTeams] = useState([]);
   const [currentTheme, setCurrentTheme] = useState(localStorage.getItem('currentTheme') || "dark");
 
+  localStorage.setItem('currentTheme', currentTheme);
+
   useEffect(() => {
     localStorage.setItem('currentTheme', currentTheme);
   }, [currentTheme]);
 
-  const theme = createTheme({
+  let theme = createTheme({
     palette: {
-      mode: localStorage.getItem('currentTheme') || currentTheme,
+      mode: localStorage.getItem('currentTheme'),
     },
   });
   
