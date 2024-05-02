@@ -25,7 +25,11 @@ export const routeOptions = {
 	"Prediction": {
 		path: '/prediction',
 		component: Prediction
-	}
+	},
+	"Upload": {
+		path: '/upload',
+		component: Upload
+	},
 };
 
 export const settingsOptions = {

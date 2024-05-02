@@ -74,11 +74,10 @@ After the containers have started, navigate to the [frontend](http://localhost:3
 - Compatibility issues between PyPi, Tensorflow and h5py mean that h5py==3.9.0 & tensorflow==2.12.0 must be the versions used with these packages
 
 ## TODO
-- Migrate frontend to React.js
-	- Create new scaler and PCA running .ipynb files
-- General code cleanup and re-factoring
+- Call functions to run intake functions in watchdog handler
 - Add logging
+- Error handling and custom error messages
+- General code cleanup and re-factoring
 - Build regression model to purely predict the winner of each match
 - Review "Separation of concerns"
-- Add file upload route
 - Deploy to AWS with CDK

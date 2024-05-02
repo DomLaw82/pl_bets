@@ -141,7 +141,6 @@ export function PlayerStatsModal(props) {
 			top: isOpen ? document.documentElement.clientHeight/2 : originY,
 			left: isOpen ? document.documentElement.clientWidth/2 : originX,
 		},
-		config: { tension: 280, friction: 120 },
 	});
 
 	const transitions = useTransition(value, {

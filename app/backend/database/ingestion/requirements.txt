@@ -5,3 +5,7 @@ beautifulsoup4
 fuzzywuzzy
 python-Levenshtein
 requests
+flask
+flask_rebar
+flask_cors
+watchdog

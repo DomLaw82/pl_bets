@@ -1,44 +1,66 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { UploadModal } from '../components/modals';
-import { Container, CssBaseline, Grid } from '@mui/material';
-import { Select } from '@mui/material';
-import {Divider} from '@mui/material';
-import { Input } from '@mui/material';
+import { Container, CssBaseline, FormControl, Grid, MenuItem } from '@mui/material';
+import { Select, Divider, Button, Input } from '@mui/material';
 
-export default function Upload(props) {
-	const [seasons, setSeasons] = props;
-	const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-	const [selectedSeason, setSelectedSeason] = useState('2023-2024');
+export default function Upload() {
+	const [ seasons, setSeasons ] = useState([]);
+	const [selectedSeason, setSelectedSeason] = useState('');
+	const [selectedFile, setSelectedFile] = useState('');
+	const [selectedFolder, setSelectedFolder] = useState('');
 
-	const playerFileNames = ["defensive_action", "goalkeeping", "passing", "possession", "shooting", "standard"];
+	const fileFolders = ["game_data", "historic_player_stats", "schedule_data", "squad_data"]
+	const fileNames = {
+		"": [],
+		"historic_player_stats": ["defensive_action", "goalkeeping", "passing", "possession", "shooting", "standard", "random"],
+		"game_data": [""],
+		"schedule_data": [""],
+		"squad_data": [""]
+	};
 
-	async function getSeasons() {
-		const response = await fetch('http://localhost:8080/matches/all-seasons',
-			{
-				headers: {
-					'Access-Control-Allow-Origin': '*'
+	useEffect(() => {
+		const getSeasons = async () => {
+			const response = await fetch('http://localhost:8080/matches/all-seasons',
+				{
+					headers: {
+						'Access-Control-Allow-Origin': '*'
+					}
 				}
-			}
-		);
-		const seasons = await response.json();
-		setSeasons(seasons);
-		return seasons;
-	}
-	
-	const handleFileUpload = (event) => {
-		const file = event.target.files[0];
-		// Process the file here
+			);
+			const seasons = await response.json();
+			setSeasons(seasons);
+		}
+		getSeasons();
+	}, []);
+
+	const handleFileUpload = async (event) => {
+		const file = document.getElementById("file-upload-file").files[0];
+
+		const formData = new FormData();
+		formData.append('file', file);
+		formData.append('folder', selectedFolder);
+		formData.append('name', selectedFile);
+		formData.append('season', selectedSeason);
+
+		fetch(`http://localhost:8009/upload/upload-file`, {
+			method: 'POST',
+			body: formData
+		});
 	};
 
-	const handleDropdownChange = (event) => {
+	const handleSeasonDropdownChange = (event) => {
 		const selectedOption = event.target.value;
-		// Update the selected option here
+		setSelectedSeason(selectedOption)
 	};
-
-	const handleSave = () => {
-		// Save the file here
+	const handleFileDropdownChange = (event) => {
+		const selectedOption = event.target.value;
+		setSelectedFile(selectedOption);
+	};
+	const handleFolderDropdownChange = (event) => {
+		const selectedOption = event.target.value;
+		setSelectedFolder(selectedOption);
 	};
 	
 	return (
@@ -63,41 +85,87 @@ export default function Upload(props) {
 							fontSize: 'clamp(3.5rem, 10vw, 4rem)',
 						}}
 					>
-						Prediction
+						Upload
 					</Typography>
 					<Divider sx={{ width: '100%', height: 2 }} />
 					<Box sx={{ width: '100%', height: 2 }}>
-						<Divider sx={{ width: '100%', height: 2 }} />
+						<Divider sx={{ height: 2 }} />
 						<Box component="div" sx={{ mt: 3 }}>
-							<Grid container spacing={2}>
-								<Grid item xs={12}>
-									<Input
-										type="file"
-										onChange={handleFileUpload}
-									/>
+							<Grid container spacing={2} >
+								<Grid item xs={12} sm={12} sx={{display: "flex", flexDirection:"row", margin: 2}}>
+									<Grid item xs={12} sm={4}>
+										<FormControl key={"file-upload-folder"} required fullWidth>
+											<Select
+												id="folder-dropdown"
+												value={selectedFolder}
+												onChange={handleFolderDropdownChange}
+												sx={{ width: '100%' }}
+												label="File Folder *"
+												required
+											>	
+												{
+													fileFolders.map((folder, index) => (
+														<MenuItem key={`${folder}-${index}`} value={folder}>{folder.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</MenuItem>
+													))
+												}
+											</Select>
+										</FormControl>
+									</Grid>
+									<Grid item xs={12} sm={4}>
+										<FormControl key={"file-upload-name"} required fullWidth>
+											<Select
+												id="file-dropdown"
+												value={selectedFile}
+												onChange={handleFileDropdownChange}
+												sx={{ width: '100%' }}
+												label="File Name *"
+												required
+											>
+												{ selectedFolder &&
+													fileNames[selectedFolder].map((fileName, index) => (
+														<MenuItem key={`${fileName}-${index}`} value={fileName}>{fileName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</MenuItem>
+													))
+												}
+											</Select>
+										</FormControl>
+									</Grid>
+									<Grid item xs={12} sm={4}>
+										<FormControl key={"file-upload-season"} required fullWidth>
+											<Select
+												id="season-dropdown"
+												value={selectedSeason}
+												onChange={handleSeasonDropdownChange}
+												sx={{ width: '100%' }}
+												label="Season *"
+												required
+											>	
+												{
+													seasons.map((season, index) => (
+														<MenuItem key={`${season}-${index}`} value={season}>{season}</MenuItem>
+													))
+												}
+											</Select>
+										</FormControl>
+									</Grid>
 								</Grid>
-								<Grid item xs={12}>
-									<Select
-										value={selectedSeason}
-										onChange={handleDropdownChange}
+								<FormControl key={"file-upload-file"} required fullWidth>
+									<Grid item xs={12} sm={12} sx={{textAlign:"center", margin: 2}}>
+										<Input
+											id='file-upload-file'
+											type="file"
+											accept=".csv"
+											required
+										/>
+									</Grid>
+								</FormControl>
+								<Grid item xs={12} sm={12} sx={{textAlign:"center", margin: 2}}>
+									<Button
+										type="submit"
+										onClick={handleFileUpload}
+										variant="outlined"
 									>
-										{
-											seasons.map((season, index) => (
-												<option key={index} value={season}>{season}</option>
-											))
-										}
-									</Select>
-								</Grid>
-								<Grid item xs={12}>
-									<Select
-										onChange={handleDropdownChange}
-									>
-										{
-											playerFileNames.map((fileName, index) => (
-												<option key={index} value={fileName}>{fileName}</option>
-											))
-										}
-									</Select>
+										Upload File
+									</Button>
 								</Grid>
 							</Grid>
 						</Box>

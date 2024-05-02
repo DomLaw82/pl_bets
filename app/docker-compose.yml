@@ -35,10 +35,12 @@ services:
     #   interval: 30s
     #   timeout: 3s
     #   retries: 20
+    ports:
+      - 8009:8009
 
   api:
     container_name: api
-    build: ./backend
+    build: ./backend/api
     image: api
     depends_on:
       - local-data-ingestion

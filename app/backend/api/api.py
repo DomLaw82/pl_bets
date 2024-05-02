@@ -30,11 +30,14 @@ def index():
    method='GET',
    response_body_schema=TeamSchema(many=True)
 )
-def get_teams() :
-   teams = db.get_dict(f"""
-      SELECT * from team ORDER BY name ASC
-   """)
-   return jsonify(teams)
+def get_teams():
+   try:
+      teams = db.get_dict(f"""
+         SELECT * from team ORDER BY name ASC
+      """)
+      return jsonify(teams)
+   except Exception as e:
+      return jsonify({"error":f"Error with endpoint /teams: {str(e)}"}), 500
 
 # all teams
 @registry.handles(
@@ -43,24 +46,27 @@ def get_teams() :
    response_body_schema=TeamSchema(many=True)
 )
 def get_active_teams() :
-   teams = db.get_dict(f"""
-      WITH current_season AS (
-         SELECT 
-            MAX(season) AS season
+   try:
+      teams = db.get_dict(f"""
+         WITH current_season AS (
+            SELECT 
+               MAX(season) AS season
+            FROM
+               player_team
+         )
+         SELECT
+            DISTINCT(team.id) AS id,
+            name
          FROM
-            player_team
-      )
-      SELECT
-         DISTINCT(team.id) AS id,
-         name
-      FROM
-         team
-      JOIN current_season ON TRUE
-      JOIN player_team ON team.id = player_team.team_id 
-         AND player_team.season = current_season.season
-      ORDER BY name ASC
-   """)
-   return jsonify(teams)
+            team
+         JOIN current_season ON TRUE
+         JOIN player_team ON team.id = player_team.team_id 
+            AND player_team.season = current_season.season
+         ORDER BY name ASC
+      """)
+      return jsonify(teams)
+   except Exception as e:
+      return jsonify({"error": f"Error with endpoint /active-teams: {str(e)}"}), 500
 
 # all players
 @registry.handles(
@@ -69,34 +75,37 @@ def get_active_teams() :
    response_body_schema=PlayerTeamNameSchema(many=True)
 )
 def get_all_players() :
-   players = db.get_dict(f"""
-      WITH current_season AS (
+   try:
+      players = db.get_dict(f"""
+         WITH current_season AS (
+            SELECT 
+               MAX(season) AS season
+            FROM
+               player_team
+         )
+                            
          SELECT 
-            MAX(season) AS season
-         FROM
-            player_team
-      )
-                         
-      SELECT 
-         DISTINCT(player.id) AS id,
-         player.first_name,
-         player.last_name,
-         player.birth_date,
-         player.position,
-         team.name AS team_name,
-         CASE WHEN pt2.season = current_season.season THEN 'True' ELSE 'False' END AS active
-      FROM player
-      JOIN current_season ON TRUE
-      JOIN (
-         SELECT player_id, MAX(season) AS max_season
-         FROM player_team
-         GROUP BY player_id
-      ) AS pt ON player.id = pt.player_id
-      JOIN player_team AS pt2 ON pt.player_id = pt2.player_id AND pt.max_season = pt2.season
-      JOIN team ON pt2.team_id = team.id
-      ORDER BY player.id ASC
-   """)
-   return jsonify(players)
+            DISTINCT(player.id) AS id,
+            player.first_name,
+            player.last_name,
+            player.birth_date,
+            player.position,
+            team.name AS team_name,
+            CASE WHEN pt2.season = current_season.season THEN 'True' ELSE 'False' END AS active
+         FROM player
+         JOIN current_season ON TRUE
+         JOIN (
+            SELECT player_id, MAX(season) AS max_season
+            FROM player_team
+            GROUP BY player_id
+         ) AS pt ON player.id = pt.player_id
+         JOIN player_team AS pt2 ON pt.player_id = pt2.player_id AND pt.max_season = pt2.season
+         JOIN team ON pt2.team_id = team.id
+         ORDER BY player.id ASC
+      """)
+      return jsonify(players)
+   except Exception as e:
+      return jsonify({"error": f"Error with endpoint /players: {str(e)}"}), 500
 
 # current team roster
 @registry.handles(
@@ -105,30 +114,33 @@ def get_all_players() :
    response_body_schema=''
 )
 def get_all_active_players() -> list:
-   players = db.get_dict(f"""
-      WITH current_season AS (
-         SELECT 
-            MAX(season) AS season
-         FROM
-            player_team
-      )
+   try:
+      players = db.get_dict(f"""
+         WITH current_season AS (
+            SELECT 
+               MAX(season) AS season
+            FROM
+               player_team
+         )
                            
-      SELECT
-         player.id AS id,
-         player.first_name AS first_name,
-         player.last_name AS last_name,
-         player.birth_date AS birth_date,
-         player.position AS position,
-         team.name AS team_name
-      FROM
-         player
-      JOIN current_season ON TRUE
-      JOIN player_team ON player.id = player_team.player_id
-      JOIN team ON player_team.team_id = team.id
-      WHERE player_team.season = current_season.season
-      ORDER BY player.last_name ASC
-   """)
-   return jsonify(players)
+         SELECT
+            player.id AS id,
+            player.first_name AS first_name,
+            player.last_name AS last_name,
+            player.birth_date AS birth_date,
+            player.position AS position,
+            team.name AS team_name
+         FROM
+            player
+         JOIN current_season ON TRUE
+         JOIN player_team ON player.id = player_team.player_id
+         JOIN team ON player_team.team_id = team.id
+         WHERE player_team.season = current_season.season
+         ORDER BY player.last_name ASC
+      """)
+      return jsonify(players)
+   except Exception as e:
+      return jsonify({"error": f"Error with endpoint /all-active-players: {str(e)}"}), 500
 
 @registry.handles(
    rule='/active-players/<team_id>',
@@ -136,41 +148,47 @@ def get_all_active_players() -> list:
    response_body_schema=''
 )
 def get_team_current_roster(team_id:str) -> list:
-   players = db.get_dict(f"""
-      WITH current_season AS (
-         SELECT 
-            MAX(season) AS season
-         FROM
-            player_team
-      )
+   try:
+      players = db.get_dict(f"""
+         WITH current_season AS (
+            SELECT 
+               MAX(season) AS season
+            FROM
+               player_team
+         )
                            
-      SELECT
-         player.id AS id,
-         player.first_name AS first_name,
-         player.last_name AS last_name,
-         player.birth_date AS birth_date,
-         player.position AS position
-      FROM
-         player
-      JOIN current_season ON TRUE
-      JOIN player_team ON player.id = player_team.player_id
-      WHERE player_team.team_id = '{team_id}'
-      AND player_team.season = current_season.season
-      ORDER BY player.last_name ASC
-   """)
-   return jsonify(players)
+         SELECT
+            player.id AS id,
+            player.first_name AS first_name,
+            player.last_name AS last_name,
+            player.birth_date AS birth_date,
+            player.position AS position
+         FROM
+            player
+         JOIN current_season ON TRUE
+         JOIN player_team ON player.id = player_team.player_id
+         WHERE player_team.team_id = '{team_id}'
+         AND player_team.season = current_season.season
+         ORDER BY player.last_name ASC
+      """)
+      return jsonify(players)
+   except Exception as e:
+      return jsonify({"error": f"Error with endpoint /active-players/{team_id}: {str(e)}"}), 500
 
 @registry.handles(
    rule='/matches/all-seasons',
    method='GET'
 )
 def get_all_seasons() -> list:
-   seasons = db.get_list(f"""
-      SELECT DISTINCT(season) FROM match ORDER BY season ASC
-   """)
+   try:
+      seasons = db.get_list(f"""
+         SELECT DISTINCT(season) FROM match ORDER BY season ASC
+      """)
 
-   seasons = [season[0] for season in seasons]
-   return jsonify(seasons)
+      seasons = [season[0] for season in seasons]
+      return jsonify(seasons)
+   except Exception as e:
+      return jsonify({"error": f"Error with endpoint /matches/all-seasons: {str(e)}"}), 500
 
 def decompose_season(season: str) -> tuple:
    start_year, end_year = season.split('-')
@@ -189,96 +207,25 @@ def decompose_season(season: str) -> tuple:
    response_body_schema=ScheduleSchema(many=True)
 )
 def get_schedule_by_season(season:str) -> list:
-   season_start, season_end = decompose_season(season)
-   schedule = db.get_dict(f"""
-      SELECT 
-         CAST(s.date AS VARCHAR) AS date,
-         CAST(s.round_number AS VARCHAR) AS game_week,
-         CAST(home_team.name AS VARCHAR) AS home_team,
-         CAST(away_team.name AS VARCHAR) AS away_team,
-         CAST(s.result AS VARCHAR) AS result,
-         s.competition_id AS competition_id
-      FROM schedule s
-      JOIN team home_team ON s.home_team_id = home_team.id
-      JOIN team away_team ON s.away_team_id = away_team.id
-      WHERE DATE(s.date) > '{season_start}' AND DATE(s.date) < '{season_end}'
-      ORDER BY s.date ASC;
-   """)
-   print(schedule)
-   return jsonify(schedule)
-
-@registry.handles(
-   rule='/matches/add-result',
-   method='POST',
-   response_body_schema=''
-)
-def add_match_result():
    try:
-      data = request.get_json()
-
-      game_week = data.get("game-week")
-      match_date = data.get("match-date")
-      home_team = data.get("home-team")
-      away_team = data.get("away-team")
-      home_goals = data.get("home-goals")
-      away_goals = data.get("away-goals")
-
-      season = data.get("season")
-      competition_id = data.get("competition-id")
-      referee_id = data.get("referee-id")
-      home_shots = data.get("home-shots")
-      away_shots = data.get("away-shots")
-      home_shots_on_target = data.get("home-shots-on-target")
-      away_shots_on_target = data.get("away-shots-on-target")
-      home_corners = data.get("home-corners")
-      away_corners = data.get("away-corners")
-      home_fouls = data.get("home-fouls")
-      away_fouls = data.get("away-fouls")
-      home_yellow_cards = data.get("home-yellow-cards")
-      away_yellow_cards = data.get("away-yellow-cards")
-      home_red_cards = data.get("home-red-cards")
-      away_red_cards = data.get("away-red-cards")
-
-      home_team_id = db.get_list(f"SELECT id FROM team WHERE name = '{home_team}'")[0][0]
-      away_team_id = db.get_list(f"SELECT id FROM team WHERE name = '{away_team}'")[0][0]
-
-      if home_team and away_team and home_goals and away_goals and match_date and game_week:
-         db.execute(f"""
-            UPDATE schedule
-            SET result = '{home_goals}-{away_goals}'
-            WHERE home_team_id = '{home_team_id}' AND away_team_id = '{away_team_id}' AND date = '{match_date.split("T")[0]} {match_date.split("T")[1]}:00' AND round_number = '{game_week}' AND competition_id = '{competition_id}'
-         """)
-         return jsonify({"message": "Match result added successfully"}), 200
-      if away_red_cards:
-         db.execute(f"""
-            INSERT INTO match (season, competition_id, home_team_id, away_team_id, referee_id, home_goals, away_goals, home_shots, away_shots, home_shots_on_target, away_shots_on_target, home_corners, away_corners, home_fouls, away_fouls, home_yellow_cards, away_yellow_cards, home_red_cards, away_red_cards)
-            VALUES ('{season}', '{competition_id}', '{home_team_id}', '{away_team_id}', '{referee_id}', '{home_goals}', '{away_goals}', '{home_shots}', '{away_shots}', '{home_shots_on_target}', '{away_shots_on_target}', '{home_corners}', '{away_corners}', '{home_fouls}', '{away_fouls}', '{home_yellow_cards}', '{away_yellow_cards}', '{home_red_cards}', '{away_red_cards}')
-         """)
-         return jsonify({"message": "Match result added successfully"}), 200
+      season_start, season_end = decompose_season(season)
+      schedule = db.get_dict(f"""
+         SELECT 
+            CAST(s.date AS VARCHAR) AS date,
+            CAST(s.round_number AS VARCHAR) AS game_week,
+            CAST(home_team.name AS VARCHAR) AS home_team,
+            CAST(away_team.name AS VARCHAR) AS away_team,
+            CAST(s.result AS VARCHAR) AS result,
+            s.competition_id AS competition_id
+         FROM schedule s
+         JOIN team home_team ON s.home_team_id = home_team.id
+         JOIN team away_team ON s.away_team_id = away_team.id
+         WHERE DATE(s.date) > '{season_start}' AND DATE(s.date) < '{season_end}'
+         ORDER BY s.date ASC;
+      """)
+      return jsonify(schedule)
    except Exception as e:
-      return jsonify({"error": str(e)}), 500
-
-@registry.handles(
-   rule='/update/historic_per_ninety/submit',
-   method='POST',
-)
-def update_historic_per_ninety(content:str):
-   try:
-        if 'file' not in request.files:
-            return jsonify({'ERROR': 'No file part'}), 400
-        file = request.files['file']
-
-        if file.filename == '':
-            return jsonify({'ERROR': 'No selected file'}), 400
-        if not file.filename.endswith('.csv'):
-            return jsonify({'ERROR': 'Invalid file format. Must be a CSV file'}), 400
-
-        df = pd.read_csv(file)
-        df.to_sql("historic_player_per_ninety", local_pl_stats_connector.conn, if_exists="append", )
-        return jsonify({'message': 'CSV file uploaded successfully'}), 200
-   
-   except Exception as e:
-        return jsonify({'error': str(e)}), 500
+      return jsonify({"error": f"Error with endpoint /matches/season/{season}: {str(e)}"}), 500
    
 @registry.handles(
    rule='/matches/match-facts',
@@ -317,7 +264,7 @@ def get_match_facts():
       """)
       return jsonify(data)
    except Exception as e:
-      return jsonify({'error': str(e)}), 500
+      return jsonify({'error': f"Error with endpoint /matches/match-facts: {str(e)}"}), 500
    
 @registry.handles(
    rule='/prediction/stats',
@@ -434,7 +381,7 @@ def get_prediction_stats():
          }
       )
    except Exception as e:
-      return jsonify({'error': str(e)}), 500
+      return jsonify({'error': f"Error with endpoint /prediction/stats: {str(e)}"}), 500
    
 @registry.handles(
    rule='/prediction/squads',
@@ -442,51 +389,55 @@ def get_prediction_stats():
    response_body_schema=''
 )
 def get_prediction_squads() -> list:
-   home_team = request.args.get('home_team')
-   away_team = request.args.get('away_team')
+   try:
+      home_team = request.args.get('home_team')
+      away_team = request.args.get('away_team')
 
-   home_team_squad = db.get_dict(f"""
-      WITH current_season AS (
-         SELECT 
-            MAX(season) AS season
-         FROM
-            player_team
-      )
-                                 
-      SELECT
-         player.first_name,
-         player.last_name,
-         player.position
-      FROM player
-      JOIN player_team ON player.id = player_team.player_id
-      JOIN team ON player_team.team_id = team.id
-      JOIN current_season ON TRUE
-      WHERE team.name = '{home_team}'
-         AND player_team.season = current_season.season
-      ORDER BY player.last_name ASC
-   """)
-   
-   away_team_squad = db.get_dict(f"""
-      WITH current_season AS (
-         SELECT 
-            MAX(season) AS season
-         FROM
-            player_team
-      )
-                                 
-      SELECT
-         player.first_name,
-         player.last_name,
-         player.position
-      FROM player
-      JOIN player_team ON player.id = player_team.player_id
-      JOIN team ON player_team.team_id = team.id
-      JOIN current_season ON TRUE
-      WHERE team.name = '{away_team}'
-         AND player_team.season = current_season.season
-      ORDER BY player.last_name ASC
-   """)
-   return jsonify({"home_team_squad": home_team_squad, "away_team_squad": away_team_squad})
+      home_team_squad = db.get_dict(f"""
+         WITH current_season AS (
+            SELECT 
+               MAX(season) AS season
+            FROM
+               player_team
+         )
+                                    
+         SELECT
+            player.first_name,
+            player.last_name,
+            player.position
+         FROM player
+         JOIN player_team ON player.id = player_team.player_id
+         JOIN team ON player_team.team_id = team.id
+         JOIN current_season ON TRUE
+         WHERE team.name = '{home_team}'
+            AND player_team.season = current_season.season
+         ORDER BY player.last_name ASC
+      """)
+      
+      away_team_squad = db.get_dict(f"""
+         WITH current_season AS (
+            SELECT 
+               MAX(season) AS season
+            FROM
+               player_team
+         )
+                                    
+         SELECT
+            player.first_name,
+            player.last_name,
+            player.position
+         FROM player
+         JOIN player_team ON player.id = player_team.player_id
+         JOIN team ON player_team.team_id = team.id
+         JOIN current_season ON TRUE
+         WHERE team.name = '{away_team}'
+            AND player_team.season = current_season.season
+         ORDER BY player.last_name ASC
+      """)
+      return jsonify({"home_team_squad": home_team_squad, "away_team_squad": away_team_squad})
+   except Exception as e:
+      return jsonify({'error': f"Error with endpoint /prediction/squads: {str(e)}"}), 500
+
 
 @registry.handles(
    rule="/prediction/team-id",
@@ -494,9 +445,12 @@ def get_prediction_squads() -> list:
    response_body_schema=""
 )
 def get_team_id():
-   team_name = request.args.get('team_name')
-   team_id = db.get_dict(f"SELECT id FROM team WHERE name = '{team_name}'")[0]
-   return jsonify(team_id)
+   try:
+      team_name = request.args.get('team_name')
+      team_id = db.get_dict(f"SELECT id FROM team WHERE name = '{team_name}'")[0]
+      return jsonify(team_id)
+   except Exception as e:
+      return jsonify({'error': f"Error with endpoint /prediction/team-id: {str(e)}"}), 500
 
 @registry.handles(
    rule='/players/historic-stats/<player_id>',
@@ -504,104 +458,108 @@ def get_team_id():
    response_body_schema=''
 )
 def get_player_historic_stats_by_season(player_id:str) -> list:
-   return db.get_dict(f"""
-      SELECT 
-         historic_player_per_ninety.season,
-         player.first_name,
-         player.last_name,
-         team.name AS team,
-         minutes_played AS minutes,
-         ROUND((goals/ninetys)::numeric, 2) AS goals_per_90,
-         ROUND((assists/ninetys)::numeric, 2) AS assists_per_90,
-         ROUND((direct_goal_contributions/ninetys)::numeric, 2) AS direct_goal_contributions_per_90,
-         ROUND((non_penalty_goals/ninetys)::numeric, 2) AS non_penalty_goals_per_90,
-         ROUND((penalties_scored/ninetys)::numeric, 2) AS penalties_scored_per_90,
-         ROUND((penalties_attempted/ninetys)::numeric, 2) AS penalties_attempted_per_90,
-         ROUND((yellow_cards/ninetys)::numeric, 2) AS yellow_cards_per_90,
-         ROUND((red_cards/ninetys)::numeric, 2) AS red_cards_per_90,
-         ROUND((expected_goals/ninetys)::numeric, 2) AS expected_goals_per_90,
-         ROUND((non_penalty_expected_goals/ninetys)::numeric, 2) AS non_penalty_expected_goals_per_90,
-         ROUND((expected_assisted_goals/ninetys)::numeric, 2) AS expected_assisted_goals_per_90,
-         ROUND((non_penalty_expected_goals_plus_expected_assisted_goals/ninetys)::numeric, 2) AS non_penalty_expected_goals_plus_expected_assisted_goals_per_90,
-         ROUND((progressive_carries/ninetys)::numeric, 2) AS progressive_carries_per_90,
-         ROUND((progressive_passes/ninetys)::numeric, 2) AS progressive_passes_per_90,
-         ROUND((progressive_passes_received/ninetys)::numeric, 2) AS progressive_passes_received_per_90,
-         ROUND((total_passing_distance/ninetys)::numeric, 2) AS total_passing_distance_per_90,
-         ROUND((total_progressive_passing_distance/ninetys)::numeric, 2) AS total_progressive_passing_distance_per_90,
-         ROUND((short_passes_completed/ninetys)::numeric, 2) AS short_passes_completed_per_90,
-         ROUND((short_passes_attempted/ninetys)::numeric, 2) AS short_passes_attempted_per_90,
-         ROUND((medium_passes_completed/ninetys)::numeric, 2) AS medium_passes_completed_per_90,
-         ROUND((medium_passes_attempted/ninetys)::numeric, 2) AS medium_passes_attempted_per_90,
-         ROUND((long_passes_completed/ninetys)::numeric, 2) AS long_passes_completed_per_90,
-         ROUND((long_passes_attempted/ninetys)::numeric, 2) AS long_passes_attempted_per_90,
-         ROUND((expected_assists/ninetys)::numeric, 2) AS expected_assists_per_90,
-         ROUND((assists_minus_expected_assisted_goals/ninetys)::numeric, 2) AS assists_minus_expected_assisted_goals_per_90,
-         ROUND((key_passes/ninetys)::numeric, 2) AS key_passes_per_90,
-         ROUND((passes_into_final_third/ninetys)::numeric, 2) AS passes_into_final_third_per_90,
-         ROUND((passes_into_penalty_area/ninetys)::numeric, 2) AS passes_into_penalty_area_per_90,
-         ROUND((crosses_into_penalty_area/ninetys)::numeric, 2) AS crosses_into_penalty_area_per_90,
-         ROUND((shots/ninetys)::numeric, 2) AS shots_per_90,
-         ROUND((shots_on_target/ninetys)::numeric, 2) AS shots_on_target_per_90,
-         ROUND((goals_per_shot/ninetys)::numeric, 2) AS goals_per_shot_per_90,
-         ROUND((goals_per_shot_on_target/ninetys)::numeric, 2) AS goals_per_shot_on_target_per_90,
-         ROUND((average_shot_distance/ninetys)::numeric, 2) AS average_shot_distance_per_90,
-         ROUND((shots_from_free_kicks/ninetys)::numeric, 2) AS shots_from_free_kicks_per_90,
-         ROUND((penalties_made/ninetys)::numeric, 2) AS penalties_made_per_90,
-         ROUND((non_penalty_expected_goals_per_shot/ninetys)::numeric, 2) AS non_penalty_expected_goals_per_shot_per_90,
-         ROUND((goals_minus_expected_goals/ninetys)::numeric, 2) AS goals_minus_expected_goals_per_90,
-         ROUND((non_penalty_goals_minus_non_penalty_expected_goals/ninetys)::numeric, 2) AS non_penalty_goals_minus_non_penalty_expected_goals_per_90,
-         ROUND((touches/ninetys)::numeric, 2) AS touches_per_90,
-         ROUND((touches_in_defensive_penalty_area/ninetys)::numeric, 2) AS touches_in_defensive_penalty_area_per_90,
-         ROUND((touches_in_defensive_third/ninetys)::numeric, 2) AS touches_in_defensive_third_per_90,
-         ROUND((touches_in_middle_third/ninetys)::numeric, 2) AS touches_in_middle_third_per_90,
-         ROUND((touches_in_attacking_third/ninetys)::numeric, 2) AS touches_in_attacking_third_per_90,
-         ROUND((touches_in_attacking_penalty_area/ninetys)::numeric, 2) AS touches_in_attacking_penalty_area_per_90,
-         ROUND((live_ball_touches/ninetys)::numeric, 2) AS live_ball_touches_per_90,
-         ROUND((take_ons_attempted/ninetys)::numeric, 2) AS take_ons_attempted_per_90,
-         ROUND((take_ons_succeeded/ninetys)::numeric, 2) AS take_ons_succeeded_per_90,
-         ROUND((times_tackled_during_take_on/ninetys)::numeric, 2) AS times_tackled_during_take_on_per_90,
-         ROUND((carries/ninetys)::numeric, 2) AS carries_per_90,
-         ROUND((total_carrying_distance/ninetys)::numeric, 2) AS total_carrying_distance_per_90,
-         ROUND((progressive_carrying_distance/ninetys)::numeric, 2) AS progressive_carrying_distance_per_90,
-         ROUND((carries_into_final_third/ninetys)::numeric, 2) AS carries_into_final_third_per_90,
-         ROUND((carries_into_penalty_area/ninetys)::numeric, 2) AS carries_into_penalty_area_per_90,
-         ROUND((miscontrols/ninetys)::numeric, 2) AS miscontrols_per_90,
-         ROUND((dispossessed/ninetys)::numeric, 2) AS dispossessed_per_90,
-         ROUND((passes_received/ninetys)::numeric, 2) AS passes_received_per_90,
-         ROUND((tackles/ninetys)::numeric, 2) AS tackles_per_90,
-         ROUND((tackles_won/ninetys)::numeric, 2) AS tackles_won_per_90,
-         ROUND((defensive_third_tackles/ninetys)::numeric, 2) AS defensive_third_tackles_per_90,
-         ROUND((middle_third_tackles/ninetys)::numeric, 2) AS middle_third_tackles_per_90,
-         ROUND((attacking_third_tackles/ninetys)::numeric, 2) AS attacking_third_tackles_per_90,
-         ROUND((dribblers_tackled/ninetys)::numeric, 2) AS dribblers_tackled_per_90,
-         ROUND((dribbler_tackles_attempted/ninetys)::numeric, 2) AS dribbler_tackles_attempted_per_90,
-         ROUND((shots_blocked/ninetys)::numeric, 2) AS shots_blocked_per_90,
-         ROUND((passes_blocked/ninetys)::numeric, 2) AS passes_blocked_per_90,
-         ROUND((interceptions/ninetys)::numeric, 2) AS interceptions_per_90,
-         ROUND((clearances/ninetys)::numeric, 2) AS clearances_per_90,
-         ROUND((errors_leading_to_shot/ninetys)::numeric, 2) AS errors_leading_to_shot_per_90,
-         ROUND((goals_against/ninetys)::numeric, 2) AS goals_against_per_90,
-         ROUND((shots_on_target_against/ninetys)::numeric, 2) AS shots_on_target_against_per_90,
-         ROUND((saves/ninetys)::numeric, 2) AS saves_per_90,
-         ROUND((clean_sheets/ninetys)::numeric, 2) AS clean_sheets_per_90,
-         ROUND((penalties_faced/ninetys)::numeric, 2) AS penalties_faced_per_90,
-         ROUND((penalties_allowed/ninetys)::numeric, 2) AS penalties_allowed_per_90,
-         ROUND((penalties_saved/ninetys)::numeric, 2) AS penalties_saved_per_90,
-         ROUND((penalties_missed/ninetys)::numeric, 2) AS penalties_missed_per_90
-      FROM
-         historic_player_per_ninety
-      JOIN
-         player_team ON historic_player_per_ninety.player_id = player_team.player_id
-         AND historic_player_per_ninety.season = player_team.season
-      JOIN
-         team ON player_team.team_id = team.id
-      JOIN
-         player ON historic_player_per_ninety.player_id = player.id
-      WHERE
-         historic_player_per_ninety.player_id = '{player_id}'
-      ORDER BY
-         historic_player_per_ninety.season ASC;
-   """)
+   try:
+      player_historic_stats_by_season = db.get_dict(f"""
+         SELECT 
+            historic_player_per_ninety.season,
+            player.first_name,
+            player.last_name,
+            team.name AS team,
+            minutes_played AS minutes,
+            ROUND((goals/ninetys)::numeric, 2) AS goals_per_90,
+            ROUND((assists/ninetys)::numeric, 2) AS assists_per_90,
+            ROUND((direct_goal_contributions/ninetys)::numeric, 2) AS direct_goal_contributions_per_90,
+            ROUND((non_penalty_goals/ninetys)::numeric, 2) AS non_penalty_goals_per_90,
+            ROUND((penalties_scored/ninetys)::numeric, 2) AS penalties_scored_per_90,
+            ROUND((penalties_attempted/ninetys)::numeric, 2) AS penalties_attempted_per_90,
+            ROUND((yellow_cards/ninetys)::numeric, 2) AS yellow_cards_per_90,
+            ROUND((red_cards/ninetys)::numeric, 2) AS red_cards_per_90,
+            ROUND((expected_goals/ninetys)::numeric, 2) AS expected_goals_per_90,
+            ROUND((non_penalty_expected_goals/ninetys)::numeric, 2) AS non_penalty_expected_goals_per_90,
+            ROUND((expected_assisted_goals/ninetys)::numeric, 2) AS expected_assisted_goals_per_90,
+            ROUND((non_penalty_expected_goals_plus_expected_assisted_goals/ninetys)::numeric, 2) AS non_penalty_expected_goals_plus_expected_assisted_goals_per_90,
+            ROUND((progressive_carries/ninetys)::numeric, 2) AS progressive_carries_per_90,
+            ROUND((progressive_passes/ninetys)::numeric, 2) AS progressive_passes_per_90,
+            ROUND((progressive_passes_received/ninetys)::numeric, 2) AS progressive_passes_received_per_90,
+            ROUND((total_passing_distance/ninetys)::numeric, 2) AS total_passing_distance_per_90,
+            ROUND((total_progressive_passing_distance/ninetys)::numeric, 2) AS total_progressive_passing_distance_per_90,
+            ROUND((short_passes_completed/ninetys)::numeric, 2) AS short_passes_completed_per_90,
+            ROUND((short_passes_attempted/ninetys)::numeric, 2) AS short_passes_attempted_per_90,
+            ROUND((medium_passes_completed/ninetys)::numeric, 2) AS medium_passes_completed_per_90,
+            ROUND((medium_passes_attempted/ninetys)::numeric, 2) AS medium_passes_attempted_per_90,
+            ROUND((long_passes_completed/ninetys)::numeric, 2) AS long_passes_completed_per_90,
+            ROUND((long_passes_attempted/ninetys)::numeric, 2) AS long_passes_attempted_per_90,
+            ROUND((expected_assists/ninetys)::numeric, 2) AS expected_assists_per_90,
+            ROUND((assists_minus_expected_assisted_goals/ninetys)::numeric, 2) AS assists_minus_expected_assisted_goals_per_90,
+            ROUND((key_passes/ninetys)::numeric, 2) AS key_passes_per_90,
+            ROUND((passes_into_final_third/ninetys)::numeric, 2) AS passes_into_final_third_per_90,
+            ROUND((passes_into_penalty_area/ninetys)::numeric, 2) AS passes_into_penalty_area_per_90,
+            ROUND((crosses_into_penalty_area/ninetys)::numeric, 2) AS crosses_into_penalty_area_per_90,
+            ROUND((shots/ninetys)::numeric, 2) AS shots_per_90,
+            ROUND((shots_on_target/ninetys)::numeric, 2) AS shots_on_target_per_90,
+            ROUND((goals_per_shot/ninetys)::numeric, 2) AS goals_per_shot_per_90,
+            ROUND((goals_per_shot_on_target/ninetys)::numeric, 2) AS goals_per_shot_on_target_per_90,
+            ROUND((average_shot_distance/ninetys)::numeric, 2) AS average_shot_distance_per_90,
+            ROUND((shots_from_free_kicks/ninetys)::numeric, 2) AS shots_from_free_kicks_per_90,
+            ROUND((penalties_made/ninetys)::numeric, 2) AS penalties_made_per_90,
+            ROUND((non_penalty_expected_goals_per_shot/ninetys)::numeric, 2) AS non_penalty_expected_goals_per_shot_per_90,
+            ROUND((goals_minus_expected_goals/ninetys)::numeric, 2) AS goals_minus_expected_goals_per_90,
+            ROUND((non_penalty_goals_minus_non_penalty_expected_goals/ninetys)::numeric, 2) AS non_penalty_goals_minus_non_penalty_expected_goals_per_90,
+            ROUND((touches/ninetys)::numeric, 2) AS touches_per_90,
+            ROUND((touches_in_defensive_penalty_area/ninetys)::numeric, 2) AS touches_in_defensive_penalty_area_per_90,
+            ROUND((touches_in_defensive_third/ninetys)::numeric, 2) AS touches_in_defensive_third_per_90,
+            ROUND((touches_in_middle_third/ninetys)::numeric, 2) AS touches_in_middle_third_per_90,
+            ROUND((touches_in_attacking_third/ninetys)::numeric, 2) AS touches_in_attacking_third_per_90,
+            ROUND((touches_in_attacking_penalty_area/ninetys)::numeric, 2) AS touches_in_attacking_penalty_area_per_90,
+            ROUND((live_ball_touches/ninetys)::numeric, 2) AS live_ball_touches_per_90,
+            ROUND((take_ons_attempted/ninetys)::numeric, 2) AS take_ons_attempted_per_90,
+            ROUND((take_ons_succeeded/ninetys)::numeric, 2) AS take_ons_succeeded_per_90,
+            ROUND((times_tackled_during_take_on/ninetys)::numeric, 2) AS times_tackled_during_take_on_per_90,
+            ROUND((carries/ninetys)::numeric, 2) AS carries_per_90,
+            ROUND((total_carrying_distance/ninetys)::numeric, 2) AS total_carrying_distance_per_90,
+            ROUND((progressive_carrying_distance/ninetys)::numeric, 2) AS progressive_carrying_distance_per_90,
+            ROUND((carries_into_final_third/ninetys)::numeric, 2) AS carries_into_final_third_per_90,
+            ROUND((carries_into_penalty_area/ninetys)::numeric, 2) AS carries_into_penalty_area_per_90,
+            ROUND((miscontrols/ninetys)::numeric, 2) AS miscontrols_per_90,
+            ROUND((dispossessed/ninetys)::numeric, 2) AS dispossessed_per_90,
+            ROUND((passes_received/ninetys)::numeric, 2) AS passes_received_per_90,
+            ROUND((tackles/ninetys)::numeric, 2) AS tackles_per_90,
+            ROUND((tackles_won/ninetys)::numeric, 2) AS tackles_won_per_90,
+            ROUND((defensive_third_tackles/ninetys)::numeric, 2) AS defensive_third_tackles_per_90,
+            ROUND((middle_third_tackles/ninetys)::numeric, 2) AS middle_third_tackles_per_90,
+            ROUND((attacking_third_tackles/ninetys)::numeric, 2) AS attacking_third_tackles_per_90,
+            ROUND((dribblers_tackled/ninetys)::numeric, 2) AS dribblers_tackled_per_90,
+            ROUND((dribbler_tackles_attempted/ninetys)::numeric, 2) AS dribbler_tackles_attempted_per_90,
+            ROUND((shots_blocked/ninetys)::numeric, 2) AS shots_blocked_per_90,
+            ROUND((passes_blocked/ninetys)::numeric, 2) AS passes_blocked_per_90,
+            ROUND((interceptions/ninetys)::numeric, 2) AS interceptions_per_90,
+            ROUND((clearances/ninetys)::numeric, 2) AS clearances_per_90,
+            ROUND((errors_leading_to_shot/ninetys)::numeric, 2) AS errors_leading_to_shot_per_90,
+            ROUND((goals_against/ninetys)::numeric, 2) AS goals_against_per_90,
+            ROUND((shots_on_target_against/ninetys)::numeric, 2) AS shots_on_target_against_per_90,
+            ROUND((saves/ninetys)::numeric, 2) AS saves_per_90,
+            ROUND((clean_sheets/ninetys)::numeric, 2) AS clean_sheets_per_90,
+            ROUND((penalties_faced/ninetys)::numeric, 2) AS penalties_faced_per_90,
+            ROUND((penalties_allowed/ninetys)::numeric, 2) AS penalties_allowed_per_90,
+            ROUND((penalties_saved/ninetys)::numeric, 2) AS penalties_saved_per_90,
+            ROUND((penalties_missed/ninetys)::numeric, 2) AS penalties_missed_per_90
+         FROM
+            historic_player_per_ninety
+         JOIN
+            player_team ON historic_player_per_ninety.player_id = player_team.player_id
+            AND historic_player_per_ninety.season = player_team.season
+         JOIN
+            team ON player_team.team_id = team.id
+         JOIN
+            player ON historic_player_per_ninety.player_id = player.id
+         WHERE
+            historic_player_per_ninety.player_id = '{player_id}'
+         ORDER BY
+            historic_player_per_ninety.season ASC;
+      """)
+      return jsonify(player_historic_stats_by_season)
+   except Exception as e:
+      return jsonify({"error": f"Error with endpoint /players/historic-stats/{player_id}: {str(e)}"}), 500
 
 @registry.handles(
    rule='/players/recent-minutes/<player_id>',
@@ -609,19 +567,23 @@ def get_player_historic_stats_by_season(player_id:str) -> list:
    response_body_schema=''
 )
 def get_player_recent_minutes_stats_by_season(player_id:str) -> list:
-   return db.get_dict(f"""
-      SELECT 
-         season,
-         minutes_played AS minutes,
-         ninetys AS ninetys
-      FROM
-         historic_player_per_ninety
-      WHERE
-         player_id = '{player_id}'
-         AND season = (SELECT MAX(season) FROM historic_player_per_ninety)
-      ORDER BY
-         season ASC;
-   """)
+   try:
+      player_recent_minutes_stats_by_season = db.get_dict(f"""
+         SELECT 
+            season,
+            minutes_played AS minutes,
+            ninetys AS ninetys
+         FROM
+            historic_player_per_ninety
+         WHERE
+            player_id = '{player_id}'
+            AND season = (SELECT MAX(season) FROM historic_player_per_ninety)
+         ORDER BY
+            season ASC;
+      """)
+      return jsonify(player_recent_minutes_stats_by_season)
+   except Exception as e:
+      return jsonify({"error": f"Error with endpoint /players/recent-minutes/{player_id}: {str(e)}"}), 500
 
 
 

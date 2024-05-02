@@ -8,6 +8,6 @@ RUN pip install --no-cache-dir -r ./requirements.txt
 
 COPY . .
 
-EXPOSE 8009
+EXPOSE 8080
 
-CMD ["python3", "-u", "__init__.py"]
+CMD ["python3", "-u", "api.py"]
