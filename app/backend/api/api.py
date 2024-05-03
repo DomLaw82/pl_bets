@@ -16,6 +16,13 @@ registry = rebar.create_handler_registry()
 
 ### routes ###
 
+@registry.handles(
+   rule='/health',
+   method='GET',
+)
+def health():
+      return jsonify({"status": "healthy"})
+
 # index
 @registry.handles(
    rule='/',

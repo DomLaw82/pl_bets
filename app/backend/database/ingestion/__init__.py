@@ -51,6 +51,9 @@ def download_and_insert_latest_data():
 		print("--- --- --- --- --- --- --- ---\n")
 	except Exception as e:
 		return str(e)
+	
+	with open("./ingestion_status.txt", "w") as file:
+		file.write("Data ingestion completed successfully")
 
 	return "Data ingestion successful"
 

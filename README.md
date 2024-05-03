@@ -77,6 +77,7 @@ After the containers have started, navigate to the [frontend](http://localhost:3
 - Call functions to run intake functions in watchdog handler
 - Add logging
 - Error handling and custom error messages
+- Caching
 - General code cleanup and re-factoring
 - Build regression model to purely predict the winner of each match
 - Review "Separation of concerns"

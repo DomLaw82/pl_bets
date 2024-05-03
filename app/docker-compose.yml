@@ -3,38 +3,30 @@ services:
     container_name: database
     build: ./backend/database/db_setup
     image: pl-postgres
+    env_file:
+      - ./backend/database/db_setup/.env
     ports:
       - 5432:5432
     healthcheck:
-      test: ["CMD", "pg_isready", "-q", "-d", "pl_stats", "-h", "database", "-U", "postgres"]
-      interval: 10s
+      test: "pg_isready -q -d pl_stats -h database -U postgres || kill 1"
+      interval: 5s
       timeout: 5s
       retries: 5
-    environment:
-      - POSTGRES_DB=pl_stats
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_CONTAINER=database
-      - POSTGRES_PORT=5432
 
   local-data-ingestion:
     container_name: local-data-ingestion
     build: ./backend/database/ingestion
     image: local-data-ingestion
+    env_file:
+      - ./backend/database/ingestion/.env
     depends_on:
       database:
         condition: service_healthy
-    environment:
-      - POSTGRES_DB=pl_stats
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_CONTAINER=database
-      - POSTGRES_PORT=5432
-    # healthcheck:
-    #   test: ["CMD-SHELL", "docker logs pl_data_ingestion 2>&1 | grep -q 'Data Intake: COMPLETE'"]
-    #   interval: 30s
-    #   timeout: 3s
-    #   retries: 20
+    healthcheck:
+      test: cat ./ingestion_status.txt
+      interval: 30s
+      timeout: 3s
+      retries: 20
     ports:
       - 8009:8009
 
@@ -42,16 +34,17 @@ services:
     container_name: api
     build: ./backend/api
     image: api
+    env_file:
+      - ./backend/api/.env
     depends_on:
-      - local-data-ingestion
-        # condition: service_healthy
-    environment:
-      - POSTGRES_DB=pl_stats
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_CONTAINER=database
-      - POSTGRES_PORT=5432
-      - PREDICT_API_URL=http://predict:8008/predict
+      local-data-ingestion:
+        condition: service_healthy
+    healthcheck:
+      test: "curl -f http://api:8080/health"
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     ports:
       - 8080:8080
   
@@ -59,21 +52,11 @@ services:
     container_name: predict
     build: ./predict/
     image: pl-predictor
+    env_file:
+      - ./predict/.env
     depends_on:
-      - local-data-ingestion
-        # condition: service_healthy
-    environment:
-      - POSTGRES_DB=pl_stats
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_CONTAINER=database
-      - POSTGRES_PORT=5432
-      - batch_size=64
-      - dropout=0.3
-      - epochs=15
-      - hidden_layer_one=10
-      - learn_rate=0.0001
-      - n_h_layers=4
+      api:
+        condition: service_healthy
     ports:
       - 8008:8008
 
@@ -81,18 +64,11 @@ services:
     container_name: frontend
     build: ./frontend
     image: frontend
+    env_file:
+      - ./frontend/.env
     depends_on:
-      - api
-        # condition: service_healthy
+      api:
+        condition: service_healthy
     ports:
       - 3000:3000
-    environment:
-      - POSTGRES_DB=pl_stats
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_CONTAINER=database
-      - POSTGRES_PORT=5432
-      - API_URL=http://api:8080
-      - PREDICT_API_URL=http://predict:8008
-      - PUBLIC_URL=/
 
