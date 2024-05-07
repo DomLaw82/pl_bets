@@ -30,7 +30,7 @@ def upload_historic_player_data():
 
 		season = request_body['season']
 		name = request_body['name']
-		file = request.files['file']
+		file = request_body['file']
 
 		if not file.filename.endswith('.csv'):
 			raise TypeError("Invalid file type. Only CSV files are allowed.")

@@ -51,25 +51,29 @@ def clean_historic_stats_df(db_connection, df: pd.DataFrame, season: str) -> pd.
 	Returns:
 		pd.DataFrame: The cleaned dataframe.
 	"""
-	goalkeeping_columns = ["goals_against", "shots_on_target_against", "saves", "wins", "draws", "losses", "clean_sheets", "penalties_faced", "penalties_allowed", "penalties_saved", "penalties_missed"]
+	try:
+		goalkeeping_columns = ["goals_against", "shots_on_target_against", "saves", "wins", "draws", "losses", "clean_sheets", "penalties_faced", "penalties_allowed", "penalties_saved", "penalties_missed"]
 
-	df["team"] = df.apply(lambda row: get_team_id(db_connection, row.team), axis=1)
+		df["team"] = df.apply(lambda row: get_team_id(db_connection, row.team), axis=1)
 
-	df = df.rename(columns={"team": "team_id"})
-	df[goalkeeping_columns] = df[goalkeeping_columns].fillna(0)
+		df = df.rename(columns={"team": "team_id"})
+		df[goalkeeping_columns] = df[goalkeeping_columns].fillna(0)
 
-	df[["first_name", "last_name"]] = df["player"].str.extract(r'(\w+)\s*(.*)')
-	df.loc[:, "player"] = df.apply(lambda row: get_player_id_per_ninety(db_connection, row), axis=1)
+		df[["first_name", "last_name"]] = df["player"].str.extract(r'(\w+)\s*(.*)')
+		df.loc[:, "player"] = df.apply(lambda row: get_player_id_per_ninety(db_connection, row), axis=1)
 
-	df = df.rename(columns={"player": "player_id"})
-	df.columns = [x.replace("+", "_plus_").replace("/", "_divided_by_").replace("-", "_minus_") for x in df.columns.tolist()]
+		df = df.rename(columns={"player": "player_id"})
+		df.columns = [x.replace("+", "_plus_").replace("/", "_divided_by_").replace("-", "_minus_") for x in df.columns.tolist()]
 
-	df.loc[:, "season"] = season
+		df.loc[:, "season"] = season
 
-	df = df.drop(columns=["position", "first_name", "last_name", "starts", "matches_played", "wins", "draws", "losses"])
-	# 	TODO - More granular method to impute nulls
-	# 	TODO - Null and multiple player ids
-	df = df.fillna({col: 0 for col in df.columns if col not in ['player_id', 'team_id']})
+		df = df.drop(columns=["position", "first_name", "last_name", "starts", "matches_played", "wins", "draws", "losses"])
+		# 	TODO - More granular method to impute nulls
+		# 	TODO - Null and multiple player ids
+		df = df.fillna({col: 0 for col in df.columns if col not in ['player_id', 'team_id']})
+	except Exception as e:
+		raise RuntimeError(f"Error: {e}")
+		return None
 
 	return df
 
@@ -84,9 +88,13 @@ def save_to_database(db_connection, df: pd.DataFrame) -> None:
 	Returns:
 		None
 	"""
-	df.to_sql("historic_player_per_ninety", db_connection.conn, if_exists="append", index=False)
+	try:
+		with db_connection.connect() as conn:
+			df.to_sql("historic_player_per_ninety", conn, if_exists="append", index=False)
+	except Exception as e:
+		raise RuntimeError(f"Error: {e}")
 
-def per_90_main(db_connection):
+def per_90_main(db_connection, **kwargs):
 	"""
 	Main function for processing and ingesting per 90 stats data into the database.
 
@@ -96,12 +104,24 @@ def per_90_main(db_connection):
 	Returns:
 		None
 	"""
-	data_folder_path = "./data/historic_player_stats"
 
-	seasons = sorted(os.listdir(data_folder_path))
+	try:
+		single_season = kwargs.get("single_season", None)
+		data_folder_path = "./data/historic_player_stats"
 
-	for season in seasons:
-		df = combining_datasets(season)
-		df = clean_historic_stats_df(db_connection, df, season)
-		save_to_database(db_connection, df)
-		print(f"Inserted into historic_player_per_ninety table for {season}.")
+		seasons = sorted(os.listdir(data_folder_path))
+		if single_season is not None:
+			df = combining_datasets(single_season)
+			df = clean_historic_stats_df(db_connection, df, single_season)
+			save_to_database(db_connection, df)
+			print(f"Inserted into historic_player_per_ninety table for {single_season}.")
+			return
+		
+		for season in seasons:
+			df = combining_datasets(season)
+			df = clean_historic_stats_df(db_connection, df, season)
+			save_to_database(db_connection, df)
+			print(f"Inserted into historic_player_per_ninety table for {season}.")
+	except Exception as e:
+		raise RuntimeError(f"Error on ingestion at {data_folder_path}-{season}: {e}")
+		return f"Error on ingestion at {data_folder_path}-{season}: {e}"

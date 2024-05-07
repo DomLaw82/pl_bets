@@ -1,0 +1,7 @@
+FROM fluent/fluentd:v1.11-1
+
+COPY fluent.conf /fluentd/etc/
+
+EXPOSE 24224
+
+CMD ["fluentd", "-c", "/fluentd/etc/fluent.conf"]
