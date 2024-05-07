@@ -187,6 +187,7 @@ def save_to_database(db_connection, df: pd.DataFrame, table_name: str) -> None:
 	Returns:
 		None
 	"""
-	df.to_sql(table_name, db_connection.conn, if_exists="append", index=False)
+	with db_connection.connect() as conn:
+		df.to_sql(table_name, conn, if_exists="append", index=False)
 
 # TODO - Add logging for more visibility of data_intake process

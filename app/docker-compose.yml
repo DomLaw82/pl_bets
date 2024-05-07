@@ -1,7 +1,8 @@
 services:
   database:
     container_name: database
-    build: ./backend/database/db_setup
+    build:
+      dockerfile: ./Dockerfile.database
     image: pl-postgres
     env_file:
       - ./backend/database/db_setup/.env
@@ -15,7 +16,8 @@ services:
 
   local-data-ingestion:
     container_name: local-data-ingestion
-    build: ./backend/database/ingestion
+    build:
+      dockerfile: ./Dockerfile.ingestion
     image: local-data-ingestion
     env_file:
       - ./backend/database/ingestion/.env
@@ -32,7 +34,8 @@ services:
 
   api:
     container_name: api
-    build: ./backend/api
+    build:
+      dockerfile: ./Dockerfile.api
     image: api
     env_file:
       - ./backend/api/.env
@@ -50,24 +53,32 @@ services:
   
   predict:
     container_name: predict
-    build: ./predict/
+    build:
+      dockerfile: ./Dockerfile.predict
     image: pl-predictor
     env_file:
       - ./predict/.env
     depends_on:
       api:
         condition: service_healthy
+    healthcheck:
+      test: curl -f http://predict:8008/predict/health
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     ports:
       - 8008:8008
 
   frontend:
     container_name: frontend
-    build: ./frontend
+    build:
+      dockerfile: ./Dockerfile.frontend
     image: frontend
     env_file:
       - ./frontend/.env
     depends_on:
-      api:
+      predict:
         condition: service_healthy
     ports:
       - 3000:3000

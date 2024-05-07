@@ -9,3 +9,4 @@ flask
 flask_rebar
 flask_cors
 watchdog
+fluent-logger

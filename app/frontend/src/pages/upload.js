@@ -38,16 +38,18 @@ export default function Upload() {
 	const handleFileUpload = async (event) => {
 		const file = document.getElementById("file-upload-file").files[0];
 
-		const formData = new FormData();
-		formData.append('file', file);
-		formData.append('folder', selectedFolder);
-		formData.append('name', selectedFile);
-		formData.append('season', selectedSeason);
+		const requestBody = {
+			file: file,
+			folder: selectedFolder,
+			name: selectedFile,
+			season: selectedSeason
+		};
 
 		fetch(`http://localhost:8009/upload/upload-file`, {
 			method: 'POST',
-			body: formData
+			body: requestBody
 		});
+		console.log(requestBody);
 	};
 
 	const handleSeasonDropdownChange = (event) => {

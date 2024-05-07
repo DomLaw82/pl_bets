@@ -1,0 +1,10 @@
+# Use the official PostgreSQL image from Docker Hub
+FROM postgres:16.1
+
+WORKDIR /app
+
+COPY ./backend/database/db_setup/init.sql /docker-entrypoint-initdb.d/
+
+EXPOSE 5432
+
+CMD ["postgres"]

@@ -223,7 +223,8 @@ def save_to_database(db_connection, table_name, df: pd.DataFrame) -> None:
     Returns:
         None
     """
-    df.to_sql(table_name, db_connection.conn, if_exists="append", index=False) if not df.empty else None
+    with db_connection.connect() as conn:
+        df.to_sql(table_name, conn, if_exists="append", index=False) if not df.empty else None
 
 
 def team_ref_match_main(db_connection):

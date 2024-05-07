@@ -44,7 +44,8 @@ def save_to_database(db_connection, df: pd.DataFrame) -> None:
 	Returns:
 		None
 	"""
-	df.to_sql("schedule", db_connection.conn, if_exists="append", index=False)
+	with db_connection.connect() as conn:
+		df.to_sql("schedule", conn, if_exists="append", index=False)
 
 def schedule_main(db_connection) -> None:
 	"""
@@ -57,16 +58,19 @@ def schedule_main(db_connection) -> None:
 		None
 	"""
 	season_schedule_folder_path = "./data/schedule_data"
-
-	for season_schedule_file in os.scandir(season_schedule_folder_path):
-		if season_schedule_file.is_file() and season_schedule_file.name.endswith(".csv"):
-			file_path = os.path.join(season_schedule_folder_path, season_schedule_file.name)
-			df = pd.read_csv(file_path)
-			df = clean_schedule_data(db_connection, df)
-			
-			deduplicated_df = remove_duplicate_rows(db_connection, df, ["round_number", "date", "home_team_id", "away_team_id"], "schedule")
-			if not deduplicated_df.empty:
-				save_to_database(db_connection, deduplicated_df)
-				print(f"Inserted into schedule table for {season_schedule_file.name}")
+	try:
+		for season_schedule_file in os.scandir(season_schedule_folder_path):
+			if season_schedule_file.is_file() and season_schedule_file.name.endswith(".csv"):
+				file_path = os.path.join(season_schedule_folder_path, season_schedule_file.name)
+				df = pd.read_csv(file_path)
+				df = clean_schedule_data(db_connection, df)
+				
+				deduplicated_df = remove_duplicate_rows(db_connection, df, ["round_number", "date", "home_team_id", "away_team_id"], "schedule")
+				if not deduplicated_df.empty:
+					save_to_database(db_connection, deduplicated_df)
+					print(f"Inserted into schedule table for {season_schedule_file.name}")
+	except Exception as e:
+		print(f"Error: {e}")
+		raise RuntimeError(f"Error: {e}")
 
 # TODO - Add logging for more visibility of data_intake process

@@ -31,7 +31,8 @@ def save_to_database(db_connection, df: pd.DataFrame, team_name: str) -> None:
 	Returns:
 		None
 	"""
-	df.to_sql(team_name, db_connection.conn, if_exists="append", index=False)
+	with db_connection.connect() as conn:
+		df.to_sql(team_name, conn, if_exists="append", index=False)
 
 def country_competition_main(db_connection):
 	"""

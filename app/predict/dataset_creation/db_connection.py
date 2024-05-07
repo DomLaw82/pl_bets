@@ -16,7 +16,7 @@ class SQLConnection:
         try:
             res = pd.read_sql_query(query, self.conn)
             if res.empty:
-                raise ValueError('No data returned')
+                print('No data returned')
             return res
         except SQLAlchemyError as e:
             print('Database error:', e)
@@ -52,6 +52,3 @@ class SQLConnection:
         """Close connection to the database."""
         self.conn.close()
         self.engine.dispose()
-
-# Usage
-local_pl_stats_connector = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))

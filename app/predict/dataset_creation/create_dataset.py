@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
-from db_connection import local_pl_stats_connector
-import datetime, sys
+from db_connection import SQLConnection
+import datetime, sys, os
 
-db = local_pl_stats_connector
+db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
 output_columns = [
 	"home_goals", "away_goals", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target",

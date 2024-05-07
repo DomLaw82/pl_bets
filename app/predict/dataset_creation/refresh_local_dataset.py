@@ -1,8 +1,9 @@
 import pandas as pd
-from db_connection import local_pl_stats_connector
+from db_connection import SQLConnection
 from create_dataset import create_dataset
+import os
 
-db = local_pl_stats_connector
+db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
 def recreate_local_dataset():	
 	df = create_dataset()

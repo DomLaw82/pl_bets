@@ -37,7 +37,7 @@ def list_to_list_of_objects(list_of_tuples:list, column_names: list) -> list:
 	response_body_schema=''
 )
 def health_check():
-	return jsonify('Prediction service is healthy')
+	return jsonify({'status': 'Prediction service is healthy'})
 
 @registry.handles(
 	rule='/predict',

@@ -9,8 +9,10 @@ import os, sys
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
-from db_connection import local_pl_stats_connector as db
+from db_connection import SQLConnection
 from fuzzywuzzy import process
+
+db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
 def find_most_similar(player, options):
     result, score = process.extractOne(player, options)
