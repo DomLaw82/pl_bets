@@ -113,13 +113,11 @@ def check_player_exists(db_connection, player_id: int, team_id: int) -> bool:
 		bool: True if the player exists with a different team id, False otherwise.
 	"""
 	try:
-		with db_connection.connect() as conn:
-			result = conn.execute(f"""
+		count = db_connection.get_list(f"""
 				SELECT COUNT(*) FROM historic_player_per_ninety
 				WHERE player_id = {player_id} AND team_id != {team_id}
-			""")
-			count = result.fetchone()[0]
-			return count > 0
+			""")[0][0]
+		return count > 0
 	except Exception as e:
 		raise e
 
@@ -147,7 +145,7 @@ def update_database(db_connection, data: list[dict]):
 					WHERE player_id = {player_id} AND season = '{season}'
 				""")[0][0]
 				db_connection.execute(f"""
-					INSERT INTO player_team VALUES ({player_id}, {team_id}, {season}, {number_of_teams_played_for_this_season + 1})
+					INSERT INTO player_team VALUES ({player_id}, {team_id}, {season}, {int(number_of_teams_played_for_this_season) + 1})
 				""")
 				df_row = pd.DataFrame([row])
 				save_to_database(db_connection, df_row)
@@ -185,10 +183,9 @@ def per_90_main(db_connection):
 			save_to_database(db_connection, df)
 			logger.info(f"Inserted into historic_player_per_ninety table for {season}.")
 	except Exception as e:
-		logger.error(f"Error on ingestion at {data_folder_path}-{season}: {e}")
-		return f"Error on ingestion at {data_folder_path}-{season}: {e}"
+		raise e
 
-def per_90_update(db_connection, **kwargs):
+def per_90_update(db_connection, df: pd.DataFrame, season: str) -> None:
 	"""
 	Update function for processing and ingesting per 90 stats data into the database.
 
@@ -199,16 +196,10 @@ def per_90_update(db_connection, **kwargs):
 		None
 	"""
 	try:
-		season = kwargs.get("season", None)
-		if season is None:
-			logger.error("Season not provided.")
-			return "Season not provided."
-		
 		df = combining_datasets(season)
 		df = clean_historic_stats_df(db_connection, df, season)
 		data = df.to_dict(orient='records')
 		update_database(db_connection, data)
 		logger.info(f"Inserted into historic_player_per_ninety table for {season}.")
 	except Exception as e:
-		logger.error(f"Error on ingestion at {season}: {e}")
-		return f"Error on ingestion at {season}: {e}"
+		raise e

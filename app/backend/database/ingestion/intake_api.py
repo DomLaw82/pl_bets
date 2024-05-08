@@ -2,10 +2,13 @@ from flask import Flask, request, jsonify
 from flask_rebar import Rebar
 from flask_cors import CORS
 import pandas as pd
-import sys
+import sys, os
 from app_logger import FluentLogger
+from data_intake.per_90_stats import per_90_update
+from db_connection import SQLConnection
 
 logger = FluentLogger("data_ingestion_api").get_logger()
+db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
 rebar = Rebar()
 registry = rebar.create_handler_registry()
@@ -41,8 +44,11 @@ def upload_historic_player_data():
 		
 		save_route = f"{path_root}/{folder}/{season}/{name}.csv"
 		file.save(save_route)
-		
+
+		df = pd.read_csv(save_route)
 		logger.info(f"File {name} for season {season} uploaded successfully to route {save_route}")
+
+		per_90_update(db, df, season)
 		return jsonify("File uploaded successfully")
 	
 	except Exception as e:
