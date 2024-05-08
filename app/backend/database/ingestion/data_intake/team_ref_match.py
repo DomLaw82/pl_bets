@@ -3,6 +3,9 @@ import pandas as pd
 from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 from data_intake.utilities.unique_id import *
 from data_intake.utilities.string_manipulation import escape_single_quote
+from app_logger import FluentLogger
+
+logger = FluentLogger("intake-team_ref_match").get_logger()
 
 SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, 2025, 1)]
 TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, 2025, 1)]
@@ -17,34 +20,38 @@ def rename_team_name(team_name: str) -> str:
     Returns:
         str: The renamed team name, if it exists in the mapping. Otherwise, returns the original team name.
     """
-    rename_teams = {
-        "Leeds": "Leeds United",
-        "Newcastle": "Newcastle United",
-        "Tottenham": "Tottenham Hotspur",
-        "Leicester": "Leicester City",
-        "Man United": "Manchester United",
-        "Brighton": "Brighton & Hove Albion",
-        "Man City": "Manchester City",
-        "Nott'm Forest": "Nottingham Forest",
-        "Luton": "Luton Town",
-        "Derby": "Derby County",
-        "Birmingham": "Birmingham City",
-        "Blackburn": "Blackburn Rovers",
-        "Bolton": "Bolton Wanderers",
-        "Hull": "Hull City",
-        "Stoke": "Stoke City",
-        "Wigan": "Wigan Athletic",
-        "West Brom": "West Bromwich Albion",
-        "Swansea": "Swansea City",
-        "QPR": "Queens Park Rangers",
-        "Wolves": "Wolverhampton Wanderers",
-        "West Ham": "West Ham United",
-        "Charlton": "Charlton Athletic",
-        "Cardiff": "Cardiff City",
-        "Huddersfield": "Huddersfield Town",
-        "Norwich": "Norwich City",
-    }
-    return rename_teams.get(team_name, team_name)
+    try:
+        rename_teams = {
+            "Leeds": "Leeds United",
+            "Newcastle": "Newcastle United",
+            "Tottenham": "Tottenham Hotspur",
+            "Leicester": "Leicester City",
+            "Man United": "Manchester United",
+            "Brighton": "Brighton & Hove Albion",
+            "Man City": "Manchester City",
+            "Nott'm Forest": "Nottingham Forest",
+            "Luton": "Luton Town",
+            "Derby": "Derby County",
+            "Birmingham": "Birmingham City",
+            "Blackburn": "Blackburn Rovers",
+            "Bolton": "Bolton Wanderers",
+            "Hull": "Hull City",
+            "Stoke": "Stoke City",
+            "Wigan": "Wigan Athletic",
+            "West Brom": "West Bromwich Albion",
+            "Swansea": "Swansea City",
+            "QPR": "Queens Park Rangers",
+            "Wolves": "Wolverhampton Wanderers",
+            "West Ham": "West Ham United",
+            "Charlton": "Charlton Athletic",
+            "Cardiff": "Cardiff City",
+            "Huddersfield": "Huddersfield Town",
+            "Norwich": "Norwich City",
+        }
+        return rename_teams.get(team_name, team_name)
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        return team_name
 
 def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> pd.DataFrame:
     """
@@ -58,38 +65,42 @@ def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> 
     Returns:
         pd.DataFrame: The modified DataFrame with renamed columns and added season and competition_id columns.
     """
-    column_mapping = {
-        "HomeTeam": "home_team_id",
-        "FTHG": "home_goals",
-        "HS": "home_shots",
-        "HST": "home_shots_on_target",
-        "HY": "home_yellow_cards",
-        "HR": "home_red_cards",
-        "HC": "home_corners",
-        "HF": "home_fouls",
-        "AwayTeam": "away_team_id",
-        "FTAG": "away_goals",
-        "AS": "away_shots",
-        "AST": "away_shots_on_target",
-        "AC": "away_corners",
-        "AF": "away_fouls",
-        "AY": "away_yellow_cards",
-        "AR": "away_red_cards",
-        "Referee": "referee_id",
-        "Date": "date",
-        "PSH": "home_odds",
-        "PSD": "draw_odds",
-        "PSA": "away_odds",
-        "PSCH": "closing_home_odds",
-        "PSCD": "closing_draw_odds",
-        "PSCA": "closing_away_odds",
-    }
+    try:
+        column_mapping = {
+            "HomeTeam": "home_team_id",
+            "FTHG": "home_goals",
+            "HS": "home_shots",
+            "HST": "home_shots_on_target",
+            "HY": "home_yellow_cards",
+            "HR": "home_red_cards",
+            "HC": "home_corners",
+            "HF": "home_fouls",
+            "AwayTeam": "away_team_id",
+            "FTAG": "away_goals",
+            "AS": "away_shots",
+            "AST": "away_shots_on_target",
+            "AC": "away_corners",
+            "AF": "away_fouls",
+            "AY": "away_yellow_cards",
+            "AR": "away_red_cards",
+            "Referee": "referee_id",
+            "Date": "date",
+            "PSH": "home_odds",
+            "PSD": "draw_odds",
+            "PSA": "away_odds",
+            "PSCH": "closing_home_odds",
+            "PSCD": "closing_draw_odds",
+            "PSCA": "closing_away_odds",
+        }
 
-    df = df.rename(columns=column_mapping)
-    df["season"] = season
-    df["competition_id"] = competition_id
+        df = df.rename(columns=column_mapping)
+        df["season"] = season
+        df["competition_id"] = competition_id
 
-    return df
+        return df
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        return df
 
 def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     """
@@ -104,50 +115,54 @@ def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
 
     """
     # Select specific columns
-    new_df = df[
-        [
-            "season",
-            "date",
-            "competition_id",
-            "home_team_id",
-            "away_team_id",
-            "referee_id",
-            "home_goals",
-            "away_goals",
-            "home_shots",
-            "home_shots_on_target",
-            "away_shots",
-            "away_shots_on_target",
-            "home_fouls",
-            "home_yellow_cards",
-            "home_red_cards",
-            "away_fouls",
-            "away_yellow_cards",
-            "away_red_cards",
-            "home_corners",
-            "away_corners",
-            "home_odds",
-            "draw_odds",
-            "away_odds",
-            "closing_home_odds",
-            "closing_draw_odds",
-            "closing_away_odds",
-        ]
-    ].copy()
+    try:
+        new_df = df[
+            [
+                "season",
+                "date",
+                "competition_id",
+                "home_team_id",
+                "away_team_id",
+                "referee_id",
+                "home_goals",
+                "away_goals",
+                "home_shots",
+                "home_shots_on_target",
+                "away_shots",
+                "away_shots_on_target",
+                "home_fouls",
+                "home_yellow_cards",
+                "home_red_cards",
+                "away_fouls",
+                "away_yellow_cards",
+                "away_red_cards",
+                "home_corners",
+                "away_corners",
+                "home_odds",
+                "draw_odds",
+                "away_odds",
+                "closing_home_odds",
+                "closing_draw_odds",
+                "closing_away_odds",
+            ]
+        ].copy()
 
-    # Get team IDs using vectorized operations
-    new_df["home_team_id"] = new_df["home_team_id"].apply(lambda x: get_team_id(db_connection, x))
-    new_df["away_team_id"] = new_df["away_team_id"].apply(lambda x: get_team_id(db_connection, x))
+        # Get team IDs using vectorized operations
+        new_df["home_team_id"] = new_df["home_team_id"].apply(lambda x: get_team_id(db_connection, x))
+        new_df["away_team_id"] = new_df["away_team_id"].apply(lambda x: get_team_id(db_connection, x))
 
-    new_df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
-    
-    # Get referee IDs using vectorized operations
-    new_df["referee_id"] = new_df["referee_id"].apply(lambda x: get_referee_id(db_connection, x))
+        new_df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
+        
+        # Get referee IDs using vectorized operations
+        new_df["referee_id"] = new_df["referee_id"].apply(lambda x: get_referee_id(db_connection, x))
 
-    # Remove duplicate rows based on specific columns
-    columns_to_compare = ["season", "competition_id", "home_team_id", "away_team_id"]
-    final_df = remove_duplicate_rows(db_connection, new_df, columns_to_compare, "match")
-    return final_df
+        # Remove duplicate rows based on specific columns
+        columns_to_compare = ["season", "competition_id", "home_team_id", "away_team_id"]
+        final_df = remove_duplicate_rows(db_connection, new_df, columns_to_compare, "match")
+        return final_df
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        return df
 
 def create_teams_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     """
@@ -160,10 +175,14 @@ def create_teams_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     Returns:
         pd.DataFrame: The DataFrame containing only the names of the newly created teams.
     """
-    df = df.rename(columns={"home_team_id": "name"})
-    only_new_teams_df = df.drop_duplicates(subset="name", keep="first")
-    only_new_teams_df = remove_duplicate_rows(db_connection, only_new_teams_df, ["name"], "team").reset_index()
-    return only_new_teams_df[["name"]]
+    try:
+        df = df.rename(columns={"home_team_id": "name"})
+        only_new_teams_df = df.drop_duplicates(subset="name", keep="first")
+        only_new_teams_df = remove_duplicate_rows(db_connection, only_new_teams_df, ["name"], "team").reset_index()
+        return only_new_teams_df[["name"]]
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        return df
 
 def create_referee_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     """
@@ -176,9 +195,13 @@ def create_referee_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     Returns:
         pd.DataFrame: The DataFrame containing the referee names.
     """
-    referee_df = df.drop_duplicates(subset="referee_id")[["referee_id"]]
-    referee_df = referee_df.rename(columns={"referee_id": "name"})
-    return referee_df
+    try:
+        referee_df = df.drop_duplicates(subset="referee_id")[["referee_id"]]
+        referee_df = referee_df.rename(columns={"referee_id": "name"})
+        return referee_df
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        return df
 
 def clean_match_data(db_connection, table_name:str, season:str, df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -194,22 +217,26 @@ def clean_match_data(db_connection, table_name:str, season:str, df: pd.DataFrame
     Returns:
         pd.DataFrame: The cleaned DataFrame.
     """
-    df = rename_table_columns(df, season, '001')
+    try:
+        df = rename_table_columns(df, season, '001')
 
-    df = df.drop(columns=["B365H","B365D","B365A","BWH","BWD","BWA","IWH","IWD","IWA","PSH","PSD","PSA","WHH","WHD","WHA","VCH","VCD","VCA","Bb1X2","BbMxH","BbAvH","BbMxD","BbAvD","BbMxA","BbAvA","BbOU","BbMx>2.5","BbAv>2.5","BbMx<2.5","BbAv<2.5","BbAH","BbAHh","BbMxAHH","BbAvAHH","BbMxAHA","BbAvAHA","PSCH","PSCD","PSCA"], errors="ignore")
+        df = df.drop(columns=["B365H","B365D","B365A","BWH","BWD","BWA","IWH","IWD","IWA","PSH","PSD","PSA","WHH","WHD","WHA","VCH","VCD","VCA","Bb1X2","BbMxH","BbAvH","BbMxD","BbAvD","BbMxA","BbAvA","BbOU","BbMx>2.5","BbAv>2.5","BbMx<2.5","BbAv<2.5","BbAH","BbAHh","BbMxAHH","BbAvAHH","BbMxAHA","BbAvAHA","PSCH","PSCD","PSCA"], errors="ignore")
 
-    df["home_team_id"] = df["home_team_id"].apply(rename_team_name)
-    df["away_team_id"] = df["away_team_id"].apply(rename_team_name)
-    df["referee_id"] = df["referee_id"].apply(escape_single_quote)
+        df["home_team_id"] = df["home_team_id"].apply(rename_team_name)
+        df["away_team_id"] = df["away_team_id"].apply(rename_team_name)
+        df["referee_id"] = df["referee_id"].apply(escape_single_quote)
 
-    if table_name == "team":
-        df = create_teams_table(df, db_connection)
-    if table_name == "referee":
-        df = create_referee_table(df, db_connection)
-    if table_name == "match":
-        df = select_match_columns(df, db_connection)
-        
-    return df
+        if table_name == "team":
+            df = create_teams_table(df, db_connection)
+        if table_name == "referee":
+            df = create_referee_table(df, db_connection)
+        if table_name == "match":
+            df = select_match_columns(df, db_connection)
+            
+        return df
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        return df
 
 def save_to_database(db_connection, table_name, df: pd.DataFrame) -> None:
     """
@@ -223,8 +250,11 @@ def save_to_database(db_connection, table_name, df: pd.DataFrame) -> None:
     Returns:
         None
     """
-    with db_connection.connect() as conn:
-        df.to_sql(table_name, conn, if_exists="append", index=False) if not df.empty else None
+    try:
+        with db_connection.connect() as conn:
+            df.to_sql(table_name, conn, if_exists="append", index=False) if not df.empty else None
+    except Exception as e:
+        raise e
 
 
 def team_ref_match_main(db_connection):
@@ -240,23 +270,26 @@ def team_ref_match_main(db_connection):
     data_folder_path = "./data/game_data"
 
     data = sorted(os.listdir(data_folder_path))
-
-    for year in data:
-        season = re.findall("\d{4}", year)[0]
-        season = season[:2]+"-"+season[-2:]
-        full_season = TABLE_SEASONS[data.index(year)]
-        
-        path = data_folder_path+"/"+year
-        order = ["team", "referee", "match"]
-        comparison_columns = [["name"], ["name"], ["season","home_team_id","away_team_id"]]
-
-        for idx, table in enumerate(order):
-            df = pd.read_csv(path)
-            df = clean_match_data(db_connection, table, full_season, df)
-            deduplicated_df = remove_duplicate_rows(db_connection, df, comparison_columns[idx], table)
+    try:
+        for year in data:
+            season = re.findall("\d{4}", year)[0]
+            season = season[:2]+"-"+season[-2:]
+            full_season = TABLE_SEASONS[data.index(year)]
             
-            if not deduplicated_df.empty:
-                save_to_database(db_connection, table, deduplicated_df)
-                print(f"Inserted into {table} table for {season}.")
+            path = data_folder_path+"/"+year
+            order = ["team", "referee", "match"]
+            comparison_columns = [["name"], ["name"], ["season","home_team_id","away_team_id"]]
+
+            for idx, table in enumerate(order):
+                df = pd.read_csv(path)
+                df = clean_match_data(db_connection, table, full_season, df)
+                deduplicated_df = remove_duplicate_rows(db_connection, df, comparison_columns[idx], table)
+                
+                if not deduplicated_df.empty:
+                    save_to_database(db_connection, table, deduplicated_df)
+                    logger.info(f"Inserted into {table} table for {season}.")
+    except Exception as e:
+        logger.error(f"Error: {e}")
+        return f"Error: {e}"
 
 # TODO - Add logging for more visibility of data_intake process

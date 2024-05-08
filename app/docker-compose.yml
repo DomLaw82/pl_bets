@@ -1,4 +1,19 @@
 services:
+
+  logger:
+    container_name: logger
+    build:
+      dockerfile: ./Dockerfile.logging
+    image: logger
+    ports:
+      - 24224:24224
+    platform: "linux/arm64"
+    healthcheck:
+      test: "nc -zv logger 24224"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   database:
     container_name: database
     build:
@@ -23,6 +38,8 @@ services:
       - ./backend/database/ingestion/.env
     depends_on:
       database:
+        condition: service_healthy
+      logger: 
         condition: service_healthy
     healthcheck:
       test: cat ./ingestion_status.txt
@@ -82,4 +99,5 @@ services:
         condition: service_healthy
     ports:
       - 3000:3000
+
 

@@ -15,6 +15,7 @@ class FluentLogger:
         """
         self.logger = logging.getLogger(tag)
         self.logger.setLevel(level)
+        self.logger.propagate = False
 
         # Fluentd handler
         fluent = fluent_handler.FluentHandler(tag, host=host, port=port)
@@ -28,15 +29,15 @@ class FluentLogger:
 			})
         )
 
-        # Console handler
-        console = logging.StreamHandler()
-        console.setLevel(level)
-        console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        console.setFormatter(console_formatter)
+        # # Console handler
+        # console = logging.StreamHandler()
+        # console.setLevel(level)
+        # console_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        # console.setFormatter(console_formatter)
 
-        # Add handlers to the logger
+        # # Add handlers to the logger
+        # self.logger.addHandler(console)
         self.logger.addHandler(fluent)
-        self.logger.addHandler(console)
 
     def get_logger(self):
         """

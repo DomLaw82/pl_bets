@@ -5,6 +5,9 @@ import os
 from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 from data_intake.utilities.unique_id import get_team_id, get_player_id
 from data_intake.utilities.string_manipulation import escape_single_quote
+from app_logger import FluentLogger
+
+logger = FluentLogger("intake-player").get_logger()
 
 def not_blank_entry(player: list) -> bool:
 	"""
@@ -16,7 +19,11 @@ def not_blank_entry(player: list) -> bool:
 	Returns:
 		bool: True if all elements in the player list are not blank, False otherwise.
 	"""
-	return all(element.strip("\r\n-").strip() for element in player)
+	try:
+		return all(element.strip("\r\n-").strip() for element in player)
+	except Exception as e:
+		logger.error(f"Error: {e}")
+		return False
 
 def format_player_entries(player: list[str]) -> list[str]:
 	"""
@@ -29,14 +36,18 @@ def format_player_entries(player: list[str]) -> list[str]:
 	Returns:
 		list[str]: The formatted player information in the format [first_name, last_name, position, dob].
 	"""
-	formatted_name = [name.strip("\r\n-").strip() for name in player[0].split(maxsplit=1)]
-	formatted_name += [""] * (2 - len(formatted_name))
-	
-	split_dob = [portion.strip("\r\n").strip() for portion in player[2].split("-")]
-	formatted_dob_year = "19" + split_dob[-1] if int(str(datetime.now().year)[-2:]) < int(split_dob[-1]) else "20" + split_dob[-1]
-	new_dob = [f"{formatted_dob_year}-{split_dob[1]}-{split_dob[0]}"]
+	try:
+		formatted_name = [name.strip("\r\n-").strip() for name in player[0].split(maxsplit=1)]
+		formatted_name += [""] * (2 - len(formatted_name))
+		
+		split_dob = [portion.strip("\r\n").strip() for portion in player[2].split("-")]
+		formatted_dob_year = "19" + split_dob[-1] if int(str(datetime.now().year)[-2:]) < int(split_dob[-1]) else "20" + split_dob[-1]
+		new_dob = [f"{formatted_dob_year}-{split_dob[1]}-{split_dob[0]}"]
 
-	return formatted_name + [player[1].strip("\r\n-").strip()] + new_dob + [player[3].strip("\r\n-").strip()]
+		return formatted_name + [player[1].strip("\r\n-").strip()] + new_dob + [player[3].strip("\r\n-").strip()]
+	except Exception as e:
+		logger.error(f"Error: {e}")
+		return ["", "", "", "", ""]
 
 def get_page_soup(html_text):
 	"""
@@ -48,7 +59,11 @@ def get_page_soup(html_text):
 	Returns:
 		BeautifulSoup: A BeautifulSoup object representing the parsed HTML.
 	"""
-	return BeautifulSoup(html_text, "html.parser")
+	try:
+		return BeautifulSoup(html_text, "html.parser")
+	except Exception as e:
+		logger.error(f"An error occurred while parsing the HTML text: {str(e)}")
+		return None
 
 def get_all_teams_for_season(soup) -> list:
 	"""
@@ -60,9 +75,13 @@ def get_all_teams_for_season(soup) -> list:
 	Returns:
 	list: A list of tuples, where each tuple contains the team name and its corresponding href.
 	"""
-	team_elements = soup.find_all("h5")
-	teams = [(ele.text, ele.a.get("href")) for ele in team_elements]
-	return teams
+	try:
+		team_elements = soup.find_all("h5")
+		teams = [(ele.text, ele.a.get("href")) for ele in team_elements]
+		return teams
+	except Exception as e:
+		logger.error(f"An error occurred while extracting team names and hrefs: {str(e)}")
+		return []
 
 def get_team_squad(html_content):
 	"""
@@ -74,25 +93,29 @@ def get_team_squad(html_content):
 	Returns:
 		list: A list of lists containing the player's name, position, and date of birth.
 	"""
-	soup = get_page_soup(html_content)
-	rows = soup.find_all("tr")[1:]
-	
-	all_columns = soup.find_all("tr")[0]
-	all_column_names = [elem.text.strip("\n") for elem in all_columns.find_all("td")]
+	try:
+		soup = get_page_soup(html_content)
+		rows = soup.find_all("tr")[1:]
+		
+		all_columns = soup.find_all("tr")[0]
+		all_column_names = [elem.text.strip("\n") for elem in all_columns.find_all("td")]
 
-	required_cols = [all_column_names.index("Name"), all_column_names.index("Pos"), all_column_names.index("Date of Birth")]
+		required_cols = [all_column_names.index("Name"), all_column_names.index("Pos"), all_column_names.index("Date of Birth")]
 
-	squad = []
-	for idx, row in enumerate(rows):
-		if "Players no longer at this club" in row.text:
-			rows = rows[:idx] + rows[idx+2:-1]
-			break
+		squad = []
+		for idx, row in enumerate(rows):
+			if "Players no longer at this club" in row.text:
+				rows = rows[:idx] + rows[idx+2:-1]
+				break
 
-		row_data = [row_data.text for row_data in row.find_all("td")]
-		if all(col_index < len(row_data) for col_index in required_cols):
-			squad.append([row_data[col_index] for col_index in required_cols])
+			row_data = [row_data.text for row_data in row.find_all("td")]
+			if all(col_index < len(row_data) for col_index in required_cols):
+				squad.append([row_data[col_index] for col_index in required_cols])
 
-	return squad
+		return squad
+	except Exception as e:
+		logger.error(f"An error occurred while extracting the squad information: {str(e)}")
+		return []
 
 def player_df_to_db(df: pd.DataFrame, db_connection):
 	"""
@@ -105,14 +128,17 @@ def player_df_to_db(df: pd.DataFrame, db_connection):
 	Returns:
 		None
 	"""
-	df = df[["first_name", "last_name", "birth_date", "position"]]
-	df["first_name"] = df["first_name"].apply(escape_single_quote)
-	df["last_name"] = df["last_name"].apply(escape_single_quote)
-	player_rows_not_in_db_df = remove_duplicate_rows(db_connection, df, ["first_name", "last_name", "birth_date", "position"], "player")
-	if player_rows_not_in_db_df.empty:
-		return
-	ordered_player_df = player_rows_not_in_db_df[["first_name", "last_name", "birth_date", "position"]]
-	ordered_player_df.to_sql("player", db_connection.conn, if_exists="append", index=False)
+	try:
+		df = df[["first_name", "last_name", "birth_date", "position"]]
+		df["first_name"] = df["first_name"].apply(escape_single_quote)
+		df["last_name"] = df["last_name"].apply(escape_single_quote)
+		player_rows_not_in_db_df = remove_duplicate_rows(db_connection, df, ["first_name", "last_name", "birth_date", "position"], "player")
+		if player_rows_not_in_db_df.empty:
+			return
+		ordered_player_df = player_rows_not_in_db_df[["first_name", "last_name", "birth_date", "position"]]
+		ordered_player_df.to_sql("player", db_connection.conn, if_exists="append", index=False)
+	except Exception as e:
+		logger.error(f"Error: {e}")
 
 def player_team_df_to_db(df: pd.DataFrame, season: str, db_connection):
 	"""
@@ -126,54 +152,61 @@ def player_team_df_to_db(df: pd.DataFrame, season: str, db_connection):
 	Returns:
 		None
 	"""
-	df["player_id"] = df.apply(lambda row: get_player_id(db_connection, row), axis=1)
-	df["team_id"] = df["team_id"].apply(lambda team_id: get_team_id(db_connection, team_id))
-	df["season"] = season
-	player_team_df = df[["player_id", "team_id", "season"]]
-	player_team_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
-	player_team_df.to_sql("player_team", db_connection.conn, if_exists="append", index=False)
+	try:
+		df["player_id"] = df.apply(lambda row: get_player_id(db_connection, row), axis=1)
+		df["team_id"] = df["team_id"].apply(lambda team_id: get_team_id(db_connection, team_id))
+		df["season"] = season
+		player_team_df = df[["player_id", "team_id", "season"]]
+		player_team_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
+		player_team_df.to_sql("player_team", db_connection.conn, if_exists="append", index=False)
+	except Exception as e:
+		logger.error(f"Error: {e}")
 
 def player_main(db_connection):
 	data_folder_path = "./data/squad_data"
 	seasons = sorted(os.listdir(data_folder_path))
 
-	for season in seasons:
-		season_folder = os.path.join(data_folder_path, season)
-		teams = sorted(os.listdir(season_folder))
+	try:
+		for season in seasons:
+			season_folder = os.path.join(data_folder_path, season)
+			teams = sorted(os.listdir(season_folder))
 
-		for team in teams:
-			with open(os.path.join(season_folder, team), "r") as file:
-				html_content = file.read()
+			for team in teams:
+				with open(os.path.join(season_folder, team), "r") as file:
+					html_content = file.read()
 
-			squad = get_team_squad(html_content)
-			squad_no_blanks = [player for player in squad if not_blank_entry(player)]
-			squad_with_team = [player + [team] for player in squad_no_blanks]
-			complete_squad = [format_player_entries(player) for player in squad_with_team]
+				squad = get_team_squad(html_content)
+				squad_no_blanks = [player for player in squad if not_blank_entry(player)]
+				squad_with_team = [player + [team] for player in squad_no_blanks]
+				complete_squad = [format_player_entries(player) for player in squad_with_team]
 
-			player_df = pd.DataFrame(data=complete_squad, columns=["first_name", "last_name", "position", "birth_date", "team_id"])
-			player_df["birth_date"] = pd.to_datetime(player_df["birth_date"], format="%Y-%m-%d").dt.strftime("%Y-%m-%d")
+				player_df = pd.DataFrame(data=complete_squad, columns=["first_name", "last_name", "position", "birth_date", "team_id"])
+				player_df["birth_date"] = pd.to_datetime(player_df["birth_date"], format="%Y-%m-%d").dt.strftime("%Y-%m-%d")
 
-			player_team_df = player_df.copy()
-			player_team_df['team_id'] = player_team_df['team_id'].apply(lambda x: x.replace('.html', ''))
+				player_team_df = player_df.copy()
+				player_team_df['team_id'] = player_team_df['team_id'].apply(lambda x: x.replace('.html', ''))
 
-			player_df[["first_name", "last_name"]] = player_df[["first_name", "last_name"]].map(escape_single_quote)
-			deduplicated_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date"], "player")
-			
-			if not deduplicated_df.empty:
-				deduplicated_df = deduplicated_df[["first_name", "last_name", "birth_date", "position"]]
-				save_to_database(db_connection, deduplicated_df, "player")
-				print(f"Inserted into player table for {team} for {season}")
+				player_df[["first_name", "last_name"]] = player_df[["first_name", "last_name"]].map(escape_single_quote)
+				deduplicated_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date"], "player")
+				
+				if not deduplicated_df.empty:
+					deduplicated_df = deduplicated_df[["first_name", "last_name", "birth_date", "position"]]
+					save_to_database(db_connection, deduplicated_df, "player")
+					logger.info(f"Inserted into player table for {team} for {season}")
 
-			player_team_df["player_id"] = player_team_df.apply(lambda row: get_player_id(db_connection, row), axis=1)
-			player_team_df["team_id"] = player_team_df["team_id"].apply(lambda x: get_team_id(db_connection, x))
-			player_team_df["season"] = season
+				player_team_df["player_id"] = player_team_df.apply(lambda row: get_player_id(db_connection, row), axis=1)
+				player_team_df["team_id"] = player_team_df["team_id"].apply(lambda x: get_team_id(db_connection, x))
+				player_team_df["season"] = season
 
-			player_team_df = player_team_df[["player_id", "team_id", "season"]]
-			
-			deduplicated_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
-			if not deduplicated_df.empty:
-				save_to_database(db_connection, deduplicated_df, "player_team")
-				print(f"Inserted into player_team table for {team} for {season}")
+				player_team_df = player_team_df[["player_id", "team_id", "season"]]
+				
+				deduplicated_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
+				if not deduplicated_df.empty:
+					save_to_database(db_connection, deduplicated_df, "player_team")
+					logger.info(f"Inserted into player_team table for {team} for {season}")
+	except Exception as e:
+		logger.error(f"Error: {e}")
+		return f"Error: {e}"
 		
 def save_to_database(db_connection, df: pd.DataFrame, table_name: str) -> None:
 	"""
@@ -187,7 +220,11 @@ def save_to_database(db_connection, df: pd.DataFrame, table_name: str) -> None:
 	Returns:
 		None
 	"""
-	with db_connection.connect() as conn:
-		df.to_sql(table_name, conn, if_exists="append", index=False)
+	try:
+		with db_connection.connect() as conn:
+			df.to_sql(table_name, conn, if_exists="append", index=False)
+	except Exception as e:
+		logger.error(f"Error: {e}")
+		return f"Error: {e}"
 
 # TODO - Add logging for more visibility of data_intake process

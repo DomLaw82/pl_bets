@@ -8,6 +8,9 @@ from data_intake.download_latest_data import download_latest_data
 from intake_api import app
 from monitor_files import monitor_files
 import os
+from app_logger import FluentLogger
+
+logger = FluentLogger("download_and_insert_latest_data").get_logger()
 
 def download_and_insert_latest_data():
 
@@ -16,49 +19,42 @@ def download_and_insert_latest_data():
 		
 		pl_stats_connector = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
-		print("\n")
-		print("--- --- --- --- --- --- --- ---")
-		print("---- Ingesting latest data ----")
-		print("--- --- --- --- --- --- --- ---")
-		print("\n")
+		logger.info("---- Ingesting latest data ----")
 
 		# [country, competition]
 		country_competition_main(pl_stats_connector)
-		print("\nData Intake: country COMPLETE")
-		print("Data Intake: competition COMPLETE")
-		print("--- --- --- --- --- --- --- ---\n")
+		logger.info("\nData Intake: country COMPLETE")
+		logger.info("Data Intake: competition COMPLETE")
 
 		# format game data [team, match, referee]
 		team_ref_match_main(pl_stats_connector)
-		print("\nData Intake: team COMPLETE")
-		print("Data Intake: match COMPLETE")
-		print("Data Intake: referee COMPLETE")
-		print("--- --- --- --- --- --- --- ---\n")
+		logger.info("\nData Intake: team COMPLETE")
+		logger.info("Data Intake: match COMPLETE")
+		logger.info("Data Intake: referee COMPLETE")
 
 		# format season schedule [schedule]
 		schedule_main(pl_stats_connector)
-		print("\nData Intake: schedule COMPLETE")
-		print("--- --- --- --- --- --- --- ---\n")
+		logger.info("\nData Intake: schedule COMPLETE")
 			
 		# format squad data [player, player_team]
 		player_main(pl_stats_connector)
-		print("\nData Intake: player_team COMPLETE")
-		print("Data Intake: player COMPLETE")
-		print("--- --- --- --- --- --- --- ---\n")
+		logger.info("\nData Intake: player_team COMPLETE")
+		logger.info("Data Intake: player COMPLETE")
 			
 		# [historic_player_per_ninety]
 		per_90_main(pl_stats_connector)
-		print("\nData Intake: per_90 COMPLETE")
-		print("Data Intake: COMPLETE")
-		print("--- --- --- --- --- --- --- ---")
-		print("--- --- --- --- --- --- --- ---\n")
-	except Exception as e:
-		return str(e)
+		logger.info("\nData Intake: per_90 COMPLETE")
+		logger.info("Data Intake: COMPLETE")
 	
-	with open("./ingestion_status.txt", "w") as file:
-		file.write("Data ingestion completed successfully")
+		with open("./ingestion_status.txt", "w") as file:
+			file.write("Data ingestion completed successfully")
 
-	return "Data ingestion successful"
+		return "Data ingestion successful"
+	
+	except Exception as e:
+		logger.error(f"Error: {e}")
+		return f"Error: {e}"
+	
 
 if __name__ == "__main__":
 	download_and_insert_latest_data()

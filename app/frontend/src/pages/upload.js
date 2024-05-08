@@ -14,7 +14,7 @@ export default function Upload() {
 	const fileFolders = ["game_data", "historic_player_stats", "schedule_data", "squad_data"]
 	const fileNames = {
 		"": [],
-		"historic_player_stats": ["defensive_action", "goalkeeping", "passing", "possession", "shooting", "standard", "random"],
+		"historic_player_stats": ["defensive_action", "goalkeeping", "passing", "possession", "shooting", "standard"],
 		"game_data": [""],
 		"schedule_data": [""],
 		"squad_data": [""]
@@ -38,18 +38,21 @@ export default function Upload() {
 	const handleFileUpload = async (event) => {
 		const file = document.getElementById("file-upload-file").files[0];
 
-		const requestBody = {
-			file: file,
-			folder: selectedFolder,
-			name: selectedFile,
-			season: selectedSeason
-		};
+		const formData = new FormData();
+		formData.append('file', file);  // Assuming `file` is a File object
+		formData.append('folder', selectedFolder);
+		formData.append('name', selectedFile);
+		formData.append('season', selectedSeason);
+		console.log(formData);
+
+		for (let [key, value] of formData.entries()) {
+			console.log(key, value);
+		}
 
 		fetch(`http://localhost:8009/upload/upload-file`, {
 			method: 'POST',
-			body: requestBody
+			body: formData
 		});
-		console.log(requestBody);
 	};
 
 	const handleSeasonDropdownChange = (event) => {
