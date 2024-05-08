@@ -99,13 +99,33 @@ export default function Upload() {
 							<Grid container spacing={2} >
 								<Grid item xs={12} sm={12} sx={{display: "flex", flexDirection:"row", margin: 2}}>
 									<Grid item xs={12} sm={4}>
+										<FormControl key={"file-upload-season"} required fullWidth>
+											<Select
+												id="season-dropdown"
+												value={selectedSeason}
+												onChange={handleSeasonDropdownChange}
+												sx={{ width: '100%' }}
+												placeholder='Select Season *'
+												label="Select Season *"
+												required
+											>	
+												{
+													seasons.map((season, index) => (
+														<MenuItem key={`${season}-${index}`} value={season}>{season}</MenuItem>
+													))
+												}
+											</Select>
+										</FormControl>
+									</Grid>
+									<Grid item xs={12} sm={4}>
 										<FormControl key={"file-upload-folder"} required fullWidth>
 											<Select
 												id="folder-dropdown"
 												value={selectedFolder}
 												onChange={handleFolderDropdownChange}
 												sx={{ width: '100%' }}
-												label="File Folder *"
+												placeholder='Select Folder *'
+												label="Select Folder *"
 												required
 											>	
 												{
@@ -123,30 +143,13 @@ export default function Upload() {
 												value={selectedFile}
 												onChange={handleFileDropdownChange}
 												sx={{ width: '100%' }}
-												label="File Name *"
+												placeholder='Select File *'
+												label="Select File *"
 												required
 											>
 												{ selectedFolder &&
 													fileNames[selectedFolder].map((fileName, index) => (
 														<MenuItem key={`${fileName}-${index}`} value={fileName}>{fileName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</MenuItem>
-													))
-												}
-											</Select>
-										</FormControl>
-									</Grid>
-									<Grid item xs={12} sm={4}>
-										<FormControl key={"file-upload-season"} required fullWidth>
-											<Select
-												id="season-dropdown"
-												value={selectedSeason}
-												onChange={handleSeasonDropdownChange}
-												sx={{ width: '100%' }}
-												label="Season *"
-												required
-											>	
-												{
-													seasons.map((season, index) => (
-														<MenuItem key={`${season}-${index}`} value={season}>{season}</MenuItem>
 													))
 												}
 											</Select>
@@ -159,6 +162,7 @@ export default function Upload() {
 											id='file-upload-file'
 											type="file"
 											accept=".csv"
+											multiple={true}
 											required
 										/>
 									</Grid>

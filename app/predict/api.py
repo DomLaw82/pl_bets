@@ -8,9 +8,12 @@ import sys
 from predict_match_outcome import predict_match_outcome
 from rebuild_model import rebuild_model
 from retune_and_build_model import retune_and_build_model
+from app_logger import FluentLogger
 
 rebar = Rebar()
 registry = rebar.create_handler_registry()
+
+logger = FluentLogger("predict-api").get_logger()
 
 def list_to_list_of_objects(list_of_tuples:list, column_names: list) -> list:
 	"""
@@ -37,7 +40,12 @@ def list_to_list_of_objects(list_of_tuples:list, column_names: list) -> list:
 	response_body_schema=''
 )
 def health_check():
-	return jsonify({'status': 'Prediction service is healthy'})
+	try:
+		logger.info("Prediction service is healthy")
+		return jsonify({'status': 'Prediction service is healthy'})
+	except Exception as e:
+		logger.error(f"An error occurred while checking the health of the prediction service: {str(e)}")
+		return jsonify({'error': 'An error occurred while checking the health of the prediction service'})
 
 @registry.handles(
 	rule='/predict',
@@ -45,17 +53,22 @@ def health_check():
 	response_body_schema=match_facts_schema()
 )
 def make_prediction():
-	request_body = request.get_json()
+	try:
+		request_body = request.get_json()
 
-	home_team_id = request_body.get('homeTeamId')
-	home_players = request_body.get('homePlayers')
-	away_team_id = request_body.get('awayTeamId')
-	away_players = request_body.get('awayPlayers')
-	
-	prediction = predict_match_outcome(home_team_id, home_players, away_team_id, away_players)
-	prediction = list_to_list_of_objects(prediction, ['home_goals', 'away_goals', 'home_shots', 'away_shots', 'home_shots_on_target', 'away_shots_on_target', 'home_corners', 'away_corners', 'home_fouls', 'away_fouls', 'home_yellow_cards', 'away_yellow_cards', 'home_red_cards', 'away_red_cards'])[0]
+		home_team_id = request_body.get('homeTeamId')
+		home_players = request_body.get('homePlayers')
+		away_team_id = request_body.get('awayTeamId')
+		away_players = request_body.get('awayPlayers')
+		
+		prediction = predict_match_outcome(home_team_id, home_players, away_team_id, away_players)
+		prediction = list_to_list_of_objects(prediction, ['home_goals', 'away_goals', 'home_shots', 'away_shots', 'home_shots_on_target', 'away_shots_on_target', 'home_corners', 'away_corners', 'home_fouls', 'away_fouls', 'home_yellow_cards', 'away_yellow_cards', 'home_red_cards', 'away_red_cards'])[0]
 
-	return jsonify(prediction)
+		logger.info(f"Prediction made: {prediction}")
+		return jsonify(prediction)
+	except Exception as e:
+		logger.error(f"An error occurred while predicting the match outcome: {str(e)}")
+		return jsonify({'error': 'An error occurred while predicting the match outcome'})
 
 @registry.handles(
 	rule='/model/rebuild',
@@ -63,8 +76,13 @@ def make_prediction():
 	response_body_schema=''
 )
 def rebuild():
-	rebuild_model()
-	return jsonify('Model rebuilt')
+	try:
+		rebuild_model()
+		logger.info("Model rebuilt")
+		return jsonify('Model rebuilt')
+	except Exception as e:
+		logger.error(f"An error occurred while rebuilding the model: {str(e)}")
+		return jsonify({'error': 'An error occurred while rebuilding the model'})
 
 @registry.handles(
 	rule='/model/retune',
@@ -72,13 +90,19 @@ def rebuild():
 	response_body_schema=retune_schema()
 )
 def retune():
-	output = retune_and_build_model()
-	
-	score = output["score"]
-	params = output["params"]
+	try:
+		output = retune_and_build_model()
+		
+		score = output["score"]
+		params = output["params"]
 
-	params['score'] = score
-	return jsonify(params)
+		params['score'] = score
+
+		logger.info(f"Model retuned with params {params} and score: {score}")
+		return jsonify(params)
+	except Exception as e:
+		logger.error(f"An error occurred while retuning the model: {str(e)}")
+		return jsonify({'error': 'An error occurred while retuning the model'})
 
 
 # Create functions to remake pca and scaler models

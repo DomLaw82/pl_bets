@@ -6,7 +6,6 @@ from data_intake.country_competition import country_competition_main
 from data_intake.per_90_stats import per_90_main
 from data_intake.download_latest_data import download_latest_data
 from intake_api import app
-from monitor_files import monitor_files
 import os
 from app_logger import FluentLogger
 
@@ -59,5 +58,4 @@ def download_and_insert_latest_data():
 if __name__ == "__main__":
 	download_and_insert_latest_data()
 	app.run(debug=True, host="0.0.0.0", port="8009")
-	monitor_files()
 

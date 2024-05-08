@@ -43,7 +43,8 @@ CREATE TABLE schedule (
 CREATE TABLE player_team (
 	player_id VARCHAR(7) REFERENCES player(id),
 	team_id VARCHAR(7) REFERENCES team(id),
-	season VARCHAR(9) NOT NULL
+	season VARCHAR(9) NOT NULL,
+	number_team_in_season INT DEFAULT 1,
 );
 
 CREATE TABLE match (
@@ -159,7 +160,7 @@ CREATE TABLE historic_player_per_ninety (
 	penalties_saved FLOAT NOT NULL,
 	penalties_missed FLOAT NOT NULL,
 	season VARCHAR NOT NULL,
-	PRIMARY KEY (player_id, minutes_played, season)
+	PRIMARY KEY (player_id, team_id, season)
 );
 
 

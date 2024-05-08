@@ -99,8 +99,71 @@ def save_to_database(db_connection, df: pd.DataFrame) -> None:
 			df.to_sql("historic_player_per_ninety", conn, if_exists="append", index=False)
 	except Exception as e:
 		raise e
+	
+def check_player_exists(db_connection, player_id: int, team_id: int) -> bool:
+	"""
+	Check if the player exists in the database with a different team id than the one provided.
 
-def per_90_main(db_connection, **kwargs):
+	Parameters:
+		db_connection (DBConnection): The database connection object.
+		player_id (int): The player id.
+		team_id (int): The team id.
+
+	Returns:
+		bool: True if the player exists with a different team id, False otherwise.
+	"""
+	try:
+		with db_connection.connect() as conn:
+			result = conn.execute(f"""
+				SELECT COUNT(*) FROM historic_player_per_ninety
+				WHERE player_id = {player_id} AND team_id != {team_id}
+			""")
+			count = result.fetchone()[0]
+			return count > 0
+	except Exception as e:
+		raise e
+
+def update_database(db_connection, data: list[dict]):
+	"""
+	Update the per 90 stats in the database.
+
+	Parameters:
+		db_connection (DBConnection): The database connection object.
+		data (list[dict]): The list of dictionaries containing the data to be updated.
+
+	Returns:
+		None
+	"""
+	try:
+		for row in data:
+			player_id = row["player_id"]
+			team_id = row["team_id"]
+			season = row["season"]
+
+			if check_player_exists(db_connection, player_id, team_id):
+				# 	TODO - Handle this case
+				number_of_teams_played_for_this_season = db_connection.get_list(f"""
+					SELECT MAX(number_team_in_season) FROM player_team
+					WHERE player_id = {player_id} AND season = '{season}'
+				""")[0][0]
+				db_connection.execute(f"""
+					INSERT INTO player_team VALUES ({player_id}, {team_id}, {season}, {number_of_teams_played_for_this_season + 1})
+				""")
+				df_row = pd.DataFrame([row])
+				save_to_database(db_connection, df_row)
+			else:
+				for key, value in row.items():
+					if key in ["player_id", "team_id", "season"]:
+						continue
+					db_connection.execute(f"""
+						UPDATE historic_player_per_ninety
+						SET {key} = {value}
+						WHERE player_id = {player_id} AND season = '{season}'
+					""")
+	except Exception as e:
+		raise e
+
+def per_90_main(db_connection):
 	"""
 	Main function for processing and ingesting per 90 stats data into the database.
 
@@ -112,16 +175,9 @@ def per_90_main(db_connection, **kwargs):
 	"""
 
 	try:
-		single_season = kwargs.get("single_season", None)
 		data_folder_path = "./data/historic_player_stats"
 
 		seasons = sorted(os.listdir(data_folder_path))
-		if single_season is not None:
-			df = combining_datasets(single_season)
-			df = clean_historic_stats_df(db_connection, df, single_season)
-			save_to_database(db_connection, df)
-			logger.info(f"Inserted into historic_player_per_ninety table for {single_season}.")
-			return
 		
 		for season in seasons:
 			df = combining_datasets(season)
@@ -131,3 +187,28 @@ def per_90_main(db_connection, **kwargs):
 	except Exception as e:
 		logger.error(f"Error on ingestion at {data_folder_path}-{season}: {e}")
 		return f"Error on ingestion at {data_folder_path}-{season}: {e}"
+
+def per_90_update(db_connection, **kwargs):
+	"""
+	Update function for processing and ingesting per 90 stats data into the database.
+
+	Args:
+		db_connection: The database connection object.
+
+	Returns:
+		None
+	"""
+	try:
+		season = kwargs.get("season", None)
+		if season is None:
+			logger.error("Season not provided.")
+			return "Season not provided."
+		
+		df = combining_datasets(season)
+		df = clean_historic_stats_df(db_connection, df, season)
+		data = df.to_dict(orient='records')
+		update_database(db_connection, data)
+		logger.info(f"Inserted into historic_player_per_ninety table for {season}.")
+	except Exception as e:
+		logger.error(f"Error on ingestion at {season}: {e}")
+		return f"Error on ingestion at {season}: {e}"

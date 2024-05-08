@@ -46,21 +46,24 @@ def get_model(hidden_layer_one, dropout, learn_rate, n_h_layers) -> tf.keras.mod
 	Returns:
 	tf.keras.models.Sequential: The compiled neural network model.
 	"""
-	model = tf.keras.models.Sequential()
-	model.add(tf.keras.layers.Dense(15, activation="relu", input_dim=15))
+	try:
+		model = tf.keras.models.Sequential()
+		model.add(tf.keras.layers.Dense(15, activation="relu", input_dim=15))
 
-	for i in range(n_h_layers):
-		model.add(tf.keras.layers.Dense(hidden_layer_one, activation="relu"))
+		for i in range(n_h_layers):
+			model.add(tf.keras.layers.Dense(hidden_layer_one, activation="relu"))
 
-	model.add(tf.keras.layers.Dropout(dropout))
-	model.add(tf.keras.layers.Dense(14, activation="relu"))
+		model.add(tf.keras.layers.Dropout(dropout))
+		model.add(tf.keras.layers.Dense(14, activation="relu"))
 
-	model.compile(
-		optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=learn_rate),
-		loss="mse",
-		metrics=["accuracy"])
+		model.compile(
+			optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=learn_rate),
+			loss="mse",
+			metrics=["accuracy"])
 
-	return model
+		return model
+	except Exception as e:
+		raise e
 
 def x_y_split_df(df: pd.DataFrame, output_columns: list) -> tuple:
 	"""
@@ -73,9 +76,12 @@ def x_y_split_df(df: pd.DataFrame, output_columns: list) -> tuple:
 	X (pd.DataFrame): The input dataframe with the output columns removed.
 	y (pd.DataFrame): The output columns.
 	"""
-	X = df.drop(output_columns, axis=1)
-	y = df[output_columns]
-	return X, y
+	try:
+		X = df.drop(output_columns, axis=1)
+		y = df[output_columns]
+		return X, y
+	except Exception as e:
+		raise e
 
 def perform_scaling(X_train: np.array, X_test: np.array, pred: bool = False) -> pd.DataFrame:
 	"""
@@ -89,23 +95,26 @@ def perform_scaling(X_train: np.array, X_test: np.array, pred: bool = False) -> 
 	X_train (pd.DataFrame): The transformed training data after scaling and PCA.
 	X_test (pd.DataFrame): The transformed testing data after scaling and PCA.
 	"""
-	scaler = load('files/prediction_scaler.bin')
+	try:
+		scaler = load('files/prediction_scaler.bin')
 
-	if pred:
-		X_train = scaler.transform(X_train)
-		# X_test = scaler.transform(X_test.reshape(1, -1))
+		if pred:
+			X_train = scaler.transform(X_train)
+			# X_test = scaler.transform(X_test.reshape(1, -1))
 
-		# # Carrying out PCA on the train data
-		# feature_to_pc_map = pd.read_csv("files/feature_to_15_pcs.csv")
-		# X_train = X_train * feature_to_pc_map
-		# X_train = pd.DataFrame(X_train.sum(axis=1), columns=['components']).T
+			# # Carrying out PCA on the train data
+			# feature_to_pc_map = pd.read_csv("files/feature_to_15_pcs.csv")
+			# X_train = X_train * feature_to_pc_map
+			# X_train = pd.DataFrame(X_train.sum(axis=1), columns=['components']).T
 
 
-	else:
-		X_train = scaler.transform(X_train)
-		X_test = scaler.transform(X_test)
-	
-	return X_train, X_test
+		else:
+			X_train = scaler.transform(X_train)
+			X_test = scaler.transform(X_test)
+		
+		return X_train, X_test
+	except Exception as e:
+		raise e
 
 def build_and_save_model(dataframe: pd.DataFrame) -> tf.keras.models.Sequential:
 	"""
@@ -117,27 +126,30 @@ def build_and_save_model(dataframe: pd.DataFrame) -> tf.keras.models.Sequential:
 	Returns:
 		tf.keras.models.Sequential: The trained machine learning model.
 	"""
-	combined = dataframe
-	# Split into X and y
-	X, y = x_y_split_df(combined, output_columns)
+	try:
+		combined = dataframe
+		# Split into X and y
+		X, y = x_y_split_df(combined, output_columns)
 
-	# Split into train and test
-	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=543)
+		# Split into train and test
+		X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=543)
 
-	# Scale the data
-	X_train, X_test = perform_scaling(X_train, X_test, N)
+		# Scale the data
+		X_train, X_test = perform_scaling(X_train, X_test, N)
 
-	# Get model parameters from environment variables
-	hidden_layer_one = os.environ.get('hidden_layer_one')
-	learn_rate = os.environ.get('learn_rate')
-	dropout = os.environ.get('dropout')
-	batch_size = os.environ.get('batch_size')
-	epochs = os.environ.get('epochs')
-	n_h_layers = os.environ.get('n_h_layers')
+		# Get model parameters from environment variables
+		hidden_layer_one = os.environ.get('hidden_layer_one')
+		learn_rate = os.environ.get('learn_rate')
+		dropout = os.environ.get('dropout')
+		batch_size = os.environ.get('batch_size')
+		epochs = os.environ.get('epochs')
+		n_h_layers = os.environ.get('n_h_layers')
 
-	# Define fit, and save the model
-	model = get_model(hidden_layer_one, dropout, learn_rate, n_h_layers)
+		# Define fit, and save the model
+		model = get_model(hidden_layer_one, dropout, learn_rate, n_h_layers)
 
-	model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
+		model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
 
-	return model
+		return model
+	except Exception as e:
+		raise e

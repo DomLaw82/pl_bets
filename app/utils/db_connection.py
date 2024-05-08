@@ -42,6 +42,15 @@ class SQLConnection:
         with self.connect() as conn:
             return self._execute_query(conn, query, fetch='dict')
 
+    def execute(self, query):
+        """Execute a non-return query, managing context internally."""
+        with self.connect() as conn:
+            try:
+                conn.execute(sqlalchemy.text(query))
+            except SQLAlchemyError as e:
+                print('Database error:', e)
+                raise
+
     def _execute_query(self, conn, query, fetch='all'):
         """Helper method to execute queries and manage fetch types."""
         try:

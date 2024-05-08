@@ -47,7 +47,6 @@ def predict_match_outcome(home_team_id: str, home_players: list, away_team_id: s
 
 		model = tf.keras.models.load_model("files/stats_regression_model.h5")
 		prediction = model.predict(X)
-
 		return prediction
 	except Exception as e:
 		logger.error(f"An error occurred while predicting the match outcome: {str(e)}")

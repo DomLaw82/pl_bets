@@ -10,5 +10,6 @@ COPY ./utils/app_logger.py .
 RUN pip install --no-cache-dir -r ./requirements.txt
 
 COPY ./predict .
+COPY ./utils/db_connection.py ./dataset_creation
 
 CMD ["python3", "-u", "api.py"]
