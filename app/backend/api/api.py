@@ -25,8 +25,11 @@ registry = rebar.create_handler_registry()
    method='GET',
 )
 def health():
-      logger.info("Health check")
+   try:
       return jsonify({"status": "healthy"})
+   except Exception as e:
+      logger.error(f"Error with endpoint /health: {str(e)}")
+      return jsonify({"error": f"Error with endpoint /health: {str(e)}"}), 500
 
 # index
 @registry.handles(

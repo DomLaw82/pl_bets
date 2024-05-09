@@ -15,45 +15,61 @@ registry = rebar.create_handler_registry()
 
 
 @registry.handles(
-	rule='/upload/health',
-	method='GET',
-	response_body_schema=''
+    rule='/upload/health',
+    method='GET',
+    response_body_schema=''
 )
 def health_check():
-	logger.info("Upload service is healthy")
-	return jsonify('Upload service is healthy')
+    return jsonify('Upload service is healthy')
 
+
+from flask import request, jsonify
+import pandas as pd
+import os
+import logging
 
 @registry.handles(
-	rule="/upload/upload-file",
-	method="POST",
+    rule="/upload/upload-file",
+    method="POST",
 )
 def upload_historic_player_data():
-	try:
+    path_root = "./data"  # Base directory for saving files
+    try:
+        folder = request.form['folder']
+        season = request.form['season']
+        files = request.files.getlist('files')
+        names = request.form.getlist('names')
 
-		path_root = "./data"
+        # Ensure the directory structure exists
+        os.makedirs(os.path.join(path_root, folder, season), exist_ok=True)
 
-		file = request.files['file']
-		folder = request.form['folder']
-		name = request.form['name']
-		season = request.form['season']
+        files_uploaded = []
 
-		if not file.filename.endswith('.csv'):
-			logger.warning("Invalid file type. Only CSV files are allowed.")
-			raise TypeError("Invalid file type. Only CSV files are allowed.")
-		
-		save_route = f"{path_root}/{folder}/{season}/{name}.csv"
-		file.save(save_route)
+        logger.info(f"Uploading files: {', '.join(names)}")
 
-		df = pd.read_csv(save_route)
-		logger.info(f"File {name} for season {season} uploaded successfully to route {save_route}")
+        for name, file in list(zip(names, files)):
 
-		per_90_update(db, df, season)
-		return jsonify("File uploaded successfully")
-	
-	except Exception as e:
-		logger.error(f"Error uploading file {name} for season {season} to route {save_route}: {str(e)}")
-		return jsonify("Error uploading file: " + str(e))
+            # Validate file type
+            if not file.filename.endswith('.csv'):
+                logger.warning("Invalid file type. Only CSV files are allowed.")
+                return jsonify("Invalid file type. Only CSV files are allowed."), 400
+
+            # Construct the full save path
+            save_route = os.path.join(path_root, folder, season, f"{name}.csv")
+            
+            # Save the file to the specified path
+            file.save(save_route)
+            logger.info(f"File {name} saved to {save_route}")
+            files_uploaded.append(name)
+
+        per_90_update(db, season)
+
+        return jsonify(f"Files uploaded successfully: {', '.join(files_uploaded)}"), 200
+
+    except Exception as e:
+        logger.error(f"Error uploading files: {str(e)}")
+        return jsonify(f"Error uploading files: {str(e)}"), 500
+
 
 
 

@@ -25,12 +25,12 @@ def combining_datasets(season: str) -> pd.DataFrame:
 	}
 	try:
 		data_folder_path = "./data/historic_player_stats"
-		season_folder = data_folder_path + "/" + season
+		season_folder = os.path.join(data_folder_path, season)
 
 		datasets = sorted(os.listdir(season_folder))
 		complete = pd.DataFrame()
 		for dataset in datasets:
-			dataset_path = season_folder + "/" + dataset
+			dataset_path = os.path.join(season_folder, dataset)
 
 			df = pd.read_csv(dataset_path)
 			df = df[columns[dataset]]
@@ -101,24 +101,31 @@ def save_to_database(db_connection, df: pd.DataFrame) -> None:
 	except Exception as e:
 		raise e
 	
-def check_player_exists(db_connection, player_id: int, team_id: int) -> bool:
+def check_existing_player_for_team(db_connection, player_id: str, team_id: str, season: str) -> bool:
 	"""
 	Check if the player exists in the database with a different team id than the one provided.
 
 	Parameters:
 		db_connection (DBConnection): The database connection object.
-		player_id (int): The player id.
-		team_id (int): The team id.
+		player_id (str): The player id.
+		team_id (str): The team id.
+		season (str): The season.
 
 	Returns:
 		bool: True if the player exists with a different team id, False otherwise.
 	"""
 	try:
-		count = db_connection.get_list(f"""
-				SELECT COUNT(*) FROM historic_player_per_ninety
-				WHERE player_id = '{player_id}' AND team_id != '{team_id}'
-			""")[0][0]
-		return count > 0
+		# Checking to see if the team_id provided is the team_id for the players current team
+		teams_played_for_in_season = db_connection.get_list(f"""
+			SELECT team_id FROM historic_player_per_ninety
+			WHERE player_id = '{player_id}' AND season = '{season}'
+		""")
+		teams_played_for_in_season = [team[0] for team in teams_played_for_in_season]
+
+		if team_id not in teams_played_for_in_season:
+			return False
+		
+		return True
 	except Exception as e:
 		raise e
 
@@ -139,7 +146,18 @@ def update_database(db_connection, data: list[dict]):
 			team_id = row["team_id"]
 			season = row["season"]
 
-			if check_player_exists(db_connection, player_id, team_id):
+			existing_player_for_team = check_existing_player_for_team(db_connection, player_id, team_id, season)
+
+			if existing_player_for_team:
+				for key, value in row.items():
+					if key in ["player_id", "team_id", "season"]:
+						continue
+					db_connection.execute(f"""
+						UPDATE historic_player_per_ninety
+						SET {key} = {value}
+						WHERE player_id = '{player_id}' AND season = '{season}'
+					""")
+			else:
 				# 	TODO - Handle this case
 				number_of_teams_played_for_this_season = db_connection.get_list(f"""
 					SELECT MAX(number_team_in_season) FROM player_team
@@ -150,15 +168,6 @@ def update_database(db_connection, data: list[dict]):
 				""")
 				df_row = pd.DataFrame([row])
 				save_to_database(db_connection, df_row)
-			else:
-				for key, value in row.items():
-					if key in ["player_id", "team_id", "season"]:
-						continue
-					db_connection.execute(f"""
-						UPDATE historic_player_per_ninety
-						SET {key} = {value}
-						WHERE player_id = '{player_id}' AND season = '{season}'
-					""")
 	except Exception as e:
 		raise e
 
@@ -187,7 +196,7 @@ def per_90_main(db_connection):
 	except Exception as e:
 		raise e
 
-def per_90_update(db_connection, df: pd.DataFrame, season: str) -> None:
+def per_90_update(db_connection, season: str) -> None:
 	"""
 	Update function for processing and ingesting per 90 stats data into the database.
 
