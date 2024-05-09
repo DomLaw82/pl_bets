@@ -33,8 +33,22 @@ export const routeOptions = {
 };
 
 export const settingsOptions = {
-	"upload": {
-		path: '/upload',
-		component: Upload
+	"Refresh - Data": {
+		modal: "",
+		tooltip: "Download the latest game data",
+		options: {
+			game: "api endpoint",
+			squads: "api endpoint",
+			schedule: "api endpoint",
+		}
+
+	},
+	"Refresh - Model": {
+		modal: "",
+		tooltip: "Rebuild and save the prediction model",
+		options: {
+			rebuild: "api endpoint",
+			retuneAndRebuild: "api endpoint"
+		}
 	},
 }
