@@ -74,10 +74,11 @@ def clean_historic_stats_df(db_connection, df: pd.DataFrame, season: str) -> pd.
 
 		df.loc[:, "season"] = season
 
+		df = df.fillna(0)
+
 		df = df.drop(columns=["position", "first_name", "last_name", "starts", "matches_played", "wins", "draws", "losses"])
 		# 	TODO - More granular method to impute nulls
 		# 	TODO - Null and multiple player ids
-		df = df.fillna({col: 0 for col in df.columns if col not in ['player_id', 'team_id']})
 	except Exception as e:
 		raise e
 
@@ -179,7 +180,10 @@ def per_90_main(db_connection):
 		
 		for season in seasons:
 			df = combining_datasets(season)
+			logger.info(f"Combined datasets for {season}.")
 			df = clean_historic_stats_df(db_connection, df, season)
+			df = df.drop_duplicates()
+			# df = df.groupby(['player_id', 'team_id', 'season']).sum().reset_index()
 			save_to_database(db_connection, df)
 			logger.info(f"Inserted into historic_player_per_ninety table for {season}.")
 	except Exception as e:

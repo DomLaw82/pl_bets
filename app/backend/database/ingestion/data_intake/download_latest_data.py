@@ -242,8 +242,8 @@ def download_latest_data():
 			time.sleep(0.2)
 			download_html_for_squad_player_data(season, PLAYER_DOWNLOAD_ROOT, PLAYER_SAVE_PATH_ROOT)
 	except Exception as e:
-		logger.error(f"Error: {e}")
-		return f"Error: {e}"
+		logger.error(f"Error downloading the latest data: {e}")
+		return f"Error downloading the latest data: {e}"
 
 		
 

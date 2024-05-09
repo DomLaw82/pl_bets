@@ -9,13 +9,11 @@ from intake_api import app
 import os
 from app_logger import FluentLogger
 
-logger = FluentLogger("download_and_insert_latest_data").get_logger()
+logger = FluentLogger("insert_latest_data").get_logger()
 
-def download_and_insert_latest_data():
+def insert_latest_data():
 
-	try:
-		download_latest_data()
-		
+	try:		
 		pl_stats_connector = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
 		logger.info("---- Ingesting latest data ----")
@@ -52,10 +50,11 @@ def download_and_insert_latest_data():
 	
 	except Exception as e:
 		logger.error(f"Error: {e}")
-		return f"Error: {e}"
+		return f"Error while ingesting data: {e}"
 	
 
 if __name__ == "__main__":
-	download_and_insert_latest_data()
+	download_latest_data()
+	insert_latest_data()
 	app.run(debug=True, host="0.0.0.0", port="8009")
 

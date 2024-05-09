@@ -44,7 +44,7 @@ CREATE TABLE player_team (
 	player_id VARCHAR(7) REFERENCES player(id),
 	team_id VARCHAR(7) REFERENCES team(id),
 	season VARCHAR(9) NOT NULL,
-	number_team_in_season INT DEFAULT 1,
+	number_team_in_season INT DEFAULT 1
 );
 
 CREATE TABLE match (
