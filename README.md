@@ -79,8 +79,8 @@ After the containers have started, navigate to the [frontend](http://localhost:3
 	to your settings.json to suppress errors about the utility modules
 
 ## TODO
-- Intake functions and frontend to operational status
 - Caching
+- Settings modals
 - Profile tab in player modal with overall standard stats
 - Add team to each row of the player modal in each tab
 - Add searching, filtering and pagination to Players and Teams pages
