@@ -72,12 +72,18 @@ After the containers have started, navigate to the [frontend](http://localhost:3
 
 ## Notes
 - Compatibility issues between PyPi, Tensorflow and h5py mean that h5py==3.9.0 & tensorflow==2.12.0 must be the versions used with these packages
+- In VSCode add :
+	"python.analysis.extraPaths": [
+		"./app/utils"
+	]
+	to your settings.json to suppress errors about the utility modules
 
 ## TODO
-- Call functions to run intake functions in watchdog handler
-- Add logging
-- Error handling and custom error messages
 - Caching
+- Settings modals
+- Profile tab in player modal with overall standard stats
+- Add team to each row of the player modal in each tab
+- Add searching, filtering and pagination to Players and Teams pages
 - General code cleanup and re-factoring
 - Build regression model to purely predict the winner of each match
 - Review "Separation of concerns"

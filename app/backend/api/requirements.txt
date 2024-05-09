@@ -10,5 +10,4 @@ sqlalchemy
 psycopg2-binary
 fuzzywuzzy
 requests
-watchdog
 fluent-logger

@@ -7,18 +7,25 @@ import { Select, Divider, Button, Input } from '@mui/material';
 
 export default function Upload() {
 	const [ seasons, setSeasons ] = useState([]);
-	const [selectedSeason, setSelectedSeason] = useState('');
-	const [selectedFile, setSelectedFile] = useState('');
-	const [selectedFolder, setSelectedFolder] = useState('');
+	const [selectedSeason, setSelectedSeason] = useState('2023-2024');
+	const [selectedFolder, setSelectedFolder] = useState('historic_player_stats');
+	
+	const [selectedFiles, setSelectedFiles] = useState([]);
+	const [selectedFileNames, setSelectedFileNames] = useState([]);
 
-	const fileFolders = ["game_data", "historic_player_stats", "schedule_data", "squad_data"]
-	const fileNames = {
-		"": [],
-		"historic_player_stats": ["defensive_action", "goalkeeping", "passing", "possession", "shooting", "standard"],
-		"game_data": [""],
-		"schedule_data": [""],
-		"squad_data": [""]
-	};
+	const addFiles = (fileName, file) => {
+		setSelectedFiles(prevSelectedFiles => [...prevSelectedFiles, file]);
+		setSelectedFileNames(prevSelectedFileNames => [...prevSelectedFileNames, fileName]);
+	}
+	const removeFiles = (fileName, file) => {
+		setSelectedFiles(prevSelectedFiles => prevSelectedFiles.filter(f => f !== file));
+		setSelectedFileNames(prevSelectedFileNames => prevSelectedFileNames.filter(name => name !== fileName));
+	}
+
+	console.log(selectedFiles);	
+	console.log(selectedFileNames);
+
+	const historicPlayerStatsFileNames = ["defensive_action", "goalkeeping", "passing", "possession", "shooting", "standard"];
 
 	useEffect(() => {
 		const getSeasons = async () => {
@@ -36,36 +43,32 @@ export default function Upload() {
 	}, []);
 
 	const handleFileUpload = async (event) => {
-		const file = document.getElementById("file-upload-file").files[0];
-
 		const formData = new FormData();
-		formData.append('file', file);  // Assuming `file` is a File object
+		selectedFiles.forEach((file, index) => {
+			formData.append('files', file);
+			formData.append('names', selectedFileNames[index]);
+		});
+
 		formData.append('folder', selectedFolder);
-		formData.append('name', selectedFile);
 		formData.append('season', selectedSeason);
-		console.log(formData);
+		
+		const response = await fetch(`http://localhost:8009/upload/upload-file`, {
+            method: 'POST',
+            body: formData,
+        });
+
+        const result = await response.json();
+		console.log(result);
+        alert('Files uploaded successfully');
 
 		for (let [key, value] of formData.entries()) {
 			console.log(key, value);
 		}
-
-		fetch(`http://localhost:8009/upload/upload-file`, {
-			method: 'POST',
-			body: formData
-		});
 	};
 
 	const handleSeasonDropdownChange = (event) => {
 		const selectedOption = event.target.value;
 		setSelectedSeason(selectedOption)
-	};
-	const handleFileDropdownChange = (event) => {
-		const selectedOption = event.target.value;
-		setSelectedFile(selectedOption);
-	};
-	const handleFolderDropdownChange = (event) => {
-		const selectedOption = event.target.value;
-		setSelectedFolder(selectedOption);
 	};
 	
 	return (
@@ -98,7 +101,7 @@ export default function Upload() {
 						<Box component="div" sx={{ mt: 3 }}>
 							<Grid container spacing={2} >
 								<Grid item xs={12} sm={12} sx={{display: "flex", flexDirection:"row", margin: 2}}>
-									<Grid item xs={12} sm={4}>
+									<Grid item xs={12} sm={12}>
 										<FormControl key={"file-upload-season"} required fullWidth>
 											<Select
 												id="season-dropdown"
@@ -108,7 +111,7 @@ export default function Upload() {
 												placeholder='Select Season *'
 												label="Select Season *"
 												required
-											>	
+											> 
 												{
 													seasons.map((season, index) => (
 														<MenuItem key={`${season}-${index}`} value={season}>{season}</MenuItem>
@@ -117,56 +120,40 @@ export default function Upload() {
 											</Select>
 										</FormControl>
 									</Grid>
-									<Grid item xs={12} sm={4}>
-										<FormControl key={"file-upload-folder"} required fullWidth>
-											<Select
-												id="folder-dropdown"
-												value={selectedFolder}
-												onChange={handleFolderDropdownChange}
-												sx={{ width: '100%' }}
-												placeholder='Select Folder *'
-												label="Select Folder *"
-												required
-											>	
-												{
-													fileFolders.map((folder, index) => (
-														<MenuItem key={`${folder}-${index}`} value={folder}>{folder.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</MenuItem>
-													))
-												}
-											</Select>
-										</FormControl>
-									</Grid>
-									<Grid item xs={12} sm={4}>
-										<FormControl key={"file-upload-name"} required fullWidth>
-											<Select
-												id="file-dropdown"
-												value={selectedFile}
-												onChange={handleFileDropdownChange}
-												sx={{ width: '100%' }}
-												placeholder='Select File *'
-												label="Select File *"
-												required
-											>
-												{ selectedFolder &&
-													fileNames[selectedFolder].map((fileName, index) => (
-														<MenuItem key={`${fileName}-${index}`} value={fileName}>{fileName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</MenuItem>
-													))
-												}
-											</Select>
-										</FormControl>
-									</Grid>
 								</Grid>
-								<FormControl key={"file-upload-file"} required fullWidth>
-									<Grid item xs={12} sm={12} sx={{textAlign:"center", margin: 2}}>
-										<Input
-											id='file-upload-file'
-											type="file"
-											accept=".csv"
-											multiple={true}
-											required
-										/>
-									</Grid>
-								</FormControl>
+								<Grid item xs={12} sm={12} sx={{textAlign:"center", justifyContent: "center"}}>
+									{
+										historicPlayerStatsFileNames.map((fileName, index) => (
+											<Box key={`file-upload-${fileName}-${index}`} sx={{ width: '100%', display: "flex", flexDirection: "row"}}>
+												<FormControl key={`file-upload-${fileName}-title`} required fullWidth>
+													<Grid item xs={12} sm={6} sx={{textAlign:"center", margin: 2}}>
+														<Typography variant="h4" sx={{ textTransform: 'capitalize' }}>
+															{fileName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+														</Typography>
+													</Grid>
+												</FormControl>
+												<FormControl key={`file-upload-${fileName}-input`} required fullWidth>
+													<Grid item xs={12} sm={6} sx={{textAlign:"center", margin: 2}}>
+														<Input
+															id={`${fileName}`}
+															type="file"
+															accept=".csv"
+															required
+															name={`${fileName}`}
+															onChange={(event) => {
+																if (event.target.files.length > 0 && event.target.files.length < 2) {
+																	addFiles(fileName, event.target.files[0]);
+																} else {
+																	removeFiles(fileName, event.target.files[0]);
+																}
+															}}
+														/>
+													</Grid>
+												</FormControl>
+											</Box>
+										))
+									}
+								</Grid>
 								<Grid item xs={12} sm={12} sx={{textAlign:"center", margin: 2}}>
 									<Button
 										type="submit"
