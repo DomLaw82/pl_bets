@@ -116,7 +116,7 @@ def check_player_exists(db_connection, player_id: int, team_id: int) -> bool:
 	try:
 		count = db_connection.get_list(f"""
 				SELECT COUNT(*) FROM historic_player_per_ninety
-				WHERE player_id = {player_id} AND team_id != {team_id}
+				WHERE player_id = '{player_id}' AND team_id != '{team_id}'
 			""")[0][0]
 		return count > 0
 	except Exception as e:
@@ -143,10 +143,10 @@ def update_database(db_connection, data: list[dict]):
 				# 	TODO - Handle this case
 				number_of_teams_played_for_this_season = db_connection.get_list(f"""
 					SELECT MAX(number_team_in_season) FROM player_team
-					WHERE player_id = {player_id} AND season = '{season}'
+					WHERE player_id = '{player_id}' AND season = '{season}'
 				""")[0][0]
 				db_connection.execute(f"""
-					INSERT INTO player_team VALUES ({player_id}, {team_id}, {season}, {int(number_of_teams_played_for_this_season) + 1})
+					INSERT INTO player_team VALUES ('{player_id}', '{team_id}', '{season}', {int(number_of_teams_played_for_this_season) + 1})
 				""")
 				df_row = pd.DataFrame([row])
 				save_to_database(db_connection, df_row)
@@ -157,7 +157,7 @@ def update_database(db_connection, data: list[dict]):
 					db_connection.execute(f"""
 						UPDATE historic_player_per_ninety
 						SET {key} = {value}
-						WHERE player_id = {player_id} AND season = '{season}'
+						WHERE player_id = '{player_id}' AND season = '{season}'
 					""")
 	except Exception as e:
 		raise e
