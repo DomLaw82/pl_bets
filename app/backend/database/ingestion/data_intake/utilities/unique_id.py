@@ -63,14 +63,17 @@ def get_player_id_per_ninety(connector, row) -> str:
             if current_match[1] and current_match[1] > score:
                 matched_player = db_player
                 score = current_match[1]
+    
+        if matched_player and score >= 40:
+            return matched_player[0]  # Assuming the first column is id
+        elif matched_player and score < 40:
+            raise f"Error finding suitable matching name for player {row.first_name} {row.last_name}, closest match {matched_player} scored {score}" 
+        else:
+            raise f"Error - Unable to find matching name for player {row.first_name} {row.last_name}"  # Handle the case where no result is found
     except Exception as e:
         raise RuntimeError(f"Error: {e}")
         return None
     
-    if matched_player:
-        return matched_player[0]  # Assuming the first column is id
-    else:
-        return None  # Handle the case where no result is found
 
 
 def get_referee_id(connector, referee_name: str) -> str:

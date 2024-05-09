@@ -2,12 +2,12 @@ from flask import Flask, request, jsonify
 from flask_rebar import Rebar
 from flask_cors import CORS
 import pandas as pd
-import sys, os
+import os
 from app_logger import FluentLogger
 from data_intake.per_90_stats import per_90_update
 from db_connection import SQLConnection
 
-logger = FluentLogger("data_ingestion_api").get_logger()
+logger = FluentLogger("data_ingestion-api").get_logger()
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
 rebar = Rebar()
@@ -60,7 +60,4 @@ def upload_historic_player_data():
 app = Flask(__name__)
 CORS(app, origins=["http://api:8080", "http://localhost:8080", "http://localhost:3000", "http://frontend:3000", "http://localhost:3001", "http://frontend:3001"],  supports_credentials=True)
 rebar.init_app(app)
-
-if __name__ == '__main__':
-	app.run(debug=True, host='0.0.0.0', port="8009")
 

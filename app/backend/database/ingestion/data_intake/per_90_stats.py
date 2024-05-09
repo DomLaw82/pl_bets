@@ -180,10 +180,8 @@ def per_90_main(db_connection):
 		
 		for season in seasons:
 			df = combining_datasets(season)
-			logger.info(f"Combined datasets for {season}.")
 			df = clean_historic_stats_df(db_connection, df, season)
 			df = df.drop_duplicates()
-			# df = df.groupby(['player_id', 'team_id', 'season']).sum().reset_index()
 			save_to_database(db_connection, df)
 			logger.info(f"Inserted into historic_player_per_ninety table for {season}.")
 	except Exception as e:
