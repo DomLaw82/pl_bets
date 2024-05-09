@@ -3,11 +3,15 @@ from flask_rebar import Rebar
 from flask_cors import CORS
 from schemas import *
 import pandas as pd
-from db_connection import local_pl_stats_connector
+from db_connection import SQLConnection
+from app_logger import FluentLogger
 from flask import render_template
 from datetime import datetime
+import os
 
-db = local_pl_stats_connector
+db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
+logger = FluentLogger("api").get_logger()
+
 rebar = Rebar()
 registry = rebar.create_handler_registry()
 
@@ -16,12 +20,21 @@ registry = rebar.create_handler_registry()
 
 ### routes ###
 
+@registry.handles(
+   rule='/health',
+   method='GET',
+)
+def health():
+      logger.info("Health check")
+      return jsonify({"status": "healthy"})
+
 # index
 @registry.handles(
    rule='/',
    method='GET',
 )
 def index():
+    logger.info("Index page")
     return jsonify({"title": "Welcome to PL Bets"})
 
 # all teams
@@ -35,9 +48,11 @@ def get_teams():
       teams = db.get_dict(f"""
          SELECT * from team ORDER BY name ASC
       """)
+      logger.info("Teams retrieved")
       return jsonify(teams)
    except Exception as e:
-      return jsonify({"error":f"Error with endpoint /teams: {str(e)}"}), 500
+      logger.error(f"Error with endpoint /teams: {str(e)}")
+      return jsonify({"error": f"Error with endpoint /teams: {str(e)}"}), 500
 
 # all teams
 @registry.handles(
@@ -64,8 +79,10 @@ def get_active_teams() :
             AND player_team.season = current_season.season
          ORDER BY name ASC
       """)
+      logger.info("Active teams retrieved")
       return jsonify(teams)
    except Exception as e:
+      logger.error(f"Error with endpoint /active-teams: {str(e)}")
       return jsonify({"error": f"Error with endpoint /active-teams: {str(e)}"}), 500
 
 # all players
@@ -103,8 +120,10 @@ def get_all_players() :
          JOIN team ON pt2.team_id = team.id
          ORDER BY player.id ASC
       """)
+      logger.info("Players' information retrieved")
       return jsonify(players)
    except Exception as e:
+      logger.error(f"Error with endpoint /players: {str(e)}")
       return jsonify({"error": f"Error with endpoint /players: {str(e)}"}), 500
 
 # current team roster
@@ -138,8 +157,10 @@ def get_all_active_players() -> list:
          WHERE player_team.season = current_season.season
          ORDER BY player.last_name ASC
       """)
+      logger.info("All active players retrieved")
       return jsonify(players)
    except Exception as e:
+      logger.error(f"Error with endpoint /all-active-players: {str(e)}")
       return jsonify({"error": f"Error with endpoint /all-active-players: {str(e)}"}), 500
 
 @registry.handles(
@@ -171,8 +192,10 @@ def get_team_current_roster(team_id:str) -> list:
          AND player_team.season = current_season.season
          ORDER BY player.last_name ASC
       """)
+      logger.info(f"Active players for team {team_id} retrieved")
       return jsonify(players)
    except Exception as e:
+      logger.error(f"Error with endpoint /active-players/{team_id}: {str(e)}")
       return jsonify({"error": f"Error with endpoint /active-players/{team_id}: {str(e)}"}), 500
 
 @registry.handles(
@@ -184,10 +207,11 @@ def get_all_seasons() -> list:
       seasons = db.get_list(f"""
          SELECT DISTINCT(season) FROM match ORDER BY season ASC
       """)
-
       seasons = [season[0] for season in seasons]
+      logger.info("All seasons retrieved")
       return jsonify(seasons)
    except Exception as e:
+      logger.error(f"Error with endpoint /matches/all-seasons: {str(e)}")
       return jsonify({"error": f"Error with endpoint /matches/all-seasons: {str(e)}"}), 500
 
 def decompose_season(season: str) -> tuple:
@@ -223,8 +247,10 @@ def get_schedule_by_season(season:str) -> list:
          WHERE DATE(s.date) > '{season_start}' AND DATE(s.date) < '{season_end}'
          ORDER BY s.date ASC;
       """)
+      logger.info(f"Schedule for season {season} retrieved")
       return jsonify(schedule)
    except Exception as e:
+      logger.error(f"Error with endpoint /matches/season/{season}: {str(e)}")
       return jsonify({"error": f"Error with endpoint /matches/season/{season}: {str(e)}"}), 500
    
 @registry.handles(
@@ -262,8 +288,10 @@ def get_match_facts():
             home_team.name = '{home_team}' AND
             away_team.name = '{away_team}'
       """)
+      logger.info(f"Match facts for {home_team} vs {away_team} on {date} retrieved")
       return jsonify(data)
    except Exception as e:
+      logger.error(f"Error with endpoint /matches/match-facts: {str(e)}")
       return jsonify({'error': f"Error with endpoint /matches/match-facts: {str(e)}"}), 500
    
 @registry.handles(
@@ -370,7 +398,7 @@ def get_prediction_stats():
          )
          LIMIT 5
       """)
-      
+      logger.info(f"Prediction stats for {home_team} vs {away_team} retrieved")
       return jsonify(
          {
             "home_team_form": home_team_form, 
@@ -381,6 +409,7 @@ def get_prediction_stats():
          }
       )
    except Exception as e:
+      logger.error(f"Error with endpoint /prediction/stats: {str(e)}")
       return jsonify({'error': f"Error with endpoint /prediction/stats: {str(e)}"}), 500
    
 @registry.handles(
@@ -434,8 +463,10 @@ def get_prediction_squads() -> list:
             AND player_team.season = current_season.season
          ORDER BY player.last_name ASC
       """)
+      logger.info(f"Prediction squads for {home_team} vs {away_team} retrieved")
       return jsonify({"home_team_squad": home_team_squad, "away_team_squad": away_team_squad})
    except Exception as e:
+      logger.error(f"Error with endpoint /prediction/squads: {str(e)}")
       return jsonify({'error': f"Error with endpoint /prediction/squads: {str(e)}"}), 500
 
 
@@ -448,8 +479,10 @@ def get_team_id():
    try:
       team_name = request.args.get('team_name')
       team_id = db.get_dict(f"SELECT id FROM team WHERE name = '{team_name}'")[0]
+      logger.info(f"Team id for {team_name} retrieved")
       return jsonify(team_id)
    except Exception as e:
+      logger.error(f"Error with endpoint /prediction/team-id: {str(e)}")
       return jsonify({'error': f"Error with endpoint /prediction/team-id: {str(e)}"}), 500
 
 @registry.handles(
@@ -557,8 +590,10 @@ def get_player_historic_stats_by_season(player_id:str) -> list:
          ORDER BY
             historic_player_per_ninety.season ASC;
       """)
+      logger.info(f"Player historic stats for {player_id} retrieved")
       return jsonify(player_historic_stats_by_season)
    except Exception as e:
+      logger.error(f"Error with endpoint /players/historic-stats/{player_id}: {str(e)}")
       return jsonify({"error": f"Error with endpoint /players/historic-stats/{player_id}: {str(e)}"}), 500
 
 @registry.handles(
@@ -581,8 +616,10 @@ def get_player_recent_minutes_stats_by_season(player_id:str) -> list:
          ORDER BY
             season ASC;
       """)
+      logger.info(f"Player recent minutes stats for {player_id} retrieved")
       return jsonify(player_recent_minutes_stats_by_season)
    except Exception as e:
+      logger.error(f"Error with endpoint /players/recent-minutes/{player_id}: {str(e)}")
       return jsonify({"error": f"Error with endpoint /players/recent-minutes/{player_id}: {str(e)}"}), 500
 
 

@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     os.chdir(sys.path[0])
 
-    connector = db_connection.local_pl_stats_connector
+    connector = db_connection.pl_stats_connector
     options = {
         "1": add_match,
         "2": add_performance,

@@ -119,11 +119,13 @@ export function PlayerStatsModal(props) {
 	const [value, setValue] = useState(0);
 
 	const handleChange = (event, newValue) => {
+		console.log("New value: ", newValue)
+		console.log("Modal open?: ", isOpen)
 		setValue(newValue);
 	};
 	
 	const modalAnimation = useSpring({
-		reset: isOpen,
+		// reset: isOpen,
 		from: {
 			opacity: 0,
 			transform: 'translate(-50%, -50%) scale(0)',
@@ -146,7 +148,7 @@ export function PlayerStatsModal(props) {
 	const transitions = useTransition(value, {
 		from: { opacity: 0, transform: 'translate3d(100%,0,0)' },
 		enter: { opacity: 1, transform: 'translate3d(0%,0,0)' },
-		leave: { opacity: 0, transform: 'translate3d(-100%,0,0)' },
+		leave: { opacity: 0, transform: 'translate3d(100%,0,0)' },
 		keys: value
 	});
 

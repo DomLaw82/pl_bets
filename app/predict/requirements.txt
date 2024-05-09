@@ -17,3 +17,4 @@ scipy
 pyarrow
 fuzzywuzzy
 python-Levenshtein
+fluent-logger

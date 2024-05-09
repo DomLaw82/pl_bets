@@ -18,8 +18,8 @@ export default function HistoricStatsTabTemplate(props) {
 					</tr>
 				</thead>
 				<tbody>
-					{historicStats.map((season) => (
-						<tr key={season.season} style={{ border: `2px double white` }}>
+					{historicStats.map((season, index) => (
+						<tr key={`modal-${season.season}-${index}`} style={{ border: `2px double white` }}>
 							{statHeadings.map((stat) => (
 								<td key={`${stat}-value`} style={{ border: `2px double white`, padding: 5}}>
 									{season[stat]}

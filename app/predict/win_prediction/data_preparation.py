@@ -8,9 +8,10 @@ Created on Tue Apr 25 23:00:11 2023
 import pandas as pd
 from functools import partial
 import numpy as np
-from db_connection import local_pl_stats_connector
+from db_connection import SQLConnection
+import os
 
-db = local_pl_stats_connector
+db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
 
 

@@ -1,0 +1,16 @@
+FROM python:3.11.7-bookworm
+
+WORKDIR /app
+
+COPY ./backend/database/ingestion/requirements.txt .
+
+COPY ./utils/db_connection.py .
+COPY ./utils/app_logger.py .
+
+RUN pip install --no-cache-dir -r ./requirements.txt
+
+COPY ./backend/database/ingestion/. .
+
+EXPOSE 8009
+
+CMD ["python3", "-u", "__init__.py"]

@@ -1,6 +1,9 @@
 import requests, os, time
 from bs4 import BeautifulSoup
 import datetime
+from app_logger import FluentLogger
+
+logger = FluentLogger("download_latest_data").get_logger()
 
 # DOWNLOADING GAMES DATA FOR EVERY SEASON
 SEE_FIXTURES = "https://fixturedownload.com/download/csv/epl-" # + year the season starts in, i.e. 2024
@@ -35,13 +38,13 @@ def download_csv_for_all_games_in_a_season(season: str, url: str, save_path_root
 			csv_data = response.text
 			with open(save_path, 'w') as file:
 				file.write(csv_data)
-			print(f'Game csv file for season {season} downloaded and saved to {save_path}')
+			logger.info(f'Game csv file for season {season} downloaded and saved to {save_path}')
 			return True
 		else:
-			print(f'Failed to download the CSV file for season {season}. Status code:', response.status_code)
+			logger.error(f'Failed to download the CSV file for season {season}. Status code:', response.status_code)
 			return False
 	except Exception as e:
-		print(f'An error occurred while downloading games for season {season}:', str(e))
+		logger.error(f'An error occurred while downloading games for season {season}:', str(e))
 		return False
 	
 def get_page_soup(html_text):
@@ -66,11 +69,15 @@ def get_all_teams_for_season(soup) -> list:
 	Returns:
 	list: A list of tuples, where each tuple contains the team name and its corresponding href.
 	"""
-	h5_elements = soup.find_all("h5")
-	team_names = [ele.text for ele in h5_elements]
-	a_elements = [ele.a for ele in h5_elements]
-	hrefs = [ele.get("href") for ele in a_elements]
-	return list(zip(team_names, hrefs))
+	try:
+		h5_elements = soup.find_all("h5")
+		team_names = [ele.text for ele in h5_elements]
+		a_elements = [ele.a for ele in h5_elements]
+		hrefs = [ele.get("href") for ele in a_elements]
+		return list(zip(team_names, hrefs))
+	except Exception as e:
+		logger.error(f"An error occurred while extracting team names and hrefs: {str(e)}")
+		return []
 
 def get_team_squad(endpoint: str, SEASON: str, site_root: str):
 	"""
@@ -84,29 +91,33 @@ def get_team_squad(endpoint: str, SEASON: str, site_root: str):
 	Returns:
 		list: A list of lists containing the squad information. Each inner list contains the name, position, and date of birth of a player.
 	"""
-	squad_url = site_root+SEASON+endpoint
-	page_content = requests.get(squad_url).text
-	soup = get_page_soup(page_content)
-	rows = soup.find_all("tr")[1:]
-	
-	all_columns = soup.find_all("tr")[0]
-	all_column_names = all_columns.find_all("td")
-	all_column_names = [elem.text.strip("\n") for elem in all_column_names]
+	try:
+		squad_url = site_root+SEASON+endpoint
+		page_content = requests.get(squad_url).text
+		soup = get_page_soup(page_content)
+		rows = soup.find_all("tr")[1:]
+		
+		all_columns = soup.find_all("tr")[0]
+		all_column_names = all_columns.find_all("td")
+		all_column_names = [elem.text.strip("\n") for elem in all_column_names]
 
-	for idx, row in enumerate(rows):
-		if "Players no longer at this club" in str(row):
-			rows = rows[:idx]
-			break
-	
-	squad = []
-	for row in rows:
-		row = row.find_all("td")
-		required_cols = [all_column_names.index("Name"), all_column_names.index("Pos"),all_column_names.index("Date of Birth")]
-		try:
-			squad.append([row[i].text for i in required_cols])
-		except:
-			continue
-	return squad
+		for idx, row in enumerate(rows):
+			if "Players no longer at this club" in str(row):
+				rows = rows[:idx]
+				break
+		
+		squad = []
+		for row in rows:
+			row = row.find_all("td")
+			required_cols = [all_column_names.index("Name"), all_column_names.index("Pos"),all_column_names.index("Date of Birth")]
+			try:
+				squad.append([row[i].text for i in required_cols])
+			except:
+				continue
+		return squad
+	except Exception as e:
+		logger.error(f"An error occurred while extracting the squad data: {str(e)}")
+		return []
 
 def download_html_for_squad_player_data(season: str, url_root: str, save_path_root: str):
 	"""
@@ -163,10 +174,10 @@ def download_html_for_squad_player_data(season: str, url_root: str, save_path_ro
 				os.mkdir(year_dir_path) 
 			with open(file_save_path, 'w') as file:
 				file.write(page_content)
-			print(f'Squad csv file for season {season} downloaded and saved to {file_save_path}')
+			logger.info(f'Squad csv file for season {season} downloaded and saved to {file_save_path}')
 	except Exception as e:
-		print(f'An error occurred while downloading squad for season {season}:', str(e))
-		print(e)
+		logger.error(f'An error occurred while downloading squad for season {season}:', str(e))
+		return f'An error occurred while downloading squad for season {season}:', str(e)
 
 def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_root: str):
 	"""
@@ -185,57 +196,54 @@ def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_r
 			save_path = os.path.join(save_path_root, f"epl_{season}-{str(int(season) + 1)[-2:]}.csv") if response.status_code == 200 else None
 
 		if not save_path:
-			print(f'Failed to download the fixture CSV file for season {season}. Message:', response.text)
+			logger.error(f'Failed to download the fixture CSV file for season {season}. Message:', response.text)
 			return False
 
 		with open(save_path, 'w') as file:
 			file.write(response.text)
 
-		print(f'Fixture CSV file for season {season} downloaded and saved to {save_path}')
+		logger.info(f'Fixture CSV file for season {season} downloaded and saved to {save_path}')
 		return True
 
 	except Exception as e:
-		print(f'An error occurred while downloading fixtures for season {season}:', str(e))
+		logger.error(f'An error occurred while downloading fixtures for season {season}:', str(e))
 		return False
 
 def download_latest_data():
-	print(new_line)
-	print(separator)
-	print("---Fetching latest data---")
-	print(separator)
-	print(new_line)
+	logger.info("---Fetching latest data---")
 	
 	# This code is used to initially download the data from the web, but also to update the data on the fly from the frontend
 	GAME_SAVE_PATH_ROOT = "data/game_data/"
 	SCHEDULE_SAVE_PATH_ROOT = "data/schedule_data/"
 	PLAYER_SAVE_PATH_ROOT = "data/squad_data/"
-	
-	# Create directories if they don't exist
-	for path_root in [GAME_SAVE_PATH_ROOT, SCHEDULE_SAVE_PATH_ROOT, PLAYER_SAVE_PATH_ROOT]:
-		if not os.path.exists(path_root):
-			os.makedirs(path_root)
-	
-	# game data download
-	print("Downloading game data...")
-	for season in MATCH_SITE_SEASONS:
-		time.sleep(0.2)
-		download_csv_for_all_games_in_a_season(season, GAME_DATA_DOWNLOAD_ROOT, GAME_SAVE_PATH_ROOT)
-	print(separator)
-	
-	# fixture data download
-	print("Downloading fixture data...")
-	for season in FIXTURE_SEASON_ARRAY:
-		time.sleep(0.2)
-		download_csv_for_all_fixtures_in_a_season(season, DOWNLOAD_FIXTURE_URL_ROOT, SCHEDULE_SAVE_PATH_ROOT)
-	print(separator)
-	
-	# player data download
-	print("Downloading player data...")
-	for season in SEASONS_ARRAY:
-		time.sleep(0.2)
-		download_html_for_squad_player_data(season, PLAYER_DOWNLOAD_ROOT, PLAYER_SAVE_PATH_ROOT)
-	print(separator)
-	print(separator)
+	try:
+		# Create directories if they don't exist
+		for path_root in [GAME_SAVE_PATH_ROOT, SCHEDULE_SAVE_PATH_ROOT, PLAYER_SAVE_PATH_ROOT]:
+			if not os.path.exists(path_root):
+				os.makedirs(path_root)
+		
+		# game data download
+		print("Downloading game data...")
+		for season in MATCH_SITE_SEASONS:
+			time.sleep(0.2)
+			download_csv_for_all_games_in_a_season(season, GAME_DATA_DOWNLOAD_ROOT, GAME_SAVE_PATH_ROOT)
+		logger.info(separator)
+		
+		# fixture data download
+		print("Downloading fixture data...")
+		for season in FIXTURE_SEASON_ARRAY:
+			time.sleep(0.2)
+			download_csv_for_all_fixtures_in_a_season(season, DOWNLOAD_FIXTURE_URL_ROOT, SCHEDULE_SAVE_PATH_ROOT)
+		logger.info(separator)
+		
+		# player data download
+		print("Downloading player data...")
+		for season in SEASONS_ARRAY:
+			time.sleep(0.2)
+			download_html_for_squad_player_data(season, PLAYER_DOWNLOAD_ROOT, PLAYER_SAVE_PATH_ROOT)
+	except Exception as e:
+		logger.error(f"Error downloading the latest data: {e}")
+		return f"Error downloading the latest data: {e}"
 
 		
 

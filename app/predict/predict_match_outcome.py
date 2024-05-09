@@ -6,6 +6,9 @@ import tensorflow as tf
 import pandas as pd
 import numpy as np
 from joblib import load
+from app_logger import FluentLogger
+
+logger = FluentLogger("predict").get_logger()
 
 # Description: Predict the outcome of a match based on the trained model
 
@@ -31,21 +34,23 @@ def predict_match_outcome(home_team_id: str, home_players: list, away_team_id: s
 	Returns:
 	dict: A dictionary containing the predicted match facts.
 	"""
+	try:
+		# Neural network prediction
+		pd.set_option('display.max_columns', 10)
+		df = create_prediction_dataset(home_team_id, home_players, away_team_id, away_players)
+		
+		if df.empty:
+			return None
 
-	# Neural network prediction
-	pd.set_option('display.max_columns', 10)
-	df = create_prediction_dataset(home_team_id, home_players, away_team_id, away_players)
-	
-	if df.empty:
+		X, _ = perform_scaling(df, np.array([]), pred=True)
+		
+
+		model = tf.keras.models.load_model("files/stats_regression_model.h5")
+		prediction = model.predict(X)
+		return prediction
+	except Exception as e:
+		logger.error(f"An error occurred while predicting the match outcome: {str(e)}")
 		return None
-
-	X, _ = perform_scaling(df, np.array([]), pred=True)
-	
-
-	model = tf.keras.models.load_model("files/stats_regression_model.h5")
-	prediction = model.predict(X)
-
-	return prediction
 
 	# Logistic regression prediction
 	# try:
