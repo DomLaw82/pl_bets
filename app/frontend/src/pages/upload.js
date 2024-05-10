@@ -1,7 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { UploadModal } from '../components/modals';
 import { Container, CssBaseline, FormControl, Grid, MenuItem } from '@mui/material';
 import { Select, Divider, Button, Input } from '@mui/material';
 
@@ -168,7 +167,6 @@ export default function Upload() {
 					</Box>
 				</Box>
 			</Container>
-			<UploadModal />
 		</Fragment>
 	);
 }

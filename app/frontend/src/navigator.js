@@ -34,7 +34,6 @@ export const routeOptions = {
 
 export const settingsOptions = {
 	"Refresh - Data": {
-		modal: "",
 		tooltip: "Download the latest game data",
 		options: {
 			game: "api endpoint",
@@ -44,11 +43,10 @@ export const settingsOptions = {
 
 	},
 	"Refresh - Model": {
-		modal: "",
 		tooltip: "Rebuild and save the prediction model",
 		options: {
 			rebuild: "api endpoint",
-			retuneAndRebuild: "api endpoint"
+			retune: "api endpoint"
 		}
 	},
 }
