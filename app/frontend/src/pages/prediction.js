@@ -78,10 +78,9 @@ export default function Prediction(props) {
 	};
 
 	const getPredictionStats = async (homeTeam, awayTeam) => {
-		fetch(`${process.env.DATA_API_ROOT}/prediction/stats?home_team=${encodeURIComponent(homeTeam)}&away_team=${encodeURIComponent(awayTeam)}`)
+		await fetch(`${process.env.DATA_API_ROOT}/prediction/stats?home_team=${encodeURIComponent(homeTeam)}&away_team=${encodeURIComponent(awayTeam)}`)
 			.then(response => response.json())
 			.then(data => {
-				console.log(data);
 				setHomeTeamFormStats(data.home_team_form);
 				setAwayTeamFormStats(data.away_team_form);
 				setHomeTeamAverageStats(data.home_team_average_stats);

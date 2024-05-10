@@ -213,26 +213,22 @@ export function RefreshModal(props) {
 	useEffect(() => {
 		if (apiRoute !== "") {
 			if (["game", "squads", "schedule"].includes(apiRoute)) {
-				fetch(apiRoute)
+				fetch(`${process.env.DATA_API_ROOT}/${apiRoute}`)
 					.then(response => response.json())
 					.then(data => {
-						// Handle the data from the database
-						console.log(data);
+						alert(data);
 					})
 					.catch(error => {
-						// Handle any errors
-						console.error(error);
+						alert(error);
 					});
 			} else if (["rebuild", "retuneAndRebuild"].includes(apiRoute)) {
-				fetch(apiRoute)
+				fetch(`${process.env.INGESTION_API_ROOT}/${apiRoute}`)
 					.then(response => response.json())
 					.then(data => {
-						// Handle the data from the database
-						console.log(data);
+						alert(data);
 					})
 					.catch(error => {
-						// Handle any errors
-						console.error(error);
+						alert(error);
 					});
 			}
 		}
