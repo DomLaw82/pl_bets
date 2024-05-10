@@ -36,17 +36,17 @@ export const settingsOptions = {
 	"Refresh - Data": {
 		tooltip: "Download the latest game data",
 		options: {
-			game: "api endpoint",
-			squads: "api endpoint",
-			schedule: "api endpoint",
+			game: `${process.env.INGESTION_API_ROOT}/refresh/game-data`,
+			squads: `${process.env.INGESTION_API_ROOT}/refresh/squad-data`,
+			schedule: `${process.env.INGESTION_API_ROOT}/refresh/schedule-data`,
 		}
 
 	},
 	"Refresh - Model": {
 		tooltip: "Rebuild and save the prediction model",
 		options: {
-			rebuild: "api endpoint",
-			retune: "api endpoint"
+			rebuild: `${process.env.PREDICT_API_ROOT}/model/rebuild`,
+			retune: `${process.env.PREDICT_API_ROOT}/model/rebuild`,
 		}
 	},
 }

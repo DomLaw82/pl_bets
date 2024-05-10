@@ -10,7 +10,6 @@ import { Tabs } from '@mui/material';
 import { Tab } from '@mui/material';
 import { TabPanel, a11yProps } from './tabs';
 import { animated, useTransition, useSpring } from '@react-spring/web';
-import { useNavigate } from 'react-router-dom';
 
 
 export function MatchModal(props) {
@@ -210,8 +209,6 @@ export function RefreshModal(props) {
 	const { settingOptions, isOpen, setIsOpen, originX, originY } = props;
 
 	const [apiRoute, setApiRoute] = useState("");
-
-	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (apiRoute !== "") {

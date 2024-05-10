@@ -29,7 +29,7 @@ function App() {
   });
   
   useEffect(() => {
-		fetch('http://localhost:8080/active-teams')
+		fetch(`${process.env.DATA_API_ROOT}/active-teams`)
 			.then(response => response.json())
 			.then(data => setTeams(data))
 			.catch(error => console.log(error));

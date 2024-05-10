@@ -162,48 +162,53 @@ def player_team_df_to_db(df: pd.DataFrame, season: str, db_connection):
 	except Exception as e:
 		logger.error(f"Error: {e}")
 
+def player_main_by_season(db_connection, season, data_folder_path):
+
+	season_folder = os.path.join(data_folder_path, season)
+	teams = sorted(os.listdir(season_folder))
+
+	for team in teams:
+		with open(os.path.join(season_folder, team), "r") as file:
+			html_content = file.read()
+
+		squad = get_team_squad(html_content)
+		squad_no_blanks = [player for player in squad if not_blank_entry(player)]
+		squad_with_team = [player + [team] for player in squad_no_blanks]
+		complete_squad = [format_player_entries(player) for player in squad_with_team]
+
+		player_df = pd.DataFrame(data=complete_squad, columns=["first_name", "last_name", "position", "birth_date", "team_id"])
+		player_df["birth_date"] = pd.to_datetime(player_df["birth_date"], format="%Y-%m-%d").dt.strftime("%Y-%m-%d")
+
+		player_team_df = player_df.copy()
+		player_team_df['team_id'] = player_team_df['team_id'].apply(lambda x: x.replace('.html', ''))
+
+		player_df[["first_name", "last_name"]] = player_df[["first_name", "last_name"]].map(escape_single_quote)
+		deduplicated_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date"], "player")
+		
+		if not deduplicated_df.empty:
+			deduplicated_df = deduplicated_df[["first_name", "last_name", "birth_date", "position"]]
+			save_to_database(db_connection, deduplicated_df, "player")
+			logger.info(f"Inserted into player table for {team} for {season}")
+
+		player_team_df["player_id"] = player_team_df.apply(lambda row: get_player_id(db_connection, row), axis=1)
+		player_team_df["team_id"] = player_team_df["team_id"].apply(lambda x: get_team_id(db_connection, x))
+		player_team_df["season"] = season
+
+		player_team_df = player_team_df[["player_id", "team_id", "season"]]
+		
+		deduplicated_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
+		if not deduplicated_df.empty:
+			save_to_database(db_connection, deduplicated_df, "player_team")
+			logger.info(f"Inserted into player_team table for {team} for {season}")
+
 def player_main(db_connection):
 	data_folder_path = "./data/squad_data"
 	seasons = sorted(os.listdir(data_folder_path))
 
 	try:
 		for season in seasons:
-			season_folder = os.path.join(data_folder_path, season)
-			teams = sorted(os.listdir(season_folder))
+			player_main_by_season(db_connection, season, data_folder_path)
 
-			for team in teams:
-				with open(os.path.join(season_folder, team), "r") as file:
-					html_content = file.read()
-
-				squad = get_team_squad(html_content)
-				squad_no_blanks = [player for player in squad if not_blank_entry(player)]
-				squad_with_team = [player + [team] for player in squad_no_blanks]
-				complete_squad = [format_player_entries(player) for player in squad_with_team]
-
-				player_df = pd.DataFrame(data=complete_squad, columns=["first_name", "last_name", "position", "birth_date", "team_id"])
-				player_df["birth_date"] = pd.to_datetime(player_df["birth_date"], format="%Y-%m-%d").dt.strftime("%Y-%m-%d")
-
-				player_team_df = player_df.copy()
-				player_team_df['team_id'] = player_team_df['team_id'].apply(lambda x: x.replace('.html', ''))
-
-				player_df[["first_name", "last_name"]] = player_df[["first_name", "last_name"]].map(escape_single_quote)
-				deduplicated_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date"], "player")
-				
-				if not deduplicated_df.empty:
-					deduplicated_df = deduplicated_df[["first_name", "last_name", "birth_date", "position"]]
-					save_to_database(db_connection, deduplicated_df, "player")
-					logger.info(f"Inserted into player table for {team} for {season}")
-
-				player_team_df["player_id"] = player_team_df.apply(lambda row: get_player_id(db_connection, row), axis=1)
-				player_team_df["team_id"] = player_team_df["team_id"].apply(lambda x: get_team_id(db_connection, x))
-				player_team_df["season"] = season
-
-				player_team_df = player_team_df[["player_id", "team_id", "season"]]
-				
-				deduplicated_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
-				if not deduplicated_df.empty:
-					save_to_database(db_connection, deduplicated_df, "player_team")
-					logger.info(f"Inserted into player_team table for {team} for {season}")
 	except Exception as e:
 		logger.error(f"Error: {e}")
 		return f"Error: {e}"

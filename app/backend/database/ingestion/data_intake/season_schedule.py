@@ -33,7 +33,10 @@ def clean_schedule_data(db_connection, df: pd.DataFrame) -> pd.DataFrame:
 		# Convert 'date' column to datetime format
 		df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y %H:%M").dt.strftime("%Y/%m/%d %H:%M")
 
-		return df
+		deduplicated_df = remove_duplicate_rows(db_connection, df, ["round_number", "date", "home_team_id", "away_team_id"], "schedule")
+
+
+		return deduplicated_df
 	except Exception as e:
 		raise e
 
@@ -73,9 +76,8 @@ def schedule_main(db_connection) -> None:
 				df = pd.read_csv(file_path)
 				df = clean_schedule_data(db_connection, df)
 				
-				deduplicated_df = remove_duplicate_rows(db_connection, df, ["round_number", "date", "home_team_id", "away_team_id"], "schedule")
-				if not deduplicated_df.empty:
-					save_to_database(db_connection, deduplicated_df)
+				if not df.empty:
+					save_to_database(db_connection, df)
 					logger.info(f"Inserted into schedule table for {season_schedule_file.name}")
 	except Exception as e:
 		logger.error(f"Error: {e}")

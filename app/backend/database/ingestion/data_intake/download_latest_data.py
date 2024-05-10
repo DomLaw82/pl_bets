@@ -175,6 +175,7 @@ def download_html_for_squad_player_data(season: str, url_root: str, save_path_ro
 			with open(file_save_path, 'w') as file:
 				file.write(page_content)
 			logger.info(f'Squad csv file for season {season} downloaded and saved to {file_save_path}')
+			
 	except Exception as e:
 		logger.error(f'An error occurred while downloading squad for season {season}:', str(e))
 		return f'An error occurred while downloading squad for season {season}:', str(e)
