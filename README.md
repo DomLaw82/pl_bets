@@ -79,7 +79,7 @@ After the containers have started, navigate to the [frontend](http://localhost:3
 	to your settings.json to suppress errors about the utility modules
 
 ## TODO
-- Settings modals for data refresh
+- Player profile tabs
 - Set up CI/CD pipeline
 - Deploy to AWS with CDK
 --- THEN ---
