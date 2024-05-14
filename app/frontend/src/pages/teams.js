@@ -10,7 +10,7 @@ export default function Teams(props) {
 	const {teams, setTeams} = props;
 
 	useEffect(() => {
-		fetch(`${process.env.DATA_API_ROOT}/active-teams`)
+		fetch(`${process.env.REACT_APP_DATA_API_ROOT}/active-teams`)
 			.then(response => response.json())
 			.then(data => setTeams(data))
 			.catch(error => console.log(error));

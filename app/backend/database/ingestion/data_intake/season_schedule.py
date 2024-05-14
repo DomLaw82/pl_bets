@@ -34,8 +34,6 @@ def clean_schedule_data(db_connection, df: pd.DataFrame) -> pd.DataFrame:
 		df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y %H:%M").dt.strftime("%Y/%m/%d %H:%M")
 
 		deduplicated_df = remove_duplicate_rows(db_connection, df, ["round_number", "date", "home_team_id", "away_team_id"], "schedule")
-
-
 		return deduplicated_df
 	except Exception as e:
 		raise e

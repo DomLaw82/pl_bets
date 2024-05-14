@@ -71,7 +71,7 @@ def make_prediction():
 
 @registry.handles(
 	rule='/model/rebuild',
-	method='POST',
+	method='GET',
 	response_body_schema=''
 )
 def rebuild():
@@ -85,7 +85,7 @@ def rebuild():
 
 @registry.handles(
 	rule='/model/retune',
-	method='POST',
+	method='GET',
 	response_body_schema=retune_schema()
 )
 def retune():

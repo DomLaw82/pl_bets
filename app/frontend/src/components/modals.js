@@ -213,7 +213,7 @@ export function RefreshModal(props) {
 	useEffect(() => {
 		if (apiRoute !== "") {
 			if (["game", "squads", "schedule"].includes(apiRoute)) {
-				fetch(`${process.env.DATA_API_ROOT}/${apiRoute}`)
+				fetch(`${settingOptions[apiRoute]}`)
 					.then(response => response.json())
 					.then(data => {
 						alert(data);
@@ -222,7 +222,7 @@ export function RefreshModal(props) {
 						alert(error);
 					});
 			} else if (["rebuild", "retuneAndRebuild"].includes(apiRoute)) {
-				fetch(`${process.env.INGESTION_API_ROOT}/${apiRoute}`)
+				fetch(`${settingOptions[apiRoute]}`)
 					.then(response => response.json())
 					.then(data => {
 						alert(data);
@@ -233,7 +233,7 @@ export function RefreshModal(props) {
 			}
 		}
 	}
-	, [apiRoute]);
+	, [settingOptions, apiRoute]);
 
 	const modalAnimation = useSpring({
 		// reset: isOpen,
@@ -295,7 +295,7 @@ export function RefreshModal(props) {
 									<Typography key={key} id={`modal-modal-${key}`} variant="h5" component="p" sx={{margin: 2}}>
 										{key.toUpperCase()}
 									</Typography>
-									<Button key={`button-${key}`} onClick={() => setApiRoute(value)} variant="contained" color="primary" sx={{margin: 2}}>
+									<Button key={`button-${key}`} onClick={() => setApiRoute(key)} variant="contained" color="primary" sx={{margin: 2}}>
 										{"Refresh"}
 									</Button>
 								</Box>

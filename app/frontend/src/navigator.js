@@ -36,17 +36,17 @@ export const settingsOptions = {
 	"Refresh - Data": {
 		tooltip: "Download the latest game data",
 		options: {
-			game: `${process.env.INGESTION_API_ROOT}/refresh/game-data`,
-			squads: `${process.env.INGESTION_API_ROOT}/refresh/squad-data`,
-			schedule: `${process.env.INGESTION_API_ROOT}/refresh/schedule-data`,
+			game: `${process.env.REACT_APP_INGESTION_API_ROOT}/refresh/game-data`,
+			squads: `${process.env.REACT_APP_INGESTION_API_ROOT}/refresh/squad-data`,
+			schedule: `${process.env.REACT_APP_INGESTION_API_ROOT}/refresh/schedule-data`,
 		}
 
 	},
 	"Refresh - Model": {
 		tooltip: "Rebuild and save the prediction model",
 		options: {
-			rebuild: `${process.env.PREDICT_API_ROOT}/model/rebuild`,
-			retune: `${process.env.PREDICT_API_ROOT}/model/rebuild`,
+			rebuild: `${process.env.REACT_APP_PREDICT_API_ROOT}/model/rebuild`,
+			retune: `${process.env.REACT_APP_PREDICT_API_ROOT}/model/rebuild`,
 		}
 	},
 }

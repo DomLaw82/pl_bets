@@ -30,7 +30,7 @@ function App() {
   
   useEffect(() => {
     const getActiveTeams = async () => {
-      await fetch(`${process.env.DATA_API_ROOT}/active-teams`)
+      await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/active-teams`)
 			.then(response => response.json())
 			.then(data => setTeams(data))
         .catch(error => console.log(error));

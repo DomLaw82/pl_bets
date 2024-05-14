@@ -44,7 +44,7 @@ export default function Prediction(props) {
 
 	const getTeamIdFromName = async (teamName) => {
 		try {
-		  const response = await fetch(`${process.env.DATA_API_ROOT}/prediction/team-id?team_name=${encodeURIComponent(teamName)}`);
+		  const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/prediction/team-id?team_name=${encodeURIComponent(teamName)}`);
 		  const data = await response.json();
 		  return data.id;
 		} catch (error) {
@@ -56,7 +56,7 @@ export default function Prediction(props) {
 
 	const runPrediction = async (event) => {
 		try {
-			const response = await fetch(`${process.env.PREDICT_API_ROOT}/predict`, {
+			const response = await fetch(`${process.env.REACT_APP_PREDICT_API_ROOT}/predict`, {
 				method: 'POST',
 				credentials: 'include',
 				headers: {
@@ -78,7 +78,7 @@ export default function Prediction(props) {
 	};
 
 	const getPredictionStats = async (homeTeam, awayTeam) => {
-		await fetch(`${process.env.DATA_API_ROOT}/prediction/stats?home_team=${encodeURIComponent(homeTeam)}&away_team=${encodeURIComponent(awayTeam)}`)
+		await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/prediction/stats?home_team=${encodeURIComponent(homeTeam)}&away_team=${encodeURIComponent(awayTeam)}`)
 			.then(response => response.json())
 			.then(data => {
 				setHomeTeamFormStats(data.home_team_form);
@@ -90,7 +90,7 @@ export default function Prediction(props) {
 			.catch(error => console.log(error));
 	}
 	const getPredictionSquads = async (homeTeam, awayTeam) => {
-		fetch(`${process.env.DATA_API_ROOT}/prediction/squads?home_team=${encodeURIComponent(homeTeam)}&away_team=${encodeURIComponent(awayTeam)}`)
+		fetch(`${process.env.REACT_APP_DATA_API_ROOT}/prediction/squads?home_team=${encodeURIComponent(homeTeam)}&away_team=${encodeURIComponent(awayTeam)}`)
 			.then(response => response.json())
 			.then(data => {
 				console.log(data);

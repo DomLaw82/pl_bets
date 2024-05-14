@@ -28,7 +28,7 @@ export default function Upload() {
 
 	useEffect(() => {
 		const getSeasons = async () => {
-			const response = await fetch(`${process.env.DATA_API_ROOT}/matches/all-seasons`,
+			const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/matches/all-seasons`,
 				{
 					headers: {
 						'Access-Control-Allow-Origin': '*'
@@ -51,7 +51,7 @@ export default function Upload() {
 		formData.append('folder', selectedFolder);
 		formData.append('season', selectedSeason);
 		
-		const response = await fetch(`${process.env.INGESTION_API_ROOT}/upload/upload-file`, {
+		const response = await fetch(`${process.env.REACT_APP_INGESTION_API_ROOT}/upload/upload-file`, {
             method: 'POST',
             body: formData,
         });
