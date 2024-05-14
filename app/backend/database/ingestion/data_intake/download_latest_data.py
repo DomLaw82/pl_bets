@@ -14,8 +14,6 @@ PLAYER_DOWNLOAD_ROOT = "https://www.footballsquads.co.uk/eng/"
 
 
 current_year = datetime.datetime.now().year
-separator = "--- --- --- --- --- --- --- ---\n"
-new_line = "\n"
 
 FIXTURE_SEASON_ARRAY = [str(year) for year in range(2017, current_year, 1)]
 SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2017, current_year+1)]
@@ -145,8 +143,8 @@ def download_html_for_squad_player_data(season: str, url_root: str, save_path_ro
 
 	LEAGUE_NAMES = ["faprem.htm", "engprem.htm"]
 
-	faprem_url = url_root+season+LEAGUE_NAMES[0]
-	engprem_url = url_root+season+LEAGUE_NAMES[1]
+	faprem_url = url_root+str(season)+LEAGUE_NAMES[0]
+	engprem_url = url_root+str(season)+LEAGUE_NAMES[1]
 	time.sleep(2)
 
 	try:
@@ -157,16 +155,19 @@ def download_html_for_squad_player_data(season: str, url_root: str, save_path_ro
 				raise Exception
 		html_content = response.text 
 		soup = get_page_soup(html_content)
+		logger.info(f'HTML content for season {season} downloaded successfully')
 
 
 		teams_links = get_all_teams_for_season(soup)
 
+		logger.info(f'Extracted team names and links for season {season}')
 		for team_link in teams_links:
 			team = team_link[0]
 			link = team_link[1]
 
-			file_save_path = os.path.join(save_path_root, f"{season}{team}.html")
+			file_save_path = os.path.join(save_path_root, season.replace('/', ''), f"{team}.html")
 			year_dir_path = os.path.join(save_path_root, f"{season.replace('/', '')}")
+			logger.info(f'Downloading squad for {team} in season {season}: file path: {file_save_path} year dir path: {year_dir_path}')
 
 			squad_url = url_root+season+link
 			page_content = requests.get(squad_url).text
@@ -175,6 +176,7 @@ def download_html_for_squad_player_data(season: str, url_root: str, save_path_ro
 			with open(file_save_path, 'w') as file:
 				file.write(page_content)
 			logger.info(f'Squad csv file for season {season} downloaded and saved to {file_save_path}')
+
 	except Exception as e:
 		logger.error(f'An error occurred while downloading squad for season {season}:', str(e))
 		return f'An error occurred while downloading squad for season {season}:', str(e)
@@ -223,21 +225,17 @@ def download_latest_data():
 				os.makedirs(path_root)
 		
 		# game data download
-		print("Downloading game data...")
 		for season in MATCH_SITE_SEASONS:
 			time.sleep(0.2)
 			download_csv_for_all_games_in_a_season(season, GAME_DATA_DOWNLOAD_ROOT, GAME_SAVE_PATH_ROOT)
-		logger.info(separator)
+			
 		
 		# fixture data download
-		print("Downloading fixture data...")
 		for season in FIXTURE_SEASON_ARRAY:
 			time.sleep(0.2)
 			download_csv_for_all_fixtures_in_a_season(season, DOWNLOAD_FIXTURE_URL_ROOT, SCHEDULE_SAVE_PATH_ROOT)
-		logger.info(separator)
 		
 		# player data download
-		print("Downloading player data...")
 		for season in SEASONS_ARRAY:
 			time.sleep(0.2)
 			download_html_for_squad_player_data(season, PLAYER_DOWNLOAD_ROOT, PLAYER_SAVE_PATH_ROOT)

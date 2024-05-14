@@ -79,12 +79,14 @@ After the containers have started, navigate to the [frontend](http://localhost:3
 	to your settings.json to suppress errors about the utility modules
 
 ## TODO
+- Player profile tabs
+- Set up CI/CD pipeline
+- Deploy to AWS with CDK
+--- THEN ---
 - Caching
-- Settings modals
 - Profile tab in player modal with overall standard stats
 - Add team to each row of the player modal in each tab
 - Add searching, filtering and pagination to Players and Teams pages
 - General code cleanup and re-factoring
 - Build regression model to purely predict the winner of each match
 - Review "Separation of concerns"
-- Deploy to AWS with CDK

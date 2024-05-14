@@ -18,7 +18,7 @@ export default function Players() {
     // Function to fetch player stats
     const fetchPlayerData = async (playerId) => {
         try {
-            const statsResponse = await fetch(`http://localhost:8080/players/historic-stats/${playerId}`);
+            const statsResponse = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/players/historic-stats/${playerId}`);
             const statsData = await statsResponse.json();
 
             setHistoricStats(statsData);
@@ -35,7 +35,7 @@ export default function Players() {
     useEffect(() => {
         const fetchPlayers = async () => {
             try {
-                const response = await fetch('http://localhost:8080/all-active-players');
+                const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/all-active-players`);
                 const data = await response.json();
                 setPlayers(data);
             } catch (error) {

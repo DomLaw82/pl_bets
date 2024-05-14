@@ -21,7 +21,7 @@ export default function Matches(props) {
     
     async function getMatchFacts(date, homeTeamName, awayTeamName) {
         const formattedDate = date.split(' ')[0].replace(/\//g, '-');
-        const response = await fetch(`http://localhost:8080/matches/match-facts?date=${formattedDate}&home_team=${homeTeamName.replace(/&/g, "%26")}&away_team=${awayTeamName.replace(/&/g, "%26")}`, {
+        const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/matches/match-facts?date=${formattedDate}&home_team=${homeTeamName.replace(/&/g, "%26")}&away_team=${awayTeamName.replace(/&/g, "%26")}`, {
             headers: {
                 'Access-Control-Allow-Origin': '*'
             }
@@ -43,7 +43,7 @@ export default function Matches(props) {
     }, []);
 
     async function getMatches(season) {
-        const response = await fetch(`http://localhost:8080/matches/season/${season}`, {
+        const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/matches/season/${season}`, {
             headers: {
                 'Access-Control-Allow-Origin': '*'
             }
@@ -53,7 +53,7 @@ export default function Matches(props) {
     }
 
     async function getSeasons() {
-        const response = await fetch('http://localhost:8080/matches/all-seasons',
+        const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/matches/all-seasons`,
             {
                 headers: {
                     'Access-Control-Allow-Origin': '*'

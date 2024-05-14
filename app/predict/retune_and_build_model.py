@@ -14,7 +14,7 @@ def retune_and_build_model():
 	"""
 	try:
 		dataset = create_dataset()
-		dataset.to_csv("../files/final_combined_dataframe.csv", index=False)
+		dataset.to_csv("./files/final_combined_dataframe.csv", index=False)
 		X_scaled = recreate_scaler()
 		recreate_pca_object(data=X_scaled)
 		score, params = tune_model_params(dataset)

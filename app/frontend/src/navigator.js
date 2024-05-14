@@ -34,21 +34,19 @@ export const routeOptions = {
 
 export const settingsOptions = {
 	"Refresh - Data": {
-		modal: "",
 		tooltip: "Download the latest game data",
 		options: {
-			game: "api endpoint",
-			squads: "api endpoint",
-			schedule: "api endpoint",
+			game: `${process.env.REACT_APP_INGESTION_API_ROOT}/refresh/game-data`,
+			squads: `${process.env.REACT_APP_INGESTION_API_ROOT}/refresh/squad-data`,
+			schedule: `${process.env.REACT_APP_INGESTION_API_ROOT}/refresh/schedule-data`,
 		}
 
 	},
 	"Refresh - Model": {
-		modal: "",
 		tooltip: "Rebuild and save the prediction model",
 		options: {
-			rebuild: "api endpoint",
-			retuneAndRebuild: "api endpoint"
+			rebuild: `${process.env.REACT_APP_PREDICT_API_ROOT}/model/rebuild`,
+			retune: `${process.env.REACT_APP_PREDICT_API_ROOT}/model/rebuild`,
 		}
 	},
 }

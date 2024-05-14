@@ -29,10 +29,14 @@ function App() {
   });
   
   useEffect(() => {
-		fetch('http://localhost:8080/active-teams')
+    const getActiveTeams = async () => {
+      await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/active-teams`)
 			.then(response => response.json())
 			.then(data => setTeams(data))
-			.catch(error => console.log(error));
+        .catch(error => console.log(error));
+    }
+
+    getActiveTeams()
 	}, []);
 
   return (

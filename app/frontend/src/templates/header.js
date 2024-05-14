@@ -12,14 +12,19 @@ import MenuItem from '@mui/material/MenuItem';
 import { routeOptions, settingsOptions } from '../navigator'
 import { useNavigate } from 'react-router-dom';
 import MenuIcon from '@mui/icons-material/Menu';
-import { UploadModal } from '../components/modals';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { RefreshModal } from '../components/modals';
 
 const settings = Object.keys(settingsOptions);
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
+  const [isDataRefreshModalOpen, setIsDataRefreshModalOpen] = useState(false);
+  const [isModelRefreshModalOpen, setIsModelRefreshModalOpen] = useState(false);
+
+  const [originX, setOriginX] = useState(0);
+  const [originY, setOriginY] = useState(0);
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -32,6 +37,14 @@ function ResponsiveAppBar() {
     setAnchorElNav(null);
     navigate(path)
   };
+
+  const handleUserMenu = (event, setting) => {
+    setAnchorElUser(null);
+    setOriginX(event.clientX);
+    setOriginY(event.clientY);
+    setting === "Refresh - Data" ? setIsDataRefreshModalOpen(true) : setIsModelRefreshModalOpen(true);
+  }
+
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
@@ -159,15 +172,16 @@ function ResponsiveAppBar() {
             >
               {settings.map((setting) => (
                 <Tooltip key={setting} title={settingsOptions[setting].tooltip}>
-                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                  <MenuItem key={setting} onClick={(event) => handleUserMenu(event, setting)}>
                     <Typography textAlign="center">{setting}</Typography>
                   </MenuItem>
                 </Tooltip>
               ))}
             </Menu>
           </Box>
+          <RefreshModal settingOptions={settingsOptions["Refresh - Data"].options} isOpen={isDataRefreshModalOpen} setIsOpen={setIsDataRefreshModalOpen} originX={originX} originY={originY} />
+          <RefreshModal settingOptions={settingsOptions["Refresh - Model"].options} isOpen={isModelRefreshModalOpen} setIsOpen={setIsModelRefreshModalOpen} originX={originX} originY={originY} />
         </Toolbar>
-        <UploadModal />
       </Container>
     </AppBar>
   );

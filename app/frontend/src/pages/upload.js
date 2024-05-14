@@ -1,7 +1,6 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import { UploadModal } from '../components/modals';
 import { Container, CssBaseline, FormControl, Grid, MenuItem } from '@mui/material';
 import { Select, Divider, Button, Input } from '@mui/material';
 
@@ -29,7 +28,7 @@ export default function Upload() {
 
 	useEffect(() => {
 		const getSeasons = async () => {
-			const response = await fetch('http://localhost:8080/matches/all-seasons',
+			const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/matches/all-seasons`,
 				{
 					headers: {
 						'Access-Control-Allow-Origin': '*'
@@ -52,7 +51,7 @@ export default function Upload() {
 		formData.append('folder', selectedFolder);
 		formData.append('season', selectedSeason);
 		
-		const response = await fetch(`http://localhost:8009/upload/upload-file`, {
+		const response = await fetch(`${process.env.REACT_APP_INGESTION_API_ROOT}/upload/upload-file`, {
             method: 'POST',
             body: formData,
         });
@@ -168,7 +167,6 @@ export default function Upload() {
 					</Box>
 				</Box>
 			</Container>
-			<UploadModal />
 		</Fragment>
 	);
 }

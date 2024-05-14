@@ -13,7 +13,7 @@ def rebuild_model():
 	"""
 	try:
 		dataset = create_dataset()
-		dataset.to_csv("../files/final_combined_dataframe.csv", index=False)
+		dataset.to_csv("./files/final_combined_dataframe.csv", index=False)
 		recreate_scaler()
 		recreate_pca_object()
 		model = build_and_save_model(dataset)

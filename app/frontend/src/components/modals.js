@@ -1,18 +1,15 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import HistoricStatsTabTemplate from './historicStats/historicStatsTabTemplate';
 import { tabNames, tabColumns } from './historicStats/statHeadings';
-import { CssBaseline, Grid, duration } from '@mui/material';
+import { Button, CssBaseline, Grid } from '@mui/material';
 import { AppBar } from '@mui/material';
 import { Tabs } from '@mui/material';
 import { Tab } from '@mui/material';
 import { TabPanel, a11yProps } from './tabs';
 import { animated, useTransition, useSpring } from '@react-spring/web';
-import { ThemeProvider } from '@emotion/react';
-import { Select, Input, Divider } from '@mui/material';
-
 
 
 export function MatchModal(props) {
@@ -208,123 +205,104 @@ export function PlayerStatsModal(props) {
 	)
 }
 
-export function UploadModal(props) {
+export function RefreshModal(props) {
+	const { settingOptions, isOpen, setIsOpen, originX, originY } = props;
 
-	const { seasons, setSeasons } = props;
-	const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-	const [selectedSeason, setSelectedSeason] = useState('2023-2024');
-	const [selectedPlayerFile, setSelectedPlayerFile] = useState('defensive_action');
+	const [apiRoute, setApiRoute] = useState("");
 
-	const playerFileNames = ["defensive_action", "goalkeeping", "passing", "possession", "shooting", "standard"];
-
-	async function getSeasons() {
-        const response = await fetch('http://localhost:8080/matches/all-seasons',
-            {
-                headers: {
-                    'Access-Control-Allow-Origin': '*'
-                }
-            }
-        );
-		const seasons = await response.json();
-		setSeasons(seasons);
+	useEffect(() => {
+		if (apiRoute !== "") {
+			if (["game", "squads", "schedule"].includes(apiRoute)) {
+				fetch(`${settingOptions[apiRoute]}`)
+					.then(response => response.json())
+					.then(data => {
+						alert(data);
+					})
+					.catch(error => {
+						alert(error);
+					});
+			} else if (["rebuild", "retuneAndRebuild"].includes(apiRoute)) {
+				fetch(`${settingOptions[apiRoute]}`)
+					.then(response => response.json())
+					.then(data => {
+						alert(data);
+					})
+					.catch(error => {
+						alert(error);
+					});
+			}
+		}
 	}
-	
-	const handleFileUpload = (event) => {
-		const file = event.target.files;
-		// Process the file here
-	};
+	, [settingOptions, apiRoute]);
 
-	const handleDropdownChange = (event) => {
-		const selectedOption = event.target.value;
-		event.target.id === 'season-dropdown' ? setSelectedSeason(selectedOption) : setSelectedPlayerFile(selectedOption);
+	const modalAnimation = useSpring({
+		// reset: isOpen,
+		from: {
+			opacity: 0,
+			transform: 'translate(-50%, -50%) scale(0)',
+			height: 0,
+			width: 0,
+			top: originY,
+			left: originX,
+		},
+		to: {
+			transform: isOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0)',
+			opacity: isOpen ? 1 : 0,
+			backgroundColor: isOpen ? 'black' : 'transparent',
+			height: isOpen ? "max-content" : 0,
+			width: isOpen ? 1150 : 0,
+			top: isOpen ? document.documentElement.clientHeight/2 : originY,
+			left: isOpen ? document.documentElement.clientWidth/2 : originX,
+		},
+	});
+
+	const handleCloseModal = () => {
+		setIsOpen(false);
 	};
 
 	return (
 		<Fragment>
 			<Modal
-				open={isUploadModalOpen}
-				onClose={() => setIsUploadModalOpen(!isUploadModalOpen)}
+				open={isOpen}
+				onClose={handleCloseModal}
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
-				sx={{border: '2px solid #000'}}
 			>
-				<Box
-					sx={{
-						position: 'absolute',
-						top: '50%',
-						left: '50%',
-						transform: 'translate(-50%, -50%)',
-						width: 600,
-						bgcolor: 'background.paper',
-						border: '2px solid #000',
-						boxShadow: 24,
-						p: 4,
-						display: "flex",
-						flexDirection: "row",
-						justifyContent: "space-evenly",
-					}}
-				>
+				<animated.div style={{
+					position: 'absolute',
+					height: "max-content",
+					display: "flex",
+					flexDirection: "row",
+					justifyContent: "center",
+					textAlign: "center",
+					...modalAnimation
+				}}>
 					<Box
 						sx={{
-							marginTop: 8,
-							display: 'flex',
-							flexDirection: 'column',
-							alignItems: 'center'
+							display: "flex",
+							flexDirection: "column",
+							textAlign: "center",
+							width: "100%",
+							padding: 2 
 						}}
 					>
-						<Typography
-							variant="h1"
-							sx={{
-								display: 'flex',
-								flexDirection: { xs: 'column', md: 'row' },
-								alignSelf: 'center',
-								textAlign: 'center',
-								fontSize: 'clamp(3.5rem, 10vw, 4rem)',
-							}}
-						>
-							Upload Data
+						<Typography id="modal-modal-title" variant="h3" component="h2">
+							{"OPTIONS"}
 						</Typography>
-						<Divider sx={{ width: '100%', height: 2 }} />
-						<Box sx={{ width: '100%', height: 2 }}>
-							<Divider sx={{ width: '100%', height: 2 }} />
-							<Box component="div" sx={{ mt: 3 }}>
-								<Grid container spacing={2}>
-									<Grid item xs={12}>
-										<Input
-											type="file"
-											onChange={handleFileUpload}
-										/>
-									</Grid>
-									<Grid item xs={12}>
-										<Select
-											value={selectedSeason}
-											onChange={handleDropdownChange}
-											id='season-dropdown'
-										>
-											{	seasons &&
-												seasons.map((season, index) => (
-													<option key={index} value={season}>{season}</option>
-												))
-											}
-										</Select>
-									</Grid>
-									<Grid item xs={12}>
-										<Select
-											onChange={handleDropdownChange}
-											id='player-file-dropdown'
-										>
-											{
-												playerFileNames.map((fileName, index) => (
-													<option key={index} value={fileName}>{fileName}</option>
-												))
-											}
-										</Select>
-									</Grid>
-								</Grid>
-							</Box>
+						<Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "center"}}>
+							{Object.entries(settingOptions).map(([key, value]) => (
+								<Box key={key} sx={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", margin: 2 }}>
+									<Typography key={key} id={`modal-modal-${key}`} variant="h5" component="p" sx={{margin: 2}}>
+										{key.toUpperCase()}
+									</Typography>
+									<Button key={`button-${key}`} onClick={() => setApiRoute(key)} variant="contained" color="primary" sx={{margin: 2}}>
+										{"Refresh"}
+									</Button>
+								</Box>
+							))}
 						</Box>
 					</Box>
-				</Box>
+				</animated.div>
 			</Modal>
 		</Fragment>
 	);
