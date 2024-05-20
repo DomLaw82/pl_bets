@@ -8,8 +8,8 @@ export function FormStats(props) {
 
 	return (
 		<Fragment>
-			<Box component="div" id="form-stats" sx={{display: "flex", flexDirection: "row", justifyContent: "space-evenly", textAlign: "center"}}>
-				<Box component="div" sx={{width: "100%"}}>
+			<Box component="div" id="form-stats" sx={{height:"43vh", display: "flex", flexDirection: "row", justifyContent: "space-evenly", textAlign: "center", overflow: "hidden"}}>
+				<Box component="div" sx={{width: "100%", display: "flex", flexDirection: "column", justifyContent: "space-evenly"}}>
 					{homeTeamFormStats.map((obj, index) => {
 						return (
 							<Box component="div" key={`homeForm-${index}`}>
@@ -34,8 +34,8 @@ export function FormStats(props) {
 						);
 					})}
 				</Box>
-				<Divider orientation="vertical" flexItem />
-				<Box component="div" sx={{width: "100%"}}>
+				<Divider orientation="vertical" flexItem sx={{flexGrow: 1}} />
+				<Box component="div" sx={{width: "100%", display: "flex", flexDirection: "column", justifyContent: "space-evenly"}}>
 					{awayTeamFormStats.map((obj, index) => {
 						return (
 							<Box component="div" key={`awayForm-${index}`}>

@@ -8,13 +8,13 @@ export function Squads(props) {
 
 	return (
 		<Fragment>
-			<Box key="squads" sx={{ textAlign: "center", display: "flex", flexDirection: "row" }}>
+			<Box key="squads" sx={{ textAlign: "center", display: "flex", flexDirection: "row", maxHeight:"43vh", overflowY:"scroll"}}>
 				<Box key={"home-squads"} sx={{ width: "100%" }}>
 					{homeTeamSquad && homeTeamSquad.map((player, index) => {
 						return (
 							<PredictionPlayerCards key={index} firstName={player.first_name} lastName={player.last_name} position={player.position} />
 						)
-					})};
+					})}
 				</Box>
 				<Divider orientation="vertical" flexItem />
 				<Box key={"away-squads"} sx={{ width: "100%" }}>
@@ -22,7 +22,7 @@ export function Squads(props) {
 						return (
 							<PredictionPlayerCards key={index} firstName={player.first_name} lastName={player.last_name} position={player.position} />
 						)
-					})};
+					})}
 				</Box>
 			</Box>
 		</Fragment>

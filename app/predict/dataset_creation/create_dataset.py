@@ -51,9 +51,91 @@ def create_player_stats_for_match(game_season: str, home_team_id: str, away_team
         pd.DataFrame: The DataFrame containing the player statistics for the match.
     """
     try:
+        # Select specific columns from the historic_player_per_ninety table
         return db.get_df(f"""
             SELECT 
-                hpn.*, m.id AS match_id, m.competition_id, m.home_team_id, m.away_team_id, m.referee_id, 
+                hpn.player_id,
+                hpn.team_id,
+                hpn.minutes_played,
+                hpn.ninetys,
+                hpn.goals,
+                hpn.assists,
+                hpn.direct_goal_contributions,
+                hpn.non_penalty_goals,
+                hpn.penalties_scored,
+                hpn.penalties_attempted,
+                hpn.yellow_cards,
+                hpn.red_cards,
+                hpn.expected_goals,
+                hpn.non_penalty_expected_goals,
+                hpn.expected_assisted_goals,
+                hpn.non_penalty_expected_goals_plus_expected_assisted_goals,
+                hpn.progressive_carries,
+                hpn.progressive_passes,
+                hpn.progressive_passes_received,
+                hpn.total_passing_distance,
+                hpn.total_progressive_passing_distance,
+                hpn.short_passes_completed,
+                hpn.short_passes_attempted,
+                hpn.medium_passes_completed,
+                hpn.medium_passes_attempted,
+                hpn.long_passes_completed,
+                hpn.long_passes_attempted,
+                hpn.expected_assists,
+                hpn.assists_minus_expected_assisted_goals,
+                hpn.key_passes,
+                hpn.passes_into_final_third,
+                hpn.passes_into_penalty_area,
+                hpn.crosses_into_penalty_area,
+                hpn.shots,
+                hpn.shots_on_target,
+                hpn.goals_per_shot,
+                hpn.goals_per_shot_on_target,
+                hpn.average_shot_distance,
+                hpn.shots_from_free_kicks,
+                hpn.penalties_made,
+                hpn.non_penalty_expected_goals_per_shot,
+                hpn.goals_minus_expected_goals,
+                hpn.non_penalty_goals_minus_non_penalty_expected_goals,
+                hpn.touches,
+                hpn.touches_in_defensive_penalty_area,
+                hpn.touches_in_defensive_third,
+                hpn.touches_in_middle_third,
+                hpn.touches_in_attacking_third,
+                hpn.touches_in_attacking_penalty_area,
+                hpn.live_ball_touches,
+                hpn.take_ons_attempted,
+                hpn.take_ons_succeeded,
+                hpn.times_tackled_during_take_on,
+                hpn.carries,
+                hpn.total_carrying_distance,
+                hpn.progressive_carrying_distance,
+                hpn.carries_into_final_third,
+                hpn.carries_into_penalty_area,
+                hpn.miscontrols,
+                hpn.dispossessed,
+                hpn.passes_received,
+                hpn.tackles,
+                hpn.tackles_won,
+                hpn.defensive_third_tackles,
+                hpn.middle_third_tackles,
+                hpn.attacking_third_tackles,
+                hpn.dribblers_tackled,
+                hpn.dribbler_tackles_attempted,
+                hpn.shots_blocked,
+                hpn.passes_blocked,
+                hpn.interceptions,
+                hpn.clearances,
+                hpn.errors_leading_to_shot,
+                hpn.goals_against,
+                hpn.shots_on_target_against,
+                hpn.saves,
+                hpn.clean_sheets,
+                hpn.penalties_faced,
+                hpn.penalties_allowed,
+                hpn.penalties_saved,
+                hpn.penalties_missed,
+                hpn.season, m.id AS match_id, m.competition_id, m.home_team_id, m.away_team_id, m.referee_id, 
                 m.home_goals, m.away_goals, m.home_shots, m.away_shots, m.home_shots_on_target, 
                 m.away_shots_on_target, m.home_corners, m.away_corners, m.home_fouls, m.away_fouls, 
                 m.home_yellow_cards, m.away_yellow_cards, m.home_red_cards, m.away_red_cards
@@ -90,9 +172,91 @@ def create_prediction_player_stats_for_match(game_season: str, home_team_id: str
         pd.DataFrame: The DataFrame containing the player statistics for the match.
     """
     try:
+        # Select specific columns from the historic_player_per_ninety table
         return db.get_df(f"""
             SELECT 
-                hpn.*
+                player_id,
+                team_id,
+                minutes_played,
+                ninetys,
+                goals,
+                assists,
+                direct_goal_contributions,
+                non_penalty_goals,
+                penalties_scored,
+                penalties_attempted,
+                yellow_cards,
+                red_cards,
+                expected_goals,
+                non_penalty_expected_goals,
+                expected_assisted_goals,
+                non_penalty_expected_goals_plus_expected_assisted_goals,
+                progressive_carries,
+                progressive_passes,
+                progressive_passes_received,
+                total_passing_distance,
+                total_progressive_passing_distance,
+                short_passes_completed,
+                short_passes_attempted,
+                medium_passes_completed,
+                medium_passes_attempted,
+                long_passes_completed,
+                long_passes_attempted,
+                expected_assists,
+                assists_minus_expected_assisted_goals,
+                key_passes,
+                passes_into_final_third,
+                passes_into_penalty_area,
+                crosses_into_penalty_area,
+                shots,
+                shots_on_target,
+                goals_per_shot,
+                goals_per_shot_on_target,
+                average_shot_distance,
+                shots_from_free_kicks,
+                penalties_made,
+                non_penalty_expected_goals_per_shot,
+                goals_minus_expected_goals,
+                non_penalty_goals_minus_non_penalty_expected_goals,
+                touches,
+                touches_in_defensive_penalty_area,
+                touches_in_defensive_third,
+                touches_in_middle_third,
+                touches_in_attacking_third,
+                touches_in_attacking_penalty_area,
+                live_ball_touches,
+                take_ons_attempted,
+                take_ons_succeeded,
+                times_tackled_during_take_on,
+                carries,
+                total_carrying_distance,
+                progressive_carrying_distance,
+                carries_into_final_third,
+                carries_into_penalty_area,
+                miscontrols,
+                dispossessed,
+                passes_received,
+                tackles,
+                tackles_won,
+                defensive_third_tackles,
+                middle_third_tackles,
+                attacking_third_tackles,
+                dribblers_tackled,
+                dribbler_tackles_attempted,
+                shots_blocked,
+                passes_blocked,
+                interceptions,
+                clearances,
+                errors_leading_to_shot,
+                goals_against,
+                shots_on_target_against,
+                saves,
+                clean_sheets,
+                penalties_faced,
+                penalties_allowed,
+                penalties_saved,
+                penalties_missed,
+                season
             FROM 
                 historic_player_per_ninety hpn
             WHERE 
@@ -466,18 +630,19 @@ def grouping_prediction_dataframe_rows(df: pd.DataFrame, home_team_id: str, home
         df = df.drop(columns=columns)
 
         df = group_stats_by_player_for_home_and_away_teams(df, home_team_id, away_team_id, home_team_squad_ids, pred)
+        logger.info("\n\ngroup stats by player\n")
 
         if df["team_id"].nunique() < 2:
             sys.exit("Not enough players in each team available for prediction")
 
         df = create_per_90_stats(df, pure_stats_columns)
-        print("\n\nper 90 stats\n",df)
+        logger.info("\n\nper 90 stats\n")
         df = create_contribution_per_90_stats(df, pure_stats_columns)
-        print("\n\ncontributions per 90\n",df)
+        logger.info("\n\ncontributions per 90\n")
         df = group_stats_by_team(df, team_stats_columns)
-        print("\n\ngroup stats by team\n",df)
+        logger.info("\n\ngroup stats by team\n")
         df = convert_team_rows_to_single_row(df, home_team_id, away_team_id, pure_stats_columns)
-        print("\n\nsingle row\n",df)
+        logger.info("\n\nsingle row\n")
 
         return df
     except Exception as e:

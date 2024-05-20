@@ -7,7 +7,7 @@ export function AverageStats(props) {
 
 	return (
 		<Fragment>
-			<Box key="last-five-average-stats" sx={{textAlign: "center", display: "flex", flexDirection: "row"}}>
+			<Box key="last-five-average-stats" sx={{height:"43vh", display: "flex", flexDirection: "row", textAlign: "center", overflow: "hidden"}}>
 				<Box key={ "home-average-stats" }  sx={{ width: "100%" }}>
 					{homeTeamAverageStats.map((obj, index) => {
 						const awayObject = awayTeamAverageStats[index];
@@ -18,8 +18,8 @@ export function AverageStats(props) {
 						const away_yellow_cards = awayObject.away_yellow_cards;
 						const away_red_cards = awayObject.away_red_cards;
 						return (
-							<Box key={ "home-average-stats-container" } sx={{ display: "flex", flexDirection: "row", justifyContent: "space-evenly", textAlign: "center", width: "100%" }}>
-								<Box sx={{ width: "100%", display: "flex", flexDirection: "column"  }}>
+							<Box key={ "home-average-stats-container" } sx={{ width: "100%", display: "flex", flexDirection: "column", justifyContent: "space-evenly" }}>
+								<Box sx={{ height: "43vh", width: "100%", display: "flex", flexDirection: "column", justifyContent: "space-evenly", textAlign: "center" }}>
 									<Box key={"home_goals"}><Typography variant="body1" component="span" color={ away_goals < obj.home_goals ? "green" : "inherit"}>{obj.home_goals}</Typography></Box>
 									<Box key={"home_shots"}><Typography variant="body1" component="span" color={ away_shots < obj.home_shots ? "green" : "inherit"}>{obj.home_shots}</Typography></Box>
 									<Box key={"home_shots_on_target"}><Typography variant="body1" component="span" color={ away_shots_on_target < obj.home_shots_on_target ? "green" : "inherit"}>{obj.home_shots_on_target}</Typography></Box>
@@ -52,7 +52,7 @@ export function AverageStats(props) {
 						const home_red_cards = homeObject.home_red_cards;
 						return (
 							<Box key={"away-average-stats"} sx={{ display: "flex", flexDirection: "row", justifyContent: "space-evenly", textAlign: "center" }}>
-								<Box key={"away-average-stats-container"} sx={{ width: "100%", display: "flex", flexDirection: "column" }}>
+								<Box key={"away-average-stats-container"} sx={{ height: "43vh", width: "100%", display: "flex", flexDirection: "column", justifyContent: "space-evenly"}}>
 									<Box key={"away_goals"}><Typography variant="body1" component="span" color={home_goals < obj.away_goals ? "green" : "inherit"}>{obj.away_goals}</Typography></Box>
 									<Box key={"away_shots"}><Typography variant="body1" component="span" color={home_shots < obj.away_shots ? "green" : "inherit"}>{obj.away_shots}</Typography></Box>
 									<Box key={"away_shots_on_target"}><Typography variant="body1" component="span" color={home_shots_on_target < obj.away_shots_on_target ? "green" : "inherit"}>{obj.away_shots_on_target}</Typography></Box>

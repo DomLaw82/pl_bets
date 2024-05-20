@@ -44,12 +44,12 @@ def health_check():
 		return jsonify({'status': 'Prediction service is healthy'})
 	except Exception as e:
 		logger.error(f"An error occurred while checking the health of the prediction service: {str(e)}")
-		return jsonify({'error': 'An error occurred while checking the health of the prediction service'})
+		return jsonify({'error': 'An error occurred while checking the health of the prediction service'}), 500
 
 @registry.handles(
 	rule='/predict',
 	method='POST',
-	response_body_schema=match_facts_schema()
+	response_body_schema=""
 )
 def make_prediction():
 	try:
@@ -67,7 +67,7 @@ def make_prediction():
 		return jsonify(prediction)
 	except Exception as e:
 		logger.error(f"An error occurred while predicting the match outcome: {str(e)}")
-		return jsonify({'error': 'An error occurred while predicting the match outcome'})
+		return jsonify({'error': 'An error occurred while predicting the match outcome'}), 500
 
 @registry.handles(
 	rule='/model/rebuild',
@@ -81,7 +81,7 @@ def rebuild():
 		return jsonify('Model rebuilt')
 	except Exception as e:
 		logger.error(f"An error occurred while rebuilding the model: {str(e)}")
-		return jsonify({'error': 'An error occurred while rebuilding the model'})
+		return jsonify({'error': 'An error occurred while rebuilding the model'}), 500
 
 @registry.handles(
 	rule='/model/retune',
@@ -101,7 +101,7 @@ def retune():
 		return jsonify(params)
 	except Exception as e:
 		logger.error(f"An error occurred while retuning the model: {str(e)}")
-		return jsonify({'error': 'An error occurred while retuning the model'})
+		return jsonify({'error': 'An error occurred while retuning the model'}), 500
 
 
 # Create functions to remake pca and scaler models

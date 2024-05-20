@@ -10,11 +10,14 @@ import './App.css';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeSwitcher } from "./components/themeSwitcher";
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 
 function App() {
   const [teams, setTeams] = useState([]);
   const [currentTheme, setCurrentTheme] = useState(localStorage.getItem('currentTheme') || "dark");
+
+  const queryClient = new QueryClient();
 
   localStorage.setItem('currentTheme', currentTheme);
 
@@ -41,25 +44,27 @@ function App() {
 
   return (
     <Router>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Header />
-        <ThemeSwitcher currentTheme={currentTheme} setCurrentTheme={setCurrentTheme} />
-        <Routes>
-          {
-            Object.keys(routeOptions).map((key, index) => {
-              const { path, component: Component} = routeOptions[key];
-              return (
-                <Route
-                key={index}
-                path={path}
-                  element={<Component teams={teams} setTeams={setTeams} />}
-                />
-              );
-            })
-          }
-        </Routes>
-      </ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Header />
+          <ThemeSwitcher currentTheme={currentTheme} setCurrentTheme={setCurrentTheme} />
+          <Routes>
+            {
+              Object.keys(routeOptions).map((key, index) => {
+                const { path, component: Component} = routeOptions[key];
+                return (
+                  <Route
+                  key={index}
+                  path={path}
+                    element={<Component teams={teams} setTeams={setTeams} queryClient={queryClient} />}
+                  />
+                );
+              })
+            }
+          </Routes>
+        </ThemeProvider>
+      </QueryClientProvider>
     </Router>
   );
 }

@@ -72,14 +72,15 @@ export default function Upload() {
 	
 	return (
 		<Fragment>
-			<Container component="main">
+			<Container sx={{maxHeight: "80vh", overflow: "auto"}}>
 				<CssBaseline />
 				<Box
 					sx={{
-						marginTop: 8,
+						marginTop: 2,
 						display: 'flex',
 						flexDirection: 'column',
-						alignItems: 'center'
+						alignItems: 'center',
+						height: '100%'
 					}}
 				>
 					<Typography
@@ -95,7 +96,7 @@ export default function Upload() {
 						Upload
 					</Typography>
 					<Divider sx={{ width: '100%', height: 2 }} />
-					<Box sx={{ width: '100%', height: 2 }}>
+					<Box sx={{ width: '100%'}}>
 						<Divider sx={{ height: 2 }} />
 						<Box component="div" sx={{ mt: 3 }}>
 							<Grid container spacing={2} >

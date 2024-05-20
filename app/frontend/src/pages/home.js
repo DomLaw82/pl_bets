@@ -9,7 +9,7 @@ import Divider from '@mui/material/Divider';
 export default function Home() {
 	return (
 		<Fragment>
-			<Container component="main">
+			<Container component="main" sx={{maxHeight: "80vh", overflow: "auto"}}>
 				<CssBaseline />
 				<Box
 					id="hero"
