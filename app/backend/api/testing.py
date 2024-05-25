@@ -1,22 +1,23 @@
 import unittest
-import requests
-from api import app  # Replace with the actual import for your Flask app
+import json
+from unittest.mock import patch
+from api import app
 
 # TODO - Testing
-# Assuming you have already set up a Flask-Rebar registry
-from flask_rebar import Rebar
-rebar = Rebar(app)
-registry = rebar.create_handler_registry()
 
-class TestMyAPI(unittest.TestCase):
+class TestTeamFunction(unittest.TestCase):
     def setUp(self):
-        self.api_url = 'http://localhost:5000'  # Update with your API's URL
+        self.app = app.test_client()
+        self.app.testing = True
 
-    def test_hello_endpoint(self):
-        response = requests.get(f'{self.api_url}/api/hello')
+    @patch('api.db.get_dict')
+    def test_get_all_teams(self, mock_get_dict):
+        mock_get_dict.return_value = [{'id': 'team_one', 'name': 'Team One'}, {'id': 'team_two', 'name': 'Team Two'}]
+        
+        response = self.app.get('/teams')
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {'message': 'Hello, World!'})
+        self.assertEqual(response.json(), [{'id': 'team_one', 'name': 'Team One'}, {'id': 'team_two', 'name': 'Team Two'}])
 
 
 # create a health endpoint in the app that tests and return the status of all endpoints in the app
