@@ -42,6 +42,19 @@ def process_team_form(team_id, data):
 
     return form
 
+def add_head_to_head(data: pd.DataFrame) -> pd.DataFrame:
+    """Adds features for team form, head-to-head records, and home advantage."""
+
+    # Head-to-Head Records
+    h2h_data = (
+        data.groupby(['home_team_id', 'away_team_id'])[['home_win', 'draw', 'away_win']].sum().reset_index()
+    )
+    h2h_data.columns = ['home_team_id', 'away_team_id', 'h2h_home_wins', 'h2h_draws', 'h2h_away_wins']
+
+    data = data.merge(h2h_data, on=['home_team_id', 'away_team_id'], how='left').fillna(0)
+
+    return data
+
 # Process form for all teams
 def run_data_prep():
 
@@ -63,6 +76,10 @@ def run_data_prep():
     data['home_win'] = (data['full_time_result'] == 'H').astype(int)
     data['draw'] = (data['full_time_result'] == 'D').astype(int)
     data['away_win'] = (data['full_time_result'] == 'A').astype(int)
+
+    data = data.drop(columns=["full_time_result"])
+
+    data = add_head_to_head(data)
 
     print(data.tail())
     data.to_csv('match_and_form_data.csv', index=False)
