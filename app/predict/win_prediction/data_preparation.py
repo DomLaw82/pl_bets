@@ -10,10 +10,11 @@ from functools import partial
 import numpy as np
 from db_connection import SQLConnection
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
-
-
 
 # Create team form
 def process_team_form(team_id, data):
@@ -26,7 +27,7 @@ def process_team_form(team_id, data):
     form_temp = form_temp.groupby('season').filter(lambda x: len(x) >= 6)
 
     form_temp_home = form_temp[form_temp['is_home']].copy()
-    form_temp_home['gd_form'] = form_temp_home['goal_difference'].rolling(window=6).mean()
+    form_temp_home['gd_form'] = form_temp_home['goal_difference'].rolling(window=6).mean() # 6 game rolling average, change to sum?
     form_temp_home['gd_form_lagged'] = form_temp_home['gd_form'].shift(1)
     form_temp_home = form_temp_home[['season', 'date', 'gd_form_lagged']]
 
@@ -44,9 +45,8 @@ def process_team_form(team_id, data):
 # Process form for all teams
 def run_data_prep():
 
-    data = db.get_df("SELECT * FROM match")
     match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals","closing_home_odds","closing_draw_odds","closing_away_odds"]
-    data = data[match_columns].copy()
+    data = db.get_df(f"SELECT {match_columns.join(', ')} FROM match")
     print(data.tail())
 
     teams = data["home_team_id"].unique().tolist()
