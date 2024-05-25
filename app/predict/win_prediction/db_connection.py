@@ -1,94 +1,70 @@
-import psycopg2
+import os
 import pandas as pd
-import sqlalchemy, os
+import sqlalchemy
+from sqlalchemy.exc import SQLAlchemyError
 
-class SQLConnection():
-	"""Create a PostgreSQL connection class
-	"""
-	def __init__(self, username:str, password:str, host:str, port:str, db_name:str) -> None:
-		self.engine = sqlalchemy.create_engine(f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}', isolation_level='AUTOCOMMIT')
-		self.conn = self.engine.connect()
-	
-	def get_df(self, query:str) -> pd.DataFrame:
-		"""
-		query the database
+class SQLConnection:
+    """Create a PostgreSQL connection class with context management within each method."""
 
-		Args:
-			query (str): string used to query the database
+    def __init__(self, username, password, host, port, db_name):
+        """Initialize connection parameters."""
+        try:
+            self.connection_string = f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}'
+            self.engine = None
+        except Exception as e:
+            print(e)
 
-		Returns:
-			pd.DataFrame: result of the query
-		"""
-		query = sqlalchemy.text(query)
-		try:
-			res = pd.read_sql_query(query, self.conn)
-			return res
-		except Exception as e:
-			print('Exception Thrown:')
-			print(e)
-			print('\n')
+    def connect(self):
+        """Context manager that yields a connection from the pool."""
+        if self.engine is None:
+            self.engine = sqlalchemy.create_engine(self.connection_string, isolation_level='AUTOCOMMIT')
+        return self.engine.connect()
 
-	def get_list(self, query:str) -> list:
-		"""
-		Execute a query on the db
+    def get_df(self, query):
+        """Query the database and return a DataFrame, managing context internally."""
+        with self.connect() as conn:
+            try:
+                res = pd.read_sql_query(query, conn)
+                return res
+            except Exception as e:
+                raise ValueError(e) # Optionally re-raise the exception after logging
 
-		Args:
-				query (str): query string
+    def get_list(self, query):
+        """Execute a query and return a list, managing context internally."""
+        try:
+            with self.connect() as conn:
+                return self._execute_query(conn, query, fetch='all')
+        except Exception as e:
+            raise ValueError(e)
 
-		Returns:
-				list: returned from query
-		"""
-		query = sqlalchemy.text(query)
-		try:
-			res = self.conn.execute(query)
-			res = res.fetchall()
-			return res
-		except Exception as e:
-			print('Exception Thrown:')
-			print(e)
-			print('\n')
+    def get_dict(self, query):
+        """Execute a query and return a list of dictionaries, managing context internally."""
+        with self.connect() as conn:
+            return self._execute_query(conn, query, fetch='dict')
 
-	def execute(self, query:str) -> None:
-		"""
-		Execute a query on the db
+    def execute(self, query):
+        """Execute a non-return query, managing context internally."""
+        with self.connect() as conn:
+            try:
+                conn.execute(sqlalchemy.text(query))
+            except SQLAlchemyError as e:
+                print('Database error:', e)
+                raise
 
-		Args:
-				query (str): query string
-		"""
-		query = sqlalchemy.text(query)
-		try:
-			res = self.conn.execute(query)
-			return res
-		except Exception as e:
-			print('Exception Thrown:')
-			print(e)
-			print('\n')
-	
-	def get_dict(self, query:str) -> dict:
-		"""
-		Execute a query on the db
+    def _execute_query(self, conn, query, fetch='all'):
+        """Helper method to execute queries and manage fetch types."""
+        try:
+            result = conn.execute(sqlalchemy.text(query))
+            if fetch == 'all':
+                return result.fetchall()
+            elif fetch == 'dict':
+                columns = result.keys()
+                return [dict(zip(columns, row)) for row in result.fetchall()]
+        except SQLAlchemyError as e:
+            print('Database error:', e)
+            raise
 
-		Args:
-				query (str): query string
-
-		Returns:
-				list: returned from query
-		"""
-		query = sqlalchemy.text(query)
-		try:
-			res = self.conn.execute(query)
-			res_columns = list(self.conn.execute(query).keys())
-			res = res.fetchall()
-			
-			result_dict = {}
-			for index_a, row in enumerate(res):
-				entry = {}
-				for index_b, col in enumerate(row):
-					entry[res_columns[index_b]] = col
-				result_dict[index_a] = entry
-
-			return result_dict
-		except Exception as e:
-			print('Exception Thrown:')
-			print(e)
-			print('\n')
+    def close(self):
+        """Close the engine if it has been created."""
+        if self.engine:
+            self.engine.dispose()
