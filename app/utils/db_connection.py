@@ -6,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 class SQLConnection:
     """Create a PostgreSQL connection class with context management within each method."""
 
-    def __init__(self, username, password, host, port, db_name):
+    def __init__(self, username: str, password: str, host: str, port: str, db_name: str):
         """Initialize connection parameters."""
         try:
             self.connection_string = f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}'
@@ -20,7 +20,7 @@ class SQLConnection:
             self.engine = sqlalchemy.create_engine(self.connection_string, isolation_level='AUTOCOMMIT')
         return self.engine.connect()
 
-    def get_df(self, query):
+    def get_df(self, query: str):
         """Query the database and return a DataFrame, managing context internally."""
         with self.connect() as conn:
             try:
@@ -29,7 +29,7 @@ class SQLConnection:
             except Exception as e:
                 raise ValueError(e) # Optionally re-raise the exception after logging
 
-    def get_list(self, query):
+    def get_list(self, query: str):
         """Execute a query and return a list, managing context internally."""
         try:
             with self.connect() as conn:
@@ -37,7 +37,7 @@ class SQLConnection:
         except Exception as e:
             raise ValueError(e)
 
-    def get_dict(self, query):
+    def get_dict(self, query: str):
         """Execute a query and return a list of dictionaries, managing context internally."""
         with self.connect() as conn:
             return self._execute_query(conn, query, fetch='dict')
@@ -51,7 +51,7 @@ class SQLConnection:
                 print('Database error:', e)
                 raise
 
-    def _execute_query(self, conn, query, fetch='all'):
+    def _execute_query(self, conn, query: str, fetch='all'):
         """Helper method to execute queries and manage fetch types."""
         try:
             result = conn.execute(sqlalchemy.text(query))

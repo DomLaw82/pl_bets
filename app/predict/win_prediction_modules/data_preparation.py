@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
+db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), "localhost" or os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
 # Create team form
 def process_team_form(team_id, data):
@@ -27,12 +27,12 @@ def process_team_form(team_id, data):
     form_temp = form_temp.groupby('season').filter(lambda x: len(x) >= 6)
 
     form_temp_home = form_temp[form_temp['is_home']].copy()
-    form_temp_home['gd_form'] = form_temp_home['goal_difference'].rolling(window=6).mean() # 6 game rolling average, change to sum?
+    form_temp_home['gd_form'] = form_temp_home['goal_difference'].rolling(window=6).sum() # TODO: 6 game rolling average, change to sum?
     form_temp_home['gd_form_lagged'] = form_temp_home['gd_form'].shift(1)
     form_temp_home = form_temp_home[['season', 'date', 'gd_form_lagged']]
 
     form_temp_away = form_temp[~form_temp['is_home']].copy()
-    form_temp_away['gd_form'] = form_temp_away['goal_difference'].rolling(window=6).mean()
+    form_temp_away['gd_form'] = form_temp_away['goal_difference'].rolling(window=6).sum()
     form_temp_away['gd_form_lagged'] = form_temp_away['gd_form'].shift(1)
     form_temp_away = form_temp_away[['season', 'date', 'gd_form_lagged']]
 
@@ -59,8 +59,10 @@ def add_head_to_head(data: pd.DataFrame) -> pd.DataFrame:
 def run_data_prep():
 
     match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals","closing_home_odds","closing_draw_odds","closing_away_odds"]
-    data = db.get_df(f"SELECT {match_columns.join(', ')} FROM match")
-    print(data.tail())
+    data = db.get_df(f"SELECT {', '.join(match_columns)} FROM match")
+    print("Loaded match data successfully")
+    print(data.head().to_markdown())
+    print("--- --- --- --- ---")
 
     teams = data["home_team_id"].unique().tolist()
     process_team_form_partial = partial(process_team_form, data=data)
@@ -77,9 +79,9 @@ def run_data_prep():
     data['draw'] = (data['full_time_result'] == 'D').astype(int)
     data['away_win'] = (data['full_time_result'] == 'A').astype(int)
 
-    data = data.drop(columns=["full_time_result"])
+    # data = data.drop(columns=["full_time_result"])
 
     data = add_head_to_head(data)
 
-    print(data.tail())
+    print(data.tail().to_markdown())
     data.to_csv('match_and_form_data.csv', index=False)

@@ -4,7 +4,7 @@ from scipy.stats import t, norm
 import pandas as pd
 import numpy as np
 
-def plot_coefficients(models, outcome_labels):
+def plot_logistic_regression_coefficients(models, outcome_labels):
     """Plots coefficients for each model."""
 
     plt.figure(figsize=(12, 6))
@@ -21,7 +21,31 @@ def plot_coefficients(models, outcome_labels):
         plt.axvline(x=0, color='black', linestyle='dashed', linewidth=1)
     plt.tight_layout()
     # plt.show()
-    # plt.savefig('win_prediction/plots/model_coefficients_plot.png', dpi=300)
+    plt.savefig('win_prediction_modules/plots/model_coefficients_plot.png', dpi=300)
+    
+def plot_random_forest_coefficients(models, outcome_labels):
+    importances_data = []
+
+    for outcome in outcome_labels:
+        importances = models[outcome].feature_importances_
+        feature_names = models[outcome].feature_names_in_
+        
+        for feature_name, importance in zip(feature_names, importances):
+            importances_data.append({
+                'Outcome': outcome.replace('_', ' ').title(),
+                'Feature': feature_name,
+                'Importance': importance
+            })
+
+    df_importances = pd.DataFrame(importances_data)
+
+    plt.figure(figsize=(14, 8))
+    sns.barplot(x='Feature', y='Importance', hue='Outcome', data=df_importances)
+    plt.title('Feature Importances by Outcome')
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    # plt.show()
+    plt.savefig('win_prediction_modules/plots/rf_model_coefficients_plot.png')
 
 def plot_match_rating_distribution(data: pd.DataFrame, outcome_labels: list):
     """Plots the distribution of match ratings for each outcome."""
@@ -56,9 +80,9 @@ def plot_match_rating_distribution(data: pd.DataFrame, outcome_labels: list):
 
     plt.tight_layout()
     # plt.show()
-    # plt.savefig('win_prediction/plots/match_rating_distribution_plot.png', dpi=300)
+    plt.savefig('win_prediction_modules/plots/match_rating_distribution_plot.png', dpi=300)
 
-def plot_probability_by_match_rating(data: pd.DataFrame, models: dict, outcome_labels: list):
+def plot_probability_by_match_rating(data: pd.DataFrame, outcome_labels: list):
     """Plots the probability of each outcome by match rating."""
     plt.figure(figsize=(10, 6)) 
 
@@ -67,16 +91,11 @@ def plot_probability_by_match_rating(data: pd.DataFrame, models: dict, outcome_l
 
     for outcome, marker, color in zip(outcome_labels, markers, colours):
         sns.regplot(x='match_rating', y=f"{outcome}_prob", data=data, logistic=True, label=outcome.replace("_", " ").title(), 
-                    marker=marker, color=color, fit_reg=False, scatter_kws={'s': 50, 'alpha': 0.7})
-        
-        # Calculate and plot the logistic regression curve
-        x_values = np.linspace(data['match_rating'].min(), data['match_rating'].max(), 100)
-        y_values = models[outcome].predict(pd.DataFrame({'match_rating': x_values}))
-        plt.plot(x_values, y_values, color=color)
+                    marker=marker, color=color, scatter_kws={'s': 50, 'alpha': 0.7})
 
     plt.title('Outcome Probabilities by Match Rating')
     plt.xlabel('Match Rating')
     plt.ylabel('Probability')
     plt.legend()
     # plt.show()
-    # plt.savefig('win_prediction/plots/outcome_probability_by_match_rating_plot.png', dpi=300)
+    plt.savefig('win_prediction_modules/plots/outcome_probability_by_match_rating_plot.png', dpi=300)
