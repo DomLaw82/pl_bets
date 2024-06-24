@@ -32,6 +32,8 @@ def clean_schedule_data(db_connection, df: pd.DataFrame) -> pd.DataFrame:
 
 		# Convert 'date' column to datetime format
 		df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y %H:%M").dt.strftime("%Y/%m/%d %H:%M")
+		# Add season column based on date
+		df["season"] = pd.to_datetime(df["date"]).apply(lambda x: f"{x.year}-{x.year+1}" if x.month >= 8 else f"{x.year-1}-{x.year}")
 
 		deduplicated_df = remove_duplicate_rows(db_connection, df, ["round_number", "date", "home_team_id", "away_team_id"], "schedule")
 		return deduplicated_df
