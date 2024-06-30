@@ -10,6 +10,7 @@ import { Tabs } from '@mui/material';
 import { Tab } from '@mui/material';
 import { TabPanel, a11yProps } from './tabs';
 import { animated, useTransition, useSpring } from '@react-spring/web';
+import { PredictionHistoryCard, PredictionOutputCard } from './cards';
 
 
 export function MatchModal(props) {
@@ -298,6 +299,128 @@ export function RefreshModal(props) {
 									<Button key={`button-${key}`} onClick={() => setApiRoute(key)} variant="contained" color="primary" sx={{margin: 2}}>
 										{"Refresh"}
 									</Button>
+								</Box>
+							))}
+						</Box>
+					</Box>
+				</animated.div>
+			</Modal>
+		</Fragment>
+	);
+}
+
+export function PredictionOutputModal(props) {
+	const { homeTeam, awayTeam, predictionOutput, isOpen, setIsOpen, originX, originY } = props;
+
+	const modalAnimation = useSpring({
+		from: {
+			opacity: 0,
+			transform: 'translate(-50%, -50%) scale(0)',
+			height: 0,
+			width: 0,
+			top: originY,
+			left: originX,
+		},
+		to: {
+			transform: isOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0)',
+			opacity: isOpen ? 1 : 0,
+			backgroundColor: isOpen ? 'black' : 'transparent',
+			height: isOpen ? "max-content" : 0,
+			width: isOpen ? 1150 : 0,
+			top: isOpen ? document.documentElement.clientHeight/2 : originY,
+			left: isOpen ? document.documentElement.clientWidth/2 : originX,
+		},
+	});
+
+	const handleCloseModal = () => {
+		setIsOpen(false);
+	};
+
+	return (
+		<Fragment>
+			<Modal
+				open={isOpen}
+				onClose={handleCloseModal}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<animated.div style={{
+					position: 'absolute',
+					height: "max-content",
+					width: "100%",
+					display: "flex",
+					flexDirection: "row",
+					justifyContent: "center",
+					textAlign: "center",
+					...modalAnimation
+				}}>
+					<PredictionOutputCard homeTeam={homeTeam} awayTeam={awayTeam} predictionOutput={predictionOutput} />
+				</animated.div>
+			</Modal>
+		</Fragment>
+	);
+}
+
+export function PredictionHistoryModal(props) {
+	const { isOpen, setIsOpen, originX, originY, history } = props;
+
+	console.log(history);
+
+	const modalAnimation = useSpring({
+		from: {
+			opacity: 0,
+			transform: 'translate(-50%, -50%) scale(0)',
+			height: 0,
+			width: 0,
+			top: originY,
+			left: originX,
+		},
+		to: {
+			transform: isOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0)',
+			opacity: isOpen ? 1 : 0,
+			backgroundColor: isOpen ? 'black' : 'transparent',
+			height: isOpen ? "max-content" : 0,
+			width: isOpen ? 1150 : 0,
+			top: isOpen ? document.documentElement.clientHeight/2 : originY,
+			left: isOpen ? document.documentElement.clientWidth/2 : originX,
+		},
+	});
+
+	const handleCloseModal = () => {
+		setIsOpen(false);
+	};
+
+	return (
+		<Fragment>
+			<Modal
+				open={isOpen}
+				onClose={handleCloseModal}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<animated.div style={{
+					position: 'absolute',
+					height: "max-content",
+					width: "100%",
+					display: "flex",
+					flexDirection: "row",
+					justifyContent: "center",
+					textAlign: "center",
+					...modalAnimation
+				}}>
+					<Box
+						sx={{
+							display: "flex",
+							flexDirection: "column",
+							textAlign: "center",
+							width: "100%",
+							padding: 2 
+						}}
+					>
+						<Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "center"}}>
+							{history.map((prediction, index) => (
+								<Box key={index} sx={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", margin: .5 }}>
+									<PredictionHistoryCard homeTeam={prediction.home_team} awayTeam={prediction.away_team} data={prediction} />
 								</Box>
 							))}
 						</Box>
