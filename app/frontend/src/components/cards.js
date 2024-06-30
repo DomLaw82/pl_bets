@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardActionArea from '@mui/material/CardActionArea';
@@ -158,12 +158,12 @@ export function PredictionOutputCard(props) {
 
     return (
         <Fragment>
-            <Card sx={{ margin: 2 }} variant="outlined">
+            <Card sx={{ margin: 2, width: "100%" }} variant="outlined">
                 <CardContent sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-evenly',
-                    alignItems: "center"
+                    alignItems: "center",
                 }}>
                     <Box sx={{alignItems: "center", width: "100%"}}>
                         {/* <Typography variant="h4" component="div">
@@ -175,12 +175,11 @@ export function PredictionOutputCard(props) {
                                     {homeTeam}
                                 </Typography>
                             </Box>
-                            <Box sx={{alignItems: "center", textAlign: "center", width: "17.5%"}}></Box>
-                            <Box sx={{alignItems: "center", textAlign: "center"}}>
-                                <Divider orientation="vertical" flexItem />
+                            <Box sx={{width: "35%", alignItems: "center", textAlign: "center"}}>
+                                <Typography variant="h5" component="div">
+                                        <span> vs </span>
+                                </Typography>
                             </Box>
-                            <Divider orientation="vertical" flexItem />
-                            <Box sx={{alignItems: "center", textAlign: "center", width: "17.5%"}}></Box>
                             <Box sx={{alignItems: "center", textAlign: "center", width: "32.5%"}}>
                                 <Typography variant="h4" component="div">
                                     {awayTeam}
@@ -199,7 +198,7 @@ export function PredictionOutputCard(props) {
                                     <Divider orientation="vertical" flexItem />
                                     <Box sx={{ alignItems: "center", textAlign: "center", width: "35%" }}>
                                         <Typography variant="h6" component="div">
-                                            {`${column}`.toUpperCase()}
+                                            {`${column}`.replace(/_/g, " ").replace(/\w\S*/g, text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase())}
                                         </Typography>
                                     </Box>
                                     <Divider orientation="vertical" flexItem />
@@ -217,3 +216,76 @@ export function PredictionOutputCard(props) {
         </Fragment>
     )
 }
+
+export function PredictionHistoryCard(props) {
+    const { homeTeam, awayTeam, data } = props;
+    const [viewPrediction, setViewPrediction] = useState(false);
+    const [displaySettings, setDisplaySettings] = useState("none");
+
+    useEffect(() => {
+        if (viewPrediction) {
+            setDisplaySettings("flex");
+        } else {
+            setDisplaySettings("none");
+        }
+    }, [viewPrediction])
+
+    return (
+        <Fragment>
+            <Card sx={{ margin: .5, width: "100%" }} variant="outlined">
+            <CardActionArea  onClick={(event) => setViewPrediction(!viewPrediction)}>
+                    <CardContent sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-evenly',
+                        alignItems: "center",
+                    }}>
+                        <Box sx={{alignItems: "center", width: "100%"}}>
+                            <Box sx={{display:"flex", flexDirection:"row", justifyContent: "space-evenly", textAlign: "center"}}>
+                                <Typography variant="h5" component="div" sx={{width: "32.5%" }}>
+                                    {homeTeam}
+                                </Typography>
+                                <Typography variant="h5" component="div" sx={{width: "35%" }}>
+                                    <span> vs </span>
+                                </Typography>
+                                <Typography variant="h5" component="div" sx={{width: "32.5%" }}>
+                                    {awayTeam}
+                                </Typography>
+                            </Box>
+                            {
+                                viewPrediction && <Divider sx={{ width: '100%', height: 2 }} />
+                            }
+                            <Box sx={{display:displaySettings, flexDirection:"column", justifyContent: "space-evenly", textAlign: "center"}}>
+                                {
+                                    viewPrediction && predictionResultColumns.map((column, index) => {
+                                        return (
+                                            <Box sx={{ display: "flex", flexDirection: "row" }}>
+                                                <Box sx={{ alignItems: "center", textAlign: "center", width: "32.5%" }}>
+                                                    <Typography variant="body1" component="div">
+                                                        {data[`home_${column}`]}
+                                                    </Typography>
+                                                </Box>
+                                                <Divider orientation="vertical" flexItem />
+                                                <Box sx={{ alignItems: "center", textAlign: "center", width: "35%" }}>
+                                                    <Typography variant="h6" component="div">
+                                                        {`${column}`.replace(/_/g, " ").replace(/\w\S*/g, text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase())}
+                                                    </Typography>
+                                                </Box>
+                                                <Divider orientation="vertical" flexItem />
+                                                <Box sx={{ alignItems: "center", textAlign: "center", width: "32.5%" }}>
+                                                    <Typography variant="body1" component="div">
+                                                        {data[`away_${column}`]}
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        )
+                                    })}
+                            </Box>
+                        </Box>
+                    </CardContent>
+                </CardActionArea>
+            </Card>
+        </Fragment>
+    );
+}
+                       
