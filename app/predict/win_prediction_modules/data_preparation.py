@@ -11,49 +11,41 @@ import numpy as np
 from db_connection import SQLConnection
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), "localhost" or os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
-# Create team form
-def process_team_form(team_id, data):
+def get_team_form(sql_connection, team_id: str, is_home: bool, match_id: str = "") -> float:
+    try:
+        if match_id:
+            date = sql_connection.get_list(f"SELECT date FROM match WHERE id = '{match_id}'")[0][0]
+        else:
+            date = datetime.now().strftime("%Y-%m-%d")
+        home_or_away_form_data = sql_connection.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE {'home_team_id =' if is_home else 'away_team_id ='} '{team_id}' AND date <= '{date}' ORDER BY date DESC LIMIT 5")
+        overall_form = sql_connection.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE home_team_id = '{team_id}' OR away_team_id = '{team_id}' AND date <= '{date}' ORDER BY date DESC LIMIT 5")
 
-    form_temp = data[(data['home_team_id'] == team_id) | (data['away_team_id'] == team_id)].copy()
-    form_temp['is_home'] = form_temp['home_team_id'] == team_id
-    form_temp['goal_difference'] = form_temp.apply(lambda row: row['home_goals'] - row['away_goals'] if row['is_home'] else row['away_goals'] - row['home_goals'], axis=1)
-    form_temp = form_temp[['season', 'date', 'is_home', 'goal_difference']]
+        # Show the form for the last 5 home or away matches for a team, depending if they are home or away for the current match
+        home_or_away_mean_goal_difference = (home_or_away_form_data["home_goals"].sum() - home_or_away_form_data["away_goals"].sum())/5 if is_home else (home_or_away_form_data["away_goals"].sum() - home_or_away_form_data["home_goals"].sum())/5
+        # Show the form for the last 5 matches for a team, regardless of whether they are home or away for the current match
+        overall_mean_goal_difference = ((overall_form.loc[overall_form["home_team_id"] == team_id, "home_goals"].sum() + overall_form.loc[overall_form["away_team_id"] == team_id, "away_goals"].sum()) - (overall_form.loc[overall_form["home_team_id"] != team_id, "home_goals"].sum() + overall_form.loc[overall_form["away_team_id"] != team_id, "away_goals"].sum()))/5
+        return home_or_away_mean_goal_difference, overall_mean_goal_difference
+    except Exception as e:
+        raise e
 
-    form_temp = form_temp.groupby('season').filter(lambda x: len(x) >= 6)
-
-    form_temp_home = form_temp[form_temp['is_home']].copy()
-    form_temp_home['gd_form'] = form_temp_home['goal_difference'].rolling(window=6).sum() # TODO: 6 game rolling average, change to sum?
-    form_temp_home['gd_form_lagged'] = form_temp_home['gd_form'].shift(1)
-    form_temp_home = form_temp_home[['season', 'date', 'gd_form_lagged']]
-
-    form_temp_away = form_temp[~form_temp['is_home']].copy()
-    form_temp_away['gd_form'] = form_temp_away['goal_difference'].rolling(window=6).sum()
-    form_temp_away['gd_form_lagged'] = form_temp_away['gd_form'].shift(1)
-    form_temp_away = form_temp_away[['season', 'date', 'gd_form_lagged']]
-
-    form = pd.concat([form_temp_home, form_temp_away])
-    form['team'] = team_id
-    form = form.sort_values(by=['season', 'date'])
-
-    return form
-
-def add_head_to_head(data: pd.DataFrame) -> pd.DataFrame:
-    """Adds features for team form, head-to-head records, and home advantage."""
-
-    # Head-to-Head Records
-    h2h_data = (
-        data.groupby(['home_team_id', 'away_team_id'])[['home_win', 'draw', 'away_win']].sum().reset_index()
-    )
-    h2h_data.columns = ['home_team_id', 'away_team_id', 'h2h_home_wins', 'h2h_draws', 'h2h_away_wins']
-
-    data = data.merge(h2h_data, on=['home_team_id', 'away_team_id'], how='left').fillna(0)
-
-    return data
+def get_last_five_head_to_head_matches(sql_connection, home_team_id: str, away_team_id: str, match_id: str = "") -> pd.DataFrame:
+    try:
+        if match_id:
+            date = sql_connection.get_list(f"SELECT date FROM match WHERE id = '{match_id}'")[0][0]
+        else:
+            date = datetime.now().strftime("%Y-%m-%d")
+        # The more negative the value, the better the away team has performed w.r.t the home team in the last 5 head-to-head matches
+        data = sql_connection.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE ((home_team_id = '{home_team_id}' AND away_team_id = '{away_team_id}') OR (home_team_id = '{away_team_id}' AND away_team_id = '{home_team_id}')) AND date <= '{date}' ORDER BY date DESC LIMIT 5")
+        head_to_head_goal_difference = (data.loc[data["home_team_id"] == home_team_id, "home_goals"].sum() + data.loc[data["away_team_id"] == home_team_id, "away_goals"].sum()) - (data.loc[data["home_team_id"] == away_team_id, "home_goals"].sum() + data.loc[data["away_team_id"] == away_team_id, "away_goals"].sum())
+        return head_to_head_goal_difference
+    except Exception as e:
+        raise e
 
 # Process form for all teams
 def run_data_prep():
