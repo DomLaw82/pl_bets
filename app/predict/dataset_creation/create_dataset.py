@@ -246,36 +246,6 @@ def convert_team_rows_to_single_row(df: pd.DataFrame, home_team_id: str = None, 
     except Exception as e:
         raise e
 
-def get_team_form(sql_connection, team_id: str, is_home: bool, match_id: str = "") -> float:
-    try:
-        if match_id:
-            date = sql_connection.get_list(f"SELECT date FROM match WHERE id = '{match_id}'")[0][0]
-        else:
-            date = datetime.datetime.now().strftime("%Y-%m-%d")
-        home_or_away_form_data = sql_connection.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE {'home_team_id =' if is_home else 'away_team_id ='} '{team_id}' AND date <= '{date}' ORDER BY date DESC LIMIT 5")
-        overall_form = sql_connection.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE home_team_id = '{team_id}' OR away_team_id = '{team_id}' AND date <= '{date}' ORDER BY date DESC LIMIT 5")
-
-        # Show the form for the last 5 home or away matches for a team, depending if they are home or away for the current match
-        home_or_away_mean_goal_difference = (home_or_away_form_data["home_goals"].sum() - home_or_away_form_data["away_goals"].sum())/5 if is_home else (home_or_away_form_data["away_goals"].sum() - home_or_away_form_data["home_goals"].sum())/5
-        # Show the form for the last 5 matches for a team, regardless of whether they are home or away for the current match
-        overall_mean_goal_difference = ((overall_form.loc[overall_form["home_team_id"] == team_id, "home_goals"].sum() + overall_form.loc[overall_form["away_team_id"] == team_id, "away_goals"].sum()) - (overall_form.loc[overall_form["home_team_id"] != team_id, "home_goals"].sum() + overall_form.loc[overall_form["away_team_id"] != team_id, "away_goals"].sum()))/5
-        return home_or_away_mean_goal_difference, overall_mean_goal_difference
-    except Exception as e:
-        raise e
-
-def get_last_five_head_to_head_matches(sql_connection, home_team_id: str, away_team_id: str, match_id: str = "") -> pd.DataFrame:
-    try:
-        if match_id:
-            date = sql_connection.get_list(f"SELECT date FROM match WHERE id = '{match_id}'")[0][0]
-        else:
-            date = datetime.datetime.now().strftime("%Y-%m-%d")
-        # The more negative the value, the better the away team has performed w.r.t the home team in the last 5 head-to-head matches
-        data = sql_connection.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE ((home_team_id = '{home_team_id}' AND away_team_id = '{away_team_id}') OR (home_team_id = '{away_team_id}' AND away_team_id = '{home_team_id}')) AND date <= '{date}' ORDER BY date DESC LIMIT 5")
-        head_to_head_goal_difference = (data.loc[data["home_team_id"] == home_team_id, "home_goals"].sum() + data.loc[data["away_team_id"] == home_team_id, "away_goals"].sum()) - (data.loc[data["home_team_id"] == away_team_id, "home_goals"].sum() + data.loc[data["away_team_id"] == away_team_id, "away_goals"].sum())
-        return head_to_head_goal_difference
-    except Exception as e:
-        raise e
-
 def combine_form_and_career_stats(dfs: tuple, columns_to_evaluate: list = None) -> pd.DataFrame:
     """
     Combines the career and form statistics for a player.
