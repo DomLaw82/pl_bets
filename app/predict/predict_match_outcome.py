@@ -37,7 +37,7 @@ def predict_match_outcome(home_team_id: str, home_players: list, away_team_id: s
 	try:
 		# Neural network prediction
 		pd.set_option('display.max_columns', 10)
-		df = create_prediction_dataset(home_team_id, home_players, away_team_id, away_players)
+		df = create_prediction_dataset(home_team_id, away_team_id)
 		
 		if df.empty:
 			return None
