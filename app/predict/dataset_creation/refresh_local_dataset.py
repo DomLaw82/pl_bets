@@ -15,9 +15,10 @@ def recreate_local_dataset():
 		df = create_training_dataset(db)
 		df.to_csv("../files/final_combined_dataframe.csv", index=False)
 		logger.info("Local dataset recreated successfully")
+		return {"message": "success", "code": 200}
 	except Exception as e:
 		logger.error(f"Error recreating local dataset: {e}")
-		return f"Error: {e}"
+		return {"message": f"Error: {e}", "code": 500}
 
 if __name__ == "__main__":
 	recreate_local_dataset()
