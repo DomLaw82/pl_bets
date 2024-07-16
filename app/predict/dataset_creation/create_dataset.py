@@ -124,8 +124,6 @@ def group_stats_by_player(df: pd.DataFrame) -> pd.DataFrame:
         # TODO: Get current team squad and compare the players in the squad with the players in the player stats DataFrame
         # EDGE CASE: A player has played for both the teams playing against each other in the same season
 
-        print(df[["player_id", "team_id"]])
-
         df = (
             df[player_stats_columns+["season", "team_id"]]
             .groupby(["player_id", "season", "team_id"])
@@ -306,7 +304,7 @@ def combine_form_and_career_stats(dfs: tuple, columns_to_evaluate: list = None) 
 
         # Combined stats for all the players on both teams
         all_stats = all_stats[["match_id"] + columns_to_evaluate]
-        all_stats = all_stats.groupby("match_id").sum().reset_index(drop=True)
+        all_stats = all_stats.groupby("match_id").sum().reset_index()
 
         if "team_id" in all_stats.columns and "ninetys" in all_stats.columns:
             all_stats.drop(columns=["ninetys", "team_id"], inplace=True)
