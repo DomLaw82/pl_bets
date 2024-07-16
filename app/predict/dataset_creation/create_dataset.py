@@ -102,7 +102,7 @@ def get_player_stats(sql_connection, game_season: str, home_team_id: str, away_t
             ON
                 hpn.player_id = ptf.player_id
             WHERE 
-                hpn.season <= '{game_season}';
+                hpn.season {less_than_or_equal_to} '{game_season}';
         """)
         df["team_id"] = df["current_team_id"]
         df = df.drop(columns=["current_team_id"])
@@ -123,7 +123,7 @@ def group_stats_by_player(df: pd.DataFrame) -> pd.DataFrame:
     try:
         # TODO: Get current team squad and compare the players in the squad with the players in the player stats DataFrame
         # EDGE CASE: A player has played for both the teams playing against each other in the same season
-
+        print(df[["player_id", "team_id", "season"]])
         df = (
             df[player_stats_columns+["season", "team_id"]]
             .groupby(["player_id", "season", "team_id"])
