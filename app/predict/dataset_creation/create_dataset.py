@@ -121,9 +121,10 @@ def group_stats_by_player(df: pd.DataFrame) -> pd.DataFrame:
         pd.DataFrame: The DataFrame with player statistics grouped by player_id.
     """
     try:
+        # EDGE CASE: A player has played for both the teams playing against each other in the same season, this player's stats
+        #               will be used for both teams, when we only want them considered for the final team
         # TODO: Get current team squad and compare the players in the squad with the players in the player stats DataFrame
-        # EDGE CASE: A player has played for both the teams playing against each other in the same season
-        print(df[["player_id", "team_id", "season"]])
+
         df = (
             df[player_stats_columns+["season", "team_id"]]
             .groupby(["player_id", "season", "team_id"])
@@ -138,8 +139,6 @@ def group_stats_by_player(df: pd.DataFrame) -> pd.DataFrame:
         # Team context is not currently considered
         # TODO: Consider teams performance/play-style with features to improve prediction accuracy
         # e.g. team possession, territory, shots on target, goals scored, etc.
-
-        # df = df[df.index < df["player_id"].nunique()]
 
         return df
     except Exception as e:
