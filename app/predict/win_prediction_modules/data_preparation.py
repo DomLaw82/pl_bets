@@ -1,79 +1,136 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Apr 25 23:00:11 2023
-
-@author: antoinejwmartin
-"""
-
 import pandas as pd
-from functools import partial
 import numpy as np
 from db_connection import SQLConnection
+from collections import deque
 import os
 from dotenv import load_dotenv
-from datetime import datetime
 
 load_dotenv()
 
-db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), "localhost" or os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
+rolling_window = int(os.environ.get("ROLLING_WINDOW"))
 
-def get_team_form(sql_connection, team_id: str, is_home: bool, match_id: str = "") -> float:
-    try:
-        if match_id:
-            date = sql_connection.get_list(f"SELECT date FROM match WHERE id = '{match_id}'")[0][0]
+def get_rolling_goal_difference(df: pd.DataFrame, n: int) -> pd.DataFrame:
+    """
+    Sum the last n non-null values in a DataFrame
+    """
+    home_goal_diff = df["home_team_goal_difference"].values
+    away_goal_diff = df["away_team_goal_difference"].values
+    is_home = df["is_home"].values
+
+    values = deque(maxlen=n)
+    at_home_values = deque(maxlen=n)
+    at_away_values = deque(maxlen=n)
+
+    result = np.full(len(df), np.nan)
+    at_home_result = np.full(len(df), np.nan)
+    at_away_result = np.full(len(df), np.nan)
+
+    for i in range(len(df)):
+        if is_home[i]:
+            if pd.notnull(home_goal_diff[i]):
+                values.append(home_goal_diff[i])
+                at_home_values.append(home_goal_diff[i])
+                at_home_result[i] = sum(at_home_values)
         else:
-            date = datetime.now().strftime("%Y-%m-%d")
-        home_or_away_form_data = sql_connection.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE {'home_team_id =' if is_home else 'away_team_id ='} '{team_id}' AND date <= '{date}' ORDER BY date DESC LIMIT 5")
-        overall_form = sql_connection.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE home_team_id = '{team_id}' OR away_team_id = '{team_id}' AND date <= '{date}' ORDER BY date DESC LIMIT 5")
+            if pd.notnull(away_goal_diff[i]):
+                values.append(away_goal_diff[i])
+                at_away_values.append(away_goal_diff[i])
+                at_away_result[i] = sum(at_away_values)
 
-        # Show the form for the last 5 home or away matches for a team, depending if they are home or away for the current match
-        home_or_away_mean_goal_difference = (home_or_away_form_data["home_goals"].sum() - home_or_away_form_data["away_goals"].sum())/5 if is_home else (home_or_away_form_data["away_goals"].sum() - home_or_away_form_data["home_goals"].sum())/5
-        # Show the form for the last 5 matches for a team, regardless of whether they are home or away for the current match
-        overall_mean_goal_difference = ((overall_form.loc[overall_form["home_team_id"] == team_id, "home_goals"].sum() + overall_form.loc[overall_form["away_team_id"] == team_id, "away_goals"].sum()) - (overall_form.loc[overall_form["home_team_id"] != team_id, "home_goals"].sum() + overall_form.loc[overall_form["away_team_id"] != team_id, "away_goals"].sum()))/5
-        return home_or_away_mean_goal_difference, overall_mean_goal_difference
+        result[i] = sum(values)
+
+    result = np.concatenate(([0], result[:-1]))
+    at_home_result = np.concatenate(([0], at_home_result[:-1]))
+    at_away_result = np.concatenate(([0], at_away_result[:-1]))
+
+    return pd.DataFrame({
+        "home_team_rolling_goal_difference": np.where(is_home, result, np.nan),
+        "away_team_rolling_goal_difference": np.where(~is_home, result, np.nan),
+        "home_team_rolling_goal_difference_at_home": at_home_result,
+        "away_team_rolling_goal_difference_at_away": at_away_result
+    }, index=df.index)
+
+def get_team_form(df: pd.DataFrame, team_id: str) -> float:
+    """
+    Calculate the form of a team based on the last 5 matches:
+        - home_team_rolling_goal_difference
+        - away_team_rolling_goal_difference
+        - home_team_rolling_goal_difference_at_home
+        - away_team_rolling_goal_difference_at_away
+    """
+    try:
+        for season, season_data in df.groupby('season'):
+            season_data = season_data.copy()
+            season_data.loc[:, "is_home"] = season_data["home_team_id"] == team_id
+
+            season_data["home_team_goal_difference"] = np.where(season_data["is_home"], season_data["home_goals"] - season_data["away_goals"], np.nan)
+            season_data["away_team_goal_difference"] = np.where(~season_data["is_home"], season_data["away_goals"] - season_data["home_goals"], np.nan)
+
+            df.update(
+                get_rolling_goal_difference(
+                    season_data[["is_home", "home_team_goal_difference", "away_team_goal_difference"]], rolling_window
+                )
+            )
+        return df
     except Exception as e:
         raise e
 
-def get_last_five_head_to_head_matches(sql_connection, home_team_id: str, away_team_id: str, match_id: str = "") -> pd.DataFrame:
+def get_last_five_head_to_head_matches_rolling_goal_difference(data: pd.DataFrame) -> pd.DataFrame:
     try:
-        if match_id:
-            date = sql_connection.get_list(f"SELECT date FROM match WHERE id = '{match_id}'")[0][0]
-        else:
-            date = datetime.now().strftime("%Y-%m-%d")
-        # The more negative the value, the better the away team has performed w.r.t the home team in the last 5 head-to-head matches
-        data = sql_connection.get_df(f"SELECT id, season, date, home_team_id, away_team_id, home_goals, away_goals FROM match WHERE ((home_team_id = '{home_team_id}' AND away_team_id = '{away_team_id}') OR (home_team_id = '{away_team_id}' AND away_team_id = '{home_team_id}')) AND date <= '{date}' ORDER BY date DESC LIMIT 5")
-        head_to_head_goal_difference = (data.loc[data["home_team_id"] == home_team_id, "home_goals"].sum() + data.loc[data["away_team_id"] == home_team_id, "away_goals"].sum()) - (data.loc[data["home_team_id"] == away_team_id, "home_goals"].sum() + data.loc[data["away_team_id"] == away_team_id, "away_goals"].sum())
-        return head_to_head_goal_difference
+        data["h2h_rolling_goal_difference"] = (data["home_goals"] - data["away_goals"]).rolling(rolling_window, min_periods=1).sum().shift(1).fillna(0)
+        return data
     except Exception as e:
         raise e
+    
+def add_historic_head_to_head_results(data: pd.DataFrame) -> pd.DataFrame:
+
+    data["h2h_home_wins"] = np.nan
+    data["h2h_draws"] = np.nan
+    data["h2h_away_wins"] = np.nan
+    data["h2h_rolling_goal_difference"] = np.nan
+
+    for teams, matches in data.groupby(["home_team_id", "away_team_id"]):
+        home_team_id, away_team_id = teams
+        
+        matches["h2h_home_wins"] = matches["home_win"].cumsum().shift(1).fillna(0)
+        matches["h2h_draws"] = matches["draw"].cumsum().shift(1).fillna(0)
+        matches["h2h_away_wins"] = matches["away_win"].cumsum().shift(1).fillna(0)
+
+        matches = get_last_five_head_to_head_matches_rolling_goal_difference(matches)
+
+        data.update(matches)
+
+    return data
 
 # Process form for all teams
-def run_data_prep():
+def run_data_prep(sql_connection: SQLConnection):
 
     match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals","closing_home_odds","closing_draw_odds","closing_away_odds"]
-    data = db.get_df(f"SELECT {', '.join(match_columns)} FROM match")
+    data = sql_connection.get_df(f"SELECT {', '.join(match_columns)} FROM match ORDER BY date ASC")
     print("Loaded match data successfully")
-    print(data.head().to_markdown())
-    print("--- --- --- --- ---")
 
     teams = data["home_team_id"].unique().tolist()
-    process_team_form_partial = partial(process_team_form, data=data)
-    form = pd.concat(map(process_team_form_partial, teams), ignore_index=True)
 
-    # Add each team's form to the main database
-    data = data.merge(form.rename(columns={'team': 'home_team_id', 'gd_form_lagged': 'gd_form_home'}), on=['home_team_id', 'season', 'date'], how='left')
-    data = data.merge(form.rename(columns={'team': 'away_team_id', 'gd_form_lagged': 'gd_form_away'}), on=['away_team_id', 'season', 'date'], how='left')
+    data[["home_team_rolling_goal_difference", "away_team_rolling_goal_difference",
+            "home_team_rolling_goal_difference_at_home","away_team_rolling_goal_difference_at_away"]] = np.nan
 
-    data['match_rating'] = data['gd_form_home'] - data['gd_form_away']
+    for team in teams:
+        print(f"Processing form for {team}")
+        df = data[(data["home_team_id"] == team)| (data["away_team_id"] == team)].copy()
+        df = get_team_form(df, team)
+        data.update(df)
+
     data['full_time_result'] = np.where(data['home_goals'] > data['away_goals'], 'H', np.where(data['away_goals'] > data['home_goals'], 'A', 'D'))
 
     data['home_win'] = (data['full_time_result'] == 'H').astype(int)
     data['draw'] = (data['full_time_result'] == 'D').astype(int)
     data['away_win'] = (data['full_time_result'] == 'A').astype(int)
 
-    # data = data.drop(columns=["full_time_result"])
+    data = data.drop(columns=["full_time_result"])
 
-    data = add_head_to_head(data)
+    data = add_historic_head_to_head_results(data)
 
-    print(data.tail().to_markdown())
+    print(data.head())
+    print(data.tail())
+
     data.to_csv('match_and_form_data.csv', index=False)
