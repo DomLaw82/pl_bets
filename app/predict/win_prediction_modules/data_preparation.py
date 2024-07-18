@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 rolling_window = int(os.environ.get("ROLLING_WINDOW"))
-# TODO: NEW FEATURES - mean_goals_for, mean_goals_against, home_team_days_since_last_league_game, away_team_days_since_last_league_game
+# TODO: NEW FEATURES - mean_goals_for, mean_goals_against,
+#                    - home_team_in_europe, away_team_in_europe
 # TODO: Consider how features change over time (e.g., recent team performance, fatigue)
 # TODO: Identify and handle outliers in your data, as they can significantly impact model performance.
 
@@ -139,6 +140,28 @@ def add_historic_head_to_head_results(data: pd.DataFrame) -> pd.DataFrame:
 
     return data
 
+def get_days_since_last_league_game(data: pd.DataFrame, team_id: str) -> pd.DataFrame:
+    """
+    Calculate the number of days since the last league game for a team
+    """
+    try:
+
+        for season, season_data in data.groupby('season'):
+
+            season_data = season_data.copy()
+            season_data["is_home"] = season_data["home_team_id"] == team_id
+
+            match_differences = pd.to_datetime(season_data["date"], format="%Y-%m-%d").diff().dt.days.fillna(0).values
+
+            season_data["home_team_days_since_last_league_game"] = np.where(season_data["is_home"], match_differences, np.nan)
+            season_data["away_team_days_since_last_league_game"] = np.where(~season_data["is_home"], match_differences, np.nan)
+
+            data.update(season_data)
+
+        return data
+    except Exception as e:
+        raise e
+
 # Process form for all teams
 def run_data_prep(sql_connection: SQLConnection):
 
@@ -147,12 +170,16 @@ def run_data_prep(sql_connection: SQLConnection):
 
     teams = data["home_team_id"].unique().tolist()
 
-    data[["home_team_rolling_goal_difference", "away_team_rolling_goal_difference",
-            "home_team_rolling_goal_difference_at_home","away_team_rolling_goal_difference_at_away"]] = np.nan
+    data[[
+        "home_team_rolling_goal_difference", "away_team_rolling_goal_difference",
+        "home_team_rolling_goal_difference_at_home","away_team_rolling_goal_difference_at_away",
+        "home_team_days_since_last_league_game", "away_team_days_since_last_league_game"
+    ]] = np.nan
 
     for team in teams:
         df = data[(data["home_team_id"] == team)| (data["away_team_id"] == team)].copy()
         df = get_team_form(df, team)
+        df = get_days_since_last_league_game(df, team)
         data.update(df)
 
     data[["home_team_rolling_goal_difference", "away_team_rolling_goal_difference",
