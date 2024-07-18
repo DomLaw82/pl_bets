@@ -1,32 +1,10 @@
-# TODO: Consider how features change over time (e.g., recent team performance, fatigue)
-# TODO: Identify and handle outliers in your data, as they can significantly impact model performance.
-
 import pandas as pd
 import numpy as np
-import os
-import statsmodels.api as sm
-import statsmodels.formula.api as smf
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy.stats import t, norm
+from scipy.stats import t
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
-from win_prediction_modules.plotting_functions import plot_log_reg_coefficients, plot_feature_distribution, plot_probability_by_feature
-
-with_mean_gd_form = {
-    'bets': [294],
-    'win_rate': [0.5816326530612245],
-    'profit': [11.935339467119459],
-    'ror': [0.04059639274530428],
-    'odds': [3.0655808815443097],
-    'value': [0.7718755269602725],
-    'pvalue': [0.3159623010639926]}
-
-
-# TODO: Calculate sum_gd_form_home and sum_gd_form_away
-
-pd.set_option('display.max_columns', None)
+from win_prediction_modules.plotting_functions import plot_log_reg_coefficients, plot_probability_by_feature
 
 def model_training(model_type: str, training_data: pd.DataFrame, outcome_labels: list, feature_columns: list) -> dict:
     """Trains a model using the specified training data and returns the results."""
@@ -80,8 +58,9 @@ def value_bets_analysis(df: pd.DataFrame) -> dict:
 
     df = pd.melt(df, id_vars=df.columns[:-3], 
                                 value_vars=['H', 'D', 'A'], var_name='prediction', value_name='value_bet')
-
+    
     df = df[df['value_bet'] == 1].drop(columns='value_bet')
+
 
     df['value'] = df.apply(lambda row: row['value_h'] if row['prediction'] == 'H' else (row['value_d'] if row['prediction'] == 'D' else row['value_a']), axis=1)
     df['odds_prediction'] = df.apply(lambda row: row['fair_h'] if row['prediction'] == 'H' else (row['fair_d'] if row['prediction'] == 'D' else row['fair_a']), axis=1)
@@ -117,20 +96,33 @@ def run_data_modelling_part_one(model_type: str, data: pd.DataFrame, features: l
             positive_outcome_position = np.argmax(enhanced_models[outcome].classes_)
             probabilities = enhanced_models[outcome].predict_proba(data_test_enhanced[enhanced_feature_columns])
             data_test_enhanced[f"{outcome}_prob"] = [prob[positive_outcome_position] for prob in probabilities]
+
+        home_win_probs = data_test_enhanced['home_win_prob']
+        draw_probs = data_test_enhanced['draw_prob']
+        away_win_probs = data_test_enhanced['away_win_prob']
+
+        total_probs = home_win_probs + draw_probs + away_win_probs
+        data_test_enhanced['home_win_prob_norm'] = home_win_probs / total_probs
+        data_test_enhanced['draw_prob_norm'] = draw_probs / total_probs
+        data_test_enhanced['away_win_prob_norm'] = away_win_probs / total_probs
+
+        # Plotting
         plot_log_reg_coefficients(enhanced_models, outcome_labels)
         for feature in enhanced_feature_columns:
             # plot_feature_distribution(data_test_enhanced, outcome_labels, feature)
             plot_probability_by_feature(data_test_enhanced, outcome_labels, feature)
 
-    print(data_test_enhanced.head(50).to_markdown())
 
-    data_test_enriched = fair_odds_calculation(data_test_enhanced, outcome_labels, closing_odds_column_prefix)
+    # Calculate the number of bets, win rate, profit, and return on risk based on value bet analysis
+    data_test_enriched = data_test_enhanced.copy()
+
+    data_test_enriched = fair_odds_calculation(data_test_enriched, outcome_labels, closing_odds_column_prefix)
     
     # Calculate value of each bet
     data_test_enriched = value_bets_analysis(data_test_enriched) 
 
-    # filtered_data = data_test_enriched[(data_test_enriched['odds_prediction'] > 2) & (data_test_enriched['odds_prediction'] < 4) & (data_test_enriched['value'] < 0.05)]
-    filtered_data = data_test_enriched
+
+    filtered_data = data_test_enriched[(data_test_enriched['odds_prediction'] > 2) & (data_test_enriched['odds_prediction'] < 4) & (data_test_enriched['value'] < 0.05)]
     bets = len(filtered_data)
     win_rate = filtered_data['won'].mean()
     profit = filtered_data['profit'].sum()
@@ -150,5 +142,37 @@ def run_data_modelling_part_one(model_type: str, data: pd.DataFrame, features: l
         'value': [value],
         'pvalue': [pvalue]
     }
+    print(result)
 
-    return result
+    # Calculate profit and win rate based on model predictions
+    data_test_output = data_test_enhanced.copy()
+
+    data_test_output["model_prediction"] = np.where((
+        data_test_output["home_win_prob_norm"] > data_test_output["away_win_prob_norm"]) & (data_test_output["home_win_prob_norm"] > data_test_output["draw_prob_norm"]), "H",
+        np.where(
+            (data_test_output["draw_prob_norm"] > data_test_output["home_win_prob_norm"]) & (data_test_output["draw_prob_norm"] > data_test_output["away_win_prob_norm"]), "D",
+            "A"
+        )
+    )
+
+    data_test_output["won"] = np.where(data_test_output["full_time_result"] == data_test_output["model_prediction"], 1, 0)
+    data_test_output["odds"] = np.where(data_test_output["full_time_result"] == "H", data_test_output["closing_home_odds"], np.where(data_test_output["full_time_result"] == "D", data_test_output["closing_draw_odds"], data_test_output["closing_away_odds"]))
+
+    principal = 100
+    data_test_output["profit"] = np.where(data_test_output["won"] == 1, (data_test_output["odds"]*principal) - principal, -principal)
+
+    filtered_data = data_test_output
+    bets = len(filtered_data)
+    win_rate = filtered_data['won'].mean()
+    profit = filtered_data['profit'].sum()
+    ror = profit / bets
+
+    model_result = {
+        'bets': [bets],
+        'win_rate': [win_rate],
+        'profit': [profit],
+        'ror': [ror],
+    }
+    print(model_result)
+
+    return result, model_result
