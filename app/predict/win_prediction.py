@@ -20,7 +20,6 @@ def run_win_prediction(home_team_id: str = None, away_team_id: str = None):
 	data = run_data_prep(db)
 
 	results = run_data_modelling_part_one("logistic_regression", data, features)
-	print(results)
 
 	# all_results = run_data_modelling_part_two(data)
 
