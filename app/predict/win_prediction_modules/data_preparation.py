@@ -8,7 +8,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 rolling_window = int(os.environ.get("ROLLING_WINDOW"))
-# FEATURES mean_goals_for, mean_goals_against
+# TODO: NEW FEATURES - mean_goals_for, mean_goals_against, home_team_days_since_last_league_game, away_team_days_since_last_league_game
+# TODO: Consider how features change over time (e.g., recent team performance, fatigue)
+# TODO: Identify and handle outliers in your data, as they can significantly impact model performance.
 
 def get_rolling_goal_difference(df: pd.DataFrame, n: int) -> pd.DataFrame:
     """
