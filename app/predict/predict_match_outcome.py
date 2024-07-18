@@ -47,7 +47,7 @@ def predict_match_outcome(home_team_id: str, home_players: list, away_team_id: s
 		prediction = model.predict(X)
 		return prediction
 	except Exception as e:
-		# logger.error(f"An error occurred while predicting the match outcome: {str(e)}")
+		logger.error(f"An error occurred while predicting the match outcome: {str(e)}")
 		return None
 
 	# Logistic regression prediction
