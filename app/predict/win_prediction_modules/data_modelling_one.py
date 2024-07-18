@@ -9,8 +9,10 @@ import statsmodels.formula.api as smf
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import t, norm
+from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from win_prediction_modules.plotting_functions import plot_logistic_regression_coefficients, plot_random_forest_coefficients, plot_match_rating_distribution, plot_probability_by_match_rating
+from sklearn.preprocessing import StandardScaler
+from win_prediction_modules.plotting_functions import plot_log_reg_coefficients, plot_feature_distribution, plot_probability_by_feature
 
 with_mean_gd_form = {
     'bets': [294],
@@ -26,19 +28,6 @@ with_mean_gd_form = {
 
 pd.set_option('display.max_columns', None)
 
-def add_head_to_head(data: pd.DataFrame) -> pd.DataFrame:
-    """Adds features for team form, head-to-head records, and home advantage."""
-
-    # Head-to-Head Records
-    h2h_data = (
-        data.groupby(['home_team_id', 'away_team_id'])[['home_win', 'draw', 'away_win']].sum().reset_index()
-    )
-    h2h_data.columns = ['home_team_id', 'away_team_id', 'h2h_home_wins', 'h2h_draws', 'h2h_away_wins']
-
-    data = data.merge(h2h_data, on=['home_team_id', 'away_team_id'], how='left').fillna(0)
-
-    return data
-
 def model_training(model_type: str, training_data: pd.DataFrame, outcome_labels: list, feature_columns: list) -> dict:
     """Trains a model using the specified training data and returns the results."""
 
@@ -46,9 +35,22 @@ def model_training(model_type: str, training_data: pd.DataFrame, outcome_labels:
 
     if model_type == 'logistic_regression':
         for outcome in outcome_labels:
-            formula = f"{outcome} ~ " + " + ".join(feature_columns)
-            model = smf.glm(formula, data=training_data, family=sm.families.Binomial()).fit()
+            X = training_data[feature_columns]
+            y = training_data[outcome]
+
+            model = LogisticRegression()
+            model.fit(X, y)
+            
             models[outcome] = model
+    
+    elif model_type == 'logistic_regression_multi':
+        X = training_data[feature_columns]
+        y = training_data[outcome_labels]
+
+        model = LogisticRegression(multi_class="auto")
+        model.fit(X, y)
+        
+        models["multi"] = model
 
     elif model_type == 'random_forest':
         for outcome in outcome_labels:
@@ -91,23 +93,18 @@ def value_bets_analysis(df: pd.DataFrame) -> dict:
 
 
 # Predicts higher win_prob, and look at fair odds and value calculations
-def run_data_modelling_part_one(model_type: str, data: pd.DataFrame, closing_odds_column_prefix: str = "closing_") -> dict: 
+def run_data_modelling_part_one(model_type: str, data: pd.DataFrame, features: list, closing_odds_column_prefix: str = "closing_") -> dict: 
     """Runs the first part of the data modelling process."""
+    
+    outcome_labels = ['home_win', 'draw', 'away_win']
+    enhanced_feature_columns = features
 
-    print(data.head().to_markdown())
+    scaler = StandardScaler()
+    data[enhanced_feature_columns] = scaler.fit_transform(data[enhanced_feature_columns])
 
     # Separating the data into training and testing set
     data_train = data[data['season'] < data['season'].max()]
     data_test = data[data['season'] == data['season'].max()]
-
-    # data_train = add_head_to_head(data_train)
-    # data_test = add_head_to_head(data_test)
-
-    # Drop rows with NaN values for match rating
-    data_train = data_train.dropna(subset=['match_rating'])
-
-    outcome_labels = ['home_win', 'draw', 'away_win']
-    enhanced_feature_columns = ['match_rating', 'gd_form_home', 'gd_form_away', 'h2h_home_wins','h2h_draws','h2h_away_wins']
     
     # Model Training
     enhanced_models = model_training(model_type, data_train, outcome_labels, enhanced_feature_columns)
@@ -115,24 +112,19 @@ def run_data_modelling_part_one(model_type: str, data: pd.DataFrame, closing_odd
     # Predict probabilities for each outcome
     data_test_enhanced = data_test.copy()
 
-    for outcome in outcome_labels:
-        if hasattr(enhanced_models[outcome], 'predict_proba'):
-            data_test_enhanced[f"{outcome}_prob"] = enhanced_models[outcome].predict_proba(data_test_enhanced[enhanced_feature_columns])
-        else:
-            data_test_enhanced[f"{outcome}_prob"] = enhanced_models[outcome].predict(data_test_enhanced[enhanced_feature_columns])
-            
-    # Plotting(data_test, models, outcome_labels)
     if model_type == 'logistic_regression':
-        plot_logistic_regression_coefficients(enhanced_models, outcome_labels)
-    elif model_type == 'random_forest':
-        plot_random_forest_coefficients(enhanced_models, outcome_labels)
-    plot_match_rating_distribution(data_test_enhanced, outcome_labels)
-    plot_probability_by_match_rating(data_test_enhanced, outcome_labels)
+        for outcome in outcome_labels:
+            positive_outcome_position = np.argmax(enhanced_models[outcome].classes_)
+            probabilities = enhanced_models[outcome].predict_proba(data_test_enhanced[enhanced_feature_columns])
+            data_test_enhanced[f"{outcome}_prob"] = [prob[positive_outcome_position] for prob in probabilities]
+        plot_log_reg_coefficients(enhanced_models, outcome_labels)
+        for feature in enhanced_feature_columns:
+            # plot_feature_distribution(data_test_enhanced, outcome_labels, feature)
+            plot_probability_by_feature(data_test_enhanced, outcome_labels, feature)
 
-    # Calculate and return the results for enhanced model
-    data_test_enriched = data_test_enhanced.dropna(subset=['match_rating']).copy()
+    print(data_test_enhanced.head(50).to_markdown())
 
-    data_test_enriched = fair_odds_calculation(data_test_enriched, outcome_labels, closing_odds_column_prefix)
+    data_test_enriched = fair_odds_calculation(data_test_enhanced, outcome_labels, closing_odds_column_prefix)
     
     # Calculate value of each bet
     data_test_enriched = value_bets_analysis(data_test_enriched) 
