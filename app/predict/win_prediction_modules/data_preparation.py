@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 rolling_window = int(os.environ.get("ROLLING_WINDOW"))
+# FEATURES mean_goals_for, mean_goals_against
 
 def get_rolling_goal_difference(df: pd.DataFrame, n: int) -> pd.DataFrame:
     """
@@ -18,37 +19,70 @@ def get_rolling_goal_difference(df: pd.DataFrame, n: int) -> pd.DataFrame:
     is_home = df["is_home"].values
 
     values = deque(maxlen=n)
-    at_home_values = deque(maxlen=n)
-    at_away_values = deque(maxlen=n)
 
     result = np.full(len(df), np.nan)
-    at_home_result = np.full(len(df), np.nan)
-    at_away_result = np.full(len(df), np.nan)
 
     for i in range(len(df)):
         if is_home[i]:
             if pd.notnull(home_goal_diff[i]):
                 values.append(home_goal_diff[i])
-                at_home_values.append(home_goal_diff[i])
-                at_home_result[i] = sum(at_home_values)
         else:
             if pd.notnull(away_goal_diff[i]):
                 values.append(away_goal_diff[i])
-                at_away_values.append(away_goal_diff[i])
-                at_away_result[i] = sum(at_away_values)
 
         result[i] = sum(values)
-
+    
     result = np.concatenate(([0], result[:-1]))
-    at_home_result = np.concatenate(([0], at_home_result[:-1]))
-    at_away_result = np.concatenate(([0], at_away_result[:-1]))
+    at_location_values = get_rolling_goal_difference_at_location(df, n)
 
     return pd.DataFrame({
         "home_team_rolling_goal_difference": np.where(is_home, result, np.nan),
         "away_team_rolling_goal_difference": np.where(~is_home, result, np.nan),
-        "home_team_rolling_goal_difference_at_home": at_home_result,
-        "away_team_rolling_goal_difference_at_away": at_away_result
+        "home_team_rolling_goal_difference_at_home": np.where(is_home, at_location_values, np.nan),
+        "away_team_rolling_goal_difference_at_away": np.where(~is_home, at_location_values, np.nan),
     }, index=df.index)
+
+def get_rolling_goal_difference_at_location(df: pd.DataFrame, n: int) -> pd.DataFrame:
+    at_home_values = deque(maxlen=n)
+    at_away_values = deque(maxlen=n)
+
+    at_home_result = np.full(len(df[df["is_home"]]), np.nan)
+    at_away_result = np.full(len(df[~df["is_home"]]), np.nan)
+
+    home_df = df[df["is_home"]].copy()
+    away_df = df[~df["is_home"]].copy()
+    home_df_home_diff = home_df["home_team_goal_difference"].values
+    away_df_away_diff = away_df["away_team_goal_difference"].values
+
+    at_home_result_indices = home_df.index.values
+    at_away_result_indices = away_df.index.values
+
+    for i in range(len(home_df)):
+        if pd.notnull(home_df_home_diff[i]):
+            at_home_values.append(home_df_home_diff[i])
+            at_home_result[i] = sum(at_home_values)
+    
+    for i in range(len(away_df)):
+        if pd.notnull(away_df_away_diff[i]):
+            at_away_values.append(away_df_away_diff[i])
+            at_away_result[i] = sum(at_away_values)
+
+    at_home_result = np.concatenate(([0], at_home_result[:-1]))
+    at_away_result = np.concatenate(([0], at_away_result[:-1]))
+
+    at_home_combined = list(zip(at_home_result_indices, at_home_result))
+    at_away_combined = list(zip(at_away_result_indices, at_away_result))
+
+    at_location_combined = at_home_combined + at_away_combined
+
+    at_location_combined_sorted = sorted(at_location_combined, key=lambda x: x[0])
+
+    at_location_indices, at_location_values = zip(*at_location_combined_sorted)
+
+    at_location_indices = list(at_location_indices)
+    at_location_values = list(at_location_values)
+
+    return at_location_values
 
 def get_team_form(df: pd.DataFrame, team_id: str) -> float:
     """
@@ -71,6 +105,7 @@ def get_team_form(df: pd.DataFrame, team_id: str) -> float:
                     season_data[["is_home", "home_team_goal_difference", "away_team_goal_difference"]], rolling_window
                 )
             )
+
         return df
     except Exception as e:
         raise e
@@ -107,7 +142,6 @@ def run_data_prep(sql_connection: SQLConnection):
 
     match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals","closing_home_odds","closing_draw_odds","closing_away_odds"]
     data = sql_connection.get_df(f"SELECT {', '.join(match_columns)} FROM match ORDER BY date ASC")
-    print("Loaded match data successfully")
 
     teams = data["home_team_id"].unique().tolist()
 
@@ -115,10 +149,13 @@ def run_data_prep(sql_connection: SQLConnection):
             "home_team_rolling_goal_difference_at_home","away_team_rolling_goal_difference_at_away"]] = np.nan
 
     for team in teams:
-        print(f"Processing form for {team}")
         df = data[(data["home_team_id"] == team)| (data["away_team_id"] == team)].copy()
         df = get_team_form(df, team)
         data.update(df)
+
+    data[["home_team_rolling_goal_difference", "away_team_rolling_goal_difference",
+            "home_team_rolling_goal_difference_at_home","away_team_rolling_goal_difference_at_away"]] = data[["home_team_rolling_goal_difference", "away_team_rolling_goal_difference",
+            "home_team_rolling_goal_difference_at_home","away_team_rolling_goal_difference_at_away"]].astype(int)
 
     data['full_time_result'] = np.where(data['home_goals'] > data['away_goals'], 'H', np.where(data['away_goals'] > data['home_goals'], 'A', 'D'))
 
@@ -126,11 +163,7 @@ def run_data_prep(sql_connection: SQLConnection):
     data['draw'] = (data['full_time_result'] == 'D').astype(int)
     data['away_win'] = (data['full_time_result'] == 'A').astype(int)
 
-    data = data.drop(columns=["full_time_result"])
-
     data = add_historic_head_to_head_results(data)
 
-    print(data.head())
-    print(data.tail())
-
-    data.to_csv('match_and_form_data.csv', index=False)
+    data.to_csv('./files/match_and_form_data.csv', index=False)
+    return data
