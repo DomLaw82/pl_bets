@@ -9,6 +9,8 @@ from joblib import load
 
 N = 15
 
+# TODO: Identify and handle outliers in your data, as they can significantly impact model performance.
+
 output_columns = [
 	"home_goals", "away_goals", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target",
 	"home_corners", "away_corners", "home_fouls", "away_fouls", "home_yellow_cards", "away_yellow_cards",

@@ -33,6 +33,7 @@ CREATE TABLE referee (
 
 CREATE TABLE schedule (
 	round_number INT NOT NULL,
+	season VARCHAR(9) NOT NULL,
 	date VARCHAR(16) NOT NULL,
 	home_team_id VARCHAR(7) REFERENCES team(id),
 	away_team_id VARCHAR(7) REFERENCES team(id),
