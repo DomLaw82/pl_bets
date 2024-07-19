@@ -4,6 +4,9 @@ import numpy as np
 # from dataset_creation.create_dataset import group_stats_by_player_for_home_and_away_teams, create_per_90_stats, create_contribution_per_90_stats, group_stats_by_team, convert_team_rows_to_single_row, combine_form_and_career_stats
 from win_prediction_modules.data_preparation import get_team_form, get_last_five_head_to_head_matches_rolling_goal_difference, add_historic_head_to_head_results
 
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
+
 # class TestCreateDataset(unittest.TestCase):
 #     def setUp(self):
 #         self.df = pd.DataFrame({
@@ -257,8 +260,13 @@ class TestWinPrediction(unittest.TestCase):
             "away_team_rolling_goal_difference_at_away": [0, 0, -3, 0, -1, 0, 0, 0, 0, -3]
         })
 
-        self.assertTrue(df.equals(expected_df), "Team form statistics are incorrect")    
+        comparison = df != expected_df
+        different_rows = comparison.any(axis=1)
 
+        expected_df_error = expected_df.loc[different_rows]
+        df_error = df.loc[different_rows]
+
+        self.assertTrue(df.equals(expected_df), "Team form statistics are incorrect\n\nExpected:\n{}\n\nActual:\n{}".format(expected_df_error, df_error))    
 
 if __name__ == '__main__':
     unittest.main()
