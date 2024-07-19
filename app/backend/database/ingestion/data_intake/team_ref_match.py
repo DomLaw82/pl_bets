@@ -253,6 +253,8 @@ def save_to_database(db_connection, table_name, df: pd.DataFrame) -> None:
         None
     """
     try:
+        if table_name == "match":
+            df = df.sort_values(by=["date"]).reset_index(drop=True)
         with db_connection.connect() as conn:
             df.to_sql(table_name, conn, if_exists="append", index=False) if not df.empty else None
     except Exception as e:

@@ -53,6 +53,7 @@ def save_to_database(db_connection, df: pd.DataFrame) -> None:
 		None
 	"""
 	try:
+		df = df.sort_values(by=["date"]).reset_index(drop=True)
 		with db_connection.connect() as conn:
 			df.to_sql("schedule", conn, if_exists="append", index=False)
 	except Exception as e:

@@ -6,6 +6,9 @@ from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 import os
 from joblib import load
+from dotenv import load_dotenv
+
+load_dotenv()
 
 N = 15
 
