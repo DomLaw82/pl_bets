@@ -12,12 +12,10 @@ GAME_DATA_DOWNLOAD_ROOT = "https://www.football-data.co.uk/mmz4281/"
 DOWNLOAD_FIXTURE_URL_ROOT = "https://fixturedownload.com/download/epl-" # add on the year the season starts in, i.e. 2024
 PLAYER_DOWNLOAD_ROOT = "https://www.footballsquads.co.uk/eng/"
 
-
-current_year = datetime.datetime.now().year
-
-FIXTURE_SEASON_ARRAY = [str(year) for year in range(2017, current_year, 1)]
-SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2017, current_year+1)]
-MATCH_SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, current_year+1)]
+SEASON_END_YEAR = 2026
+FIXTURE_SEASON_ARRAY = [str(year) for year in range(2017, SEASON_END_YEAR, 1)]
+SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2017, SEASON_END_YEAR)]
+MATCH_SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SEASON_END_YEAR)]
 
 def download_csv_for_all_games_in_a_season(season: str, url: str, save_path_root: str):
 	"""
@@ -223,25 +221,36 @@ def download_latest_data():
 		for path_root in [GAME_SAVE_PATH_ROOT, SCHEDULE_SAVE_PATH_ROOT, PLAYER_SAVE_PATH_ROOT]:
 			if not os.path.exists(path_root):
 				os.makedirs(path_root)
+	except Exception as e:
+		logger.error(f"Error creating directories: {e}")
+		# return f"Error creating directories: {e}"
 		
 		# game data download
+	try:
 		for season in MATCH_SITE_SEASONS:
 			time.sleep(0.2)
 			download_csv_for_all_games_in_a_season(season, GAME_DATA_DOWNLOAD_ROOT, GAME_SAVE_PATH_ROOT)
-			
+	except Exception as e:
+		logger.error(f"Error downloading the latest match data: {e}")
+		# return f"Error downloading the latest match data: {e}"
 		
 		# fixture data download
+	try:
 		for season in FIXTURE_SEASON_ARRAY:
 			time.sleep(0.2)
 			download_csv_for_all_fixtures_in_a_season(season, DOWNLOAD_FIXTURE_URL_ROOT, SCHEDULE_SAVE_PATH_ROOT)
+	except Exception as e:
+		logger.error(f"Error downloading the latest schedule data: {e}")
+		# return f"Error downloading the latest schedule data: {e}"
 		
 		# player data download
+	try:
 		for season in SEASONS_ARRAY:
 			time.sleep(0.2)
 			download_html_for_squad_player_data(season, PLAYER_DOWNLOAD_ROOT, PLAYER_SAVE_PATH_ROOT)
 	except Exception as e:
-		logger.error(f"Error downloading the latest data: {e}")
-		return f"Error downloading the latest data: {e}"
+		logger.error(f"Error downloading the latest player data: {e}")
+		# return f"Error downloading the latest player data: {e}"
 
 		
 

@@ -18,3 +18,4 @@ pyarrow
 fuzzywuzzy
 python-Levenshtein
 fluent-logger
+python-dotenv

@@ -1,5 +1,5 @@
 # Use an official Node.js image for development
-FROM node:21-alpine as development
+FROM node:21-alpine AS development
 
 # Install dependencies
 WORKDIR /app

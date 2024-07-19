@@ -9,6 +9,7 @@ from predict_match_outcome import predict_match_outcome
 from rebuild_model import rebuild_model
 from retune_and_build_model import retune_and_build_model
 from app_logger import FluentLogger
+from win_prediction import run_win_prediction
 
 rebar = Rebar()
 registry = rebar.create_handler_registry()
@@ -56,11 +57,9 @@ def make_prediction():
 		request_body = request.get_json()
 
 		home_team_id = request_body.get('homeTeamId')
-		home_players = request_body.get('homePlayers')
 		away_team_id = request_body.get('awayTeamId')
-		away_players = request_body.get('awayPlayers')
 		
-		prediction = predict_match_outcome(home_team_id, home_players, away_team_id, away_players)
+		prediction = predict_match_outcome(home_team_id, away_team_id)
 		prediction = list_to_list_of_objects(prediction, ['home_goals', 'away_goals', 'home_shots', 'away_shots', 'home_shots_on_target', 'away_shots_on_target', 'home_corners', 'away_corners', 'home_fouls', 'away_fouls', 'home_yellow_cards', 'away_yellow_cards', 'home_red_cards', 'away_red_cards'])[0]
 
 		logger.info(f"Prediction made: {prediction}")
@@ -103,6 +102,19 @@ def retune():
 		logger.error(f"An error occurred while retuning the model: {str(e)}")
 		return jsonify({'error': 'An error occurred while retuning the model'})
 
+@registry.handles(
+	rule='/win-prediction',
+	method='POST'
+)
+def next_gameweek_fixture_result_prediction():
+	try:
+		predictions = run_win_prediction()
+		logger.info(f"Predictions made for the next gameweek: {predictions}")
+		return jsonify(predictions)
+	except Exception as e:
+		logger.error(f"An error occurred while predicting the results for the next gameweek: {str(e)}")
+		return jsonify({'error': 'An error occurred while predicting the results for the next gameweek'})
+	pass
 
 # Create functions to remake pca and scaler models
 @registry.handles(

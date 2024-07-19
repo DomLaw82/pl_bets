@@ -1,7 +1,5 @@
 from dataset_creation.create_dataset import create_prediction_dataset
-from win_prediction.data_modelling_one import run_data_modelling_part_one
 from neural_net.build_and_save_model import perform_scaling
-from win_prediction.win_prediction import run_win_prediction
 import tensorflow as tf
 import pandas as pd
 import numpy as np
@@ -21,15 +19,13 @@ logger = FluentLogger("predict").get_logger()
 # Use the model to predict the match stats for the game
 # Return these stats to the user
 
-def predict_match_outcome(home_team_id: str, home_players: list, away_team_id: str, away_players: list) -> dict:
+def predict_match_outcome(home_team_id: str, away_team_id: str) -> dict:
 	"""
 	Predicts the outcome of a match between two teams based on the given home team, home players, away team, and away players.
 
 	Parameters:
 	home_team (str): The name of the home team.
-	home_players (list): A list of home players.
 	away_team (str): The name of the away team.
-	away_players (list): A list of away players.
 
 	Returns:
 	dict: A dictionary containing the predicted match facts.
