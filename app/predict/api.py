@@ -57,11 +57,9 @@ def make_prediction():
 		request_body = request.get_json()
 
 		home_team_id = request_body.get('homeTeamId')
-		home_players = request_body.get('homePlayers')
 		away_team_id = request_body.get('awayTeamId')
-		away_players = request_body.get('awayPlayers')
 		
-		prediction = predict_match_outcome(home_team_id, home_players, away_team_id, away_players)
+		prediction = predict_match_outcome(home_team_id, away_team_id)
 		prediction = list_to_list_of_objects(prediction, ['home_goals', 'away_goals', 'home_shots', 'away_shots', 'home_shots_on_target', 'away_shots_on_target', 'home_corners', 'away_corners', 'home_fouls', 'away_fouls', 'home_yellow_cards', 'away_yellow_cards', 'home_red_cards', 'away_red_cards'])[0]
 
 		logger.info(f"Prediction made: {prediction}")

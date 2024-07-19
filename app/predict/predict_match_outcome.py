@@ -19,15 +19,13 @@ logger = FluentLogger("predict").get_logger()
 # Use the model to predict the match stats for the game
 # Return these stats to the user
 
-def predict_match_outcome(home_team_id: str, home_players: list, away_team_id: str, away_players: list) -> dict:
+def predict_match_outcome(home_team_id: str, away_team_id: str) -> dict:
 	"""
 	Predicts the outcome of a match between two teams based on the given home team, home players, away team, and away players.
 
 	Parameters:
 	home_team (str): The name of the home team.
-	home_players (list): A list of home players.
 	away_team (str): The name of the away team.
-	away_players (list): A list of away players.
 
 	Returns:
 	dict: A dictionary containing the predicted match facts.
@@ -35,7 +33,7 @@ def predict_match_outcome(home_team_id: str, home_players: list, away_team_id: s
 	try:
 		# Neural network prediction
 		pd.set_option('display.max_columns', 10)
-		df = create_prediction_dataset(home_team_id, home_players, away_team_id, away_players)
+		df = create_prediction_dataset(home_team_id, away_team_id)
 		
 		if df.empty:
 			return None
