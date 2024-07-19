@@ -27,8 +27,11 @@ def get_current_season():
 		return f"{str(current_year)}-{str(current_year + 1)}"
 	else:
 		return f"{str(current_year - 1)}-{str(current_year)}"
+	
+def get_current_date():
+	return datetime.date.today().strftime('%Y-%m-%d')
 
-def run_win_prediction(fixtures: list = []) -> list:
+def run_win_prediction() -> list:
 	"""
 	Run the win prediction model to predict the outcome of the given fixtures.
 
@@ -41,6 +44,21 @@ def run_win_prediction(fixtures: list = []) -> list:
 	match_columns = ["home_goals","away_goals","closing_home_odds","closing_draw_odds","closing_away_odds"]
 	all_columns = ["home_goals","away_goals","closing_home_odds","closing_draw_odds","closing_away_odds"] + features
 	output_columns = ["home_team_id", "away_team_id", "home_win_prob", "draw_prob", "away_win_prob"]
+	current_date = get_current_date()
+
+	fixtures = db.get_list(f"""
+		SELECT 
+			date, home_team_id, away_team_id 
+		FROM schedule 
+		WHERE date >= '{current_date}' 
+			AND round_number = (
+				SELECT 
+					MIN(round_number) 
+				FROM schedule
+				WHERE date >= '{current_date}'
+			)
+		ORDER BY date ASC
+	""")
 
 	fixtures_df = pd.DataFrame()
 
@@ -69,7 +87,7 @@ def run_win_prediction(fixtures: list = []) -> list:
 
 	output = []
 
-	for home_team_id, away_team_id in fixtures:
+	for date, home_team_id, away_team_id in fixtures:
 		latest_row = outcome_prob[(outcome_prob["home_team_id"] == home_team_id) & (outcome_prob["away_team_id"] == away_team_id)].tail(1)
 		home_win_prob = latest_row["home_win_prob"].values[0]
 		draw_prob = latest_row["draw_prob"].values[0]
@@ -77,6 +95,8 @@ def run_win_prediction(fixtures: list = []) -> list:
 		prediction = latest_row["prediction"].values[0]
 
 		output.append((home_team_id, away_team_id, home_win_prob, draw_prob, away_win_prob, prediction))
+
+	return output
 
 	# all_results = run_data_modelling_part_two(data)
 
