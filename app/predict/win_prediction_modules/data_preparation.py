@@ -255,8 +255,19 @@ def get_days_since_last_league_game(data: pd.DataFrame, team_id: str) -> pd.Data
         raise e
 
 # Process form for all teams
-def run_data_prep(sql_connection: SQLConnection, features: list):
+def run_data_prep(sql_connection: SQLConnection, features: list, fixtures: pd.DataFrame = pd.DataFrame()) -> pd.DataFrame:
+    """
+    Runs the data preparation process for predicting match outcomes.
 
+    Args:
+        sql_connection (SQLConnection): An instance of the SQLConnection class for connecting to the database.
+        features (list): A list of features to be added to the dataset.
+        fixtures (pd.DataFrame, optional): A DataFrame containing fixture data, to add fixtures for weekly prediction. Defaults to an empty DataFrame.
+
+    Returns:
+        pd.DataFrame: The prepared dataset with added features.
+
+    """
     match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals","closing_home_odds","closing_draw_odds","closing_away_odds"]
     goal_difference_features = ["home_team_rolling_goal_difference", "away_team_rolling_goal_difference", "home_team_rolling_goal_difference_at_home","away_team_rolling_goal_difference_at_away"]
     
@@ -266,6 +277,9 @@ def run_data_prep(sql_connection: SQLConnection, features: list):
 
     data[features] = np.nan
 
+    if not fixtures.empty:
+        data = pd.concat([data, fixtures], ignore_index=True)
+
     for team in teams:
         df = data[(data["home_team_id"] == team)| (data["away_team_id"] == team)].copy()
         df = get_team_form(df, team)
@@ -274,13 +288,4 @@ def run_data_prep(sql_connection: SQLConnection, features: list):
 
     data[goal_difference_features] = data[goal_difference_features].astype(int)
 
-    data['full_time_result'] = np.where(data['home_goals'] > data['away_goals'], 'H', np.where(data['away_goals'] > data['home_goals'], 'A', 'D'))
-
-    data['home_win'] = (data['full_time_result'] == 'H').astype(int)
-    data['draw'] = (data['full_time_result'] == 'D').astype(int)
-    data['away_win'] = (data['full_time_result'] == 'A').astype(int)
-
-    data = add_historic_head_to_head_results(data)
-
-    data.to_csv('./files/match_and_form_data.csv', index=False)
     return data

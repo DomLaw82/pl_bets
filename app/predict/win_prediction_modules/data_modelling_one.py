@@ -147,7 +147,7 @@ def run_data_modelling_part_one(model_type: str, data: pd.DataFrame, features: l
     # Calculate profit and win rate based on model predictions
     data_test_output = data_test_enhanced.copy()
 
-    data_test_output["model_prediction"] = np.where((
+    data_test_output["prediction"] = np.where((
         data_test_output["home_win_prob_norm"] > data_test_output["away_win_prob_norm"]) & (data_test_output["home_win_prob_norm"] > data_test_output["draw_prob_norm"]), "H",
         np.where(
             (data_test_output["draw_prob_norm"] > data_test_output["home_win_prob_norm"]) & (data_test_output["draw_prob_norm"] > data_test_output["away_win_prob_norm"]), "D",
@@ -155,7 +155,7 @@ def run_data_modelling_part_one(model_type: str, data: pd.DataFrame, features: l
         )
     )
 
-    data_test_output["won"] = np.where(data_test_output["full_time_result"] == data_test_output["model_prediction"], 1, 0)
+    data_test_output["won"] = np.where(data_test_output["full_time_result"] == data_test_output["prediction"], 1, 0)
     data_test_output["odds"] = np.where(data_test_output["full_time_result"] == "H", data_test_output["closing_home_odds"], np.where(data_test_output["full_time_result"] == "D", data_test_output["closing_draw_odds"], data_test_output["closing_away_odds"]))
 
     principal = 100
@@ -175,4 +175,13 @@ def run_data_modelling_part_one(model_type: str, data: pd.DataFrame, features: l
     }
     print(model_result)
 
-    return result, model_result
+    return {
+        "value_bets": {
+            "test_results": result,
+            "dataframe": data_test_enriched
+        },
+        "outcome_prob": {
+            "test_results": model_result,
+            "dataframe": data_test_output
+        }
+    }
