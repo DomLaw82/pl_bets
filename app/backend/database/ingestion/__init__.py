@@ -8,6 +8,10 @@ from data_intake.download_latest_data import download_latest_data
 from intake_api import app
 import os
 from app_logger import FluentLogger
+import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = FluentLogger("insert_latest_data").get_logger()
 
@@ -15,6 +19,10 @@ def insert_latest_data():
 
 	try:		
 		pl_stats_connector = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
+
+		current_year = datetime.datetime.now().year
+		current_month = datetime.datetime.now().month
+		season_end_year = current_year + 2 if current_month > 6 else current_year + 1 # +2 as range is used, which is exclusive
 
 		logger.info("---- Ingesting latest data ----")
 
