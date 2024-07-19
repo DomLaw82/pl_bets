@@ -9,6 +9,7 @@ from predict_match_outcome import predict_match_outcome
 from rebuild_model import rebuild_model
 from retune_and_build_model import retune_and_build_model
 from app_logger import FluentLogger
+from win_prediction import run_win_prediction
 
 rebar = Rebar()
 registry = rebar.create_handler_registry()
@@ -103,6 +104,19 @@ def retune():
 		logger.error(f"An error occurred while retuning the model: {str(e)}")
 		return jsonify({'error': 'An error occurred while retuning the model'})
 
+@registry.handles(
+	rule='/win-prediction',
+	method='POST'
+)
+def next_gameweek_fixture_result_prediction():
+	try:
+		predictions = run_win_prediction()
+		logger.info(f"Predictions made for the next gameweek: {predictions}")
+		return jsonify(predictions)
+	except Exception as e:
+		logger.error(f"An error occurred while predicting the results for the next gameweek: {str(e)}")
+		return jsonify({'error': 'An error occurred while predicting the results for the next gameweek'})
+	pass
 
 # Create functions to remake pca and scaler models
 @registry.handles(
