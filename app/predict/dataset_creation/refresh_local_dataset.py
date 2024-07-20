@@ -7,7 +7,7 @@ from app_logger import FluentLogger
 
 load_dotenv()
 
-db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), "localhost" or os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
+db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 logger = FluentLogger("predict-refresh_local_dataset").get_logger()
 
 def recreate_local_dataset():

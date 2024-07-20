@@ -2,7 +2,6 @@ from flask import Flask
 from flask import Flask, request, jsonify
 from flask_rebar import Rebar
 from flask_cors import CORS
-from schema.schemas import *
 import pandas as pd
 import sys
 from predict_match_outcome import predict_match_outcome
@@ -10,7 +9,7 @@ from rebuild_model import rebuild_model
 from retune_and_build_model import retune_and_build_model
 from app_logger import FluentLogger
 from win_prediction import run_win_prediction
-
+#TODO: Move SQLConnection HERE
 rebar = Rebar()
 registry = rebar.create_handler_registry()
 
@@ -38,7 +37,6 @@ def list_to_list_of_objects(list_of_tuples:list, column_names: list) -> list:
 @registry.handles(
 	rule='/predict/health',
 	method='GET',
-	response_body_schema=''
 )
 def health_check():
 	try:
@@ -50,7 +48,6 @@ def health_check():
 @registry.handles(
 	rule='/predict',
 	method='POST',
-	response_body_schema=match_facts_schema()
 )
 def make_prediction():
 	try:
@@ -71,7 +68,6 @@ def make_prediction():
 @registry.handles(
 	rule='/model/rebuild',
 	method='GET',
-	response_body_schema=''
 )
 def rebuild():
 	try:
@@ -85,7 +81,6 @@ def rebuild():
 @registry.handles(
 	rule='/model/retune',
 	method='GET',
-	response_body_schema=retune_schema()
 )
 def retune():
 	try:
@@ -104,7 +99,7 @@ def retune():
 
 @registry.handles(
 	rule='/win-prediction',
-	method='POST'
+	method='GET'
 )
 def next_gameweek_fixture_result_prediction():
 	try:
@@ -120,7 +115,6 @@ def next_gameweek_fixture_result_prediction():
 @registry.handles(
 	rule='/transformation/scaling',
 	method='POST',
-	response_body_schema=retune_schema()
 )
 def recreate_scaler():
 	pass
@@ -128,7 +122,6 @@ def recreate_scaler():
 @registry.handles(
 	rule='/transformation/pca',
 	method='POST',
-	response_body_schema=retune_schema()
 )
 def recreate_pca_object():
 	pass

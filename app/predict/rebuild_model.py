@@ -1,4 +1,4 @@
-from dataset_creation.create_dataset import create_dataset
+from dataset_creation.create_dataset import create_training_dataset
 from neural_net.build_and_save_model import build_and_save_model
 from transformation.pca import recreate_pca_object
 from transformation.scaling import recreate_scaler
@@ -12,7 +12,7 @@ def rebuild_model():
 		None
 	"""
 	try:
-		dataset = create_dataset()
+		dataset = create_training_dataset()
 		dataset.to_csv("./files/final_combined_dataframe.csv", index=False)
 		recreate_scaler()
 		recreate_pca_object()

@@ -86,7 +86,7 @@ export function PredictionPlayerCards(props) {
 }
 
 export function MatchCards(props) {
-    const { gameWeek, date, homeTeam, awayTeam, result, handleOpenMatchFactsModal } = props;
+    const { gameWeek, date, homeTeam, awayTeam, result, handleOpenMatchFactsModal, homeWinProb, awayWinProb, drawProb, prediction } = props;
     
     return (
         <Fragment>
@@ -98,7 +98,7 @@ export function MatchCards(props) {
                             flexDirection: 'row',
                             justifyContent: 'space-between'
                         }}>
-                            <Box>
+                            <Box sx={{width:"70%"}}>
                                 <Typography variant="h5" component="div">
                                     {homeTeam} vs {awayTeam}
                                 </Typography>
@@ -109,11 +109,36 @@ export function MatchCards(props) {
                                     Game Week: {gameWeek}
                                 </Typography>
                             </Box>
-                            <Box sx={{ alignContent: "center" }}>
-                                <Typography variant="h5">
-                                    {result}
-                                </Typography>
-                            </Box>
+                            {
+                                homeWinProb && awayWinProb && drawProb &&
+                                <Box sx={{width:"20%", alignItems: "center"}}>
+                                    <Typography variant="body2" color={homeWinProb > drawProb && homeWinProb > awayWinProb ? "green" : "white"}>
+                                        Home: {(homeWinProb*100).toPrecision(3)}%
+                                    </Typography>
+                                    <Typography variant="body2" color={awayWinProb > drawProb && awayWinProb > homeWinProb ? "green" : "white"}>
+                                        Away: {(awayWinProb*100).toPrecision(3)}%
+                                    </Typography>
+                                    <Typography variant="body2" color={drawProb > awayWinProb && drawProb > homeWinProb ? "green" : "white"}>
+                                        Draw: {(drawProb*100).toPrecision(3)}%
+                                    </Typography>
+                                </Box>
+                            }
+                            {
+                                !homeWinProb && !awayWinProb && !drawProb &&
+                                <Box sx={{ alignContent: "center", width:"10%" }}>
+                                    <Typography variant="h5">
+                                        {result}
+                                    </Typography>
+                                </Box>
+                            }
+                            {
+                                result === "-" && homeWinProb && awayWinProb && drawProb &&
+                                <Box sx={{ alignContent: "center", width:"10%" }}>
+                                    <Typography variant="h3">
+                                        {prediction}
+                                    </Typography>
+                                </Box>
+                            }
                         </Box>
                     </CardContent>
                     <Divider sx={{ width: '100%', height: 2 }} />

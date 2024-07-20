@@ -7,7 +7,7 @@ from db_connection import SQLConnection
 from app_logger import FluentLogger
 from flask import render_template
 from datetime import datetime
-import os
+import os, datetime
 
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 logger = FluentLogger("api").get_logger()
@@ -44,7 +44,6 @@ def index():
 @registry.handles(
    rule='/teams',
    method='GET',
-   response_body_schema=TeamSchema(many=True)
 )
 def get_teams():
    try:
@@ -61,7 +60,6 @@ def get_teams():
 @registry.handles(
    rule='/active-teams',
    method='GET',
-   response_body_schema=TeamSchema(many=True)
 )
 def get_active_teams() :
    try:
@@ -92,7 +90,6 @@ def get_active_teams() :
 @registry.handles(
    rule='/players',
    method='GET',
-   response_body_schema=PlayerTeamNameSchema(many=True)
 )
 def get_all_players() :
    try:
@@ -133,7 +130,6 @@ def get_all_players() :
 @registry.handles(
    rule='/all-active-players',
    method='GET',
-   response_body_schema=''
 )
 def get_all_active_players() -> list:
    try:
@@ -169,7 +165,6 @@ def get_all_active_players() -> list:
 @registry.handles(
    rule='/active-players/<team_id>',
    method='GET',
-   response_body_schema=''
 )
 def get_team_current_roster(team_id:str) -> list:
    try:
@@ -208,7 +203,7 @@ def get_team_current_roster(team_id:str) -> list:
 def get_all_seasons() -> list:
    try:
       seasons = db.get_list(f"""
-         SELECT DISTINCT(season) FROM match ORDER BY season ASC
+         SELECT DISTINCT(season) FROM schedule ORDER BY season ASC;
       """)
       seasons = [season[0] for season in seasons]
       logger.info("All seasons retrieved")
@@ -222,8 +217,8 @@ def decompose_season(season: str) -> tuple:
    start_month = '08'
    end_month = '05'
    
-   start_date = datetime.strptime(f"{start_year}-{start_month}-01", "%Y-%m-%d")
-   end_date = datetime.strptime(f"{end_year}-{end_month}-31", "%Y-%m-%d")
+   start_date = datetime.datetime.strptime(f"{start_year}-{start_month}-01", "%Y-%m-%d")
+   end_date = datetime.datetime.strptime(f"{end_year}-{end_month}-31", "%Y-%m-%d")
    
    return (start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"))
 
@@ -231,7 +226,6 @@ def decompose_season(season: str) -> tuple:
 @registry.handles(
    rule='/matches/season/<season>',
    method='GET',
-   response_body_schema=ScheduleSchema(many=True)
 )
 def get_schedule_by_season(season:str) -> list:
    try:
@@ -242,6 +236,8 @@ def get_schedule_by_season(season:str) -> list:
             CAST(s.round_number AS VARCHAR) AS game_week,
             CAST(home_team.name AS VARCHAR) AS home_team,
             CAST(away_team.name AS VARCHAR) AS away_team,
+            home_team.id AS home_team_id,
+            away_team.id AS away_team_id,
             CAST(s.result AS VARCHAR) AS result,
             s.competition_id AS competition_id
          FROM schedule s
@@ -255,6 +251,27 @@ def get_schedule_by_season(season:str) -> list:
    except Exception as e:
       logger.error(f"Error with endpoint /matches/season/{season}: {str(e)}")
       return jsonify({"error": f"Error with endpoint /matches/season/{season}: {str(e)}"}), 500
+
+@registry.handles(
+   rule='/matches/current-gameweek',
+   method='GET',
+)
+def get_current_gameweek() -> list:
+   try:
+      current_date = datetime.date.today().strftime("%Y-%m-%d")
+      schedule = db.get_list(f"""
+         SELECT 
+            MIN(round_number) AS game_week
+         FROM 
+            schedule s
+         WHERE 
+            date > '{current_date}';
+      """)
+      logger.info(f"Current gameweek retrieved: {schedule[0][0]}")
+      return jsonify(schedule[0][0])
+   except Exception as e:
+      logger.error(f"Error with endpoint /matches/current-gameweek: {str(e)}")
+      return jsonify({"error": f"Error with endpoint /matches/current-gameweek: {str(e)}"}), 500
    
 @registry.handles(
    rule='/matches/match-facts',
@@ -418,7 +435,6 @@ def get_prediction_stats():
 @registry.handles(
    rule='/prediction/squads',
    method='GET',
-   response_body_schema=''
 )
 def get_prediction_squads() -> list:
    try:
@@ -476,7 +492,6 @@ def get_prediction_squads() -> list:
 @registry.handles(
    rule="/prediction/team-id",
    method="GET",
-   response_body_schema=""
 )
 def get_team_id():
    try:
@@ -491,7 +506,6 @@ def get_team_id():
 @registry.handles(
    rule='/players/historic-stats/<player_id>',
    method='GET',
-   response_body_schema=''
 )
 def get_player_historic_stats_by_season(player_id:str) -> list:
    try:
@@ -602,7 +616,6 @@ def get_player_historic_stats_by_season(player_id:str) -> list:
 @registry.handles(
    rule='/players/recent-minutes/<player_id>',
    method='GET',
-   response_body_schema=''
 )
 def get_player_recent_minutes_stats_by_season(player_id:str) -> list:
    try:
@@ -630,7 +643,6 @@ def get_player_recent_minutes_stats_by_season(player_id:str) -> list:
 # @registry.handles(
 #    rule='/download-latest-data',
 #    method='GET',
-#    response_body_schema=''
 # )
 # def download_latest_data():
 #    # module will be available in the container, but is not in the path locally (see app/backend/database/ingestion/__init__.py)
