@@ -11,7 +11,7 @@ import datetime
 
 load_dotenv()
 
-db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), "localhost" or os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
+db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
 features = os.environ.get("WIN_PREDICTION_FEATURES").split(",")
 
@@ -48,7 +48,7 @@ def run_win_prediction() -> list:
 
 	fixtures = db.get_list(f"""
 		SELECT 
-			date, home_team_id, away_team_id 
+			date, home_team_id, away_team_id
 		FROM schedule 
 		WHERE date >= '{current_date}' 
 			AND round_number = (
@@ -89,12 +89,12 @@ def run_win_prediction() -> list:
 
 	for date, home_team_id, away_team_id in fixtures:
 		latest_row = outcome_prob[(outcome_prob["home_team_id"] == home_team_id) & (outcome_prob["away_team_id"] == away_team_id)].tail(1)
-		home_win_prob = latest_row["home_win_prob"].values[0]
-		draw_prob = latest_row["draw_prob"].values[0]
-		away_win_prob = latest_row["away_win_prob"].values[0]
+		home_win_prob = latest_row["home_win_prob_norm"].values[0]
+		draw_prob = latest_row["draw_prob_norm"].values[0]
+		away_win_prob = latest_row["away_win_prob_norm"].values[0]
 		prediction = latest_row["prediction"].values[0]
 
-		output.append((home_team_id, away_team_id, home_win_prob, draw_prob, away_win_prob, prediction))
+		output.append(dict(home_team_id=home_team_id, away_team_id=away_team_id, home_win_prob=home_win_prob, draw_prob=draw_prob, away_win_prob=away_win_prob, prediction=prediction))
 
 	return output
 

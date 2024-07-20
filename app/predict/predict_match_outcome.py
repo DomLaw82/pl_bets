@@ -3,10 +3,16 @@ from neural_net.build_and_save_model import perform_scaling
 import tensorflow as tf
 import pandas as pd
 import numpy as np
-from joblib import load
+import os
+from db_connection import SQLConnection
 from app_logger import FluentLogger
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = FluentLogger("predict").get_logger()
+
+db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
 # Description: Predict the outcome of a match based on the trained model
 
@@ -33,7 +39,7 @@ def predict_match_outcome(home_team_id: str, away_team_id: str) -> dict:
 	try:
 		# Neural network prediction
 		pd.set_option('display.max_columns', 10)
-		df = create_prediction_dataset(home_team_id, away_team_id)
+		df = create_prediction_dataset(db, home_team_id, away_team_id)
 		
 		if df.empty:
 			return None
