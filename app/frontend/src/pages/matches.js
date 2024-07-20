@@ -1,4 +1,4 @@
-import { useState, useCallback, Fragment } from "react";
+import { useEffect, useState, useCallback, Fragment } from "react";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -10,28 +10,57 @@ import ButtonGroup from "@mui/material/ButtonGroup";
 import { MatchModal } from "../components/modals";
 import { useQuery } from "react-query";
 import { PageLoading } from "../components/loaders";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export default function Matches(props) {
-	const [selectedSeason, setSelectedSeason] = useState("2023-2024");
+	const [seasons, setSeasons] = useState([]);
+	const [selectedSeason, setSelectedSeason] = useState("2024-2025");
+	const [matches, setMatches] = useState([]);
+	const [currentGameWeek, setCurrentGameWeek] = useState("0");
+	const [matchFacts, setMatchFacts] = useState([]);
 	const [originX, setOriginX] = useState(0);
 	const [originY, setOriginY] = useState(0);
-	const [date, setDate] = useState("");
-	const [homeTeam, setHomeTeam] = useState("");
-	const [awayTeam, setAwayTeam] = useState("");
+	const [formattedDate, setCurrentDate] = useState("");
+	const [
+		currentGameWeekMatchesPrediction,
+		setCurrentGameWeekMatchesPrediction,
+	] = useState([]);
+
 	const [isMatchFactsModalOpen, setIsMatchFactsModalOpen] = useState(false);
 
+	async function getMatchFacts(date, homeTeamName, awayTeamName) {
+		const formattedDate = date.split(" ")[0].replace(/\//g, "-");
+		const response = await fetch(
+			`${
+				process.env.REACT_APP_DATA_API_ROOT
+			}/matches/match-facts?date=${formattedDate}&home_team=${homeTeamName.replace(
+				/&/g,
+				"%26"
+			)}&away_team=${awayTeamName.replace(/&/g, "%26")}`,
+			{
+				headers: {
+					"Access-Control-Allow-Origin": "*",
+				},
+			}
+		);
+		const matchFacts = await response.json();
+		return matchFacts[0];
+	}
+
 	const handleOpenMatchFactsModal = useCallback(
-		async (event, date, homeTeam, awayTeam) => {
+		async (event, date, homeTeamName, awayTeamName) => {
 			setOriginX(event.clientX);
 			setOriginY(event.clientY);
-			setDate(date);
-			setHomeTeam(homeTeam);
-            setAwayTeam(awayTeam);
+			const facts = await getMatchFacts(date, homeTeamName, awayTeamName);
 			setIsMatchFactsModalOpen(true);
+			setMatchFacts(facts);
 		},
-		[setIsMatchFactsModalOpen]
-    );
-    
+		[setIsMatchFactsModalOpen, setMatchFacts]
+	);
+
 	const handleCloseMatchFactsModal = useCallback(() => {
 		setIsMatchFactsModalOpen(false);
 	}, []);
@@ -45,19 +74,9 @@ export default function Matches(props) {
 				},
 			}
 		);
-		if (!response.ok) {
-			throw new Error("Network response was not ok");
-		}
-		return response.json();
+		const matches = await response.json();
+		return matches;
 	}
-
-	const {
-		data: matches = [],
-		isLoading: isLoadingMatches,
-		// error: matchesError,
-	} = useQuery(["matches", selectedSeason], () => getMatches(selectedSeason), {
-		staleTime: Infinity,
-	});
 
 	async function getSeasons() {
 		const response = await fetch(
@@ -68,63 +87,82 @@ export default function Matches(props) {
 				},
 			}
 		);
-		if (!response.ok) {
-			throw new Error("Network response was not ok");
-		}
-		return response.json();
+		const seasons = await response.json();
+		return seasons;
 	}
-
-	const {
-		data: seasons = [],
-		isLoading: isLoadingSeasons,
-		// error: seasonsError,
-	} = useQuery("seasons", getSeasons, {
-        staleTime: Infinity,
-	});
-    
-	const getMatchFacts = async (date, homeTeam, awayTeam) => {
-		const formattedDate = date.split(" ")[0].replace(/\//g, "-");
+	async function getCurrentGameWeek() {
 		const response = await fetch(
-			`${
-				process.env.REACT_APP_DATA_API_ROOT
-			}/matches/match-facts?date=${formattedDate}&home_team=${homeTeam.replace(
-				/&/g,
-				"%26"
-			)}&away_team=${awayTeam.replace(/&/g, "%26")}`,
+			`${process.env.REACT_APP_DATA_API_ROOT}/matches/current-gameweek`,
 			{
 				headers: {
 					"Access-Control-Allow-Origin": "*",
 				},
 			}
 		);
+		const gameweek = await response.json();
+		return gameweek.toString();
+	}
 
-		if (!response.ok) {
-			throw new Error("Network response was not ok");
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const matches = await getMatches(selectedSeason);
+				const currentGameWeek = await getCurrentGameWeek();
+				setMatches(matches);
+				setCurrentGameWeek(currentGameWeek);
+			} catch (error) {
+				console.error("Error:", error);
+			}
+		};
+
+		fetchData();
+	}, [selectedSeason]);
+
+	useEffect(() => {
+		const fetchSeasons = async () => {
+			try {
+				const seasons = await getSeasons();
+				setSeasons(seasons);
+			} catch (error) {
+				console.error("Error fetching seasons:", error);
+			}
+		};
+
+		fetchSeasons();
+	}, [setSeasons]);
+
+	useEffect(() => {
+		let currentDate = new Date();
+
+		let year = currentDate.getFullYear(); // Gets the full year (4 digits)
+		let month = currentDate.getMonth() + 1; // Gets the month (0-11, so add 1)
+		let day = currentDate.getDate(); // Gets the day of the month (1-31)
+
+		// Pad the month and day with a leading zero if necessary
+		month = month < 10 ? "0" + month : month;
+		day = day < 10 ? "0" + day : day;
+
+		// Combine into a final date string in YYYY-MM-DD format
+		let formattedDate = `${year}/${month}/${day}`;
+		setCurrentDate(formattedDate);
+	}, [selectedSeason]);
+
+	useEffect(() => {
+		async function getCurrentGameWeekMatchesPrediction() {
+			const response = await fetch(
+				`${process.env.REACT_APP_PREDICT_API_ROOT}/win-prediction`,
+				{
+					headers: {
+						"Access-Control-Allow-Origin": "*",
+					},
+				}
+			);
+			const predictions = await response.json();
+			setCurrentGameWeekMatchesPrediction(predictions);
 		}
-		return response.json();
-	};
 
-	const {
-		data: matchFacts = {},
-		isLoading: isLoadingMatchFacts,
-		// error: matchFactsError,
-	} = useQuery(
-            [
-                "matchFacts",
-                date,
-                homeTeam,
-                awayTeam
-            ],
-            () => getMatchFacts(date, homeTeam, awayTeam),
-        {
-                enabled: !!homeTeam && !!awayTeam && !!date,
-                staleTime: Infinity,
-            }
-        );
-    
-	if (isLoadingMatches || isLoadingSeasons) {
-		return <PageLoading />;
-    }
+		getCurrentGameWeekMatchesPrediction();
+	}, []);
 
 	return (
 		<Fragment>
@@ -132,7 +170,7 @@ export default function Matches(props) {
 				<CssBaseline />
 				<Box
 					sx={{
-						marginTop: 1,
+						marginTop: 8,
 						display: "flex",
 						flexDirection: "column",
 						alignItems: "center",
@@ -158,8 +196,10 @@ export default function Matches(props) {
 									return (
 										<Button
 											key={season}
-                                            onClick={() => setSelectedSeason(season)}
-                                            variant={selectedSeason === season ? "contained" : "outlined"}
+											onClick={() => setSelectedSeason(season)}
+											variant={
+												selectedSeason === season ? "contained" : "outlined"
+											}
 										>
 											{season}
 										</Button>
@@ -168,35 +208,154 @@ export default function Matches(props) {
 							</ButtonGroup>
 						</Container>
 						<Divider sx={{ width: "100%", height: 2 }} />
-                        <Divider sx={{ width: "100%", height: 2 }} />
-                        <Box  sx={{ width: "100%", overflowY: "scroll", maxHeight:"60vh" }}>
-                            <Box id="past-matches">
-                                {matches.map((match) => {
-                                    return (
-                                        <MatchCards
-                                            key={`${match.home_team}-${match.away_team}-${match.game_week}`} // Ensure keys are unique and well-formed
-                                            gameWeek={match.game_week}
-                                            date={match.date}
-                                            homeTeam={match.home_team}
-                                            awayTeam={match.away_team}
-                                            result={match.result}
-                                            handleOpenMatchFactsModal={handleOpenMatchFactsModal}
-                                            matchFactsPopulated={matchFacts.length > 0}
-                                        />
-                                    );
-                                })}
-                            </Box>
-                        </Box>
+						<Divider sx={{ width: "100%", height: 2 }} />
+						<Accordion>
+							<AccordionSummary
+								expandIcon={<ExpandMoreIcon />}
+								aria-controls="panel1-content"
+								id="panel1-header"
+							>
+								<Typography
+									variant="h2"
+									sx={{
+										display: "flex",
+										flexDirection: { xs: "column", md: "row" },
+										alignSelf: "center",
+										textAlign: "center",
+										fontSize: "clamp(2.5rem, 8vw, 2.5rem)",
+									}}
+								>
+									Current Game Week
+								</Typography>
+							</AccordionSummary>
+							<AccordionDetails>
+								<Box id="current-game-week">
+									{matches
+										.filter(
+											(match) =>
+												(match.date > formattedDate) &
+												(match.game_week === currentGameWeek)
+										) // Filter matches based on date
+                                        .map((match) => {
+                                            console.log(currentGameWeekMatchesPrediction)
+											const prediction = currentGameWeekMatchesPrediction.find(
+												(pred) =>
+													pred.home_team_id === match.home_team_id &&
+													pred.away_team_id === match.away_team_id
+                                            );
+                                            console.log(prediction)
+											return (
+												<MatchCards
+													key={`${match.home_team}-${match.away_team}-${match.date}`}
+													gameWeek={match.game_week}
+													date={match.date}
+													homeTeam={match.home_team}
+													awayTeam={match.away_team}
+													result={match.result}
+													homeWinProb={
+														prediction ? prediction.home_win_prob : null
+													}
+													awayWinProb={
+														prediction ? prediction.away_win_prob : null
+													}
+													drawProb={prediction ? prediction.draw_prob : null}
+                                                    prediction={prediction ? prediction.prediction : null}
+													handleOpenMatchFactsModal={handleOpenMatchFactsModal}
+												/>
+											);
+										})}
+								</Box>
+							</AccordionDetails>
+						</Accordion>
+						<Divider sx={{ width: "100%", height: 2 }} />
+						<Accordion>
+							<AccordionSummary
+								expandIcon={<ExpandMoreIcon />}
+								aria-controls="panel2-content"
+								id="panel2-header"
+							>
+								<Typography
+									variant="h2"
+									sx={{
+										display: "flex",
+										flexDirection: { xs: "column", md: "row" },
+										alignSelf: "center",
+										textAlign: "center",
+										fontSize: "clamp(2.5rem, 8vw, 2.5rem)",
+									}}
+								>
+									Upcoming Matches
+								</Typography>
+							</AccordionSummary>
+							<AccordionDetails>
+								<Box id="upcoming-matches">
+									{matches
+										.filter(
+											(match) =>
+												(match.date > formattedDate) &
+												(match.game_week > currentGameWeek)
+										) // Filter matches based on date
+										.map((match) => (
+											<MatchCards
+												key={`${match.home_team}-${match.away_team}-${match.date}`}
+												gameWeek={match.game_week}
+												date={match.date}
+												homeTeam={match.home_team}
+												awayTeam={match.away_team}
+												result={match.result}
+												handleOpenMatchFactsModal={handleOpenMatchFactsModal}
+											/>
+										))}
+								</Box>
+							</AccordionDetails>
+						</Accordion>
+						<Divider sx={{ width: "100%", height: 2 }} />
+						<Accordion>
+							<AccordionSummary
+								expandIcon={<ExpandMoreIcon />}
+								aria-controls="panel3-content"
+								id="panel3-header"
+							>
+								<Typography
+									variant="h2"
+									sx={{
+										display: "flex",
+										flexDirection: { xs: "column", md: "row" },
+										alignSelf: "center",
+										textAlign: "center",
+										fontSize: "clamp(2.5rem, 8vw, 2.5rem)",
+									}}
+								>
+									Past Matches
+								</Typography>
+							</AccordionSummary>
+							<AccordionDetails>
+								<Box id="past-matches">
+									{matches
+										.filter((match) => match.date < formattedDate) // Filter matches based on date
+										.map((match) => (
+											<MatchCards
+												key={`${match.home_team}-${match.away_team}-${match.date}`}
+												gameWeek={match.game_week}
+												date={match.date}
+												homeTeam={match.home_team}
+												awayTeam={match.away_team}
+												result={match.result}
+												handleOpenMatchFactsModal={handleOpenMatchFactsModal}
+											/>
+										))}
+								</Box>
+							</AccordionDetails>
+						</Accordion>
 					</Box>
 				</Box>
 				{
 					<MatchModal
 						isMatchFactsModalOpen={isMatchFactsModalOpen}
-                        handleCloseMatchFactsModal={handleCloseMatchFactsModal}
-                        isLoadingMatchFacts={isLoadingMatchFacts}
-                        matchFacts={matchFacts}
+						handleCloseMatchFactsModal={handleCloseMatchFactsModal}
+						matchFacts={matchFacts}
 						originX={originX}
-                        originY={originY}
+						originY={originY}
 					/>
 				}
 			</Container>

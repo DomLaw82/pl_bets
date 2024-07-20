@@ -2,14 +2,14 @@ from flask import Flask
 from flask import Flask, request, jsonify
 from flask_rebar import Rebar
 from flask_cors import CORS
-from schema.schemas import *
 import pandas as pd
 import sys
 from predict_match_outcome import predict_match_outcome
 from rebuild_model import rebuild_model
 from retune_and_build_model import retune_and_build_model
 from app_logger import FluentLogger
-
+from win_prediction import run_win_prediction
+#TODO: Move SQLConnection HERE
 rebar = Rebar()
 registry = rebar.create_handler_registry()
 
@@ -37,7 +37,6 @@ def list_to_list_of_objects(list_of_tuples:list, column_names: list) -> list:
 @registry.handles(
 	rule='/predict/health',
 	method='GET',
-	response_body_schema=''
 )
 def health_check():
 	try:
@@ -49,18 +48,15 @@ def health_check():
 @registry.handles(
 	rule='/predict',
 	method='POST',
-	response_body_schema=""
 )
 def make_prediction():
 	try:
 		request_body = request.get_json()
 
 		home_team_id = request_body.get('homeTeamId')
-		home_players = request_body.get('homePlayers')
 		away_team_id = request_body.get('awayTeamId')
-		away_players = request_body.get('awayPlayers')
 		
-		prediction = predict_match_outcome(home_team_id, home_players, away_team_id, away_players)
+		prediction = predict_match_outcome(home_team_id, away_team_id)
 		prediction = list_to_list_of_objects(prediction, ['home_goals', 'away_goals', 'home_shots', 'away_shots', 'home_shots_on_target', 'away_shots_on_target', 'home_corners', 'away_corners', 'home_fouls', 'away_fouls', 'home_yellow_cards', 'away_yellow_cards', 'home_red_cards', 'away_red_cards'])[0]
 
 		logger.info(f"Prediction made: {prediction}")
@@ -72,7 +68,6 @@ def make_prediction():
 @registry.handles(
 	rule='/model/rebuild',
 	method='GET',
-	response_body_schema=''
 )
 def rebuild():
 	try:
@@ -86,7 +81,6 @@ def rebuild():
 @registry.handles(
 	rule='/model/retune',
 	method='GET',
-	response_body_schema=retune_schema()
 )
 def retune():
 	try:
@@ -103,12 +97,24 @@ def retune():
 		logger.error(f"An error occurred while retuning the model: {str(e)}")
 		return jsonify({'error': 'An error occurred while retuning the model'}), 500
 
+@registry.handles(
+	rule='/win-prediction',
+	method='GET'
+)
+def next_gameweek_fixture_result_prediction():
+	try:
+		predictions = run_win_prediction()
+		logger.info(f"Predictions made for the next gameweek: {predictions}")
+		return jsonify(predictions)
+	except Exception as e:
+		logger.error(f"An error occurred while predicting the results for the next gameweek: {str(e)}")
+		return jsonify({'error': 'An error occurred while predicting the results for the next gameweek'})
+	pass
 
 # Create functions to remake pca and scaler models
 @registry.handles(
 	rule='/transformation/scaling',
 	method='POST',
-	response_body_schema=retune_schema()
 )
 def recreate_scaler():
 	pass
@@ -116,7 +122,6 @@ def recreate_scaler():
 @registry.handles(
 	rule='/transformation/pca',
 	method='POST',
-	response_body_schema=retune_schema()
 )
 def recreate_pca_object():
 	pass

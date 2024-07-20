@@ -1,35 +1,49 @@
-import { Fragment, useState } from "react";
-import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
-import CssBaseline from '@mui/material/CssBaseline';
-import Typography from '@mui/material/Typography';
-import { Button, FormControl, Divider, Select, InputLabel, MenuItem } from "@mui/material";
+import { Fragment, useEffect, useState } from "react";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import CssBaseline from "@mui/material/CssBaseline";
+import Typography from "@mui/material/Typography";
+import {
+	Grid,
+	Button,
+	FormControl,
+	Divider,
+	Select,
+	InputLabel,
+	MenuItem,
+} from "@mui/material";
 import { Tabs, Tab } from "@mui/material";
-import AppBar from '@mui/material/AppBar';
+import AppBar from "@mui/material/AppBar";
 import { FormStats } from "../components/predictionTabs/predictionFormStats";
 import { AverageStats } from "../components/predictionTabs/predictionAverages";
 import { HeadToHead } from "../components/predictionTabs/predictionHeadToHead";
 import { Squads } from "../components/predictionTabs/predictionSquads";
 import { TabPanel, a11yProps } from "../components/tabs";
+import { PredictionOutputModal } from "../components/modals";
+import HistoryIcon from '@mui/icons-material/History';
+import { PredictionHistoryModal } from "../components/modals";
 import { PredictionModal } from "../components/modals";
 import { useQuery } from "react-query";
 import { PageLoading } from "../components/loaders";
 
 
 export default function Prediction(props) {
-
 	const { teams } = props;
 
 	const tabs = ["FORM", "AVERAGES AT LOCATION", "HEAD TO HEAD", "SQUADS"];
-	
+
 	const [value, setValue] = useState(0);
 
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
-	  };
+	};
 
-	const [homeTeam, setHomeTeam] = useState('');
-	const [awayTeam, setAwayTeam] = useState('');
+	const [homeTeam, setHomeTeam] = useState("");
+	const [homeTeamId, setHomeTeamId] = useState("");
+	const [awayTeam, setAwayTeam] = useState("");
+	const [awayTeamId, setAwayTeamId] = useState("");
+	const [homeTeamSquad, setHomeTeamSquad] = useState([]);
+	const [awayTeamSquad, setAwayTeamSquad] = useState([]);
 
 	const [homeTeamFormStats, setHomeTeamFormStats] = useState([]);
 	const [awayTeamFormStats, setAwayTeamFormStats] = useState([]);
@@ -37,55 +51,72 @@ export default function Prediction(props) {
 	const [awayTeamAverageStats, setAwayTeamAverageStats] = useState([]);
 	const [headToHeadStats, setHeadToHeadStats] = useState([]);
 
+	const [isPredictionOutputModalOpen, setIsPredictionOutputModalOpen] =
+		useState(false);
+	const [isPredictionHistoryModalOpen, setIsPredictionHistoryModalOpen] =
+		useState(false);
+
+	const [predictionOutput, setPredictionOutput] = useState([]);
+	const [predictionHistory, setPredictionHistory] = useState([])
+
 	const [isPredictionModalOpen, setIsPredictionModalOpen] = useState(false);
-	
+
+	const [originX, setOriginX] = useState(0);
+	const [originY, setOriginY] = useState(0);
+
+	function addToPredictionHistory(prediction) {
+		let temp = predictionHistory;
+		temp = temp.filter(obj => obj.home_team !== prediction.home_team || obj.away_team !== prediction.away_team)
+		temp.push(prediction)
+		setPredictionHistory(temp)
+	}
 
 	const getTeamIdFromName = async (teamName) => {
-		const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/prediction/team-id?team_name=${encodeURIComponent(teamName)}`,
-			{
-				method: 'GET',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			}
-		);
-		
-		if (!response.ok) {
-			throw new Error("Network response was not ok");
+		try {
+			const response = await fetch(
+				`${
+					process.env.REACT_APP_DATA_API_ROOT
+				}/prediction/team-id?team_name=${encodeURIComponent(teamName)}`
+			);
+			const data = await response.json();
+			return data.id;
+		} catch (error) {
+			console.error("Failed to fetch team ID:", error);
+			return null;
 		}
-		const result = await response.json();
-		return result.id;
 	};
 
-	const {
-		data: homeId = "",
-		isLoading: isLoadingHomeTeamId,
-		// error: teamIdError,
-	} = useQuery(
-		[
-			"teamId",
-			homeTeam,
-		],
-		() => homeTeam && getTeamIdFromName(homeTeam),
-		{
-			staleTime: Infinity
+	const runPrediction = async (event) => {
+		try {
+			const response = await fetch(
+				`${process.env.REACT_APP_PREDICT_API_ROOT}/predict`,
+				{
+					method: "POST",
+					credentials: "include",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						homeTeamId: homeTeamId,
+						awayTeamId: awayTeamId,
+						homePlayers: [],
+						awayPlayers: [],
+					}),
+				}
+			);
+			const data = await response.json();
+			console.log(data);
+			setPredictionOutput(data);
+			setOriginX(event.clientX);
+			setOriginY(event.clientY);
+			setIsPredictionOutputModalOpen(true);
+			data.home_team = homeTeam;
+			data.away_team = awayTeam;
+			addToPredictionHistory(data);
+		} catch (error) {
+			console.error("Prediction failed:", error);
 		}
-	);
-	const {
-		data: awayId = "",
-		isLoading: isLoadingAwayTeamId,
-		error: awayTeamIdError,
-	} = useQuery(
-		[
-			"teamId",
-			awayTeam,
-		],
-		() => awayTeam && getTeamIdFromName(awayTeam),
-		{
-			staleTime: Infinity,
-		}
-	);
+	};
 
 	const getPredictionStats = async (homeTeam, awayTeam) => {
 		const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/prediction/stats?home_team=${encodeURIComponent(homeTeam)}&away_team=${encodeURIComponent(awayTeam)}`,
@@ -131,80 +162,44 @@ export default function Prediction(props) {
 	);
 
 	const getPredictionSquads = async (homeTeam, awayTeam) => {
-		const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/prediction/squads?home_team=${encodeURIComponent(homeTeam)}&away_team=${encodeURIComponent(awayTeam)}`,
-			{
-				method: 'GET',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json'
-				}
-			}
+		fetch(
+			`${
+				process.env.REACT_APP_DATA_API_ROOT
+			}/prediction/squads?home_team=${encodeURIComponent(
+				homeTeam
+			)}&away_team=${encodeURIComponent(awayTeam)}`
 		)
-		if (!response.ok) {
-			throw new Error("Network response was not ok");
-		}
-		return response.json();
-	};
-
-	const {
-		data: predictionSquads = {},
-		isLoading: isLoadingPredictionSquads,
-		error: predictionSquadsError,
-	} = useQuery(
-		[
-			"squads",
-			homeTeam,
-			awayTeam,
-		],
-		() => getPredictionSquads(homeTeam, awayTeam),
-		{
-			staleTime: Infinity,
-		}
-
-	);
-	
-	const runPrediction = async () => {
-		const response = await fetch(`${process.env.REACT_APP_PREDICT_API_ROOT}/predict`, {
-			method: 'POST',
-			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				homeTeamId: homeId,
-				awayTeamId: awayId,
-				homePlayers: [],
-				awayPlayers: []
+			.then((response) => response.json())
+			.then((data) => {
+				console.log(data);
+				setHomeTeamSquad(data.home_team_squad);
+				setAwayTeamSquad(data.away_team_squad);
 			})
-		});
-
-		if (!response.ok) {
-			throw new Error("Network response was not ok");
-		}
-
-		return response.json();
+			.catch((error) => console.log(error));
 	};
-	
-	const {
-		data: predictionOutput = [],
-		isLoading: isLoadingPredictionOutput,
-		error: predictionOutputError,
-	} = useQuery(
-		[
-			"predictionOutput",
-			homeId,
-			awayId,
-		],
-		() => runPrediction(),
-		{	
-			enabled: !!homeId && !!awayId && homeId !== awayId,
-			staleTime: Infinity,
-		}
-		);
-	
-	console.log(predictionOutput)
-	
-	
+
+	useEffect(() => {
+		const getTeamIds = async (homeTeam, awayTeam) => {
+			if (homeTeam) {
+				const homeTeamId = await getTeamIdFromName(homeTeam);
+				setHomeTeamId(homeTeamId);
+			}
+			if (awayTeam) {
+				const awayTeamId = await getTeamIdFromName(awayTeam);
+				setAwayTeamId(awayTeamId);
+			}
+		};
+		const getStats = async (homeTeam, awayTeam) => {
+			if (homeTeam && awayTeam && homeTeam !== awayTeam) {
+				await getPredictionStats(homeTeam, awayTeam);
+				await getPredictionSquads(homeTeam, awayTeam);
+			}
+		};
+
+		getTeamIds(homeTeam, awayTeam);
+		getStats(homeTeam, awayTeam);
+	}, [homeTeam, awayTeam]);
+
 	return (
 		<Fragment>
 			<Container component="main" sx={{height: "max-content"}}>
@@ -220,21 +215,21 @@ export default function Prediction(props) {
 					<Typography
 						variant="h1"
 						sx={{
-							display: 'flex',
-							flexDirection: { xs: 'column', md: 'row' },
-							alignSelf: 'center',
-							textAlign: 'center',
-							fontSize: 'clamp(3.5rem, 10vw, 4rem)',
+							display: "flex",
+							flexDirection: { xs: "column", md: "row" },
+							alignSelf: "center",
+							textAlign: "center",
+							fontSize: "clamp(3.5rem, 10vw, 4rem)",
 						}}
 					>
 						Prediction
 					</Typography>
-					<Divider sx={{ width: '100%', height: 2 }} />
-					<Box sx={{ width: '100%'}}>
-						<Divider sx={{ width: '100%', height: 2 }} />
-						<Box component="div" sx={{ mt: 2, height: "60vh" }}>
-							<Box component="form" noValidate sx={{ mt: 1, display: "flex", flexDirection: "row" }}>
-								<Box sx={{width: "50%"}}>
+					<Divider sx={{ width: "100%", height: 2 }} />
+					<Box sx={{ width: "100%", height: 2 }}>
+						<Divider sx={{ width: "100%", height: 2 }} />
+						<Box component="div" sx={{ mt: 3 }}>
+							<Grid container spacing={2}>
+								<Grid item xs={12} sm={6}>
 									<FormControl key={"home-team-select"} required fullWidth>
 										<InputLabel id="home-team-label">Home Team</InputLabel>
 										<Select
@@ -254,8 +249,8 @@ export default function Prediction(props) {
 											))}
 										</Select>
 									</FormControl>
-								</Box>
-								<Box sx={{width: "50%"}}>
+								</Grid>
+								<Grid sx={{width: "50%"}}>
 									<FormControl key={"away-team-select"} required fullWidth>
 										<InputLabel id="away-team-label">Away Team</InputLabel>
 										<Select
@@ -275,66 +270,139 @@ export default function Prediction(props) {
 											))}
 										</Select>
 									</FormControl>
-								</Box>
-							</Box>
-							<Box sx={{ alignItems: "center", height: "55vh" }} >
-								<AppBar position="static">
-									<Tabs
-										value={value}
-										onChange={handleChange}
-										indicatorColor="secondary"
-										textColor="inherit"
-										variant="fullWidth"
-										aria-label="full width tabs"
+								</Grid>
+								<Grid
+									item
+									xs={12}
+									sx={{
+										maxHeight: 300,
+										height: "min-content",
+										overflow: "hidden",
+										alignItems: "center",
+									}}
+								>
+									<AppBar position="static">
+										<Tabs
+											value={value}
+											onChange={handleChange}
+											indicatorColor="secondary"
+											textColor="inherit"
+											variant="fullWidth"
+											aria-label="full width tabs"
+										>
+											{tabs.map((tab, index) => (
+												<Tab key={index} label={tab} {...a11yProps(index)} />
+											))}
+										</Tabs>
+									</AppBar>
+									<Box
+										sx={{
+											height: "100%",
+											overflowY: "auto",
+											alignItems: "center",
+										}}
 									>
-										{tabs.map((tab, index) => (
-											<Tab key={index} label={tab} {...a11yProps(index)} />
-										))}
-									</Tabs>
-								</AppBar>
-								{
-									isLoadingPredictionStatsTabs || isLoadingPredictionSquads || isLoadingPredictionSquads || isLoadingHomeTeamId || isLoadingAwayTeamId || !(homeId && awayId)  ?
-									<Box sx={{ height: '100%', overflowY: 'scroll', alignItems: "center" }}>
-										<TabPanel key="formStats" value={value} index={0} dir={"right"}>
-											<PageLoading/>
+										<TabPanel
+											key="formStats"
+											value={value}
+											index={0}
+											dir={"right"}
+										>
+											<FormStats
+												homeTeamFormStats={homeTeamFormStats}
+												awayTeamFormStats={awayTeamFormStats}
+											/>
 										</TabPanel>
-										<TabPanel key="averageAtLocationStats" value={value} index={1} dir={"right"}>
-											<PageLoading/>
-										</TabPanel>
-										<TabPanel key="form" value={value} index={2} dir={"right"}>
-											<PageLoading/>
-										</TabPanel>
-										<TabPanel key="squads" value={value} index={3} dir={"right"}>
-											<PageLoading/>
-										</TabPanel>
-									</Box> :
-									<Box sx={{ height: '100%', overflowY: 'scroll', alignItems: "center", overflow: "hidden"}}>
-										<TabPanel key="formStats" value={value} index={0} dir={"right"}>
-											<FormStats homeTeamFormStats={homeTeamFormStats} awayTeamFormStats={awayTeamFormStats} />
-										</TabPanel>
-										<TabPanel key="averageAtLocationStats" value={value} index={1} dir={"right"}>
-											<AverageStats homeTeamAverageStats={homeTeamAverageStats} awayTeamAverageStats={awayTeamAverageStats} />
+										<TabPanel
+											key="averageAtLocationStats"
+											value={value}
+											index={1}
+											dir={"right"}
+										>
+											<AverageStats
+												homeTeamAverageStats={homeTeamAverageStats}
+												awayTeamAverageStats={awayTeamAverageStats}
+											/>
 										</TabPanel>
 										<TabPanel key="form" value={value} index={2} dir={"right"}>
 											<HeadToHead headToHeadStats={headToHeadStats} />
 										</TabPanel>
-										<TabPanel key="squads" value={value} index={3} dir={"right"}>
-												<Squads homeTeamSquad={predictionSquads.home_team_squad} awayTeamSquad={predictionSquads.away_team_squad} isError={predictionSquadsError} />
+										<TabPanel
+											key="squads"
+											value={value}
+											index={3}
+											dir={"right"}
+										>
+											<Squads
+												homeTeamSquad={homeTeamSquad}
+												awayTeamSquad={awayTeamSquad}
+											/>
 										</TabPanel>
 									</Box>
-								}
-							</Box>
-							<Box sx={{ alignItems: "center", height: "max-content"}} >
-								{homeTeam && awayTeam && homeTeam !== awayTeam && (
-									<Button
-										fullWidth
-										onClick={() => { setIsPredictionModalOpen(true) }}
-										variant="outlined"
-									>
-										<span>Run Prediction</span>
-									</Button>
-								)}
-							</Box>
+								</Grid>
+								<Grid item xs={12} sx={{ alignItems: "center" }}>
+									<Box sx={{
+										display: "flex",
+										flexDirection: "row"
+									}}>
+										{homeTeam && awayTeam && homeTeam !== awayTeam && (
+											<Button
+												fullWidth
+												onClick={() => {
+													runPrediction(homeTeam, awayTeam);
+												}}
+												variant="outlined"
+											>
+												<span>Run Prediction</span>
+											</Button>
+										)}
+										{predictionHistory.length >= 1 && (	
+											<Button
+												variant="outlined"
+												onClick={() => {
+													setIsPredictionHistoryModalOpen(true);
+												}}
+											>
+												<HistoryIcon/>
+											</Button>
+										)}
+									</Box>
+									{homeTeam && awayTeam && predictionOutput && (
+										<Grid
+											item
+											xs={12}
+											sx={{ alignItems: "center", textAlign: "center" }}
+											>
+											<Box sx={{ width: "100%"}}>
+												<PredictionOutputModal
+													homeTeam={homeTeam}
+													awayTeam={awayTeam}
+													predictionOutput={predictionOutput}
+													isOpen={isPredictionOutputModalOpen}
+													setIsOpen={setIsPredictionOutputModalOpen}
+													originX={originX}
+													originY={originY}
+													/>
+											</Box>
+										</Grid>
+									)}
+									{predictionHistory.length >= 1 && (
+										<Grid>
+											<Box sx={{ width: "100%"}}>
+												<PredictionHistoryModal
+													homeTeam={homeTeam}
+													awayTeam={awayTeam}
+													history={predictionHistory}
+													isOpen={isPredictionHistoryModalOpen}
+													setIsOpen={setIsPredictionHistoryModalOpen}
+													originX={originX}
+													originY={originY}
+													/>
+											</Box>
+										</Grid>
+									)}
+								</Grid>
+							</Grid>
 						</Box>
 					</Box>
 				</Box>

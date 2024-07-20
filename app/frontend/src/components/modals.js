@@ -12,8 +12,9 @@ import { TabPanel, a11yProps } from "./tabs";
 import { animated, useTransition, useSpring } from "@react-spring/web";
 import PlayerProfileTab from "./historicStats/playerProfileTab";
 import { ModalDataLoading } from "./loaders";
-import { PredictionOutputCard } from "./cards";
+import { PredictionOutputCard, PredictionHistoryCard } from "./cards";
 import Card from "@mui/material/Card";
+
 
 export function MatchModal(props) {
 	const {
@@ -528,119 +529,124 @@ export function RefreshModal(props) {
 	);
 }
 
-export function PredictionModal(props) {
-	const { homeTeam, awayTeam, predictionOutput, isOpen, setIsOpen, isError, isLoading } = props;
+export function PredictionOutputModal(props) {
+	const { homeTeam, awayTeam, predictionOutput, isOpen, setIsOpen, originX, originY } = props;
 
 	const modalAnimation = useSpring({
 		from: {
 			opacity: 0,
-			transform: "translate(-50%, -50%) scale(0)",
+			transform: 'translate(-50%, -50%) scale(0)',
 			height: 0,
 			width: 0,
+			top: originY,
+			left: originX,
 		},
 		to: {
-			transform: isOpen
-				? "translate(-50%, -50%) scale(1)"
-				: "translate(-50%, -50%) scale(0)",
+			transform: isOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0)',
 			opacity: isOpen ? 1 : 0,
-			backgroundColor: isOpen ? "black" : "transparent",
+			backgroundColor: isOpen ? 'black' : 'transparent',
 			height: isOpen ? "max-content" : 0,
-			width: isOpen ? "max-content" : 0,
+			width: isOpen ? 1150 : 0,
+			top: isOpen ? document.documentElement.clientHeight/2 : originY,
+			left: isOpen ? document.documentElement.clientWidth/2 : originX,
 		},
 	});
 
 	const handleCloseModal = () => {
 		setIsOpen(false);
-	}
-
-	return (
-		isError ?
-			<ModalError /> :
-			<Fragment>
-				<Modal
-						open={isOpen}
-						onClose={handleCloseModal}
-						aria-labelledby="modal-modal-title"
-						aria-describedby="modal-modal-description"
-					>
-						<animated.div
-							style={{
-								position: "absolute",
-								display: "flex",
-								justifyContent: "center",
-								top: document.documentElement.clientHeight / 2,
-								left: document.documentElement.clientWidth / 2,
-								...modalAnimation,
-							}}
-					>
-						<Box sx={{ alignItems: "center" }} >
-							{
-								isLoading ?
-									<ModalDataLoading />
-									:
-									homeTeam && awayTeam && predictionOutput &&
-									<PredictionOutputCard homeTeam={ homeTeam } awayTeam={awayTeam} predictionOutput={predictionOutput} />
-							}
-						</Box>
-					</animated.div>
-				</Modal>
-			</Fragment>
-	)
-}
-
-function ModalError(props) {
+	};
 
 	return (
 		<Fragment>
 			<Modal
-				open={props.isOpen}
-				onClose={props.handleClose}
+				open={isOpen}
+				onClose={handleCloseModal}
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				<animated.div
-					style={{
-						position: "absolute",
-						height: "max-content",
-						display: "flex",
-						flexDirection: "row",
-						justifyContent: "center",
-						textAlign: "center",
-						...props.modalAnimation,
-					}}
-				>
+				<animated.div style={{
+					position: 'absolute',
+					height: "max-content",
+					width: "100%",
+					display: "flex",
+					flexDirection: "row",
+					justifyContent: "center",
+					textAlign: "center",
+					...modalAnimation
+				}}>
+					<PredictionOutputCard homeTeam={homeTeam} awayTeam={awayTeam} predictionOutput={predictionOutput} />
+				</animated.div>
+			</Modal>
+		</Fragment>
+	);
+}
+
+export function PredictionHistoryModal(props) {
+	const { isOpen, setIsOpen, originX, originY, history } = props;
+
+	console.log(history);
+
+	const modalAnimation = useSpring({
+		from: {
+			opacity: 0,
+			transform: 'translate(-50%, -50%) scale(0)',
+			height: 0,
+			width: 0,
+			top: originY,
+			left: originX,
+		},
+		to: {
+			transform: isOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0)',
+			opacity: isOpen ? 1 : 0,
+			backgroundColor: isOpen ? 'black' : 'transparent',
+			height: isOpen ? "max-content" : 0,
+			width: isOpen ? 1150 : 0,
+			top: isOpen ? document.documentElement.clientHeight/2 : originY,
+			left: isOpen ? document.documentElement.clientWidth/2 : originX,
+		},
+	});
+
+	const handleCloseModal = () => {
+		setIsOpen(false);
+	};
+
+	return (
+		<Fragment>
+			<Modal
+				open={isOpen}
+				onClose={handleCloseModal}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<animated.div style={{
+					position: 'absolute',
+					height: "max-content",
+					width: "100%",
+					display: "flex",
+					flexDirection: "row",
+					justifyContent: "center",
+					textAlign: "center",
+					...modalAnimation
+				}}>
 					<Box
 						sx={{
 							display: "flex",
 							flexDirection: "column",
 							textAlign: "center",
 							width: "100%",
-							padding: 2,
+							padding: 2 
 						}}
 					>
-						<Typography id="modal-modal-title" variant="h3" component="h2">
-							{"ERROR"}
-						</Typography>
-						<Box
-							sx={{
-								display: "flex",
-								flexDirection: "column",
-								justifyContent: "center",
-								textAlign: "center",
-							}}
-						>
-							<Typography
-								id={`modal-modal-error`}
-								variant="h5"
-								component="p"
-								sx={{ margin: 2 }}
-							>
-								{"An error occurred. Please try again."}
-							</Typography>
+						<Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "center"}}>
+							{history.map((prediction, index) => (
+								<Box key={index} sx={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", margin: .5 }}>
+									<PredictionHistoryCard homeTeam={prediction.home_team} awayTeam={prediction.away_team} data={prediction} />
+								</Box>
+							))}
 						</Box>
 					</Box>
 				</animated.div>
 			</Modal>
 		</Fragment>
-	)
+	);
 }

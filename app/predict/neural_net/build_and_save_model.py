@@ -6,8 +6,13 @@ from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 import os
 from joblib import load
+from dotenv import load_dotenv
+
+load_dotenv()
 
 N = 15
+
+# TODO: Identify and handle outliers in your data, as they can significantly impact model performance.
 
 output_columns = [
 	"home_goals", "away_goals", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target",

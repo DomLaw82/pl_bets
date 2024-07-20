@@ -1,0 +1,9 @@
+# Run the refresh squad data script on the 1st of August every year at midnight
+0 0 1 8 * /app/refresh_schedule_data.sh >> /var/log/refresh_schedule_data.log 2>&1
+
+# Run the refresh game data script every day at midnight
+0 0 * * * /app/refresh_game_data.sh >> /var/log/refresh_game_data.log 2>&1
+
+# Run the refresh squad data script on the 1st of September and the 2nd of February every year at 8 AM
+0 0 1 9 * /app/refresh_squad_data.sh >> /var/log/refresh_squad_data.log 2>&1
+0 0 2 2 * /app/refresh_squad_data.sh >> /var/log/refresh_squad_data.log 2>&1

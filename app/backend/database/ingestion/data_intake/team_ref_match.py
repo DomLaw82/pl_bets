@@ -4,11 +4,13 @@ from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 from data_intake.utilities.unique_id import *
 from data_intake.utilities.string_manipulation import escape_single_quote
 from app_logger import FluentLogger
+import datetime
 
 logger = FluentLogger("intake-team_ref_match").get_logger()
 
-SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, 2025, 1)]
-TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, 2025, 1)]
+SEASON_END_YEAR = 2026
+SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SEASON_END_YEAR, 1)]
+TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, SEASON_END_YEAR, 1)]
 
 def rename_team_name(team_name: str) -> str:
     """
@@ -251,6 +253,8 @@ def save_to_database(db_connection, table_name, df: pd.DataFrame) -> None:
         None
     """
     try:
+        if table_name == "match":
+            df = df.sort_values(by=["date"]).reset_index(drop=True)
         with db_connection.connect() as conn:
             df.to_sql(table_name, conn, if_exists="append", index=False) if not df.empty else None
     except Exception as e:
