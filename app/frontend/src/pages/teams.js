@@ -23,7 +23,6 @@ export default function Teams(props) {
 				<CssBaseline />
 				<Box
 					sx={{
-						marginTop: 2,
 						display: 'flex',
 						flexDirection: 'column',
 						alignItems: 'center'

@@ -22,17 +22,18 @@ export function ModalDataLoading() {
   );
 }
 
-export function PageLoading() {
-  return (
-	<Fragment>
-		<Box sx={{display: "flex", alignItems:"center", justifyContent:"center", width: "100%", height:"60vh"}}>
-			<l-waveform
-				size="60"
-				stroke="3.5"
-				speed="1.2" 
-				color="white" 
-			></l-waveform>
-		</Box>
-	</Fragment>
-  );
+export function PageLoading(props) {
+	const { height } = props
+	return (
+		<Fragment>
+			<Box sx={{display: "flex", alignItems:"center", justifyContent:"center", width: "100%", height: height ? height : "60vh"}}>
+				<l-waveform
+					size="60"
+					stroke="3.5"
+					speed="1.2" 
+					color="white" 
+				></l-waveform>
+			</Box>
+		</Fragment>
+	);
 }
