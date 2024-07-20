@@ -374,7 +374,7 @@ export default function Matches(props) {
 						)}
 					</Box>
 				</Box>
-				{
+				{ matchFacts ?
 					<MatchModal
 						isMatchFactsModalOpen={isMatchFactsModalOpen}
 						handleCloseMatchFactsModal={handleCloseMatchFactsModal}
@@ -382,6 +382,8 @@ export default function Matches(props) {
 						originX={originX}
 						originY={originY}
 					/>
+					:
+					<ModalDataLoading />
 				}
 			</Container>
 		</Fragment>

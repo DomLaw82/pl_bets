@@ -23,7 +23,7 @@ import { PredictionOutputModal } from "../components/modals";
 import HistoryIcon from "@mui/icons-material/History";
 import { PredictionHistoryModal } from "../components/modals";
 import { useQuery } from "react-query";
-import { PageLoading } from "../components/loaders";
+import { ModalDataLoading, PageLoading } from "../components/loaders";
 
 export default function Prediction(props) {
 	const { teams } = props;
@@ -436,7 +436,7 @@ export default function Prediction(props) {
 						</Box>
 					</Box>
 				</Box>
-				{homeTeam && awayTeam && predictionOutput && (
+				{homeTeam && awayTeam && predictionOutput ? (
 					<PredictionOutputModal
 						homeTeam={homeTeam}
 						awayTeam={awayTeam}
@@ -446,6 +446,8 @@ export default function Prediction(props) {
 						isLoading={isLoadingPredictionOutput}
 						isError={predictionOutputError}
 					/>
+				) : (
+					<ModalDataLoading />
 				)}
 			</Container>
 		</Fragment>
