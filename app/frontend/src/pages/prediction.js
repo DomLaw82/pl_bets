@@ -153,10 +153,9 @@ export default function Prediction(props) {
 		}
 		return response.json();
 	};
-
 	const {
 		data: predictionTabStats = {},
-		isLoading: isLoadingPredictionStatsTabs,
+		// isLoading: isLoadingPredictionStatsTabs,
 		// error: predictionStatsError,
 	} = useQuery(
 		["predictionStats", homeTeam, awayTeam, getPredictionStats],
@@ -284,7 +283,7 @@ export default function Prediction(props) {
 										</Select>
 									</FormControl>
 								</Grid>
-								{homeTeam && awayTeam ? (
+								{homeTeam && awayTeam && predictionTabStats ? (
 									<Grid
 										item
 										xs={12}
@@ -361,7 +360,7 @@ export default function Prediction(props) {
 									</Grid>
 								) : (
 									<Box sx={{ width: "100%", textAlign: "center" }}>
-										<Box sx={{ marginTop: "110", padding: "110" }}>
+										<Box>
 											<Typography variant="h6" sx={{ textAlign: "center" }}>
 												Select a home and away team to view predictions
 											</Typography>
@@ -411,8 +410,8 @@ export default function Prediction(props) {
 													predictionOutput={predictionOutput}
 													isOpen={isPredictionOutputModalOpen}
 													setIsOpen={setIsPredictionOutputModalOpen}
-													originX={originX}
-													originY={originY}
+													// originX={originX}
+													// originY={originY}
 												/>
 											</Box>
 										</Grid>
@@ -426,8 +425,8 @@ export default function Prediction(props) {
 													history={predictionHistory}
 													isOpen={isPredictionHistoryModalOpen}
 													setIsOpen={setIsPredictionHistoryModalOpen}
-													originX={originX}
-													originY={originY}
+													// originX={originX}
+													// originY={originY}
 												/>
 											</Box>
 										</Grid>
