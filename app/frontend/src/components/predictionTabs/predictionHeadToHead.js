@@ -7,7 +7,7 @@ export function HeadToHead(props) {
 
 	return (
 		<Fragment>
-			<Box component="div" id="form-stats" sx={{ display: "flex", flexDirection: "column", justifyContent: "space-evenly", textAlign: "center" }}>
+			<Box component="div" id="form-stats" sx={{ height:"43vh", display: "flex", flexDirection: "column", justifyContent: "space-evenly", textAlign: "center", overflow: "hidden" }}>
 				{headToHeadStats.map((obj, index) => {
 					return (
 						<Box component="div" key={`awayForm-${index}`}>

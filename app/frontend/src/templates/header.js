@@ -70,7 +70,7 @@ function ResponsiveAppBar() {
               textDecoration: 'none',
             }}
           >
-            PL BETS
+            PL PREDICTION
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
@@ -129,7 +129,7 @@ function ResponsiveAppBar() {
               textDecoration: 'none',
             }}
           >
-            PL BETS
+            PL PREDICTION
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {Object.entries(routeOptions).map(([route, obj]) => {

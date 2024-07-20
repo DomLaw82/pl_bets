@@ -20,8 +20,10 @@ import { HeadToHead } from "../components/predictionTabs/predictionHeadToHead";
 import { Squads } from "../components/predictionTabs/predictionSquads";
 import { TabPanel, a11yProps } from "../components/tabs";
 import { PredictionOutputModal } from "../components/modals";
-import HistoryIcon from '@mui/icons-material/History';
+import HistoryIcon from "@mui/icons-material/History";
 import { PredictionHistoryModal } from "../components/modals";
+import { useQuery } from "react-query";
+import { ModalDataLoading, PageLoading } from "../components/loaders";
 
 export default function Prediction(props) {
 	const { teams } = props;
@@ -38,32 +40,36 @@ export default function Prediction(props) {
 	const [homeTeamId, setHomeTeamId] = useState("");
 	const [awayTeam, setAwayTeam] = useState("");
 	const [awayTeamId, setAwayTeamId] = useState("");
+	const [homeTeamSquad, setHomeTeamSquad] = useState([]);
+	const [awayTeamSquad, setAwayTeamSquad] = useState([]);
 
 	const [homeTeamFormStats, setHomeTeamFormStats] = useState([]);
 	const [awayTeamFormStats, setAwayTeamFormStats] = useState([]);
 	const [homeTeamAverageStats, setHomeTeamAverageStats] = useState([]);
 	const [awayTeamAverageStats, setAwayTeamAverageStats] = useState([]);
 	const [headToHeadStats, setHeadToHeadStats] = useState([]);
-	const [homeTeamSquad, setHomeTeamSquad] = useState([]);
-	const [awayTeamSquad, setAwayTeamSquad] = useState([]);
 
 	const [isPredictionOutputModalOpen, setIsPredictionOutputModalOpen] =
 		useState(false);
 	const [isPredictionHistoryModalOpen, setIsPredictionHistoryModalOpen] =
 		useState(false);
 
-	const [predictionOutput, setPredictionOutput] = useState([]);
-	const [predictionHistory, setPredictionHistory] = useState([])
+	const [predictionHistory, setPredictionHistory] = useState([]);
 
+	const [isPredictionModalOpen, setIsPredictionModalOpen] = useState(false);
 
-	const [originX, setOriginX] = useState(0);
-	const [originY, setOriginY] = useState(0);
+	// const [originX, setOriginX] = useState(0);
+	// const [originY, setOriginY] = useState(0);
 
 	function addToPredictionHistory(prediction) {
 		let temp = predictionHistory;
-		temp = temp.filter(obj => obj.home_team !== prediction.home_team || obj.away_team !== prediction.away_team)
-		temp.push(prediction)
-		setPredictionHistory(temp)
+		temp = temp.filter(
+			(obj) =>
+				obj.home_team !== prediction.home_team ||
+				obj.away_team !== prediction.away_team
+		);
+		temp.push(prediction);
+		setPredictionHistory(temp);
 	}
 
 	const getTeamIdFromName = async (teamName) => {
@@ -99,38 +105,75 @@ export default function Prediction(props) {
 					}),
 				}
 			);
-			const data = await response.json();
-			console.log(data);
-			setPredictionOutput(data);
-			setOriginX(event.clientX);
-			setOriginY(event.clientY);
-			setIsPredictionOutputModalOpen(true);
-			data.home_team = homeTeam;
-			data.away_team = awayTeam;
-			addToPredictionHistory(data);
+			return await response.json();
 		} catch (error) {
 			console.error("Prediction failed:", error);
 		}
 	};
+	const {
+		data: predictionOutput = {},
+		isLoading: isLoadingPredictionOutput,
+		error: predictionOutputError,
+	} = useQuery(
+		["predictionOutput", homeTeam, awayTeam, runPrediction],
+		() => runPrediction(),
+		{
+			enabled: false,
+			staleTime: Infinity,
+			onSuccess: (data) => {
+				console.log(data);
+				// setOriginX(event.clientX);
+				// setOriginY(event.clientY);
+				setIsPredictionOutputModalOpen(true);
+				data.home_team = homeTeam;
+				data.away_team = awayTeam;
+				addToPredictionHistory(data);
+			},
+		}
+	);
 
 	const getPredictionStats = async (homeTeam, awayTeam) => {
-		await fetch(
+		const response = await fetch(
 			`${
 				process.env.REACT_APP_DATA_API_ROOT
 			}/prediction/stats?home_team=${encodeURIComponent(
 				homeTeam
-			)}&away_team=${encodeURIComponent(awayTeam)}`
-		)
-			.then((response) => response.json())
-			.then((data) => {
+			)}&away_team=${encodeURIComponent(awayTeam)}`,
+			{
+				method: "GET",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			}
+		);
+
+		if (!response.ok) {
+			throw new Error("Network response was not ok");
+		}
+		return response.json();
+	};
+	const {
+		data: predictionTabStats = {},
+		// isLoading: isLoadingPredictionStatsTabs,
+		// error: predictionStatsError,
+	} = useQuery(
+		["predictionStats", homeTeam, awayTeam, getPredictionStats],
+		() => getPredictionStats(homeTeam, awayTeam),
+		{
+			enabled: !!homeTeam && !!awayTeam && homeTeam !== awayTeam,
+			staleTime: Infinity,
+			onSuccess: (data) => {
+				console.log(data);
 				setHomeTeamFormStats(data.home_team_form);
 				setAwayTeamFormStats(data.away_team_form);
 				setHomeTeamAverageStats(data.home_team_average_stats);
 				setAwayTeamAverageStats(data.away_team_average_stats);
 				setHeadToHeadStats(data.head_to_head_stats);
-			})
-			.catch((error) => console.log(error));
-	};
+			},
+		}
+	);
+
 	const getPredictionSquads = async (homeTeam, awayTeam) => {
 		fetch(
 			`${
@@ -172,11 +215,10 @@ export default function Prediction(props) {
 
 	return (
 		<Fragment>
-			<Container component="main">
+			<Container component="main" sx={{ height: "max-content" }}>
 				<CssBaseline />
 				<Box
 					sx={{
-						marginTop: 8,
 						display: "flex",
 						flexDirection: "column",
 						alignItems: "center",
@@ -241,80 +283,98 @@ export default function Prediction(props) {
 										</Select>
 									</FormControl>
 								</Grid>
-								<Grid
-									item
-									xs={12}
-									sx={{
-										maxHeight: 300,
-										height: "min-content",
-										overflow: "hidden",
-										alignItems: "center",
-									}}
-								>
-									<AppBar position="static">
-										<Tabs
-											value={value}
-											onChange={handleChange}
-											indicatorColor="secondary"
-											textColor="inherit"
-											variant="fullWidth"
-											aria-label="full width tabs"
-										>
-											{tabs.map((tab, index) => (
-												<Tab key={index} label={tab} {...a11yProps(index)} />
-											))}
-										</Tabs>
-									</AppBar>
-									<Box
+								{homeTeam && awayTeam && predictionTabStats ? (
+									<Grid
+										item
+										xs={12}
 										sx={{
-											height: "100%",
-											overflowY: "auto",
+											maxHeight: 300,
+											height: "min-content",
+											overflow: "hidden",
 											alignItems: "center",
 										}}
 									>
-										<TabPanel
-											key="formStats"
-											value={value}
-											index={0}
-											dir={"right"}
+										<AppBar position="static">
+											<Tabs
+												value={value}
+												onChange={handleChange}
+												indicatorColor="secondary"
+												textColor="inherit"
+												variant="fullWidth"
+												aria-label="full width tabs"
+											>
+												{tabs.map((tab, index) => (
+													<Tab key={index} label={tab} {...a11yProps(index)} />
+												))}
+											</Tabs>
+										</AppBar>
+										<Box
+											sx={{
+												height: "100%",
+												overflowY: "auto",
+												alignItems: "center",
+											}}
 										>
-											<FormStats
-												homeTeamFormStats={homeTeamFormStats}
-												awayTeamFormStats={awayTeamFormStats}
-											/>
-										</TabPanel>
-										<TabPanel
-											key="averageAtLocationStats"
-											value={value}
-											index={1}
-											dir={"right"}
-										>
-											<AverageStats
-												homeTeamAverageStats={homeTeamAverageStats}
-												awayTeamAverageStats={awayTeamAverageStats}
-											/>
-										</TabPanel>
-										<TabPanel key="form" value={value} index={2} dir={"right"}>
-											<HeadToHead headToHeadStats={headToHeadStats} />
-										</TabPanel>
-										<TabPanel
-											key="squads"
-											value={value}
-											index={3}
-											dir={"right"}
-										>
-											<Squads
-												homeTeamSquad={homeTeamSquad}
-												awayTeamSquad={awayTeamSquad}
-											/>
-										</TabPanel>
+											<TabPanel
+												key="formStats"
+												value={value}
+												index={0}
+												dir={"right"}
+											>
+												<FormStats
+													homeTeamFormStats={homeTeamFormStats}
+													awayTeamFormStats={awayTeamFormStats}
+												/>
+											</TabPanel>
+											<TabPanel
+												key="averageAtLocationStats"
+												value={value}
+												index={1}
+												dir={"right"}
+											>
+												<AverageStats
+													homeTeamAverageStats={homeTeamAverageStats}
+													awayTeamAverageStats={awayTeamAverageStats}
+												/>
+											</TabPanel>
+											<TabPanel
+												key="form"
+												value={value}
+												index={2}
+												dir={"right"}
+											>
+												<HeadToHead headToHeadStats={headToHeadStats} />
+											</TabPanel>
+											<TabPanel
+												key="squads"
+												value={value}
+												index={3}
+												dir={"right"}
+											>
+												<Squads
+													homeTeamSquad={homeTeamSquad}
+													awayTeamSquad={awayTeamSquad}
+												/>
+											</TabPanel>
+										</Box>
+									</Grid>
+								) : (
+									<Box sx={{ width: "100%", textAlign: "center" }}>
+										<Box>
+											<Typography variant="h6" sx={{ textAlign: "center" }}>
+												Select a home and away team to view predictions
+											</Typography>
+										</Box>
+										<PageLoading />
 									</Box>
-								</Grid>
+								)}
 								<Grid item xs={12} sx={{ alignItems: "center" }}>
-									<Box sx={{
-										display: "flex",
-										flexDirection: "row"
-									}}>
+									<Box
+										sx={{
+											display: "flex",
+											flexDirection: "row",
+										}}
+									>
 										{homeTeam && awayTeam && homeTeam !== awayTeam && (
 											<Button
 												fullWidth
@@ -326,14 +386,14 @@ export default function Prediction(props) {
 												<span>Run Prediction</span>
 											</Button>
 										)}
-										{predictionHistory.length >= 1 && (	
+										{predictionHistory.length >= 1 && (
 											<Button
 												variant="outlined"
 												onClick={() => {
 													setIsPredictionHistoryModalOpen(true);
 												}}
 											>
-												<HistoryIcon/>
+												<HistoryIcon />
 											</Button>
 										)}
 									</Box>
@@ -342,32 +402,32 @@ export default function Prediction(props) {
 											item
 											xs={12}
 											sx={{ alignItems: "center", textAlign: "center" }}
-											>
-											<Box sx={{ width: "100%"}}>
+										>
+											<Box sx={{ width: "100%" }}>
 												<PredictionOutputModal
 													homeTeam={homeTeam}
 													awayTeam={awayTeam}
 													predictionOutput={predictionOutput}
 													isOpen={isPredictionOutputModalOpen}
 													setIsOpen={setIsPredictionOutputModalOpen}
-													originX={originX}
-													originY={originY}
-													/>
+													// originX={originX}
+													// originY={originY}
+												/>
 											</Box>
 										</Grid>
 									)}
 									{predictionHistory.length >= 1 && (
 										<Grid>
-											<Box sx={{ width: "100%"}}>
+											<Box sx={{ width: "100%" }}>
 												<PredictionHistoryModal
 													homeTeam={homeTeam}
 													awayTeam={awayTeam}
 													history={predictionHistory}
 													isOpen={isPredictionHistoryModalOpen}
 													setIsOpen={setIsPredictionHistoryModalOpen}
-													originX={originX}
-													originY={originY}
-													/>
+													// originX={originX}
+													// originY={originY}
+												/>
 											</Box>
 										</Grid>
 									)}
@@ -376,6 +436,19 @@ export default function Prediction(props) {
 						</Box>
 					</Box>
 				</Box>
+				{homeTeam && awayTeam && predictionOutput ? (
+					<PredictionOutputModal
+						homeTeam={homeTeam}
+						awayTeam={awayTeam}
+						predictionOutput={predictionOutput}
+						isOpen={isPredictionModalOpen}
+						setIsOpen={setIsPredictionModalOpen}
+						isLoading={isLoadingPredictionOutput}
+						isError={predictionOutputError}
+					/>
+				) : (
+					<ModalDataLoading />
+				)}
 			</Container>
 		</Fragment>
 	);

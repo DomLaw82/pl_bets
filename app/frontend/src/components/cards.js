@@ -27,22 +27,22 @@ export function PlayerCards(props) {
                             alignItems: "center"
                         }}>
                             <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
-                                <Typography variant="h5" component="div">
+                                <Typography className={"player-name"} variant="h5" component="div">
                                     {firstName} {lastName}
                                 </Typography>
                             </Box>
                             <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
-                                <Typography variant="body1">
+                                <Typography className={"player-dob"} variant="body1">
                                     DOB: {birthDate}
                                 </Typography>
                             </Box>
                             <Box sx={{alignItems: "center", textAlign: "center", width: "30%"}}>
-                                <Typography variant="body1">
+                                <Typography className={"player-position"} variant="body1">
                                     Position: {position}
                                 </Typography>
                             </Box>
                             <Box sx={{ alignItems: "center", height: 60}}>
-                                <img src={badge} alt={teamName} height="60" />
+                                <img className={"player-team"} src={badge} alt={teamName} height="60" />
                             </Box>
                         </Box>
                     </CardContent>
@@ -91,7 +91,10 @@ export function MatchCards(props) {
     return (
         <Fragment>
             <Card sx={{ margin: 2 }} variant="outlined">
-            <CardActionArea  onClick={(event) => handleOpenMatchFactsModal(event, date, homeTeam, awayTeam)}>
+                <CardActionArea onClick={(event) => {
+                    handleOpenMatchFactsModal(event, date, homeTeam, awayTeam)
+                }
+                }>
                     <CardContent>
                         <Box sx={{
                             display: 'flex',
@@ -194,8 +197,8 @@ export function PredictionOutputCard(props) {
                         {/* <Typography variant="h4" component="div">
                             Prediction Output
                         </Typography> */}
-                        <Box sx={{display:"flex", flexDirection:"row"}}>
-                            <Box sx={{alignItems: "center", textAlign: "center", width: "32.5%"}}>
+                        <Box key={"header"} sx={{display:"flex", flexDirection:"row", margin: 2}}>
+                            <Box key={"home-header"} sx={{alignItems: "center", textAlign: "center", width: "32.5%"}}>
                                 <Typography variant="h4" component="div">
                                     {homeTeam}
                                 </Typography>
@@ -214,20 +217,20 @@ export function PredictionOutputCard(props) {
 
                         {predictionOutput && predictionResultColumns.map((column, index) => {
                             return (
-                                <Box sx={{ display: "flex", flexDirection: "row" }}>
-                                    <Box sx={{ alignItems: "center", textAlign: "center", width: "32.5%" }}>
+                                <Box key={`data-${index}`} sx={{ display: "flex", flexDirection: "row" }}>
+                                    <Box key={`home_${column}`} sx={{ alignItems: "center", textAlign: "center", width: "32.5%" }}>
                                         <Typography variant="body1" component="div">
                                             {predictionOutput[`home_${column}`]}
                                         </Typography>
                                     </Box>
                                     <Divider orientation="vertical" flexItem />
-                                    <Box sx={{ alignItems: "center", textAlign: "center", width: "35%" }}>
+                                    <Box key={`title_${column}`} sx={{ alignItems: "center", textAlign: "center", width: "35%" }}>
                                         <Typography variant="h6" component="div">
                                             {`${column}`.replace(/_/g, " ").replace(/\w\S*/g, text => text.charAt(0).toUpperCase() + text.substring(1).toLowerCase())}
                                         </Typography>
                                     </Box>
                                     <Divider orientation="vertical" flexItem />
-                                    <Box sx={{ alignItems: "center", textAlign: "center", width: "32.5%" }}>
+                                    <Box key={`away_${column}`} sx={{ alignItems: "center", textAlign: "center", width: "32.5%" }}>
                                         <Typography variant="body1" component="div">
                                             {predictionOutput[`away_${column}`]}
                                         </Typography>

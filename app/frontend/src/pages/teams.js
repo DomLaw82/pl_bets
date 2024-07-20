@@ -19,11 +19,10 @@ export default function Teams(props) {
 
 	return (
 		<Fragment>
-			<Container component="main">
+			<Container sx={{maxHeight: "80vh", overflow: "auto"}}>
 				<CssBaseline />
 				<Box
 					sx={{
-						marginTop: 8,
 						display: 'flex',
 						flexDirection: 'column',
 						alignItems: 'center'
@@ -42,9 +41,9 @@ export default function Teams(props) {
 						Teams
 					</Typography>
 					<Divider sx={{ width: '100%', height: 2 }} />
-					<Box sx={{ width: '100%', height: 2 }}>
+					<Box sx={{ width: '100%'}}>
 						<Divider sx={{ width: '100%', height: 2 }} />
-						<Box id="active-teams">
+						<Box id="active-teams" sx={{ width: "100%",height: "65vh", overflowY: "scroll"}}>
 							{
 								teams.map((team) => {
 									return (

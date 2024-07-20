@@ -81,8 +81,11 @@ CREATE TABLE match (
 CREATE TABLE historic_player_per_ninety (
 	player_id VARCHAR(7) REFERENCES player(id),
 	team_id VARCHAR(7) REFERENCES team(id),
+	nationality VARCHAR NOT NULL,
+	matches_played INT NOT NULL,
 	minutes_played FLOAT NOT NULL,
 	ninetys FLOAT NOT NULL,
+	starts INT NOT NULL,
 	goals FLOAT NOT NULL,
 	assists FLOAT NOT NULL,
 	direct_goal_contributions FLOAT NOT NULL,

@@ -309,7 +309,7 @@ def get_match_facts():
             away_team.name = '{away_team}'
       """)
       logger.info(f"Match facts for {home_team} vs {away_team} on {date} retrieved")
-      return jsonify(data)
+      return jsonify(data[0])
    except Exception as e:
       logger.error(f"Error with endpoint /matches/match-facts: {str(e)}")
       return jsonify({'error': f"Error with endpoint /matches/match-facts: {str(e)}"}), 500
@@ -516,6 +516,8 @@ def get_player_historic_stats_by_season(player_id:str) -> list:
             player.last_name,
             team.name AS team,
             minutes_played AS minutes,
+            starts,
+            matches_played,
             ROUND((goals/ninetys)::numeric, 2) AS goals_per_90,
             ROUND((assists/ninetys)::numeric, 2) AS assists_per_90,
             ROUND((direct_goal_contributions/ninetys)::numeric, 2) AS direct_goal_contributions_per_90,
@@ -638,17 +640,33 @@ def get_player_recent_minutes_stats_by_season(player_id:str) -> list:
       logger.error(f"Error with endpoint /players/recent-minutes/{player_id}: {str(e)}")
       return jsonify({"error": f"Error with endpoint /players/recent-minutes/{player_id}: {str(e)}"}), 500
 
-
-
-# @registry.handles(
-#    rule='/download-latest-data',
-#    method='GET',
-# )
-# def download_latest_data():
-#    # module will be available in the container, but is not in the path locally (see app/backend/database/ingestion/__init__.py)
-#    # TODO - refactor this so that the module is available locally/create empty file locally
-#    message = download_and_insert_latest_data()
-#    return jsonify(message)
+@registry.handles(
+   rule='/players/player-profile/<player_id>',
+   method='GET',
+   response_body_schema=''
+)
+def get_player_profile(player_id:str):
+   try:
+      player_profile = db.get_dict(f"""
+         SELECT
+            player.first_name,
+            player.last_name,
+            player.birth_date,
+            player.position,
+            historic_player_per_ninety.nationality,
+            team.name AS team
+         FROM player
+         JOIN player_team ON player.id = player_team.player_id
+         JOIN team ON player_team.team_id = team.id
+         JOIN historic_player_per_ninety ON player.id = historic_player_per_ninety.player_id
+         WHERE player.id = '{player_id}' AND player_team.season = (SELECT MAX(season) FROM player_team WHERE player_id = '{player_id}')
+         LIMIT 1
+      """)
+      logger.info(f"Player profile for {player_id} retrieved")
+      return jsonify(player_profile)
+   except Exception as e:
+      logger.error(f"Error with endpoint /players/player-profile/{player_id}: {str(e)}")
+      return jsonify({"error": f"Error with endpoint /players/player-profile/{player_id}: {str(e)}"}), 500
 
 
 app = Flask(__name__)

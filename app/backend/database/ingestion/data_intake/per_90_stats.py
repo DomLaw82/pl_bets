@@ -16,12 +16,12 @@ def combining_datasets(season: str) -> pd.DataFrame:
 
 	"""
 	columns = {
-		"goalkeeping.csv": ['player','position','team','goals_against','shots_on_target_against','saves','wins','draws','losses','clean_sheets','penalties_faced','penalties_allowed','penalties_saved','penalties_missed'],
-		"passing.csv": ['player','position','team','total_passing_distance','total_progressive_passing_distance','short_passes_completed','short_passes_attempted','medium_passes_completed','medium_passes_attempted','long_passes_completed','long_passes_attempted','expected_assisted_goals','expected_assists','assists-expected_assisted_goals','key_passes','passes_into_final_third','passes_into_penalty_area','crosses_into_penalty_area','progressive_passes'],
-		"shooting.csv": ['player','position','team','shots','shots_on_target','goals_per_shot','goals_per_shot_on_target','average_shot_distance','shots_from_free_kicks','penalties_made','non_penalty_expected_goals_per_shot','goals-expected_goals','non_penalty_goals-non_penalty_expected_goals'],
-		"defensive_actions.csv": ['player', 'position','team','tackles','tackles_won','defensive_third_tackles','middle_third_tackles','attacking_third_tackles','dribblers_tackled','dribbler_tackles_attempted','shots_blocked','passes_blocked','interceptions','clearances','errors_leading_to_shot'],
-		"possession.csv": ['player','position','team','touches','touches_in_defensive_penalty_area','touches_in_defensive_third','touches_in_middle_third','touches_in_attacking_third','touches_in_attacking_penalty_area','live_ball_touches','take_ons_attempted','take_ons_succeeded','times_tackled_during_take_on','carries','total_carrying_distance','progressive_carrying_distance','carries_into_final_third','carries_into_penalty_area','miscontrols','dispossessed','passes_received', "progressive_passes_received"],
-		"standard.csv": ['player','position','team','matches_played','starts','minutes_played','ninetys','goals','assists','direct_goal_contributions','non_penalty_goals','penalties_scored','penalties_attempted','yellow_cards','red_cards','expected_goals','non_penalty_expected_goals','non_penalty_expected_goals+expected_assisted_goals','progressive_carries']
+		"goalkeeping.csv": ['player', 'nation','position','team','goals_against','shots_on_target_against','saves','wins','draws','losses','clean_sheets','penalties_faced','penalties_allowed','penalties_saved','penalties_missed'],
+		"passing.csv": ['player', 'nation','position','team','total_passing_distance','total_progressive_passing_distance','short_passes_completed','short_passes_attempted','medium_passes_completed','medium_passes_attempted','long_passes_completed','long_passes_attempted','expected_assisted_goals','expected_assists','assists-expected_assisted_goals','key_passes','passes_into_final_third','passes_into_penalty_area','crosses_into_penalty_area','progressive_passes'],
+		"shooting.csv": ['player', 'nation', 'position','team','shots','shots_on_target','goals_per_shot','goals_per_shot_on_target','average_shot_distance','shots_from_free_kicks','penalties_made','non_penalty_expected_goals_per_shot','goals-expected_goals','non_penalty_goals-non_penalty_expected_goals'],
+		"defensive_actions.csv": ['player', 'nation', 'position','team','tackles','tackles_won','defensive_third_tackles','middle_third_tackles','attacking_third_tackles','dribblers_tackled','dribbler_tackles_attempted','shots_blocked','passes_blocked','interceptions','clearances','errors_leading_to_shot'],
+		"possession.csv": ['player', 'nation','position','team','touches','touches_in_defensive_penalty_area','touches_in_defensive_third','touches_in_middle_third','touches_in_attacking_third','touches_in_attacking_penalty_area','live_ball_touches','take_ons_attempted','take_ons_succeeded','times_tackled_during_take_on','carries','total_carrying_distance','progressive_carrying_distance','carries_into_final_third','carries_into_penalty_area','miscontrols','dispossessed','passes_received', "progressive_passes_received"],
+		"standard.csv": ['player', 'nation', 'position','team','matches_played','starts','minutes_played','ninetys','goals','assists','direct_goal_contributions','non_penalty_goals','penalties_scored','penalties_attempted','yellow_cards','red_cards','expected_goals','non_penalty_expected_goals','non_penalty_expected_goals+expected_assisted_goals','progressive_carries']
 	}
 	try:
 		data_folder_path = "./data/historic_player_stats"
@@ -38,7 +38,7 @@ def combining_datasets(season: str) -> pd.DataFrame:
 			if complete.empty:
 				complete = df.copy(deep=True)
 			else:
-				complete = complete.merge(df, on=["player", "position", "team"], how='left')
+				complete = complete.merge(df, on=["player", "nation", "position", "team"], how='left')
 
 		return complete
 	except Exception as e:
@@ -74,9 +74,12 @@ def clean_historic_stats_df(db_connection, df: pd.DataFrame, season: str) -> pd.
 
 		df.loc[:, "season"] = season
 
+		df["nation"] = df["nation"].str.split(" ").str[1]
+		df = df.rename(columns={"nation": "nationality"})
+
 		df = df.fillna(0)
 
-		df = df.drop(columns=["position", "first_name", "last_name", "starts", "matches_played", "wins", "draws", "losses"])
+		df = df.drop(columns=["position", "first_name", "last_name", "wins", "draws", "losses"])
 		# 	TODO - More granular method to impute nulls
 		# 	TODO - Null and multiple player ids
 	except Exception as e:
