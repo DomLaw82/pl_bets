@@ -63,7 +63,7 @@ def make_prediction():
 		return jsonify(prediction)
 	except Exception as e:
 		logger.error(f"An error occurred while predicting the match outcome: {str(e)}")
-		return jsonify({'error': 'An error occurred while predicting the match outcome'}), 500
+		return jsonify({'error': f'An error occurred while predicting the match outcome: {str(e)}'}), 500
 
 @registry.handles(
 	rule='/model/rebuild',
