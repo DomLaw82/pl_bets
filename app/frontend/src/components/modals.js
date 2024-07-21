@@ -23,7 +23,6 @@ export function MatchModal(props) {
 		originX,
 		originY,
 		isLoadingMatchFacts,
-		// isError,
 		matchFacts,
 	} = props;
 	const uniqueStats = [
@@ -61,49 +60,6 @@ export function MatchModal(props) {
 				: originX,
 		},
 	});
-
-	// if (isLoadingMatchFacts && !isError) {
-	// 	return (
-	// 		<Fragment>
-	// 			<Modal
-	// 				open={isMatchFactsModalOpen}
-	// 				onClose={handleCloseMatchFactsModal}
-	// 				aria-labelledby="modal-modal-title"
-	// 				aria-describedby="modal-modal-description"
-	// 				sx={{ border: "2px solid #000" }}
-	// 			>
-	// 				<animated.div
-	// 					style={{
-	// 						position: "absolute",
-	// 						top: "50%",
-	// 						left: "50%",
-	// 						width: 600,
-	// 						bgcolor: "background.paper",
-	// 						border: "2px solid #000",
-	// 						boxShadow: 24,
-	// 						p: 4,
-	// 						padding: 20,
-	// 						display: "flex",
-	// 						flexDirection: "row",
-	// 						justifyContent: "space-evenly",
-	// 						...modalSpring,
-	// 					}}
-	// 				>
-	// 					<Box
-	// 						sx={{
-	// 							display: "flex",
-	// 							flexDirection: "column",
-	// 							textAlign: "center",
-	// 							width: 200,
-	// 						}}
-	// 					>
-	// 						<ModalDataLoading />
-	// 					</Box>
-	// 				</animated.div>
-	// 			</Modal>
-	// 		</Fragment>
-	// 	);
-	// }
 
 	return (
 		<Fragment>
