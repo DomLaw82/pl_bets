@@ -86,13 +86,15 @@ export function PredictionPlayerCards(props) {
 }
 
 export function MatchCards(props) {
-    const { gameWeek, date, homeTeam, awayTeam, result, handleOpenMatchFactsModal, homeWinProb, awayWinProb, drawProb, prediction } = props;
+    const { gameWeek, date, homeTeam, awayTeam, result, handleOpenMatchFactsModal, homeWinProb, awayWinProb, drawProb, prediction, futureMatch } = props;
     
     return (
         <Fragment>
             <Card sx={{ margin: 2 }} variant="outlined">
                 <CardActionArea onClick={(event) => {
-                    handleOpenMatchFactsModal(event, date, homeTeam, awayTeam)
+                    if (!futureMatch) {
+                        handleOpenMatchFactsModal(event, date, homeTeam, awayTeam)
+                    }
                 }
                 }>
                     <CardContent>
