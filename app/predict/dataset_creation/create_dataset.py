@@ -3,10 +3,10 @@ import numpy as np
 from db_connection import SQLConnection
 import datetime, sys, os
 from dotenv import load_dotenv
-# from app_logger import FluentLogger
+from app_logger import FluentLogger
 
 load_dotenv()
-# # # logger = FluentLogger("predict-dataset_creation").get_logger()
+logger = FluentLogger("predict-dataset_creation").get_logger()
 
 output_columns = [
     "home_goals", "away_goals", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target",
@@ -364,7 +364,7 @@ def create_training_dataset(sql_connection) -> pd.DataFrame:
         df = combine_form_and_career_stats((complete_player_career_stats_for_match_df, complete_player_form_stats_for_match_df), columns_to_evaluate=stats_columns)
         df = pd.merge(df, all_matches, on="match_id")
 
-        # logger.info(f"Dataset created successfully - {df.shape[0]} rows and {df.shape[1]} columns.")
+        logger.info(f"Dataset created successfully - {df.shape[0]} rows and {df.shape[1]} columns.")
         print(f"Dataset created successfully - {df.shape[0]} rows and {df.shape[1]} columns.")
         return df
     except Exception as e:
@@ -387,9 +387,10 @@ def create_prediction_dataset(sql_connection, home_team_id: str, away_team_id: s
         if career.empty or form.empty:
             return None
 
-        df = combine_form_and_career_stats((career, form), pred=True, columns_to_evaluate=stats_columns)
+        df = combine_form_and_career_stats((career, form), columns_to_evaluate=stats_columns)
 
-        # logger.info(f"Prediction dataset created successfully - {df.shape[0]} rows and {df.shape[1]} columns.")
+        df = df.drop(columns=["match_id"])
+        logger.info(f"Prediction dataset created successfully - {df.shape[0]} rows and {df.shape[1]} columns.")
 
         return df
     except Exception as e:
