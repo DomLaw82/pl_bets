@@ -11,7 +11,10 @@ import datetime
 
 load_dotenv()
 
-db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
+# with shots_on_target {'bets': [390], 'win_rate': [0.541025641025641], 'profit': [-337.0], 'ror': [-0.8641025641025641]}
+# without shots_on_target {'bets': [390], 'win_rate': [0.558974358974359], 'profit': [2082.0], 'ror': [5.338461538461538]}
+
+db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"),"localhost" or os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
 features = os.environ.get("WIN_PREDICTION_FEATURES").split(",")
 
