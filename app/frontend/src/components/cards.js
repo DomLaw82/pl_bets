@@ -86,13 +86,15 @@ export function PredictionPlayerCards(props) {
 }
 
 export function MatchCards(props) {
-    const { gameWeek, date, homeTeam, awayTeam, result, handleOpenMatchFactsModal, homeWinProb, awayWinProb, drawProb, prediction } = props;
+    const { gameWeek, date, homeTeam, awayTeam, result, handleOpenMatchFactsModal, homeWinProb, awayWinProb, drawProb, prediction, futureMatch } = props;
     
     return (
         <Fragment>
             <Card sx={{ margin: 2 }} variant="outlined">
                 <CardActionArea onClick={(event) => {
-                    handleOpenMatchFactsModal(event, date, homeTeam, awayTeam)
+                    if (!futureMatch) {
+                        handleOpenMatchFactsModal(event, date, homeTeam, awayTeam)
+                    }
                 }
                 }>
                     <CardContent>
@@ -260,13 +262,13 @@ export function PredictionHistoryCard(props) {
 
     return (
         <Fragment>
-            <Card sx={{ margin: .5, width: "100%" }} variant="outlined">
+            <Card key={`${homeTeam}-${awayTeam}`} sx={{ margin: .5, width: "100%" }} variant="outlined">
             <CardActionArea  onClick={(event) => setViewPrediction(!viewPrediction)}>
                     <CardContent sx={{
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'space-evenly',
-                        alignItems: "center",
+                        alignItems: "center"
                     }}>
                         <Box sx={{alignItems: "center", width: "100%"}}>
                             <Box sx={{display:"flex", flexDirection:"row", justifyContent: "space-evenly", textAlign: "center"}}>
@@ -287,7 +289,7 @@ export function PredictionHistoryCard(props) {
                                 {
                                     viewPrediction && predictionResultColumns.map((column, index) => {
                                         return (
-                                            <Box sx={{ display: "flex", flexDirection: "row" }}>
+                                            <Box key={column} sx={{ display: "flex", flexDirection: "row" }}>
                                                 <Box sx={{ alignItems: "center", textAlign: "center", width: "32.5%" }}>
                                                     <Typography variant="body1" component="div">
                                                         {data[`home_${column}`]}

@@ -61,49 +61,6 @@ export function MatchModal(props) {
 		},
 	});
 
-	if (isLoadingMatchFacts) {
-		return (
-			<Fragment>
-				<Modal
-					open={isMatchFactsModalOpen}
-					onClose={handleCloseMatchFactsModal}
-					aria-labelledby="modal-modal-title"
-					aria-describedby="modal-modal-description"
-					sx={{ border: "2px solid #000" }}
-				>
-					<animated.div
-						style={{
-							position: "absolute",
-							top: "50%",
-							left: "50%",
-							width: 600,
-							bgcolor: "background.paper",
-							border: "2px solid #000",
-							boxShadow: 24,
-							p: 4,
-							padding: 20,
-							display: "flex",
-							flexDirection: "row",
-							justifyContent: "space-evenly",
-							...modalSpring,
-						}}
-					>
-						<Box
-							sx={{
-								display: "flex",
-								flexDirection: "column",
-								textAlign: "center",
-								width: 200,
-							}}
-						>
-							<ModalDataLoading />
-						</Box>
-					</animated.div>
-				</Modal>
-			</Fragment>
-		);
-	}
-
 	return (
 		<Fragment>
 			<Modal
@@ -553,7 +510,7 @@ export function PredictionOutputModal(props) {
 	});
 
 	const handleCloseModal = () => {
-		setIsOpen(false);
+		setIsOpen(false)
 	};
 
 	return (
@@ -574,7 +531,7 @@ export function PredictionOutputModal(props) {
 					textAlign: "center",
 					...modalAnimation
 				}}>
-					<PredictionOutputCard homeTeam={homeTeam} awayTeam={awayTeam} predictionOutput={predictionOutput} />
+					{predictionOutput ? <PredictionOutputCard homeTeam={homeTeam} awayTeam={awayTeam} predictionOutput={predictionOutput} />:<ModalDataLoading/>}
 				</animated.div>
 			</Modal>
 		</Fragment>
@@ -583,8 +540,6 @@ export function PredictionOutputModal(props) {
 
 export function PredictionHistoryModal(props) {
 	const { isOpen, setIsOpen, originX, originY, history } = props;
-
-	console.log(history);
 
 	const modalAnimation = useSpring({
 		from: {
@@ -639,7 +594,7 @@ export function PredictionHistoryModal(props) {
 					>
 						<Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "center"}}>
 							{history.map((prediction, index) => (
-								<Box key={index} sx={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", margin: .5 }}>
+								<Box key={`${index}-${prediction.home_team}-${prediction.away_team}`} sx={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", margin: .5 }}>
 									<PredictionHistoryCard homeTeam={prediction.home_team} awayTeam={prediction.away_team} data={prediction} />
 								</Box>
 							))}

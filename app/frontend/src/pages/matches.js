@@ -43,7 +43,7 @@ export default function Matches(props) {
 			}
 		);
 		const matchFacts = await response.json();
-		return matchFacts[0];
+		return matchFacts;
 	}
 
 	const handleOpenMatchFactsModal = useCallback(
@@ -158,16 +158,16 @@ export default function Matches(props) {
 	useEffect(() => {
 		let currentGameWeekMatches = matches.filter(
 			(match) =>
-				(match.date > formattedDate) & (match.game_week === currentGameWeek)
+				(match.date > formattedDate) && (match.game_week === currentGameWeek)
 		);
 		let nextGameWeekMatches = matches.filter(
 			(match) =>
-				(match.game_week === (parseInt(currentGameWeek) + 1).toString()) &
+				(match.game_week === (parseInt(currentGameWeek) + 1).toString()) &&
 				(match.date > formattedDate)
 		);
 		let pastMatches = matches.filter(
 			(match) =>
-				(match.date < formattedDate) & (match.game_week === currentGameWeek)
+				(match.date < formattedDate) && (match.game_week === currentGameWeek)
 		);
 
 		// Update the state with the filtered matches
@@ -280,6 +280,7 @@ export default function Matches(props) {
 															handleOpenMatchFactsModal={
 																handleOpenMatchFactsModal
 															}
+															futureMatch={formattedDate < match.date ? true : false}
 														/>
 													);
 												})}
@@ -321,6 +322,7 @@ export default function Matches(props) {
 														handleOpenMatchFactsModal={
 															handleOpenMatchFactsModal
 														}
+														futureMatch={formattedDate < match.date ? true : false}
 													/>
 												))}
 											</Box>
@@ -361,6 +363,7 @@ export default function Matches(props) {
 														handleOpenMatchFactsModal={
 															handleOpenMatchFactsModal
 														}
+														futureMatch={formattedDate < match.date ? true : false}
 													/>
 												))}
 											</Box>

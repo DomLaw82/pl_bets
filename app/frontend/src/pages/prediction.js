@@ -23,7 +23,6 @@ import { PredictionOutputModal } from "../components/modals";
 import HistoryIcon from "@mui/icons-material/History";
 import { PredictionHistoryModal } from "../components/modals";
 import { useQuery } from "react-query";
-import { ModalDataLoading, PageLoading } from "../components/loaders";
 
 export default function Prediction(props) {
 	const { teams } = props;
@@ -49,14 +48,17 @@ export default function Prediction(props) {
 	const [awayTeamAverageStats, setAwayTeamAverageStats] = useState([]);
 	const [headToHeadStats, setHeadToHeadStats] = useState([]);
 
+	const [originX, setOriginX] = useState(0);
+	const [originY, setOriginY] = useState(0);
+
+	const [predictionOutput, setPredictionOutput] = useState({});
 	const [isPredictionOutputModalOpen, setIsPredictionOutputModalOpen] =
 		useState(false);
 	const [isPredictionHistoryModalOpen, setIsPredictionHistoryModalOpen] =
 		useState(false);
+	const [fetchPrediction, setFetchPrediction] = useState(false);
 
 	const [predictionHistory, setPredictionHistory] = useState([]);
-
-	const [isPredictionModalOpen, setIsPredictionModalOpen] = useState(false);
 
 	// const [originX, setOriginX] = useState(0);
 	// const [originY, setOriginY] = useState(0);
@@ -105,32 +107,20 @@ export default function Prediction(props) {
 					}),
 				}
 			);
-			return await response.json();
+			const prediction = await response.json();
+			console.log(prediction);
+			setOriginX(event.clientX);
+			setOriginY(event.clientY);
+			setIsPredictionOutputModalOpen(true);
+			setPredictionOutput(prediction);
+			prediction.home_team = homeTeam;
+			prediction.away_team = awayTeam;
+			addToPredictionHistory(prediction);
+			return prediction;
 		} catch (error) {
 			console.error("Prediction failed:", error);
 		}
 	};
-	const {
-		data: predictionOutput = {},
-		isLoading: isLoadingPredictionOutput,
-		error: predictionOutputError,
-	} = useQuery(
-		["predictionOutput", homeTeam, awayTeam, runPrediction],
-		() => runPrediction(),
-		{
-			enabled: false,
-			staleTime: Infinity,
-			onSuccess: (data) => {
-				console.log(data);
-				// setOriginX(event.clientX);
-				// setOriginY(event.clientY);
-				setIsPredictionOutputModalOpen(true);
-				data.home_team = homeTeam;
-				data.away_team = awayTeam;
-				addToPredictionHistory(data);
-			},
-		}
-	);
 
 	const getPredictionStats = async (homeTeam, awayTeam) => {
 		const response = await fetch(
@@ -163,6 +153,7 @@ export default function Prediction(props) {
 		{
 			enabled: !!homeTeam && !!awayTeam && homeTeam !== awayTeam,
 			staleTime: Infinity,
+
 			onSuccess: (data) => {
 				console.log(data);
 				setHomeTeamFormStats(data.home_team_form);
@@ -359,13 +350,12 @@ export default function Prediction(props) {
 										</Box>
 									</Grid>
 								) : (
-									<Box sx={{ width: "100%", textAlign: "center" }}>
+									<Box sx={{ width: "100%", textAlign: "center", alignItems: "center", margin: "10%" }}>
 										<Box>
-											<Typography variant="h6" sx={{ textAlign: "center" }}>
+											<Typography variant="h3" sx={{ textAlign: "center"}}>
 												Select a home and away team to view predictions
 											</Typography>
 										</Box>
-										<PageLoading />
 									</Box>
 								)}
 								<Grid item xs={12} sx={{ alignItems: "center" }}>
@@ -378,8 +368,8 @@ export default function Prediction(props) {
 										{homeTeam && awayTeam && homeTeam !== awayTeam && (
 											<Button
 												fullWidth
-												onClick={() => {
-													runPrediction(homeTeam, awayTeam);
+												onClick={(event) => {
+													runPrediction(event);
 												}}
 												variant="outlined"
 											>
@@ -409,9 +399,11 @@ export default function Prediction(props) {
 													awayTeam={awayTeam}
 													predictionOutput={predictionOutput}
 													isOpen={isPredictionOutputModalOpen}
+													setFetchPrediction={setFetchPrediction}
+													fetchPrediction={fetchPrediction}
 													setIsOpen={setIsPredictionOutputModalOpen}
-													// originX={originX}
-													// originY={originY}
+													originX={originX}
+													originY={originY}
 												/>
 											</Box>
 										</Grid>
@@ -425,8 +417,8 @@ export default function Prediction(props) {
 													history={predictionHistory}
 													isOpen={isPredictionHistoryModalOpen}
 													setIsOpen={setIsPredictionHistoryModalOpen}
-													// originX={originX}
-													// originY={originY}
+													originX={originX}
+													originY={originY}
 												/>
 											</Box>
 										</Grid>
@@ -436,19 +428,6 @@ export default function Prediction(props) {
 						</Box>
 					</Box>
 				</Box>
-				{homeTeam && awayTeam && predictionOutput ? (
-					<PredictionOutputModal
-						homeTeam={homeTeam}
-						awayTeam={awayTeam}
-						predictionOutput={predictionOutput}
-						isOpen={isPredictionModalOpen}
-						setIsOpen={setIsPredictionModalOpen}
-						isLoading={isLoadingPredictionOutput}
-						isError={predictionOutputError}
-					/>
-				) : (
-					<ModalDataLoading />
-				)}
 			</Container>
 		</Fragment>
 	);
