@@ -59,19 +59,10 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Determine next version number
-      id: versioning
-      run: |
-        TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-        echo "Current tag: $TAG"
-        NEXT_TAG=$((TAG+1))
-        echo "Next tag: $NEXT_TAG"
-        echo "IMAGE_TAG=v$NEXT_TAG" >> $GITHUB_ENV
-
     - name: Build, tag, and push Docker image
       env:
         ECR_REPOSITORY: ${{ secrets.INGESTION_ECR_REPOSITORY }}
-        IMAGE_TAG: ${{ env.IMAGE_TAG }}
+        IMAGE_TAG: latest
       run: |
           docker build -t $ECR_REPOSITORY/my-app:$IMAGE_TAG -f ./app/Dockerfile.ingestion .
           docker push $ECR_REPOSITORY/my-app:$IMAGE_TAG
