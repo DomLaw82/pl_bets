@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    name: Push Ingestion Image to Amazon ECR
+    name: Push Logging Image to Amazon ECR
     runs-on: ubuntu-latest
     environment: production
 
@@ -36,7 +36,7 @@ jobs:
       env:
         IMAGE_TAG: ${{ github.sha }}
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        REPOSITORY: ${{ secrets.INGESTION_ECR_REPOSITORY }}
+        REPOSITORY: ${{ secrets.LOGGING_ECR_REPOSITORY }}
       run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f Dockerfile.ingestion .
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f Dockerfile.logging .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG

@@ -3,12 +3,12 @@ FROM node:21-alpine AS development
 
 # Install dependencies
 WORKDIR /app
-COPY ./frontend/package*.json ./
-COPY ./frontend/webpack.config.js ./
+COPY ./app/frontend/package*.json ./
+COPY ./app/frontend/webpack.config.js ./
 RUN npm install 
 
 # Copy source code
-COPY ./frontend .
+COPY ./app/frontend .
 
 EXPOSE 3000
 
