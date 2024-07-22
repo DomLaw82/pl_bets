@@ -430,7 +430,7 @@ def get_prediction_stats():
       )
    except Exception as e:
       logger.error(f"Error with endpoint /prediction/stats: {str(e)}")
-      return jsonify({'error': f"Error with endpoint /prediction/stats: {str(e)}"}), 500
+      raise Exception(f"Error with endpoint /prediction/stats: {str(e)}")
    
 @registry.handles(
    rule='/prediction/squads',
@@ -667,7 +667,225 @@ def get_player_profile(player_id:str):
    except Exception as e:
       logger.error(f"Error with endpoint /players/player-profile/{player_id}: {str(e)}")
       return jsonify({"error": f"Error with endpoint /players/player-profile/{player_id}: {str(e)}"}), 500
+   
+@registry.handles(
+   rule='/teams/profile/<team_id>',
+   method='GET',
+)
+def get_team_profile(team_id:str):
+   try:
+      team_profile = db.get_dict(f"""
+         SELECT 
+            season,
+            '{team_id}' AS team_id,
+            t.name AS team_name,
+            COUNT(*) AS matches_played,
+            SUM(
+               CASE
+                  WHEN home_team_id = '{team_id}'
+                  AND SPLIT_PART(result, ' - ', 1) > SPLIT_PART(result, ' - ', 2) THEN 3
+                  WHEN away_team_id = '{team_id}'
+                  AND SPLIT_PART(result, ' - ', 2) > SPLIT_PART(result, ' - ', 1) THEN 3
+                  WHEN SPLIT_PART(result, ' - ', 1) = SPLIT_PART(result, ' - ', 2) THEN 1
+                  ELSE 0
+               END
+            ) AS total_points,
+            SUM(
+               CASE
+                  WHEN home_team_id = '{team_id}'
+                  AND SPLIT_PART(result, ' - ', 1) > SPLIT_PART(result, ' - ', 2) THEN 1
+                  WHEN away_team_id = '{team_id}'
+                  AND SPLIT_PART(result, ' - ', 2) > SPLIT_PART(result, ' - ', 1) THEN 1
+                  ELSE 0
+               END
+            ) AS wins,
+            SUM(
+               CASE
+                  WHEN SPLIT_PART(result, ' - ', 1) = SPLIT_PART(result, ' - ', 2) THEN 1
+                  ELSE 0
+               END
+            ) AS draws,
+            SUM(
+               CASE
+                  WHEN home_team_id = '{team_id}'
+                  AND SPLIT_PART(result, ' - ', 1) < SPLIT_PART(result, ' - ', 2) THEN 1
+                  WHEN away_team_id = '{team_id}'
+			         AND SPLIT_PART(result, ' - ', 2) < SPLIT_PART(result, ' - ', 1) THEN 1
+                  ELSE 0
+               END
+            ) AS losses,
+            SUM(
+               CASE
+                  WHEN home_team_id = '{team_id}' THEN CAST(SPLIT_PART(result, ' - ', 1) AS INTEGER)
+                  ELSE CAST(SPLIT_PART(result, ' - ', 2) AS INTEGER)
+               END
+            ) AS goals_for,
+            SUM(
+               CASE
+                  WHEN home_team_id = '{team_id}' THEN CAST(SPLIT_PART(result, ' - ', 2) AS INTEGER)
+                  ELSE CAST(SPLIT_PART(result, ' - ', 1) AS INTEGER)
+               END
+            ) AS goals_against,
+            SUM(
+               CASE
+                  WHEN home_team_id = '{team_id}' THEN CAST(SPLIT_PART(result, ' - ', 1) AS INTEGER) - CAST(SPLIT_PART(result, ' - ', 2) AS INTEGER)
+                  ELSE CAST(SPLIT_PART(result, ' - ', 2) AS INTEGER) - CAST(SPLIT_PART(result, ' - ', 1) AS INTEGER)
+               END
+            ) AS goal_difference
+         FROM schedule
+            JOIN team t ON t.id = '{team_id}'
+         WHERE (
+               home_team_id = '{team_id}'
+               OR away_team_id = '{team_id}'
+            )
+            AND result != '-'
+         GROUP BY season,
+            t.name
+         ORDER BY season DESC;
+      """)
+      logger.info(f"Team profile for {team_id} retrieved")
+      return jsonify(team_profile)
+   except Exception as e:
+      logger.error(f"Error with endpoint /teams/profile/{team_id}: {str(e)}")
+      return jsonify({"error": f"Error with endpoint /teams/profile/{team_id}: {str(e)}"}), 500
 
+def get_top_n_all_time(df:pd.DataFrame, n:int, stat:str) -> list:
+   try:
+      df = df[["full_name", f"{stat}"]].sort_values(by=stat, ascending=False)
+      values = df.head(n).to_dict(orient='records')
+      logger.info(f"Top {n} all-time {stat} retrieved")
+      return values
+   except Exception as e:
+      logger.error(f"Error creating top {n} {stat} dataframe: {str(e)}")
+      raise Exception(f"Error creating top {n} {stat} dataframe: {str(e)}")
+
+@registry.handles(
+   rule='/teams/all-time-stats/<team_id>',
+   method='GET',
+)
+def get_all_time_player_stats(team_id:str):
+   # top 5 for each stat
+      # appearances tab
+         # top appearances
+         # top minutes
+      # goals tab
+         # top goalscorers
+         # top goals per 90
+         # top xg
+         # top xg per 90
+      # assists tab
+         # top assisters
+         # top assists per 90
+         # top xa
+         # top xa per 90
+      # goalkeeping tab
+         # top clean sheets
+         # top save pct
+      # defending tab
+         # top interceptions
+         # top blocks
+      # discipline tab
+         # top yellow cards
+         # top red cards
+      # errors tab
+         # top errors leading to shot per 90
+         # top miscontrols per 90
+         # top dispossessed per 90
+
+   tab_columns = {
+		"appearances": ["appearances", "minutes"],
+		"goals": ["goals", "goals_per_ninety", "expected_goals", "expected_goals_per_ninety"],
+		"assists": ["assists", "assists_per_ninety", "expected_assists", "expected_assists_per_ninety"],
+		"goalkeeping": ["saves", "clean_sheets"],
+		"defending": ["tackles", "interceptions", "clearances"],
+		"discipline": ["yellow_cards", "red_cards"],
+		"errors": ["errors_leading_to_shot", "dispossessed", "miscontrols"],
+	}
+   
+   try:
+      # The player must have played at least 10 games for the team
+      all_time_player_stats = db.get_df(f"""
+         WITH player_name AS (
+            SELECT
+                  DISTINCT CONCAT(player.first_name, ' ', player.last_name) AS full_name,
+                  player.id AS player_id
+            FROM
+               player
+            JOIN
+                  historic_player_per_ninety ON player.id = historic_player_per_ninety.player_id
+            WHERE
+               historic_player_per_ninety.team_id = '{team_id}'
+               AND matches_played > 10
+         ),
+         
+         sums AS (
+            SELECT
+               pn.full_name,
+               SUM(ninetys) AS ninetys,
+               SUM(matches_played) AS appearances,
+               SUM(minutes_played) AS minutes,
+               SUM(goals) AS goals,
+               SUM(assists) AS assists,
+               SUM(expected_goals) AS expected_goals,
+               SUM(expected_assists) AS expected_assists,
+               SUM(yellow_cards) AS yellow_cards,
+               SUM(red_cards) AS red_cards,
+               SUM(clean_sheets) AS clean_sheets,
+               SUM(saves) AS saves,
+               SUM(interceptions) AS interceptions,
+               SUM(tackles) AS tackles,
+               SUM(clearances) AS clearances,
+               SUM(errors_leading_to_shot) AS errors_leading_to_shot,
+               SUM(miscontrols) AS miscontrols,
+               SUM(dispossessed) AS dispossessed
+            FROM
+               historic_player_per_ninety
+            JOIN
+               player_name pn ON historic_player_per_ninety.player_id = pn.player_id
+            WHERE
+               historic_player_per_ninety.team_id = '{team_id}'
+               AND ninetys > 0
+            GROUP BY
+               pn.full_name
+         )
+
+         SELECT
+            full_name,
+            ninetys,
+            appearances,
+            minutes,
+            goals,
+            ROUND((goals/ninetys)::numeric, 2) AS goals_per_ninety,
+            assists,
+            ROUND((assists/ninetys)::numeric, 2) AS assists_per_ninety,
+            ROUND(expected_goals::numeric, 2) AS expected_goals,
+            ROUND((expected_goals/ninetys)::numeric, 2) AS expected_goals_per_ninety,
+            ROUND(expected_assists::numeric, 2) AS expected_assists,
+            ROUND((expected_assists/ninetys)::numeric, 2) AS expected_assists_per_ninety,
+            yellow_cards,
+            red_cards,
+            clean_sheets,
+            saves,
+            interceptions,
+            tackles,
+            clearances,
+            errors_leading_to_shot,
+            miscontrols,
+            dispossessed
+         FROM
+            sums;
+      """)
+      logger.info(f"Team all time stats for {team_id} retrieved")
+      top_performers = {}
+      for key, columns in tab_columns.items():
+         top_performers[key] = {}
+         for column in columns:
+            top_performers[key][column] = get_top_n_all_time(all_time_player_stats, 5, column)
+      logger.info(f"Top performers for all time stats for {team_id} retrieved:\n{top_performers}")
+      return jsonify(top_performers)
+   except Exception as e:
+      logger.error(f"Error with endpoint /teams/all-time-stats/{team_id}: {str(e)}")
+      return jsonify({"error": f"Error with endpoint /teams/all-time-stats/{team_id}: {str(e)}"}), 500
 
 app = Flask(__name__)
 CORS(app, origins=["http://frontend:3000", "http://localhost:3000", "http://frontend:3001", "http://localhost:3001"],  supports_credentials=True)
