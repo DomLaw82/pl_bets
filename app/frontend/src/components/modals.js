@@ -700,16 +700,45 @@ export function TeamModal(props) {
 		setIsOpen(false);
 	};
 
-	const tabNames = ["Performance", "Appearances", "Goals", "Assists", "Goalkeeping", "Defending", "Discipline", "Errors"];
+	const tabNames = [
+		"Performance",
+		"Appearances",
+		"Goals",
+		"Assists",
+		"Goalkeeping",
+		"Defending",
+		"Discipline",
+		"Errors",
+	];
 	const tabColumns = {
-		"Performance": ["season", "matches_played", "total_points", "wins", "draws", "losses", "goals_for", "goals_against", "goal_difference"],
-		"Appearances": ["appearances", "minutes"],
-		"Goals": ["goals", "goals_per_ninety", "expected_goals", "expected_goals_per_ninety"],
-		"Assists": ["assists", "assists_per_ninety", "expected_assists", "expected_assists_per_ninety"],
-		"Goalkeeping": ["saves", "clean_sheets"],
-		"Defending": ["tackles", "interceptions", "clearances"],
-		"Discipline": ["yellow_cards", "red_cards"],
-		"Errors": ["errors_leading_to_shot", "dispossessed", "miscontrols"],
+		Performance: [
+			"season",
+			"matches_played",
+			"total_points",
+			"wins",
+			"draws",
+			"losses",
+			"goals_for",
+			"goals_against",
+			"goal_difference",
+		],
+		Appearances: ["appearances", "minutes"],
+		Goals: [
+			"goals",
+			"goals_per_ninety",
+			"expected_goals",
+			"expected_goals_per_ninety",
+		],
+		Assists: [
+			"assists",
+			"assists_per_ninety",
+			"expected_assists",
+			"expected_assists_per_ninety",
+		],
+		Goalkeeping: ["saves", "clean_sheets"],
+		Defending: ["tackles", "interceptions", "clearances"],
+		Discipline: ["yellow_cards", "red_cards"],
+		Errors: ["errors_leading_to_shot", "dispossessed", "miscontrols"],
 	};
 	const teamLeaguePerformance = teamInfo ? teamInfo[0] : null;
 	const teamAllTimeStats = teamInfo ? teamInfo[1] : null;
@@ -779,7 +808,7 @@ export function TeamModal(props) {
 											))}
 										</Tabs>
 									</AppBar>
-									{transitions((style, index) => (
+									{transitions((style, index) =>
 										tabNames[index] === "Performance" ? (
 											<animated.div style={style}>
 												<TabPanel value={value} index={index}>
@@ -791,21 +820,44 @@ export function TeamModal(props) {
 											</animated.div>
 										) : (
 											<animated.div style={style}>
-													<TabPanel value={value} index={index}>
-														<Box sx={{display:"flex", flexDirection:"row", width:"100%", justifyContent:"space-evenly", overflowX:"scroll"}}>
-														{tabColumns[tabNames[index]].map((stat) => (
-															<Box>
-																<TabTableBySeasonTemplate
-																	historicStats={teamAllTimeStats[tabNames[index].toLowerCase()][stat]}
-																	statHeadings={["full_name", stat]}
-																/>
+												<TabPanel value={value} index={index}>
+													<Box
+														sx={{
+															display: "flex",
+															flexDirection: "row",
+															width: "100%",
+															justifyContent: "space-evenly",
+															overflowX: "scroll",
+														}}
+													>
+														<Box
+															sx={{ display: "flex", flexDirection: "column" }}
+														>
+															<Typography variant="h3">
+																Top 5 All Time
+															</Typography>
+															<Box
+																sx={{ display: "flex", flexDirection: "row" }}
+															>
+																{tabColumns[tabNames[index]].map((stat) => (
+																	<Box>
+																		<TabTableBySeasonTemplate
+																			historicStats={
+																				teamAllTimeStats[
+																					tabNames[index].toLowerCase()
+																				][stat]
+																			}
+																			statHeadings={["full_name", stat]}
+																		/>
+																	</Box>
+																))}
 															</Box>
-														))}
-															</Box>
+														</Box>
+													</Box>
 												</TabPanel>
 											</animated.div>
 										)
-									))}
+									)}
 								</Box>
 							) : (
 								<ModalDataLoading />
