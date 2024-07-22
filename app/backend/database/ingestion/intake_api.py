@@ -170,8 +170,8 @@ def refresh_schedule_data():
                 logger.info(f"Schedule data for season {current_season} updated and inserted successfully")
                 return jsonify(f"Schedule data for season {current_season} updated and inserted successfully"), 200
 
-        logger.info(f"Schedule data for season {current_season}/{str(int(current_season)+1)} up to date")
-        return jsonify(f"Schedule data for season {current_season}/{str(int(current_season)+1)} up to date"), 200
+        logger.info(f"Schedule data for season {current_season} up to date")
+        return jsonify(f"Schedule data for season {current_season} up to date"), 200
 
     except Exception as e:
         logger.error(f"Error refreshing schedule data: {str(e)}")
