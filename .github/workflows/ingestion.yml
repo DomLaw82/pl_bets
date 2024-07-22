@@ -47,10 +47,6 @@ jobs:
         ref: 'main'
         fetch-depth: 0
 
-    - name: List contents
-      run: |
-          ls -laR .
-
     - name: Configure AWS credentials
       id: aws-credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -66,7 +62,7 @@ jobs:
     - name: Build, tag, and push Docker image
       env:
         ECR_REPOSITORY: ${{ secrets.INGESTION_ECR_REPOSITORY }}
-        IMAGE_TAG: latest
+        IMAGE_TAG: ${{ github.sha }}
       run: |
           docker build -t $ECR_REPOSITORY/ingestion:$IMAGE_TAG -f ./Dockerfile.ingestion .
           docker push $ECR_REPOSITORY/ingestion:$IMAGE_TAG
