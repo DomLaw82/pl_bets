@@ -154,12 +154,14 @@ export function MatchCards(props) {
 }
 
 export function TeamCards(props) {
-    const { teamName, teamLogo } = props;
+    const { teamId, teamName, teamLogo, handleOpenTeamModal} = props;
 
     return (
         <Fragment>
-            <Card sx={{ margin: 2}} variant="outlined">
-                <CardActionArea>
+            <Card key={teamId} sx={{ margin: 2}} variant="outlined">
+                <CardActionArea onClick={(event) => {
+                    handleOpenTeamModal(event, teamId)
+                }}>
                     <CardContent>
                         <Box sx={{
                             display: 'flex',
