@@ -4,6 +4,8 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y cron curl
 
+RUN ls -l
+
 COPY ./backend/database/ingestion/requirements.txt .
 
 COPY ./utils/db_connection.py .
