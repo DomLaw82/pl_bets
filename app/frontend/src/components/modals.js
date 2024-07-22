@@ -743,7 +743,16 @@ export function TeamModal(props) {
 	const teamLeaguePerformance = teamInfo ? teamInfo[0] : null;
 	const teamAllTimeStats = teamInfo ? teamInfo[1] : null;
 
-	console.log(teamInfo);
+	function toTitleCase(stat) {
+		return stat
+			.replace(/_/g, " ")
+			.split(' ')
+			.map(word => word !== "per" ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : word)
+			.join(' ')
+			.replace("Ninety", "90") 
+			.replace("per", "/") 
+			.replace("Expected", "Exp.");
+	}
 
 	return (
 		<Fragment>
@@ -830,16 +839,20 @@ export function TeamModal(props) {
 															overflowX: "scroll",
 														}}
 													>
-														<Box
-															sx={{ display: "flex", flexDirection: "column" }}
-														>
-															<Typography variant="h3">
-																Top 5 All Time
-															</Typography>
+														{tabColumns[tabNames[index]].map((stat) => (
 															<Box
-																sx={{ display: "flex", flexDirection: "row" }}
+																sx={{
+																	display: "flex",
+																	flexDirection: "column",
+																	textAlign: "center",
+																}}
 															>
-																{tabColumns[tabNames[index]].map((stat) => (
+																<Typography variant="h5">
+																	Top 5: {toTitleCase(stat)}
+																</Typography>
+																<Box
+																	sx={{ display: "flex", flexDirection: "row" }}
+																>
 																	<Box>
 																		<TabTableBySeasonTemplate
 																			historicStats={
@@ -850,9 +863,9 @@ export function TeamModal(props) {
 																			statHeadings={["full_name", stat]}
 																		/>
 																	</Box>
-																))}
+																</Box>
 															</Box>
-														</Box>
+														))}
 													</Box>
 												</TabPanel>
 											</animated.div>
