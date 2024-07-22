@@ -28,12 +28,12 @@ def get_rolling_goal_difference(df: pd.DataFrame, n: int) -> pd.DataFrame:
     - The rolling goal difference is calculated separately for the home and away teams.
     - The rolling goal difference is the sum of the last `n` non-null goal differences for each team.
     - If a team has less than `n` non-null goal differences available, the rolling goal difference will be NaN for those periods.
-    - The resulting DataFrame will have two columns: "home_team_rolling_goal_difference_at_home" and "away_team_rolling_goal_difference_at_away".
+    - The resulting DataFrame will have two columns: "home_rolling_goal_difference_at_home" and "away_rolling_goal_difference_at_away".
     - The index of the resulting DataFrame will be the same as the input DataFrame.
     """
 
-    home_goal_diff = df["home_team_goal_difference"].values
-    away_goal_diff = df["away_team_goal_difference"].values
+    home_goal_diff = df["home_goal_difference"].values
+    away_goal_diff = df["away_goal_difference"].values
     is_home = df["is_home"].values
 
     values = deque(maxlen=n)
@@ -53,8 +53,8 @@ def get_rolling_goal_difference(df: pd.DataFrame, n: int) -> pd.DataFrame:
     result = np.concatenate(([0], result[:-1]))
 
     return pd.DataFrame({
-        "home_team_rolling_goal_difference": np.where(is_home, result, np.nan),
-        "away_team_rolling_goal_difference": np.where(~is_home, result, np.nan),
+        "home_rolling_goal_difference": np.where(is_home, result, np.nan),
+        "away_rolling_goal_difference": np.where(~is_home, result, np.nan),
     }, index=df.index)
 
 def get_rolling_goal_difference_at_location(df: pd.DataFrame, n: int) -> pd.DataFrame:
@@ -67,20 +67,20 @@ def get_rolling_goal_difference_at_location(df: pd.DataFrame, n: int) -> pd.Data
 
     Returns:
         pd.DataFrame: A DataFrame with two columns:
-            - 'home_team_rolling_goal_difference_at_home': Rolling goal difference at home for each match.
-            - 'away_team_rolling_goal_difference_at_away': Rolling goal difference away for each match.
+            - 'home_rolling_goal_difference_at_home': Rolling goal difference at home for each match.
+            - 'away_rolling_goal_difference_at_away': Rolling goal difference away for each match.
 
     Example:
         df = pd.DataFrame({
             'is_home': [True, False, True, False, True],
-            'home_team_goal_difference': [1, -2, 3, 0, -1],
-            'away_team_goal_difference': [-1, 0, 2, -3, 1]
+            'home_goal_difference': [1, -2, 3, 0, -1],
+            'away_goal_difference': [-1, 0, 2, -3, 1]
         })
         result = get_rolling_goal_difference_at_location(df, 3)
         print(result)
 
         Output:
-            home_team_rolling_goal_difference_at_home  away_team_rolling_goal_difference_at_away
+            home_rolling_goal_difference_at_home  away_rolling_goal_difference_at_away
         0                                          NaN                                      NaN
         1                                          NaN                                      NaN
         2                                          4.0                                      NaN
@@ -98,8 +98,8 @@ def get_rolling_goal_difference_at_location(df: pd.DataFrame, n: int) -> pd.Data
     home_df = df[df["is_home"]].copy()
     away_df = df[~df["is_home"]].copy()
     
-    home_df_home_diff = home_df["home_team_goal_difference"].values
-    away_df_away_diff = away_df["away_team_goal_difference"].values
+    home_df_home_diff = home_df["home_goal_difference"].values
+    away_df_away_diff = away_df["away_goal_difference"].values
 
     at_home_result_indices = home_df.index.values
     at_away_result_indices = away_df.index.values
@@ -130,17 +130,17 @@ def get_rolling_goal_difference_at_location(df: pd.DataFrame, n: int) -> pd.Data
     at_location_values = list(at_location_values)
 
     return pd.DataFrame({
-        "home_team_rolling_goal_difference_at_home": np.where(is_home, at_location_values, np.nan),
-        "away_team_rolling_goal_difference_at_away": np.where(~is_home, at_location_values, np.nan),
+        "home_rolling_goal_difference_at_home": np.where(is_home, at_location_values, np.nan),
+        "away_rolling_goal_difference_at_away": np.where(~is_home, at_location_values, np.nan),
     }, index=df.index)
 
 def get_team_form(df: pd.DataFrame, team_id: str) -> pd.DataFrame:
     """
     Calculate the form of a team based on the last 5 matches:
-        - home_team_rolling_goal_difference
-        - away_team_rolling_goal_difference
-        - home_team_rolling_goal_difference_at_home
-        - away_team_rolling_goal_difference_at_away
+        - home_rolling_goal_difference
+        - away_rolling_goal_difference
+        - home_rolling_goal_difference_at_home
+        - away_rolling_goal_difference_at_away
 
     Args:
         df (pd.DataFrame): The DataFrame containing the match data.
@@ -155,17 +155,17 @@ def get_team_form(df: pd.DataFrame, team_id: str) -> pd.DataFrame:
             season_data = season_data.copy()
             season_data.loc[:, "is_home"] = season_data["home_team_id"] == team_id
 
-            season_data["home_team_goal_difference"] = np.where(season_data["is_home"], season_data["home_goals"] - season_data["away_goals"], np.nan)
-            season_data["away_team_goal_difference"] = np.where(~season_data["is_home"], season_data["away_goals"] - season_data["home_goals"], np.nan)
+            season_data["home_goal_difference"] = np.where(season_data["is_home"], season_data["home_goals"] - season_data["away_goals"], np.nan)
+            season_data["away_goal_difference"] = np.where(~season_data["is_home"], season_data["away_goals"] - season_data["home_goals"], np.nan)
 
             df.update(
                 get_rolling_goal_difference(
-                    season_data[["is_home", "home_team_goal_difference", "away_team_goal_difference"]], rolling_window
+                    season_data[["is_home", "home_goal_difference", "away_goal_difference"]], rolling_window
                 )
             )
             df.update(
                 get_rolling_goal_difference_at_location(
-                    season_data[["is_home", "home_team_goal_difference", "away_team_goal_difference"]], rolling_window
+                    season_data[["is_home", "home_goal_difference", "away_goal_difference"]], rolling_window
                 )
             )
 
@@ -245,8 +245,8 @@ def get_days_since_last_league_game(data: pd.DataFrame, team_id: str) -> pd.Data
 
             match_differences = pd.to_datetime(season_data["date"], format="%Y-%m-%d").diff().dt.days.fillna(0).values
 
-            season_data["home_team_days_since_last_league_game"] = np.where(season_data["is_home"], match_differences, np.nan)
-            season_data["away_team_days_since_last_league_game"] = np.where(~season_data["is_home"], match_differences, np.nan)
+            season_data["home_days_since_last_league_game"] = np.where(season_data["is_home"], match_differences, np.nan)
+            season_data["away_days_since_last_league_game"] = np.where(~season_data["is_home"], match_differences, np.nan)
 
             data.update(season_data)
 
@@ -269,7 +269,7 @@ def run_data_prep(sql_connection: SQLConnection, features: list, fixtures: pd.Da
 
     """
     match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals","closing_home_odds","closing_draw_odds","closing_away_odds"]
-    goal_difference_features = ["home_team_rolling_goal_difference", "away_team_rolling_goal_difference", "home_team_rolling_goal_difference_at_home","away_team_rolling_goal_difference_at_away"]
+    goal_difference_features = ["home_rolling_goal_difference", "away_rolling_goal_difference", "home_rolling_goal_difference_at_home","away_rolling_goal_difference_at_away"]
     
     data = sql_connection.get_df(f"SELECT {', '.join(match_columns)} FROM match ORDER BY date ASC")
 

@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Typography from '@mui/material/Typography';
 import { Divider } from "@mui/material";
 import { TeamCards } from "../components/cards";
+import { useQuery } from "react-query";
 
 export default function Teams(props) {
 	const {teams, setTeams} = props;
@@ -16,6 +17,22 @@ export default function Teams(props) {
 			.catch(error => console.log(error));
 	}, [setTeams]);
 
+	// async function fetchTeamInformation(team_id) {
+	// 	const teamInfo = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/teams/profile/${team_id}`)
+	// 		.then(response => response.json())
+	// 		.catch(error => console.log(error));
+	// 	const teamAllTimeStats = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/teams/all-time-stats/${team_id}`)
+	// 		.then(response => response.json())
+	// 		.catch(error => console.log(error));
+	// 	return teamInfo;
+	// }
+	// const {
+	// 	data: teamInfo,
+	// 	isLoading: teamInfoIsLoading,
+
+	// } = useQuery(['teamInfo', team_id], () => fetchTeamInformation(team_id), {
+	// 	enabled: !!team_id,
+	// });
 
 	return (
 		<Fragment>

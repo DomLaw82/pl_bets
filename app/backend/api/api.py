@@ -748,12 +748,22 @@ def get_team_profile(team_id:str):
       logger.error(f"Error with endpoint /teams/profile/{team_id}: {str(e)}")
       return jsonify({"error": f"Error with endpoint /teams/profile/{team_id}: {str(e)}"}), 500
 
+def get_top_n_all_time(df:pd.DataFrame, n:int, stat:str) -> list:
+   try:
+      df = df[["full_name", f"{stat}"]].sort_values(by=stat, ascending=False)
+      values = df.head(n).to_dict(orient='records')
+      logger.info(f"Top {n} all-time {stat} retrieved")
+      return values
+   except Exception as e:
+      logger.error(f"Error creating top {n} {stat} dataframe: {str(e)}")
+      return jsonify({"error": f"Error creating top {n} {stat} dataframe: {str(e)}"}), 500
+
 @registry.handles(
-   rule='/teams/player-stats/<team_id>',
+   rule='/teams/all-time-stats/<team_id>',
    method='GET',
 )
 def get_all_time_player_stats(team_id:str):
-   # top 10 for each stat
+   # top 5 for each stat
       # appearances tab
          # top appearances
          # top minutes
@@ -794,7 +804,7 @@ def get_all_time_player_stats(team_id:str):
             JOIN
                   historic_player_per_ninety ON player.id = historic_player_per_ninety.player_id
             WHERE
-                  historic_player_per_ninety.team_id = 't-00001'
+                  historic_player_per_ninety.team_id = '{team_id}'
                AND ninetys > 0
          ),
          
@@ -822,7 +832,7 @@ def get_all_time_player_stats(team_id:str):
             JOIN
                player_name pn ON historic_player_per_ninety.player_id = pn.player_id
             WHERE
-               historic_player_per_ninety.team_id = 't-00001'
+               historic_player_per_ninety.team_id = '{team_id}'
                AND ninetys > 0
             GROUP BY
                pn.full_name
@@ -853,8 +863,12 @@ def get_all_time_player_stats(team_id:str):
          FROM
             sums;
       """)
-      logger.info(f"Team player stats for {team_id} retrieved")
-      return jsonify(all_time_player_stats)
+      logger.info(f"Team all time stats for {team_id} retrieved")
+      top_performers = []
+      for column in all_time_player_stats:
+         if column not in ["full_name", "ninetys"]:
+            top_performers.append(get_top_n_all_time(all_time_player_stats, 5, column))
+      return jsonify(top_performers)
    except Exception as e:
       logger.error(f"Error with endpoint /teams/player-stats/{team_id}: {str(e)}")
       return jsonify({"error": f"Error with endpoint /teams/player-stats/{team_id}: {str(e)}"}), 500
