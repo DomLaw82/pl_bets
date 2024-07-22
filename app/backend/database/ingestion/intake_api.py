@@ -149,9 +149,9 @@ def refresh_schedule_data():
         
         schedule_data_download_root = os.environ.get("DOWNLOAD_FIXTURE_URL_ROOT")
         schedule_data_save_root = os.environ.get("SCHEDULE_SAVE_PATH_ROOT")
+        logger.info(f"Downloading schedule data for season {current_season}")
         
         download_csv_for_all_fixtures_in_a_season(str(current_season.split("-")[0]), schedule_data_download_root, schedule_data_save_root)
-        
         season_schedule_file_path = os.path.join(schedule_data_save_root, f"epl_{str(current_season.split('-')[0])}-{str(current_season.split('-')[1][-2:])}.csv")
         
         df = pd.read_csv(season_schedule_file_path)

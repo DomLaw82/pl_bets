@@ -188,11 +188,11 @@ def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_r
 	"""
 	  
 	try:
-		response = requests.get(f"{url}{season}-UTC.csv")
+		response = requests.get(f"{url}{season}-GMTStandardTime.csv")
 		save_path = os.path.join(save_path_root, f"epl_{season}-{str(int(season) + 1)[-2:]}.csv") if response.status_code == 200 else None
 
 		if not save_path:
-			response = requests.get(f"{url}{season}-GMTStandardTime.csv")
+			response = requests.get(f"{url}{season}-UTC.csv")
 			save_path = os.path.join(save_path_root, f"epl_{season}-{str(int(season) + 1)[-2:]}.csv") if response.status_code == 200 else None
 
 		if not save_path:
