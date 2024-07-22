@@ -47,6 +47,10 @@ jobs:
         ref: 'main'
         fetch-depth: 0
 
+    - name: List contents
+      run: |
+          ls -laR backend/database/
+
     - name: Configure AWS credentials
       id: aws-credentials
       uses: aws-actions/configure-aws-credentials@v4
