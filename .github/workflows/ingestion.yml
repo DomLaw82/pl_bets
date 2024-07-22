@@ -49,7 +49,7 @@ jobs:
 
     - name: List contents
       run: |
-          ls -laR backend/database/
+          ls -laR .
 
     - name: Configure AWS credentials
       id: aws-credentials
