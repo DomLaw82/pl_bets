@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import HistoricStatsTabTemplate from "./historicStats/historicStatsTabTemplate";
+import TabTableBySeasonTemplate from "./historicStats/TabTableBySeasonTemplate";
 import { tabNames, tabColumns } from "./historicStats/statHeadings";
 import { Button, CssBaseline, Divider, Grid } from "@mui/material";
 import { AppBar } from "@mui/material";
@@ -14,7 +14,6 @@ import PlayerProfileTab from "./historicStats/playerProfileTab";
 import { ModalDataLoading } from "./loaders";
 import { PredictionOutputCard, PredictionHistoryCard } from "./cards";
 import Card from "@mui/material/Card";
-
 
 export function MatchModal(props) {
 	const {
@@ -84,6 +83,7 @@ export function MatchModal(props) {
 						display: "flex",
 						flexDirection: "row",
 						justifyContent: "space-evenly",
+						overflowX: "hidden",
 						...modalSpring,
 					}}
 				>
@@ -100,9 +100,12 @@ export function MatchModal(props) {
 								<ModalDataLoading />
 							</Box>
 						) : (
-								<Box sx={{
+							<Box
+								sx={{
 									display: "flex",
-									flexDirection: "row"}}>
+									flexDirection: "row",
+								}}
+							>
 								<Box
 									sx={{
 										display: "flex",
@@ -137,7 +140,7 @@ export function MatchModal(props) {
 										return null;
 									})}
 								</Box>
-								<Divider orientation="horizontal" sx={{height: 2}} flexItem />	
+								<Divider orientation="horizontal" sx={{ height: 2 }} flexItem />
 								<Box
 									sx={{
 										display: "flex",
@@ -267,6 +270,7 @@ export function PlayerStatsModal(props) {
 						display: "flex",
 						flexDirection: "row",
 						justifyContent: "center",
+						overflowX: "hidden",
 						...modalAnimation,
 					}}
 				>
@@ -325,7 +329,7 @@ export function PlayerStatsModal(props) {
 										tabNames[index] !== "Profile" ? (
 											<animated.div style={style}>
 												<TabPanel value={value} index={index}>
-													<HistoricStatsTabTemplate
+													<TabTableBySeasonTemplate
 														historicStats={historicStats}
 														statHeadings={tabColumns[tabNames[index]]}
 													/>
@@ -424,6 +428,7 @@ export function RefreshModal(props) {
 						flexDirection: "row",
 						justifyContent: "center",
 						textAlign: "center",
+						overflowX: "hidden",
 						...modalAnimation,
 					}}
 				>
@@ -487,77 +492,35 @@ export function RefreshModal(props) {
 }
 
 export function PredictionOutputModal(props) {
-	const { homeTeam, awayTeam, predictionOutput, isOpen, setIsOpen, originX, originY } = props;
+	const {
+		homeTeam,
+		awayTeam,
+		predictionOutput,
+		isOpen,
+		setIsOpen,
+		originX,
+		originY,
+	} = props;
 
 	const modalAnimation = useSpring({
 		from: {
 			opacity: 0,
-			transform: 'translate(-50%, -50%) scale(0)',
+			transform: "translate(-50%, -50%) scale(0)",
 			height: 0,
 			width: 0,
 			top: originY,
 			left: originX,
 		},
 		to: {
-			transform: isOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0)',
+			transform: isOpen
+				? "translate(-50%, -50%) scale(1)"
+				: "translate(-50%, -50%) scale(0)",
 			opacity: isOpen ? 1 : 0,
-			backgroundColor: isOpen ? 'black' : 'transparent',
+			backgroundColor: isOpen ? "black" : "transparent",
 			height: isOpen ? "max-content" : 0,
 			width: isOpen ? 1150 : 0,
-			top: isOpen ? document.documentElement.clientHeight/2 : originY,
-			left: isOpen ? document.documentElement.clientWidth/2 : originX,
-		},
-	});
-
-	const handleCloseModal = () => {
-		setIsOpen(false)
-	};
-
-	return (
-		<Fragment>
-			<Modal
-				open={isOpen}
-				onClose={handleCloseModal}
-				aria-labelledby="modal-modal-title"
-				aria-describedby="modal-modal-description"
-			>
-				<animated.div style={{
-					position: 'absolute',
-					height: "max-content",
-					width: "100%",
-					display: "flex",
-					flexDirection: "row",
-					justifyContent: "center",
-					textAlign: "center",
-					...modalAnimation
-				}}>
-					{predictionOutput ? <PredictionOutputCard homeTeam={homeTeam} awayTeam={awayTeam} predictionOutput={predictionOutput} />:<ModalDataLoading/>}
-				</animated.div>
-			</Modal>
-		</Fragment>
-	);
-}
-
-export function PredictionHistoryModal(props) {
-	const { isOpen, setIsOpen, originX, originY, history } = props;
-
-	const modalAnimation = useSpring({
-		from: {
-			opacity: 0,
-			transform: 'translate(-50%, -50%) scale(0)',
-			height: 0,
-			width: 0,
-			top: originY,
-			left: originX,
-		},
-		to: {
-			transform: isOpen ? 'translate(-50%, -50%) scale(1)' : 'translate(-50%, -50%) scale(0)',
-			opacity: isOpen ? 1 : 0,
-			backgroundColor: isOpen ? 'black' : 'transparent',
-			height: isOpen ? "max-content" : 0,
-			width: isOpen ? 1150 : 0,
-			top: isOpen ? document.documentElement.clientHeight/2 : originY,
-			left: isOpen ? document.documentElement.clientWidth/2 : originX,
+			top: isOpen ? document.documentElement.clientHeight / 2 : originY,
+			left: isOpen ? document.documentElement.clientWidth / 2 : originX,
 		},
 	});
 
@@ -573,31 +536,280 @@ export function PredictionHistoryModal(props) {
 				aria-labelledby="modal-modal-title"
 				aria-describedby="modal-modal-description"
 			>
-				<animated.div style={{
-					position: 'absolute',
-					height: "max-content",
-					width: "100%",
-					display: "flex",
-					flexDirection: "row",
-					justifyContent: "center",
-					textAlign: "center",
-					...modalAnimation
-				}}>
+				<animated.div
+					style={{
+						position: "absolute",
+						height: "max-content",
+						width: "100%",
+						display: "flex",
+						flexDirection: "row",
+						justifyContent: "center",
+						textAlign: "center",
+						...modalAnimation,
+					}}
+				>
+					{predictionOutput ? (
+						<PredictionOutputCard
+							homeTeam={homeTeam}
+							awayTeam={awayTeam}
+							predictionOutput={predictionOutput}
+						/>
+					) : (
+						<ModalDataLoading />
+					)}
+				</animated.div>
+			</Modal>
+		</Fragment>
+	);
+}
+
+export function PredictionHistoryModal(props) {
+	const { isOpen, setIsOpen, originX, originY, history } = props;
+
+	const modalAnimation = useSpring({
+		from: {
+			opacity: 0,
+			transform: "translate(-50%, -50%) scale(0)",
+			height: 0,
+			width: 0,
+			top: originY,
+			left: originX,
+		},
+		to: {
+			transform: isOpen
+				? "translate(-50%, -50%) scale(1)"
+				: "translate(-50%, -50%) scale(0)",
+			opacity: isOpen ? 1 : 0,
+			backgroundColor: isOpen ? "black" : "transparent",
+			height: isOpen ? "max-content" : 0,
+			width: isOpen ? 1150 : 0,
+			top: isOpen ? document.documentElement.clientHeight / 2 : originY,
+			left: isOpen ? document.documentElement.clientWidth / 2 : originX,
+		},
+	});
+
+	const handleCloseModal = () => {
+		setIsOpen(false);
+	};
+
+	return (
+		<Fragment>
+			<Modal
+				open={isOpen}
+				onClose={handleCloseModal}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<animated.div
+					style={{
+						position: "absolute",
+						height: "max-content",
+						width: "100%",
+						display: "flex",
+						flexDirection: "row",
+						justifyContent: "center",
+						textAlign: "center",
+						overflowX: "hidden",
+						...modalAnimation,
+					}}
+				>
 					<Box
 						sx={{
 							display: "flex",
 							flexDirection: "column",
 							textAlign: "center",
 							width: "100%",
-							padding: 2 
+							padding: 2,
 						}}
 					>
-						<Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "center"}}>
+						<Box
+							sx={{
+								display: "flex",
+								flexDirection: "column",
+								justifyContent: "center",
+								textAlign: "center",
+							}}
+						>
 							{history.map((prediction, index) => (
-								<Box key={`${index}-${prediction.home_team}-${prediction.away_team}`} sx={{ display: "flex", flexDirection: "row", justifyContent: "center", textAlign: "center", margin: .5 }}>
-									<PredictionHistoryCard homeTeam={prediction.home_team} awayTeam={prediction.away_team} data={prediction} />
+								<Box
+									key={`${index}-${prediction.home_team}-${prediction.away_team}`}
+									sx={{
+										display: "flex",
+										flexDirection: "row",
+										justifyContent: "center",
+										textAlign: "center",
+										margin: 0.5,
+									}}
+								>
+									<PredictionHistoryCard
+										homeTeam={prediction.home_team}
+										awayTeam={prediction.away_team}
+										data={prediction}
+									/>
 								</Box>
 							))}
+						</Box>
+					</Box>
+				</animated.div>
+			</Modal>
+		</Fragment>
+	);
+}
+
+export function TeamModal(props) {
+	const { isOpen, teamInfo, setIsOpen, originX, originY, isLoading } = props;
+
+	const [value, setValue] = useState(0);
+
+	const transitions = useTransition(value, {
+		from: { opacity: 0, transform: "translate3d(100%,0,0)" },
+		enter: { opacity: 1, transform: "translate3d(0%,0,0)" },
+		leave: { opacity: 0, transform: "translate3d(100%,0,0)" },
+		keys: value,
+	});
+
+	const modalAnimation = useSpring({
+		from: {
+			opacity: 0,
+			transform: "translate(-50%, -50%) scale(0)",
+			height: 0,
+			width: 0,
+			top: originY,
+			left: originX,
+		},
+		to: {
+			transform: isOpen
+				? "translate(-50%, -50%) scale(1)"
+				: "translate(-50%, -50%) scale(0)",
+			opacity: isOpen ? 1 : 0,
+			backgroundColor: isOpen ? "black" : "transparent",
+			height: isOpen ? "max-content" : 0,
+			width: isOpen ? 1150 : 0,
+			top: isOpen ? document.documentElement.clientHeight / 2 : originY,
+			left: isOpen ? document.documentElement.clientWidth / 2 : originX,
+		},
+	});
+
+	const handleChange = (event, newValue) => {
+		console.log("New value: ", newValue);
+		console.log("Modal open?: ", isOpen);
+		setValue(newValue);
+	};
+
+	const handleCloseModal = () => {
+		setIsOpen(false);
+	};
+
+	const tabNames = ["Performance", "Appearances", "Goals", "Assists", "Goalkeeping", "Defending", "Discipline", "Errors"];
+	const tabColumns = {
+		"Performance": ["season", "matches_played", "total_points", "wins", "draws", "losses", "goals_for", "goals_against", "goal_difference"],
+		"Appearances": ["appearances", "minutes"],
+		"Goals": ["goals", "goals_per_ninety", "expected_goals", "expected_goals_per_ninety"],
+		"Assists": ["assists", "assists_per_ninety", "expected_assists", "expected_assists_per_ninety"],
+		"Goalkeeping": ["saves", "clean_sheets"],
+		"Defending": ["tackles", "interceptions", "clearances"],
+		"Discipline": ["yellow_cards", "red_cards"],
+		"Errors": ["errors_leading_to_shot", "dispossessed", "miscontrols"],
+	};
+	const teamLeaguePerformance = teamInfo ? teamInfo[0] : null;
+	const teamAllTimeStats = teamInfo ? teamInfo[1] : null;
+
+	console.log(teamInfo);
+
+	return (
+		<Fragment>
+			<Modal
+				open={isOpen}
+				onClose={handleCloseModal}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				<animated.div
+					style={{
+						position: "absolute",
+						height: "max-content",
+						width: "100%",
+						display: "flex",
+						flexDirection: "row",
+						justifyContent: "center",
+						textAlign: "center",
+						overflowX: "hidden",
+						...modalAnimation,
+					}}
+				>
+					<Box
+						sx={{
+							display: "flex",
+							flexDirection: "column",
+							textAlign: "center",
+							width: "100%",
+							padding: 2,
+						}}
+					>
+						<Box
+							sx={{
+								display: "flex",
+								flexDirection: "column",
+								justifyContent: "center",
+								textAlign: "center",
+							}}
+						>
+							{teamInfo && !isLoading ? (
+								<Box>
+									<AppBar position="static">
+										<Tabs
+											value={value}
+											onChange={handleChange}
+											indicatorColor="secondary"
+											textColor="inherit"
+											variant="fullWidth"
+											aria-label="full width tabs"
+										>
+											{tabNames.map((tab, index) => (
+												<Tab
+													key={index}
+													label={tab}
+													sx={{
+														whiteSpace: "nowrap",
+														overflow: "hidden",
+														textOverflow: "hidden",
+													}}
+													{...a11yProps(index)}
+												/>
+											))}
+										</Tabs>
+									</AppBar>
+									{transitions((style, index) => (
+										tabNames[index] === "Performance" ? (
+											<animated.div style={style}>
+												<TabPanel value={value} index={index}>
+													<TabTableBySeasonTemplate
+														historicStats={teamLeaguePerformance}
+														statHeadings={tabColumns[tabNames[index]]}
+													/>
+												</TabPanel>
+											</animated.div>
+										) : (
+											<animated.div style={style}>
+													<TabPanel value={value} index={index}>
+														<Box sx={{display:"flex", flexDirection:"row", width:"100%", justifyContent:"space-evenly", overflowX:"scroll"}}>
+														{tabColumns[tabNames[index]].map((stat) => (
+															<Box>
+																<TabTableBySeasonTemplate
+																	historicStats={teamAllTimeStats[tabNames[index].toLowerCase()][stat]}
+																	statHeadings={["full_name", stat]}
+																/>
+															</Box>
+														))}
+															</Box>
+												</TabPanel>
+											</animated.div>
+										)
+									))}
+								</Box>
+							) : (
+								<ModalDataLoading />
+							)}
 						</Box>
 					</Box>
 				</animated.div>
