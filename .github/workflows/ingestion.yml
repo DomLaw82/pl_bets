@@ -66,4 +66,3 @@ jobs:
       run: |
           docker build -t $ECR_REPOSITORY/ingestion:$IMAGE_TAG -f ./app/Dockerfile.ingestion .
           docker push $ECR_REPOSITORY/ingestion:$IMAGE_TAG
-      working-directory: ./app
