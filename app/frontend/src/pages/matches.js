@@ -167,7 +167,7 @@ export default function Matches(props) {
 		);
 		let pastMatches = matches.filter(
 			(match) =>
-				(match.date < formattedDate) && (match.game_week === currentGameWeek)
+				(match.date < formattedDate)
 		);
 
 		// Update the state with the filtered matches
