@@ -3,9 +3,6 @@ import { Box, Tooltip } from "@mui/material";
 export default function TabTableBySeasonTemplate(props) {
 	const { historicStats, statHeadings, key } = props;
 
-	// console.log(statHeadings)
-	// console.log(historicStats)
-
 	return (
 		<Box key={key} sx={{ display: 'flex', justifyContent: 'center', margin: 2, overflow: "hidden", whiteSpace: 'nowrap', textOverflow: "hidden"}}>
 			<table style={{ borderCollapse: "collapse", textAlign: "center" }}>
@@ -21,7 +18,7 @@ export default function TabTableBySeasonTemplate(props) {
 					</tr>
 				</thead>
 				<tbody>
-					{historicStats.map((season, index) => (
+					{historicStats && historicStats.map((season, index) => (
 						<tr key={`modal-${season.season}-${index}`} style={{ border: `2px double white` }}>
 							{statHeadings.map((stat) => (
 								<td key={`${stat}-value`} style={{ border: `2px double white`, padding: 5}}>
