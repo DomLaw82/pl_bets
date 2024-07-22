@@ -13,27 +13,27 @@ rolling_window = int(os.environ.get("ROLLING_WINDOW"))
 # TODO: Consider how features change over time (e.g., recent team performance, fatigue)
 # TODO: Identify and handle outliers in your data, as they can significantly impact model performance.
 
-def get_rolling_goal_difference(df: pd.DataFrame, n: int) -> pd.DataFrame:
+def get_rolling_stat(df: pd.DataFrame, stat: str, n: int) -> pd.DataFrame:
     """
-    Calculate the rolling goal difference for each team in a DataFrame.
+    Calculate the rolling stat for each team in a DataFrame.
 
     Parameters:
     - df (pd.DataFrame): The input DataFrame containing the data.
     - n (int): The number of previous non-null values to consider for the rolling sum.
 
     Returns:
-    - pd.DataFrame: A DataFrame with the rolling goal difference for each team.
+    - pd.DataFrame: A DataFrame with the rolling stat for each team.
 
     Notes:
-    - The rolling goal difference is calculated separately for the home and away teams.
-    - The rolling goal difference is the sum of the last `n` non-null goal differences for each team.
-    - If a team has less than `n` non-null goal differences available, the rolling goal difference will be NaN for those periods.
-    - The resulting DataFrame will have two columns: "home_rolling_goal_difference_at_home" and "away_rolling_goal_difference_at_away".
+    - The rolling stat is calculated separately for the home and away teams.
+    - The rolling stat is the sum of the last `n` non-null stats for each team.
+    - If a team has less than `n` non-null stats available, the rolling stat will be NaN for those periods.
+    - The resulting DataFrame will have two columns: "home_rolling_{stat}_at_home" and "away_rolling_{stat}_at_away".
     - The index of the resulting DataFrame will be the same as the input DataFrame.
     """
 
-    home_goal_diff = df["home_goal_difference"].values
-    away_goal_diff = df["away_goal_difference"].values
+    home_goal_diff = df[f"home_{stat}"].values
+    away_goal_diff = df[f"away_{stat}"].values
     is_home = df["is_home"].values
 
     values = deque(maxlen=n)
@@ -53,8 +53,8 @@ def get_rolling_goal_difference(df: pd.DataFrame, n: int) -> pd.DataFrame:
     result = np.concatenate(([0], result[:-1]))
 
     return pd.DataFrame({
-        "home_rolling_goal_difference": np.where(is_home, result, np.nan),
-        "away_rolling_goal_difference": np.where(~is_home, result, np.nan),
+        f"home_rolling_{stat}": np.where(is_home, result, np.nan),
+        f"away_rolling_{stat}": np.where(~is_home, result, np.nan),
     }, index=df.index)
 
 def get_rolling_goal_difference_at_location(df: pd.DataFrame, n: int) -> pd.DataFrame:
@@ -141,6 +141,8 @@ def get_team_form(df: pd.DataFrame, team_id: str) -> pd.DataFrame:
         - away_rolling_goal_difference
         - home_rolling_goal_difference_at_home
         - away_rolling_goal_difference_at_away
+        - home_rolling_shots_on_target
+        - away_rolling_shots_on_target
 
     Args:
         df (pd.DataFrame): The DataFrame containing the match data.
@@ -157,10 +159,10 @@ def get_team_form(df: pd.DataFrame, team_id: str) -> pd.DataFrame:
 
             season_data["home_goal_difference"] = np.where(season_data["is_home"], season_data["home_goals"] - season_data["away_goals"], np.nan)
             season_data["away_goal_difference"] = np.where(~season_data["is_home"], season_data["away_goals"] - season_data["home_goals"], np.nan)
-
+            
             df.update(
-                get_rolling_goal_difference(
-                    season_data[["is_home", "home_goal_difference", "away_goal_difference"]], rolling_window
+                get_rolling_stat(
+                    season_data[["is_home", "home_goal_difference", "away_goal_difference"]], "goal_difference", rolling_window
                 )
             )
             df.update(
@@ -168,6 +170,11 @@ def get_team_form(df: pd.DataFrame, team_id: str) -> pd.DataFrame:
                     season_data[["is_home", "home_goal_difference", "away_goal_difference"]], rolling_window
                 )
             )
+            # df.update(
+            #     get_rolling_stat(
+            #         season_data[["is_home", "home_shots_on_target", "away_shots_on_target"]], "shots_on_target", rolling_window
+            #     )
+            # )
 
         return df
     except Exception as e:
@@ -268,8 +275,10 @@ def run_data_prep(sql_connection: SQLConnection, features: list, fixtures: pd.Da
         pd.DataFrame: The prepared dataset with added features.
 
     """
-    match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals","closing_home_odds","closing_draw_odds","closing_away_odds"]
-    goal_difference_features = ["home_rolling_goal_difference", "away_rolling_goal_difference", "home_rolling_goal_difference_at_home","away_rolling_goal_difference_at_away"]
+    match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals", "home_shots_on_target", "away_shots_on_target", "closing_home_odds","closing_draw_odds","closing_away_odds"]
+    model_features = ["home_rolling_goal_difference", "away_rolling_goal_difference", "home_rolling_goal_difference_at_home","away_rolling_goal_difference_at_away",
+                    #   "home_rolling_shots_on_target", "away_rolling_shots_on_target"
+                    ]
     
     data = sql_connection.get_df(f"SELECT {', '.join(match_columns)} FROM match ORDER BY date ASC")
 
@@ -286,6 +295,6 @@ def run_data_prep(sql_connection: SQLConnection, features: list, fixtures: pd.Da
         df = get_days_since_last_league_game(df, team)
         data.update(df)
 
-    data[goal_difference_features] = data[goal_difference_features].astype(int)
+    data[model_features] = data[model_features].astype(int)
 
     return data
