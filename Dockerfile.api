@@ -2,14 +2,14 @@ FROM python:3.11.7-bookworm
 
 WORKDIR /app
 
-COPY ./backend/api/requirements.txt .
+COPY ./app/backend/api/requirements.txt .
 
-COPY ./utils/db_connection.py .
-COPY ./utils/app_logger.py .
+COPY ./app/utils/db_connection.py .
+COPY ./app/utils/app_logger.py .
 
 RUN pip install --no-cache-dir -r ./requirements.txt
 
-COPY ./backend/api .
+COPY ./app/backend/api .
 
 EXPOSE 8080
 

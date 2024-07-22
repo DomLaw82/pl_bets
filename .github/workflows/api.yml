@@ -4,9 +4,12 @@ on:
   push:
     branches: [ "main" ]
 
+# permissions:
+#   contents: read
+
 jobs:
   deploy:
-    name: Push Ingestion Image to Amazon ECR
+    name: Push API Image to Amazon ECR
     runs-on: ubuntu-latest
     environment: production
 
@@ -36,7 +39,7 @@ jobs:
       env:
         IMAGE_TAG: ${{ github.sha }}
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        REPOSITORY: ${{ secrets.INGESTION_ECR_REPOSITORY }}
+        REPOSITORY: ${{ secrets.API_ECR_REPOSITORY }}
       run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f Dockerfile.ingestion .
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG -f Dockerfile.api .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
