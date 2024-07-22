@@ -178,7 +178,7 @@ def download_html_for_squad_player_data(season: str, url_root: str, save_path_ro
 	except Exception as e:
 		logger.error(f'An error occurred while downloading squad for season {season}:', str(e))
 		return f'An error occurred while downloading squad for season {season}:', str(e)
-
+	
 def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_root: str):
 	"""
 	Downloads match facts for every game for the specified season data as a single csv
@@ -189,15 +189,17 @@ def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_r
 	  
 	try:
 		response = requests.get(f"{url}{season}-GMTStandardTime.csv")
+		logger.info(f'Attempted to download GMT fixture CSV file for season {season}: {response.status_code}')
 		save_path = os.path.join(save_path_root, f"epl_{season}-{str(int(season) + 1)[-2:]}.csv") if response.status_code == 200 else None
 
 		if not save_path:
 			response = requests.get(f"{url}{season}-UTC.csv")
+			logger.info(f'Attempted to download UTC fixture CSV file for season {season}: {response.status_code}')
 			save_path = os.path.join(save_path_root, f"epl_{season}-{str(int(season) + 1)[-2:]}.csv") if response.status_code == 200 else None
 
 		if not save_path:
 			logger.error(f'Failed to download the fixture CSV file for season {season}. Message:', response.text)
-			return False
+			raise Exception(f"Error downloading fixture CSV file: {response.text}")
 
 		with open(save_path, 'w') as file:
 			file.write(response.text)
