@@ -1,4 +1,4 @@
-name: Deploy to Amazon ECS
+name: Ingestion to Amazon ECS
 
 on:
   push:

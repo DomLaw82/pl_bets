@@ -1,4 +1,4 @@
-name: Deploy to Amazon ECS
+name: Predict to Amazon ECS
 
 on:
   push:
