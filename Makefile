@@ -1,6 +1,6 @@
 .SILENT:
 
-include .env
+include ./app/.env
 
 PSQL_IMAGE_NAME = pl_postgres
 PROJECT_NAME = pl-bets
