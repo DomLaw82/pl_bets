@@ -30,6 +30,8 @@ def combining_datasets(season: str) -> pd.DataFrame:
 		datasets = sorted(os.listdir(season_folder))
 		complete = pd.DataFrame()
 		for dataset in datasets:
+			if dataset == ".DS_Store":
+				continue
 			dataset_path = os.path.join(season_folder, dataset)
 
 			df = pd.read_csv(dataset_path)
@@ -191,6 +193,8 @@ def per_90_main(db_connection):
 		seasons = sorted(os.listdir(data_folder_path))
 		
 		for season in seasons:
+			if season == ".DS_Store":
+				continue
 			df = combining_datasets(season)
 			df = clean_historic_stats_df(db_connection, df, season)
 			df = df.drop_duplicates()
