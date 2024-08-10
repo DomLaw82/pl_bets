@@ -1,4 +1,4 @@
-import { useEffect, useState, Fragment, useMemo } from "react";
+import { useState, Fragment, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -44,10 +44,6 @@ export default function Players(props) {
         "players",
         fetchPlayers,
         { staleTime: Infinity }
-    );
-
-    const [playerStatsSegment, setPlayerStatsSegment] = useState(
-        players.slice(playerStartIndex, playerEndIndex)
     );
 
     const handlePreviousPage = () => {
@@ -130,12 +126,9 @@ export default function Players(props) {
         setModalPlayerId(playerId);
     };
 
-    useEffect(() => {
-        if (players) {
-            setPlayerStatsSegment(players.slice(playerStartIndex, playerEndIndex));
-        }
+    const playerStatsSegment = useMemo(() => {
+        return players ? players.slice(playerStartIndex, playerEndIndex) : [];
     }, [players, playerStartIndex, playerEndIndex]);
-
     
     
     const handleCategoryChange = (event) => {

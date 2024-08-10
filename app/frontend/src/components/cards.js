@@ -157,7 +157,7 @@ export function TeamCards(props) {
     const { teamId, teamName, teamLogo, handleOpenTeamModal} = props;
 
     return (
-        <Fragment>
+        <Fragment key={`${teamId}-fragment`}>
             <Card key={teamId} sx={{ margin: 2}} variant="outlined">
                 <CardActionArea onClick={(event) => {
                     handleOpenTeamModal(event, teamId)

@@ -110,27 +110,27 @@ export default function PlayerProfileTab(props) {
 			>
 				<table style={{ borderCollapse: "collapse", textAlign: "center" }}>
 					<thead>
-						<tr style={{ border: `4px solid white` }}>
+						<tr style={{ border: `4px solid white` }} key={"profile-table-head"}>
 							<th style={{ border: `4px solid white`, padding: 5 }}>
-								<Tooltip title="Season">S</Tooltip>
+								<Tooltip title="Season"><>S</></Tooltip>
 							</th>
 							<th style={{ border: `4px solid white`, padding: 5 }}>
-								<Tooltip title="Team">T</Tooltip>
+								<Tooltip title="Team"><>T</></Tooltip>
 							</th>
 							<th style={{ border: `4px solid white`, padding: 5 }}>
-								<Tooltip title="Played">P</Tooltip>
+								<Tooltip title="Played"><>P</></Tooltip>
 							</th>
 							<th style={{ border: `4px solid white`, padding: 5 }}>
-								<Tooltip title="Starts">S</Tooltip>
+								<Tooltip title="Starts"><>S</></Tooltip>
 							</th>
 							<th style={{ border: `4px solid white`, padding: 5 }}>
-								<Tooltip title="Minutes">M</Tooltip>
+								<Tooltip title="Minutes"><>M</></Tooltip>
 							</th>
 						</tr>
 					</thead>
 					<tbody>
 						{historicStats.map((player) => (
-							<tr style={{ border: `2px double white` }}>
+							<tr style={{ border: `2px double white` }} key={`${player.season} ${player.team}`}>
 								<td style={{ border: `2px double white`, padding: 5 }}>
 									{player.season}
 								</td>

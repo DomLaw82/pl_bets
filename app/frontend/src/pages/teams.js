@@ -79,11 +79,12 @@ export default function Teams(props) {
 						Teams
 					</Typography>
 					<Divider sx={{ width: "100%", height: 2 }} />
-					<Box sx={{ width: "100%" }}>
+					<Box sx={{ width: "100%" }} key={"active-team-container"}>
 						<Divider sx={{ width: "100%", height: 2 }} />
 						<Box
 							id="active-teams"
 							sx={{ width: "100%", height: "65vh", overflowY: "scroll" }}
+							key={"active-teams"}
 						>
 							{teams.map((team) => {
 								return (
@@ -93,6 +94,7 @@ export default function Teams(props) {
 										teamLogo={`/logos/${team.name}.png`}
 										handleOpenTeamModal={handleOpenTeamModal}
 										isOpen={isTeamModalOpen}
+										key={team.id}
 									/>
 								);
 							})}
