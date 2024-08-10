@@ -46,7 +46,6 @@ def predict_match_outcome(home_team_id: str, away_team_id: str) -> dict:
 
 		X, _ = perform_scaling(df, np.array([]), pred=True)
 		
-
 		model = tf.keras.models.load_model("files/stats_regression_model.h5")
 		prediction = model.predict(X)
 		return prediction

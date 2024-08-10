@@ -377,17 +377,19 @@ def create_prediction_dataset(sql_connection, home_team_id: str, away_team_id: s
 
         career = get_player_stats(sql_connection, season, home_team_id, away_team_id, "<")
         form = get_player_stats(sql_connection, season, home_team_id, away_team_id, "=")
-        
         career = grouping_prediction_dataframe_rows(career, home_team_id, away_team_id)
         form = grouping_prediction_dataframe_rows(form, home_team_id, away_team_id)
+        
+        if career.empty or form.empty:
+            raise ValueError(f"Not enough players in each team for season {season} available for prediction; Career dataframe players: {career.shape[0]}, Form dataframe players: {form.shape[0]}")
 
         career["match_id"] = "match_id"
         form["match_id"] = "match_id"
 
-        if career.empty or form.empty:
-            return None
-
         df = combine_form_and_career_stats((career, form), columns_to_evaluate=stats_columns)
+
+        logger.info(f"Career player stats combined successfully for prediction: \n{career}.")
+        logger.info(f"Form player stats combined successfully for prediction: \n{form}.")
 
         df = df.drop(columns=["match_id"])
         logger.info(f"Prediction dataset created successfully - {df.shape[0]} rows and {df.shape[1]} columns.")
