@@ -97,11 +97,10 @@ to your settings.json to suppress errors about the utility modules
 
 ## TODO
 
+- Dashboard page, look at stat correlations over all data to make better betting decisions, compare team/player performance
+- Provide choice stats for each game
 - Set up CI/CD pipeline for deployment to AWS
 - Deploy to AWS with CDK/Terraform  
-
---- THEN ---
-
 - Caching
 - General code cleanup and re-factoring
 - Review "Separation of concerns"
