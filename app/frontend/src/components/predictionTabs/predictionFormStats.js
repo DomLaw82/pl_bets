@@ -8,7 +8,7 @@ export function FormStats(props) {
 
 	return (
 		<Fragment>
-			<Box component="div" id="form-stats" sx={{height:"43vh", display: "flex", flexDirection: "row", justifyContent: "space-evenly", textAlign: "center", overflow: "hidden"}}>
+			<Box component="div" id="form-stats" sx={{height:"43vh", display: "flex", flexDirection: "row", justifyContent: "space-evenly", textAlign: "center", overflowY:"scroll"}}>
 				<Box component="div" sx={{width: "100%", display: "flex", flexDirection: "column", justifyContent: "space-evenly"}}>
 					{homeTeamFormStats.map((obj, index) => {
 						return (

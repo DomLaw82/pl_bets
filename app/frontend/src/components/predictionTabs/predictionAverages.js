@@ -7,7 +7,7 @@ export function AverageStats(props) {
 
 	return (
 		<Fragment>
-			<Box key="last-five-average-stats" sx={{height:"43vh", display: "flex", flexDirection: "row", textAlign: "center", overflow: "hidden"}}>
+			<Box key="last-five-average-stats" sx={{height:"43vh", display: "flex", flexDirection: "row", textAlign: "center", overflowY:"scroll"}}>
 				<Box key={ "home-average-stats" }  sx={{ width: "100%" }}>
 					{homeTeamAverageStats.map((obj, index) => {
 						const awayObject = awayTeamAverageStats[index];
