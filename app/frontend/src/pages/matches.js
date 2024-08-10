@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, Fragment } from "react";
+import { useEffect, useState, useCallback, useMemo, Fragment } from "react";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -21,9 +21,6 @@ export default function Matches(props) {
 	const [originX, setOriginX] = useState(0);
 	const [originY, setOriginY] = useState(0);
 	const [formattedDate, setCurrentDate] = useState("");
-	const [currentGameWeekMatches, setCurrentGameWeekMatches] = useState([]);	
-	const [nextGameWeekMatches, setNextGameWeekMatches] = useState([]);
-	const [pastMatches, setPastMatches] = useState([]);
 
 	const [isMatchFactsModalOpen, setIsMatchFactsModalOpen] = useState(false);
 
@@ -155,30 +152,23 @@ export default function Matches(props) {
 		staleTime: Infinity,
 	});
 
-	useEffect(() => {
-		let currentGameWeekMatches = matches.filter(
-			(match) =>
-				(match.date > formattedDate) && (match.game_week === currentGameWeek)
-		);
-		let nextGameWeekMatches = matches.filter(
-			(match) =>
-				(match.game_week === (parseInt(currentGameWeek) + 1).toString()) &&
-				(match.date > formattedDate)
-		);
-		let pastMatches = matches.filter(
-			(match) =>
-				(match.date < formattedDate)
-		);
-
-		// Update the state with the filtered matches
-		setCurrentGameWeekMatches(currentGameWeekMatches);
-		setNextGameWeekMatches(nextGameWeekMatches);
-		setPastMatches(pastMatches);
+	const currentGameWeekMatches = useMemo(() => {
+		return matches.filter(match => match.date > formattedDate && match.game_week === currentGameWeek);
 	}, [matches, formattedDate, currentGameWeek]);
+	
+	const nextGameWeekMatches = useMemo(() => {
+		return matches.filter(match => match.game_week === (parseInt(currentGameWeek) + 1).toString() && match.date > formattedDate);
+	}, [matches, formattedDate, currentGameWeek]);
+	
+	const pastMatches = useMemo(() => {
+		return matches.filter(match => match.date < formattedDate);
+	}, [matches, formattedDate]);
 
 	if (isLoadingMatches | isLoadingSeasons) {
 		return <PageLoading />;
 	}
+
+	console.log("currentGameWeekPredictions", currentGameWeekMatchesPrediction);
 
 	return (
 		<Fragment>

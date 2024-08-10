@@ -153,28 +153,27 @@ def get_team_form(df: pd.DataFrame, team_id: str) -> pd.DataFrame:
 
     """
     try:
-        for season, season_data in df.groupby('season'):
-            season_data = season_data.copy()
-            season_data.loc[:, "is_home"] = season_data["home_team_id"] == team_id
+        data = df.copy()
+        data.loc[:, "is_home"] = data["home_team_id"] == team_id
 
-            season_data["home_goal_difference"] = np.where(season_data["is_home"], season_data["home_goals"] - season_data["away_goals"], np.nan)
-            season_data["away_goal_difference"] = np.where(~season_data["is_home"], season_data["away_goals"] - season_data["home_goals"], np.nan)
-            
-            df.update(
-                get_rolling_stat(
-                    season_data[["is_home", "home_goal_difference", "away_goal_difference"]], "goal_difference", rolling_window
-                )
+        data["home_goal_difference"] = np.where(data["is_home"], data["home_goals"] - data["away_goals"], np.nan)
+        data["away_goal_difference"] = np.where(~data["is_home"], data["away_goals"] - data["home_goals"], np.nan)
+        
+        df.update(
+            get_rolling_stat(
+                data[["is_home", "home_goal_difference", "away_goal_difference"]], "goal_difference", rolling_window
             )
-            df.update(
-                get_rolling_goal_difference_at_location(
-                    season_data[["is_home", "home_goal_difference", "away_goal_difference"]], rolling_window
-                )
+        )
+        df.update(
+            get_rolling_goal_difference_at_location(
+                data[["is_home", "home_goal_difference", "away_goal_difference"]], rolling_window
             )
-            # df.update(
-            #     get_rolling_stat(
-            #         season_data[["is_home", "home_shots_on_target", "away_shots_on_target"]], "shots_on_target", rolling_window
-            #     )
-            # )
+        )
+        # df.update(
+        #     get_rolling_stat(
+        #         data[["is_home", "home_shots_on_target", "away_shots_on_target"]], "shots_on_target", rolling_window
+        #     )
+        # )
 
         return df
     except Exception as e:
@@ -245,17 +244,15 @@ def get_days_since_last_league_game(data: pd.DataFrame, team_id: str) -> pd.Data
     """
     try:
 
-        for season, season_data in data.groupby('season'):
+        copied_data = data.copy()
+        copied_data["is_home"] = copied_data["home_team_id"] == team_id
 
-            season_data = season_data.copy()
-            season_data["is_home"] = season_data["home_team_id"] == team_id
+        match_differences = pd.to_datetime(copied_data["date"], format="%Y-%m-%d").diff().dt.days.fillna(0).values
 
-            match_differences = pd.to_datetime(season_data["date"], format="%Y-%m-%d").diff().dt.days.fillna(0).values
+        copied_data["home_days_since_last_league_game"] = np.where(copied_data["is_home"], match_differences, np.nan)
+        copied_data["away_days_since_last_league_game"] = np.where(~copied_data["is_home"], match_differences, np.nan)
 
-            season_data["home_days_since_last_league_game"] = np.where(season_data["is_home"], match_differences, np.nan)
-            season_data["away_days_since_last_league_game"] = np.where(~season_data["is_home"], match_differences, np.nan)
-
-            data.update(season_data)
+        data.update(copied_data)
 
         return data
     except Exception as e:

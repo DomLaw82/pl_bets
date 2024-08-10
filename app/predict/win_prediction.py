@@ -3,7 +3,7 @@ import numpy as np
 from db_connection import SQLConnection
 import os
 from dotenv import load_dotenv
-from win_prediction_modules.data_modelling_one import run_data_modelling_part_one
+from win_prediction_modules.data_modelling_one import run_model_training, model_testing
 # from win_prediction_modules.data_modelling_two import run_data_modelling_part_two
 # from win_prediction_modules.weekly_outcome_prediction import predict_fixture_outcome_odds
 import pandas as pd
@@ -49,7 +49,7 @@ def run_win_prediction() -> list:
 	output_columns = ["home_team_id", "away_team_id", "home_win_prob", "draw_prob", "away_win_prob"]
 	current_date = get_current_date()
 
-	fixtures = db.get_list(f"""
+	upcoming_fixtures = db.get_list(f"""
 		SELECT 
 			date, home_team_id, away_team_id
 		FROM schedule 
@@ -63,17 +63,17 @@ def run_win_prediction() -> list:
 		ORDER BY date ASC
 	""")
 
-	fixtures_df = pd.DataFrame()
+	upcoming_fixtures_df = pd.DataFrame()
 
-	if fixtures:
-		fixtures_df = pd.DataFrame(fixtures, columns=["date", "home_team_id", "away_team_id"])
-		fixtures_df["date"] = pd.to_datetime(fixtures_df["date"]).dt.strftime('%Y-%m-%d')
-		fixtures_df["season"] = get_current_season()
-		fixtures_df[match_columns] = 10 # arbitrary value that is removed after the shift
+	if upcoming_fixtures:
+		upcoming_fixtures_df = pd.DataFrame(upcoming_fixtures, columns=["date", "home_team_id", "away_team_id"])
+		upcoming_fixtures_df["date"] = pd.to_datetime(upcoming_fixtures_df["date"]).dt.strftime('%Y-%m-%d')
+		upcoming_fixtures_df["season"] = get_current_season()
 
-		fixtures_df[features] = np.nan
+		upcoming_fixtures_df[match_columns] = np.nan 
+		upcoming_fixtures_df[features] = np.nan
 
-	data = run_data_prep(db, features, fixtures_df)
+	data = run_data_prep(db, features, upcoming_fixtures_df)
 
 	data['full_time_result'] = np.where(data['home_goals'] > data['away_goals'], 'H', np.where(data['away_goals'] > data['home_goals'], 'A', 'D'))
 
@@ -85,20 +85,25 @@ def run_win_prediction() -> list:
 
 	data.to_csv('./files/match_and_form_data.csv', index=False)
 
-	results = run_data_modelling_part_one("logistic_regression", data, features)
-	outcome_prob = results["outcome_prob"]["dataframe"]
+	training_data = data[data['date'] < get_current_date()]
+	prediction_data = data[data['date'] >= get_current_date()]
+
+	models = run_model_training("logistic_regression", training_data, features)
+
+	outcomes = ["home_win", "draw", "away_win"]
+	prediction_data = model_testing(models, "logistic_regression", prediction_data, outcomes, features)
 
 	output = []
 
-	for date, home_team_id, away_team_id in fixtures:
-		latest_row = outcome_prob[(outcome_prob["home_team_id"] == home_team_id) & (outcome_prob["away_team_id"] == away_team_id)].tail(1)
-		home_win_prob = latest_row["home_win_prob_norm"].values[0]
-		draw_prob = latest_row["draw_prob_norm"].values[0]
-		away_win_prob = latest_row["away_win_prob_norm"].values[0]
+	for date, home_team_id, away_team_id in upcoming_fixtures:
+		latest_row = prediction_data[(prediction_data["home_team_id"] == home_team_id) & (prediction_data["away_team_id"] == away_team_id)].tail(1)
+		home_win_prob = latest_row["home_win_prob"].values[0]
+		draw_prob = latest_row["draw_prob"].values[0]
+		away_win_prob = latest_row["away_win_prob"].values[0]
 		prediction = latest_row["prediction"].values[0]
 
 		output.append(dict(home_team_id=home_team_id, away_team_id=away_team_id, home_win_prob=home_win_prob, draw_prob=draw_prob, away_win_prob=away_win_prob, prediction=prediction))
-
+	print(output)
 	return output
 
 	# all_results = run_data_modelling_part_two(data)
