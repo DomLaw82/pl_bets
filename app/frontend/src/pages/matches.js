@@ -181,19 +181,6 @@ export default function Matches(props) {
 						alignItems: "center",
 					}}
 				>
-					<Typography
-						variant="h1"
-						sx={{
-							display: "flex",
-							flexDirection: { xs: "column", md: "row" },
-							alignSelf: "center",
-							textAlign: "center",
-							fontSize: "clamp(3.5rem, 10vw, 4rem)",
-						}}
-					>
-						Matches
-					</Typography>
-					<Divider sx={{ width: "100%", height: 2 }} />
 					<Box sx={{ width: "100%", overflow: "hidden", overflowY: "scroll" }}>
 						<Container sx={{ marginTop: 2, marginBottom: 2, textAlign: "center" }}>
 							<ButtonGroup size="large" aria-label="Large button group">

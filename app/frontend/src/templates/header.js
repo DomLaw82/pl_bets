@@ -22,6 +22,7 @@ function ResponsiveAppBar() {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [isDataRefreshModalOpen, setIsDataRefreshModalOpen] = useState(false);
   const [isModelRefreshModalOpen, setIsModelRefreshModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(window.location.pathname);
 
   const [originX, setOriginX] = useState(0);
   const [originY, setOriginY] = useState(0);
@@ -137,8 +138,11 @@ function ResponsiveAppBar() {
                 return (
                   <Button
                     key={route}
-                    onClick={() => navigate(obj.path)}
-                    sx={{ my: 2, color: 'white', display: 'block' }}
+                    onClick={() => {
+                      navigate(obj.path)
+                      setCurrentPage(obj.path)
+                    }}
+                    sx={{ my: 2, color: 'white', display: 'block', border: currentPage === obj.path ? '2px solid' : 'none' }}
                   >
                     {route}
                   </Button>

@@ -4,6 +4,7 @@ import Players from './pages/players';
 import Matches from './pages/matches';
 import Prediction from './pages/prediction';
 import Upload from './pages/upload';
+import Visualisations from './pages/visualisations';
 
 export const routeOptions = {
 	"home": {
@@ -26,10 +27,14 @@ export const routeOptions = {
 		path: '/prediction',
 		component: Prediction
 	},
-	"Upload": {
-		path: '/upload',
-		component: Upload
-	},
+	// "Upload": {
+	// 	path: '/upload',
+	// 	component: Upload
+	// },
+	"Visualisations": {
+		path: '/visualisations',
+		component: Visualisations
+	}
 };
 
 export const settingsOptions = {

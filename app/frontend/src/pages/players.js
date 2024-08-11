@@ -179,19 +179,6 @@ export default function Players(props) {
                             alignItems: "center",
                         }}
                     >
-                        <Typography
-                            variant="h1"
-                            sx={{
-                                display: "flex",
-                                flexDirection: { xs: "column", md: "row" },
-                                alignSelf: "center",
-                                textAlign: "center",
-                                fontSize: "clamp(3.5rem, 10vw, 4rem)",
-                            }}
-                        >
-                            Players
-                        </Typography>
-                        <Divider sx={{ width: "100%", height: 2 }} />
                         <Box sx={{ width: "100%", overflow: "hidden", overflowY: "scroll" }}>
                             <Divider sx={{ width: "100%", height: 2 }} />
                             <Container sx={{ marginTop: 2, marginBottom: 2, width: "100%", display: "flex", justifyContent: "center" }}>

@@ -215,19 +215,6 @@ export default function Prediction(props) {
 						alignItems: "center",
 					}}
 				>
-					<Typography
-						variant="h1"
-						sx={{
-							display: "flex",
-							flexDirection: { xs: "column", md: "row" },
-							alignSelf: "center",
-							textAlign: "center",
-							fontSize: "clamp(3.5rem, 10vw, 4rem)",
-						}}
-					>
-						Prediction
-					</Typography>
-					<Divider sx={{ width: "100%", height: 2 }} />
 					<Box sx={{ width: "100%", height: 2 }}>
 						<Divider sx={{ width: "100%", height: 2 }} />
 						<Box component="div" sx={{ mt: 3 }}>

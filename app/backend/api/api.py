@@ -8,6 +8,7 @@ from app_logger import FluentLogger
 from flask import render_template
 from datetime import datetime
 import os, datetime
+import numpy as np
 
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 logger = FluentLogger("api").get_logger()
@@ -594,7 +595,7 @@ def get_player_historic_stats_by_season(player_id:str) -> list:
             ROUND((penalties_faced/ninetys)::numeric, 2) AS penalties_faced_per_90,
             ROUND((penalties_allowed/ninetys)::numeric, 2) AS penalties_allowed_per_90,
             ROUND((penalties_saved/ninetys)::numeric, 2) AS penalties_saved_per_90,
-            ROUND((penalties_missed/ninetys)::numeric, 2) AS penalties_missed_per_90
+            ROUND((penalties_missed/ninetys)::numeric, 2) AS penalties_missed_per_90,
          FROM
             historic_player_per_ninety
          JOIN
@@ -886,6 +887,108 @@ def get_all_time_player_stats(team_id:str):
    except Exception as e:
       logger.error(f"Error with endpoint /teams/all-time-stats/{team_id}: {str(e)}")
       return jsonify({"error": f"Error with endpoint /teams/all-time-stats/{team_id}: {str(e)}"}), 500
+
+@registry.handles(
+   rule='/vis/player-columns',
+   method='GET',
+)
+def get_player_comp_columns() -> list:
+   try:
+      comp_cols = db.get_list("""
+         SELECT column_name
+         FROM information_schema.columns
+         WHERE table_name = 'historic_player_per_ninety'
+      """)
+      comp_cols = [col[0] for col in comp_cols if col not in ["id", "season", "player_id", "team_id"] and not any([op in col for op in ["plus", "minus", "divided"]])]
+      logger.info(f"Player comparison columns retrieved: {comp_cols}")
+      return jsonify(sorted(comp_cols))
+   except Exception as e:
+      logger.error(f"Error getting player comparison columns: {str(e)}")
+      raise Exception(f"Error getting player comparison columns: {str(e)}")
+
+@registry.handles(
+   rule='/vis/team-columns',
+   method='GET',
+)
+def get_team_comp_columns() -> list:
+   try:
+      comp_cols = db.get_list("""
+         SELECT column_name
+         FROM information_schema.columns
+         WHERE table_name = 'historic_player_per_ninety'
+      """)
+      comp_cols = [col[0] for col in comp_cols if col not in ["id", "ninetys", "season", "player_id", "team_id"] and not any([op in col for op in ["plus", "minus", "divided"]])]
+      additional = ["league_finishes", "league_points", "league_goals_for", "league_goals_against", "league_goal_difference"]+comp_cols
+      logger.info(f"Player comparison columns retrieved: {comp_cols}")
+      return jsonify(sorted(additional))
+   except Exception as e:
+      logger.error(f"Error getting player comparison columns: {str(e)}")
+      raise Exception(f"Error getting player comparison columns: {str(e)}")
+
+@registry.handles(
+   rule='/visualisation/<table_name>',
+   method='GET',
+)
+def get_stats_for_charts(table_name: str) -> list:
+   try:
+      entity_ids = request.args.get('entities', "")
+      stats = request.args.get('stats', "")
+      start_season = f"'{request.args.get('start_season', '2017-2018')}'"
+      end_season = f"'{request.args.get('end_season', '2024-2025')}'"
+      per_ninety = bool(int(request.args.get('per_ninety', 0)))
+      x_axis = request.args.get('x_axis', "season")
+
+      if len(entity_ids.split(",")) == 0 or len(stats.split(",")) == 0:
+         raise Exception("No entity ids or stats provided")
+      
+      query = f"""
+         SELECT {table_name}_id, season, {'ninetys, ' if table_name == 'player' else ''}{stats}
+         FROM historic_player_per_ninety
+         WHERE {table_name}_id IN ({entity_ids}) AND season >= {start_season} AND season <= {end_season}
+         GROUP BY {table_name}_id, season, ninetys, {stats}
+      """
+
+      logger.info(f"Query: {query}")
+      df = db.get_df(query)
+
+      if per_ninety:
+         df[stats] = df[stats].div(df["ninetys"], axis=0)
+
+      x_axis_values = []
+      y_axis_values = []
+
+      if x_axis == "season":
+         x_axis_values = sorted(df["season"].unique().tolist())
+
+      for stat in stats.split(","):
+         for entity_id in entity_ids.replace("'", "").split(","):
+            entity_data = df[df[f"{table_name}_id"] == entity_id]
+            if len(entity_data) < len(x_axis_values):
+               missing_seasons = set(x_axis_values) - set(entity_data["season"])
+               for season in missing_seasons:
+                  new_row = entity_data.iloc[0].copy()
+                  new_row["season"] = season
+                  new_row[stat] = "NaN"
+                  entity_data = pd.concat([entity_data, new_row], ignore_index=True)
+
+            entity_data["x"] = entity_data["season"]
+            entity_data["y"] = entity_data[stat]
+            id = f"{entity_id}.{stat}"
+
+            y_axis = entity_data["y"].to_list()
+            y_axis_values.append({"data": y_axis, "label": id, })
+
+      if table_name == "team":
+         pass
+
+      print("\n\n")
+      print(x_axis_values)
+      print(y_axis_values)
+
+      return jsonify([x_axis_values, y_axis_values])
+   except Exception as e:
+      logger.error(f"Error with endpoint /vis/{table_name}?{entity_ids}: {str(e)}")
+      return jsonify({"error": f"Error with endpoint /vis/{table_name}?{entity_ids}: {str(e)}"}), 500
 
 app = Flask(__name__)
 CORS(app, origins=["http://frontend:3000", "http://localhost:3000", "http://frontend:3001", "http://localhost:3001"],  supports_credentials=True)

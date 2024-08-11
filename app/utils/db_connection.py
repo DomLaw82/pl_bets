@@ -29,8 +29,8 @@ class SQLConnection:
             except Exception as e:
                 raise ValueError(e) # Optionally re-raise the exception after logging
 
-    def get_list(self, query: str) -> list:
-        """Execute a query and return a list, managing context internally."""
+    def get_list(self, query: str) -> list[tuple]:
+        """Execute a query and return a list of tuples, each representing a row, managing context internally."""
         try:
             with self.connect() as conn:
                 return self._execute_query(conn, query, fetch='all')
@@ -38,7 +38,7 @@ class SQLConnection:
             raise ValueError(e)
 
     def get_dict(self, query: str) -> list[dict]:
-        """Execute a query and return a list of dictionaries, managing context internally."""
+        """Execute a query and return a list of dictionaries, each representing a row, managing context internally."""
         with self.connect() as conn:
             return self._execute_query(conn, query, fetch='dict')
 
