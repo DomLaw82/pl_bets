@@ -202,7 +202,7 @@ export default function Players(props) {
                             </Container>
                             <Divider sx={{ width: "100%", height: 2 }} />
                             <Divider sx={{ width: "100%", height: 2 }} />
-                            <Box id="active-teams" sx={{ width: "100%", overflowY: "scroll", maxHeight: "51vh" }} >
+                            <Box id="active-teams" sx={{ width: "100%", overflowY: "scroll", maxHeight: "61vh" }} >
                                 {
                                     searchTerm !== "" ?
                                     filteredPlayers.map((player) => (

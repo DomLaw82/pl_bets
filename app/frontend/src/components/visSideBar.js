@@ -15,24 +15,26 @@ export const ColumnsSidebar = (props) => {
     const [columns, setColumns] = useState([]);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [filteredColumns, setFilteredColumns] = useState([]);
-	const [open, setOpen] = useState(true); // State to handle sidebar open/close
+	const [open, setOpen] = useState(false); // State to handle sidebar open/close
 	const [stats, setStats] = useState([]);
 
-    useEffect(() => {
-        fetch(`${process.env.REACT_APP_DATA_API_ROOT}/vis/${selectedEntity === "player" ? "player-columns" : (selectedEntity === "team" ? "team-columns" : "")}`)
-            .then(response => response.json())
-			.then(data => {
-				if (!Array.isArray(data)) {
-					throw new Error(`${data}`);
-				}
-				setColumns(data);
-				const initialCheckState = {};
-				data.forEach(column => {
-					initialCheckState[column] = false;
-				});
-				setChecked(initialCheckState);
-            })
-            .catch(error => console.error('Error fetching player columns:', error));
+	useEffect(() => {
+		if (selectedEntity !== "") {
+			fetch(`${process.env.REACT_APP_DATA_API_ROOT}/vis/${selectedEntity === "player" ? "player-columns" : (selectedEntity === "team" ? "team-columns" : "")}`)
+				.then(response => response.json())
+				.then(data => {
+					if (!Array.isArray(data)) {
+						throw new Error(`${data}`);
+					}
+					setColumns(data);
+					const initialCheckState = {};
+					data.forEach(column => {
+						initialCheckState[column] = false;
+					});
+					setChecked(initialCheckState);
+				})
+				.catch(error => console.error('Error fetching player columns:', error))
+		};
 	}, [selectedEntity]);
 
 	useEffect(() => {
@@ -58,7 +60,7 @@ export const ColumnsSidebar = (props) => {
 		<Box
 			sx={{
 				width: open ? 280 : 68, // Adjust width based on state, 48px enough to show icon only
-				height: open ? '100%' : 68, // Hide sidebar when closed
+				height: open ? 480 : 68, // Hide sidebar when closed
 				overflowX: 'scroll', // Hide content when drawer is closed
 				overflowY: 'scroll', // Hide content when drawer is closed
 				transition: 'all 0.3s ease-in-out',
@@ -129,7 +131,7 @@ export const ColumnsSidebar = (props) => {
 export const EntitySidebar = (props) => {
 	const { selectedEntity, checked, setChecked } = props;
 	const [filteredEntities, setFilteredEntities] = useState([]);
-	const [open, setOpen] = useState(true); // State to handle sidebar open/close
+	const [open, setOpen] = useState(false); // State to handle sidebar open/close
 	const [searchTerm, setSearchTerm] = useState('');
 
 	const fetchEntities = async (entityType) => {
@@ -140,7 +142,7 @@ export const EntitySidebar = (props) => {
         return response.json();
     };
 
-    const { data: entities, isLoading, isError, error } = useQuery(
+    const { data: entities = [], isLoading, isError, error } = useQuery(
         ['entities', selectedEntity], // The first parameter is a unique key for the query
         () => fetchEntities(selectedEntity), // The query function that fetches the data
         {
@@ -188,7 +190,7 @@ export const EntitySidebar = (props) => {
 		<Box
 			sx={{
 				width: open ? 280 : 68, // Adjust width based on state, 48px enough to show icon only
-				height: open ? '100%' : 68, // Hide sidebar when closed
+				height: open ? 480 : 68, // Hide sidebar when closed
 				overflowX: 'scroll', // Hide content when drawer is closed
 				overflowY: 'scroll',
 				transition: 'all 0.3s ease-in-out',
@@ -232,7 +234,7 @@ export const EntitySidebar = (props) => {
 				</Box>
 			</Box>
 			<List>
-				{searchTerm && filteredEntities.map((entity, index) => (
+				{entities && filteredEntities.map((entity, index) => (
 					<ListItem key={index} disablePadding>
 						<FormGroup>
 							<FormControlLabel

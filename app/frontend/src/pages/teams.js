@@ -73,7 +73,7 @@ export default function Teams(props) {
 
 	return (
 		<Fragment>
-			<Container sx={{ maxHeight: "80vh", overflow: "auto" }}>
+			<Container sx={{ maxHeight: "100vh", overflow: "auto" }}>
 				<CssBaseline />
 				<Box
 					sx={{
@@ -86,7 +86,7 @@ export default function Teams(props) {
 						<Divider sx={{ width: "100%", height: 2 }} />
 						<Box
 							id="active-teams"
-							sx={{ width: "100%", height: "65vh", overflowY: "scroll" }}
+							sx={{ width: "100%", height: "80vh", overflowY: "scroll" }}
 							key={"active-teams"}
 						>
 							{teams.map((team) => {
