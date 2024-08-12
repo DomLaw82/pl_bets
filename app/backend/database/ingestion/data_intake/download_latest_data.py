@@ -11,6 +11,7 @@ SEE_FIXTURES = "https://fixturedownload.com/download/csv/epl-" # + year the seas
 GAME_DATA_DOWNLOAD_ROOT = "https://www.football-data.co.uk/mmz4281/"
 DOWNLOAD_FIXTURE_URL_ROOT = "https://fixturedownload.com/download/epl-" # add on the year the season starts in, i.e. 2024
 PLAYER_DOWNLOAD_ROOT = "https://www.footballsquads.co.uk/eng/"
+MANAGER_DOWNLOAD_URL = "https://en.wikipedia.org/wiki/List_of_Premier_League_managers"
 
 SEASON_END_YEAR = 2026
 FIXTURE_SEASON_ARRAY = [str(year) for year in range(2017, SEASON_END_YEAR, 1)]
@@ -210,6 +211,31 @@ def download_csv_for_all_fixtures_in_a_season(season: str, url: str, save_path_r
 	except Exception as e:
 		logger.error(f'An error occurred while downloading fixtures for season {season}:', str(e))
 		return False
+	
+def download_manager_html_data(url: str, save_path: str):
+	"""
+	Downloads the HTML content of the given URL and saves it to the specified path.
+
+	Parameters:
+	url (str): The URL from which the HTML content is to be downloaded.
+	save_path (str): The path where the downloaded HTML content is to be saved.
+
+	Returns:
+	bool: True if the HTML content is downloaded and saved successfully, False otherwise.
+	"""
+	try:
+		response = requests.get(url)
+		if response.status_code != 200:
+			logger.error(f"Failed to download the HTML content. Status code: {response.status_code}")
+			return False
+
+		with open(save_path, "w") as file:
+			file.write(response.text)
+		logger.info(f"HTML content downloaded and saved to {save_path}")
+		return True
+	except Exception as e:
+		logger.error(f"An error occurred while downloading the HTML content: {str(e)}")
+		return False
 
 def download_latest_data():
 	logger.info("---Fetching latest data---")
@@ -253,6 +279,19 @@ def download_latest_data():
 	except Exception as e:
 		logger.error(f"Error downloading the latest player data: {e}")
 		# return f"Error downloading the latest player data: {e}"
+
+	try:
+		# Download
+		# Managers data
+		MANAGER_SAVE_PATH_ROOT = "data/manager_data/"
+		MANAGER_URL = MANAGER_DOWNLOAD_URL
+		MANAGER_FILE_NAME = "managers.html"
+		MANAGER_FILE_PATH = os.path.join(MANAGER_SAVE_PATH_ROOT, MANAGER_FILE_NAME)
+		download_manager_html_data(MANAGER_URL, MANAGER_FILE_PATH)
+	except Exception as e:
+		logger.error(f"Error downloading the latest manager data: {e}")
+		# return {"error": f"Error downloading the latest manager data: {e}"}
+
 
 		
 

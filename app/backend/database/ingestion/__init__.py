@@ -5,6 +5,7 @@ from data_intake.player import player_main
 from data_intake.country_competition import country_competition_main
 from data_intake.per_90_stats import per_90_main
 from data_intake.download_latest_data import download_latest_data
+from data_intake.managers import manager_main
 from intake_api import app
 import os
 from app_logger import FluentLogger
@@ -45,6 +46,10 @@ def insert_latest_data():
 		player_main(pl_stats_connector)
 		logger.info("\nData Intake: player_team COMPLETE")
 		logger.info("Data Intake: player COMPLETE")
+
+		# format manager data [manager]
+		manager_main(pl_stats_connector)
+		logger.info("\nData Intake: manager COMPLETE")
 			
 		# [historic_player_per_ninety]
 		per_90_main(pl_stats_connector)
