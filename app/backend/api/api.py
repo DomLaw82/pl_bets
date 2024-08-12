@@ -940,16 +940,32 @@ def get_stats_for_charts(table_name: str) -> list:
 
       if len(entity_ids.split(",")) == 0 or len(stats.split(",")) == 0:
          raise Exception("No entity ids or stats provided")
-      
-      query = f"""
-         SELECT {table_name}_id, season, {'ninetys, ' if table_name == 'player' else ''}{stats}
+      sum_stats = ",".join([(f'SUM({stat}) AS {stat}') for stat in stats.split(",")])
+      player_query = f"""
+         SELECT player_id, player.first_name || ' ' || player.last_name as name, season, 
+         SUM(ninetys), {sum_stats}
          FROM historic_player_per_ninety
-         WHERE {table_name}_id IN ({entity_ids}) AND season >= {start_season} AND season <= {end_season}
-         GROUP BY {table_name}_id, season, ninetys, {stats}
+         LEFT JOIN player ON player.id = player_id
+         WHERE player_id IN ({entity_ids}) AND season >= {start_season} AND season <= {end_season}
+         GROUP BY player_id, season, player.first_name, player.last_name
       """
+
+      # team_query = f"""
+      #    SELECT {table_name}_id, {'player.first_name || \' \' || player.last_name as name,' if table_name == 'player' else ''} season, 
+      #    {'team.name as name,' if table_name == 'team' else ''}, {'ninetys, ' if table_name == 'player' else ''}{stats}
+      #    FROM historic_player_per_ninety
+      #    {'LEFT JOIN player ON player.id = player_id' if table_name == 'player' else ''}
+      #    {'LEFT JOIN team ON team.id = team_id' if table_name == 'team' else ''}
+      #    WHERE {table_name}_id IN ({entity_ids}) AND season >= {start_season} AND season <= {end_season}
+      #    GROUP BY {table_name}_id, season, ninetys, {stats}
+      # """
+
+      query = player_query if table_name == "player" else ""
+      print(query)
 
       logger.info(f"Query: {query}")
       df = db.get_df(query)
+      print(df)
 
       if per_ninety:
          df[stats] = df[stats].div(df["ninetys"], axis=0)
@@ -964,19 +980,24 @@ def get_stats_for_charts(table_name: str) -> list:
          for entity_id in entity_ids.replace("'", "").split(","):
             entity_data = df[df[f"{table_name}_id"] == entity_id]
             if len(entity_data) < len(x_axis_values):
-               missing_seasons = set(x_axis_values) - set(entity_data["season"])
+               missing_seasons = list(set(x_axis_values) - set(entity_data["season"]))
+               print(missing_seasons)
                for season in missing_seasons:
                   new_row = entity_data.iloc[0].copy()
                   new_row["season"] = season
-                  new_row[stat] = "NaN"
-                  entity_data = pd.concat([entity_data, new_row], ignore_index=True)
+                  new_row[stat] = 0 # Change to allow missing values, None/np.nan/"NaN" does not work
+                  print(new_row)
+                  entity_data = pd.concat([entity_data, pd.DataFrame([new_row])], ignore_index=True)
+                  print(entity_data)
 
+            entity_data = entity_data.sort_values(by="season")
             entity_data["x"] = entity_data["season"]
             entity_data["y"] = entity_data[stat]
-            id = f"{entity_id}.{stat}"
+            ent_id = entity_data["name"].to_list()[0]
+            print(ent_id)
 
             y_axis = entity_data["y"].to_list()
-            y_axis_values.append({"data": y_axis, "label": id, })
+            y_axis_values.append({"data": y_axis, "label": ent_id, })
 
       if table_name == "team":
          pass
@@ -985,8 +1006,10 @@ def get_stats_for_charts(table_name: str) -> list:
       print(x_axis_values)
       print(y_axis_values)
 
+      print(jsonify([x_axis_values, y_axis_values]).json)
       return jsonify([x_axis_values, y_axis_values])
    except Exception as e:
+      print(e)
       logger.error(f"Error with endpoint /vis/{table_name}?{entity_ids}: {str(e)}")
       return jsonify({"error": f"Error with endpoint /vis/{table_name}?{entity_ids}: {str(e)}"}), 500
 
