@@ -18,7 +18,7 @@ export default function Visualisations() {
 	// player colums endpoint = /vis/player-columns
 	// player data endpoint = /vis/player/ids=..,..,..&stats=..,..,..&season=..&per_ninety=..
 
-	const { data: data_series = [[], [], []] } = useQuery(
+	const { data: data_series = [[], []] } = useQuery(
 		["columns", stats, entities],
 		async () => {
 			const checked_stats = Object.keys(stats).filter(
@@ -52,8 +52,6 @@ export default function Visualisations() {
 			staleTime: Infinity,
 		}
 	);
-
-
 
 	console.log(data_series);
 
@@ -107,6 +105,14 @@ export default function Visualisations() {
 								flexDirection: "column",
 								overflowX: "hidden",
 								justifyContent: "center",
+								alignItems: "center",  // Center content horizontally in the flex container
+								position: "fixed",     // Changed from absolute to fixed for viewport-based positioning
+								top: "60%",            // Position at 50% from the top of the viewport
+								left: "50%",           // Position at 50% from the left of the viewport
+								transform: "translate(-50%, -50%)", // Adjust position to center the element exactly
+								width: 1000,           // Specific width for the chart
+								height: 500,           // Specific height for the chart
+								zIndex: -10,			// Ensure the chart is above other elements
 							}}
 						>
 							{data_series && (
@@ -114,8 +120,12 @@ export default function Visualisations() {
 									width={1000}
 									height={500}
 									loading={data_series[0].length === 0}
-									xAxis={[{ data: data_series[0], scaleType: "band"}]}
-									series={data_series[1]}
+									xAxis={[{ data: data_series[0], scaleType: "band" }]}
+									series={data_series[1].map(data => ({
+										...data,
+										curve: "linear",
+										valueFormatter: value => value == null ? '?' : value.toString(),
+									}))}
 									yAxis={[{ min: 0, scaleType: "linear" }]}
 								/>
 							)}

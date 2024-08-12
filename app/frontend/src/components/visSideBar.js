@@ -57,40 +57,51 @@ export const ColumnsSidebar = (props) => {
 	return (
 		<Box
 			sx={{
-				width: open ? 280 : 70, // Adjust width based on state, 48px enough to show icon only
-				// height: open ? '100%' : 60, // Hide sidebar when closed
+				width: open ? 280 : 68, // Adjust width based on state, 48px enough to show icon only
+				height: open ? '100%' : 68, // Hide sidebar when closed
 				overflowX: 'scroll', // Hide content when drawer is closed
+				overflowY: 'scroll', // Hide content when drawer is closed
 				transition: 'all 0.3s ease-in-out',
 				border: '1px solid white',
-				padding: 1,
+				paddingLeft: open ? 1 : 0,
+				paddingRight: open ? 1 : 0,
+				bgcolor: 'background.paper',
 			}}
 		>
 			<Box
 				sx={{
 					display: 'flex',
+					flexDirection: 'row',
 					width: '100%', // Fixed width for the button
 					justifyContent: 'flex-end', // Center the icon button
 					transition: 'all 0.3s ease-in-out',
+					position: 'sticky', // Changed from absolute to fixed for viewport-based positioning
+					top: "0",
+					bgcolor: 'background.paper',
+					borderBottom: '1px solid white',
+					zIndex: 1,
+					padding: 1,
+					alignItems: 'center',
 				}}
 			>
-				<IconButton
-					onClick={toggleDrawer}
-					sx={{
-						width: 40, // Fixed width for the button
-						justifyContent: 'center', // Center the icon button
-					}}
-				>
-					{open ? <ArrowCircleLeftIcon fontSize='large' /> : <ArrowCircleRightIcon fontSize='large' />}
-				</IconButton>
-			</Box>
-			<Box>
-				{columns && <TextField
-					label="Search"
-					variant="outlined"
-					fullWidth
-					sx={{ marginBottom: 2 }}
-					onChange={(event) => setSearchTerm(event.target.value)}
-				/>}
+				<Box sx={{flexGrow:1, alignItems:"center", justifyContent: "center", alignContent: "center"}}>
+					{columns && open && <TextField
+						label="Search"
+						variant="outlined"
+						fullWidth
+						onChange={(event) => setSearchTerm(event.target.value)}
+					/>}
+				</Box>
+				<Box>
+					<IconButton
+						onClick={toggleDrawer}
+						sx={{
+							justifyContent: 'center',
+						}}
+					>
+						{open ? <ArrowCircleLeftIcon fontSize='large' /> : <ArrowCircleRightIcon fontSize='large' />}
+					</IconButton>
+				</Box>
 			</Box>
 			<List>
 				{filteredColumns.map((column, index) => (
@@ -176,38 +187,49 @@ export const EntitySidebar = (props) => {
 	return (
 		<Box
 			sx={{
-				width: open ? 280 : 70, // Adjust width based on state, 48px enough to show icon only
-				// height: open ? '100%' : 60, // Hide sidebar when closed
+				width: open ? 280 : 68, // Adjust width based on state, 48px enough to show icon only
+				height: open ? '100%' : 68, // Hide sidebar when closed
 				overflowX: 'scroll', // Hide content when drawer is closed
+				overflowY: 'scroll',
 				transition: 'all 0.3s ease-in-out',
 				border: '1px solid white',
-				padding: 1,
+				paddingLeft: open ? 1 : 0,
+				paddingRight: open ? 1 : 0,
+				bgcolor: 'background.paper',
 			}}
 		>
 			<Box sx={{
-						display: 'flex',
-						width: '100%', // Fixed width for the button
-						justifyContent: 'flex-start', // Center the icon button
-						transition: 'all 0.3s ease-in-out',
-					}}>
+				display: 'flex',
+				flexDirection: 'row',
+				width: '100%', // Fixed width for the button
+				justifyContent: 'flex-start', // Center the icon button
+				transition: 'all 0.3s ease-in-out',
+				position: 'sticky', // Changed from absolute to fixed for viewport-based positioning
+				top: "0",
+				bgcolor: 'background.paper',
+				borderBottom: '1px solid white',
+				zIndex: 1,
+				padding: 1,
+				alignItems: 'center',
+			}}>
 				<IconButton
 					onClick={toggleDrawer}
 					sx={{
-						width: 40, // Fixed width for the button
+						 // Fixed width for the button
 						justifyContent: 'center', // Center the icon button
 					}}
 				>
 					{open ? <ArrowCircleRightIcon fontSize='large' /> : <ArrowCircleLeftIcon fontSize='large' /> }
 				</IconButton>
-			</Box>
-			<Box>
-				{entities && <TextField
-					label="Search"
-					variant="outlined"
-					fullWidth
-					sx={{ marginBottom: 2 }}
-					onChange={(event) => setSearchTerm(event.target.value)}
-				/>}
+				<Box sx={{flexGrow:1, alignItems:"center", justifyContent: "center", alignContent: "center"}}
+				>
+					{entities && open && <TextField
+						label="Search"
+						variant="outlined"
+						fullWidth
+						onChange={(event) => setSearchTerm(event.target.value)}
+					/>}
+				</Box>
 			</Box>
 			<List>
 				{searchTerm && filteredEntities.map((entity, index) => (
