@@ -595,7 +595,7 @@ def get_player_historic_stats_by_season(player_id:str) -> list:
             ROUND((penalties_faced/ninetys)::numeric, 2) AS penalties_faced_per_90,
             ROUND((penalties_allowed/ninetys)::numeric, 2) AS penalties_allowed_per_90,
             ROUND((penalties_saved/ninetys)::numeric, 2) AS penalties_saved_per_90,
-            ROUND((penalties_missed/ninetys)::numeric, 2) AS penalties_missed_per_90,
+            ROUND((penalties_missed/ninetys)::numeric, 2) AS penalties_missed_per_90
          FROM
             historic_player_per_ninety
          JOIN
@@ -993,8 +993,7 @@ def get_stats_for_charts(table_name: str) -> list:
             entity_data = entity_data.sort_values(by="season")
             entity_data["x"] = entity_data["season"]
             entity_data["y"] = entity_data[stat]
-            ent_id = entity_data["name"].to_list()[0]
-            print(ent_id)
+            ent_id = entity_data["name"].to_list()[0] + " - " + stat
 
             y_axis = entity_data["y"].to_list()
             y_axis_values.append({"data": y_axis, "label": ent_id, })

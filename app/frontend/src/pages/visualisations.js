@@ -84,6 +84,9 @@ export default function Visualisations() {
 							</MenuItem>
 						</Select>
 					</Box>
+					<Typography variant="h4" sx={{ marginTop: 2 }}>
+						{Object.keys(stats).filter((key) => stats[key] === true).join(", ")}
+					</Typography>
 					<Box
 						sx={{
 							maxHeight: "65vh",
@@ -107,7 +110,7 @@ export default function Visualisations() {
 								justifyContent: "center",
 								alignItems: "center",  // Center content horizontally in the flex container
 								position: "fixed",     // Changed from absolute to fixed for viewport-based positioning
-								top: "60%",            // Position at 50% from the top of the viewport
+								top: "65%",            // Position at 50% from the top of the viewport
 								left: "50%",           // Position at 50% from the left of the viewport
 								transform: "translate(-50%, -50%)", // Adjust position to center the element exactly
 								width: 1000,           // Specific width for the chart
