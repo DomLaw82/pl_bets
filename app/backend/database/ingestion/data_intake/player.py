@@ -83,7 +83,7 @@ def get_all_teams_for_season(soup) -> list:
 		logger.error(f"An error occurred while extracting team names and hrefs: {str(e)}")
 		return []
 
-def get_team_squad(html_content):
+def get_team_squad(html_content: str) -> list[list[str]]:
 	"""
 	Extracts the squad information from the HTML content.
 
@@ -100,7 +100,7 @@ def get_team_squad(html_content):
 		all_columns = soup.find_all("tr")[0]
 		all_column_names = [elem.text.strip("\n") for elem in all_columns.find_all("td")]
 
-		required_cols = [all_column_names.index("Name"), all_column_names.index("Pos"), all_column_names.index("Date of Birth")]
+		required_cols = [all_column_names.index("Name"), all_column_names.index("Pos"), all_column_names.index("Date of Birth"), all_column_names.index("Height"), all_column_names.index("Weight")]
 
 		squad = []
 		for idx, row in enumerate(rows):
@@ -129,10 +129,10 @@ def player_df_to_db(df: pd.DataFrame, db_connection):
 		None
 	"""
 	try:
-		df = df[["first_name", "last_name", "birth_date", "position"]]
+		df = df[["first_name", "last_name", "birth_date", "position", "height", "weight"]]
 		df["first_name"] = df["first_name"].apply(escape_single_quote)
 		df["last_name"] = df["last_name"].apply(escape_single_quote)
-		player_rows_not_in_db_df = remove_duplicate_rows(db_connection, df, ["first_name", "last_name", "birth_date", "position"], "player")
+		player_rows_not_in_db_df = remove_duplicate_rows(db_connection, df, ["first_name", "last_name", "birth_date", "position", "height", "weight"], "player")
 		if player_rows_not_in_db_df.empty:
 			return
 		ordered_player_df = player_rows_not_in_db_df[["first_name", "last_name", "birth_date", "position"]]
@@ -176,17 +176,17 @@ def player_main_by_season(db_connection, season, data_folder_path):
 		squad_with_team = [player + [team] for player in squad_no_blanks]
 		complete_squad = [format_player_entries(player) for player in squad_with_team]
 
-		player_df = pd.DataFrame(data=complete_squad, columns=["first_name", "last_name", "position", "birth_date", "team_id"])
+		player_df = pd.DataFrame(data=complete_squad, columns=["first_name", "last_name", "position", "birth_date", "height", "weight", "team_id"])
 		player_df["birth_date"] = pd.to_datetime(player_df["birth_date"], format="%Y-%m-%d").dt.strftime("%Y-%m-%d")
 
 		player_team_df = player_df.copy()
 		player_team_df['team_id'] = player_team_df['team_id'].apply(lambda x: x.replace('.html', ''))
 
 		player_df[["first_name", "last_name"]] = player_df[["first_name", "last_name"]].map(escape_single_quote)
-		deduplicated_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date"], "player")
+		deduplicated_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date", "height", "weight"], "player")
 		
 		if not deduplicated_df.empty:
-			deduplicated_df = deduplicated_df[["first_name", "last_name", "birth_date", "position"]]
+			deduplicated_df = deduplicated_df[["first_name", "last_name", "birth_date", "position", "height", "weight"]]
 			save_to_database(db_connection, deduplicated_df, "player")
 			logger.info(f"Inserted into player table for {team} for {season}")
 

@@ -97,15 +97,29 @@ to your settings.json to suppress errors about the utility modules
 
 ## TODO
 
-- Dashboard page, look at stat correlations over all data to make better betting decisions, compare team/player performance
+- Player data - match logs from fbref - CREATE A NEW TABLE TO SHOW INDIVIDUAL GAME PERFORMANCES FOR EACH PLAYER
+- API-FOOTBALL.COM  to get more data
+- Add club elo to neural network and regression prediction model, use in FPL calculations
 
-- Scrape manager data - [Wikipedia](https://en.wikipedia.org/wiki/List_of_Premier_League_managers)
+- Dashboard page, look at stat correlations over all data to make better betting decisions, compare team/player performance [x]
+
+- Manager page
+- Scrape manager data - [Wikipedia](https://en.wikipedia.org/wiki/List_of_Premier_League_managers) [x]
+- - Typical stats per position for each manager
+- - Typical overall team stats for each manager
+- - Per 90 stats per manager
 - - Sum team stats during managers career to identify key characteristics of each managers personal philosophy/tactics
 - - Perform PCA to identify manager/tactic types
 - - Identify key metrics for each tactic
 - - Display in Tactics/Coaches page
 - - Find some way to include this in outcome prediction
 - - - Use model to determine effectiveness of each tactic against each other
+
+- FPL page
+- - Solver - Generate the best team based on fpl rules
+- - Ratings for each player for each upcoming game
+- - - expected points tally for each game
+- - Compare players/positions/teams
 
 - Provide choice stats for each game, comparing the two teams and tactics
 

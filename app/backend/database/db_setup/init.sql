@@ -18,7 +18,9 @@ CREATE TABLE player (
 	first_name VARCHAR,
 	last_name VARCHAR,
 	birth_date VARCHAR(10) NOT NULL,
-	position VARCHAR NOT NULL
+	position VARCHAR NOT NULL,
+	height FLOAT NOT NULL,
+	weight FLOAT NOT NULL,
 );
 
 CREATE TABLE team (

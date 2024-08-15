@@ -6,6 +6,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { ColumnsSidebar, EntitySidebar } from "../components/visSideBar";
 import { MenuItem, Select } from "@mui/material";
 import { LineChart, XAxis, YAxis, Scatter, Tooltip } from "@mui/x-charts";
+import { PageLoading } from "../components/loaders";
 
 export default function Visualisations() {
 	const [selectedEntity, setSelectedEntity] = useState("");
@@ -13,10 +14,12 @@ export default function Visualisations() {
 	const [entities, setEntities] = useState([]);
 	const [xAxis, setXAxis] = useState("season");
 
-	// http://localhost:8080
-
-	// player colums endpoint = /vis/player-columns
-	// player data endpoint = /vis/player/ids=..,..,..&stats=..,..,..&season=..&per_ninety=..
+	// fix max depth reached error
+	// stat per graph, can show comparison between multiple players, teams, mini app bar to cycle through stats
+	// 		x axis can be season, gameweek
+	// 		y axis can be any stat
+	// 		speed up page processing
+	// resort lists on sidebar when entity is selected, i.e. all selected entities are at the top
 
 	const { data: data_series = [[], []] } = useQuery(
 		["columns", stats, entities],
@@ -74,7 +77,6 @@ export default function Visualisations() {
 							id="entity-select"
 						>
 							<MenuItem value="" key={"empty-entity"}>
-								Select Entity
 							</MenuItem>
 							<MenuItem value="player" key={"player-entity"}>
 								Player
@@ -85,8 +87,11 @@ export default function Visualisations() {
 						</Select>
 					</Box>
 					<Typography variant="h4" sx={{ marginTop: 2 }}>
-						{Object.keys(stats).filter((key) => stats[key] === true).join(", ")}
+						{Object.keys(stats)
+							.filter((key) => stats[key] === true)
+							.join(", ")}
 					</Typography>
+					{selectedEntity && stats && entities ?
 					<Box
 						sx={{
 							maxHeight: "65vh",
@@ -97,48 +102,56 @@ export default function Visualisations() {
 							paddingTop: 1,
 						}}
 					>
-						<ColumnsSidebar
-							selectedEntity={selectedEntity}
-							checked={stats}
-							setChecked={setStats}
-						/>
-						<Box
-							sx={{
-								display: "flex",
-								flexDirection: "column",
-								overflowX: "hidden",
-								justifyContent: "center",
-								alignItems: "center",  // Center content horizontally in the flex container
-								position: "fixed",     // Changed from absolute to fixed for viewport-based positioning
-								top: "65%",            // Position at 50% from the top of the viewport
-								left: "50%",           // Position at 50% from the left of the viewport
-								transform: "translate(-50%, -50%)", // Adjust position to center the element exactly
-								width: 1000,           // Specific width for the chart
-								height: 500,           // Specific height for the chart
-								zIndex: -10,			// Ensure the chart is above other elements
-							}}
-						>
-							{data_series && (
-								<LineChart
-									width={1000}
-									height={500}
-									loading={data_series[0].length === 0}
-									xAxis={[{ data: data_series[0], scaleType: "band" }]}
-									series={data_series[1].map(data => ({
-										...data,
-										curve: "linear",
-										valueFormatter: value => value == null ? '?' : value.toString(),
-									}))}
-									yAxis={[{ min: 0, scaleType: "linear" }]}
-								/>
-							)}
+							<ColumnsSidebar
+								selectedEntity={selectedEntity}
+								checked={stats}
+								setChecked={setStats}
+							/>
+							<Box
+								sx={{
+									display: "flex",
+									flexDirection: "column",
+									overflowX: "hidden",
+									justifyContent: "center",
+									alignItems: "center", // Center content horizontally in the flex container
+									position: "fixed", // Changed from absolute to fixed for viewport-based positioning
+									top: "65%", // Position at 50% from the top of the viewport
+									left: "50%", // Position at 50% from the left of the viewport
+									transform: "translate(-50%, -50%)", // Adjust position to center the element exactly
+									width: 1000, // Specific width for the chart
+									height: 500, // Specific height for the chart
+									zIndex: -10, // Ensure the chart is above other elements
+								}}
+							>
+								{data_series && (
+									<LineChart
+										width={1000}
+										height={500}
+										loading={data_series[0].length === 0}
+										xAxis={[{ data: data_series[0], scaleType: "band" }]}
+										series={data_series[1].map((data) => ({
+											...data,
+											curve: "linear",
+											valueFormatter: (value) =>
+												value == null ? "?" : value.toString(),
+										}))}
+										yAxis={[{ min: 0, scaleType: "linear" }]}
+									/>
+								)}
+							</Box>
+							<EntitySidebar
+								selectedEntity={selectedEntity}
+								checked={entities}
+								setChecked={setEntities}
+							/>
+						</Box> :
+						<Box>
+							<Typography variant="h3" sx={{marginTop: "10%"}}>
+								Select an entity type to graph
+							</Typography>
+							<PageLoading />
 						</Box>
-						<EntitySidebar
-							selectedEntity={selectedEntity}
-							checked={entities}
-							setChecked={setEntities}
-						/>
-					</Box>
+					}
 				</Box>
 			</Container>
 		</Fragment>
