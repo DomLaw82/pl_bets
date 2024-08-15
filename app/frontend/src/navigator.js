@@ -5,6 +5,8 @@ import Matches from './pages/matches';
 import Prediction from './pages/prediction';
 import Upload from './pages/upload';
 import Visualisations from './pages/visualisations';
+import Managers from './pages/managers';
+import FPL from './pages/fpl';
 
 export const routeOptions = {
 	"home": {
@@ -34,7 +36,16 @@ export const routeOptions = {
 	"Visualisations": {
 		path: '/visualisations',
 		component: Visualisations
+	},
+	"Managers": {
+		path: '/managers',
+		component: Managers
+	},
+	"FPL": {
+		path: '/fpl',
+		component: FPL,
 	}
+
 };
 
 export const settingsOptions = {

@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from data_intake.utilities.unique_id import get_team_id
 from app_logger import FluentLogger
+from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 
 logger = FluentLogger("intake-manager").get_logger()
 
@@ -61,6 +62,8 @@ def clean_manager(html_content, connector):
 		df = df.drop(columns=["team"])
 
 		df = df[['first_name', 'last_name', 'team_id', 'start_date', 'end_date']]
+
+		df = remove_duplicate_rows(connector, df, ["first_name", "last_name", "team_id", "start_date", "end_date"])
 
 		return df
 	except Exception as e:
