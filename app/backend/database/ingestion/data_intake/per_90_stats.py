@@ -196,11 +196,15 @@ def per_90_main(db_connection):
 			if season == ".DS_Store":
 				continue
 			df = combining_datasets(season)
+			print("combine")
 			df = clean_historic_stats_df(db_connection, df, season)
+			print("clean")
 			df = df.drop_duplicates()
+			print("drop")
 			save_to_database(db_connection, df)
 			logger.info(f"Inserted into historic_player_per_ninety table for {season}.")
 	except Exception as e:
+		logger.error(f"Error with per 90 stats: {e}")
 		raise e
 
 def per_90_update(db_connection, season: str) -> None:
@@ -220,4 +224,5 @@ def per_90_update(db_connection, season: str) -> None:
 		update_database(db_connection, data)
 		logger.info(f"Inserted into historic_player_per_ninety table for {season}.")
 	except Exception as e:
+		logger.error(f"Error with per 90 stats: {e}")
 		raise e

@@ -44,10 +44,10 @@ def format_player_entries(player: list[str]) -> list[str]:
 		formatted_dob_year = "19" + split_dob[-1] if int(str(datetime.now().year)[-2:]) < int(split_dob[-1]) else "20" + split_dob[-1]
 		new_dob = [f"{formatted_dob_year}-{split_dob[1]}-{split_dob[0]}"]
 
-		return formatted_name + [player[1].strip("\r\n-").strip()] + new_dob + [player[3].strip("\r\n-").strip()]
+		return formatted_name + [player[1].strip("\r\n-").strip()] + new_dob + [player[3].strip("\r\n-").strip(), player[4].strip("\r\n-").strip(), player[5].strip("\r\n-").strip()]
 	except Exception as e:
 		logger.error(f"Error: {e}")
-		return ["", "", "", "", ""]
+		return ["", "", "", "", "", "", ""]
 
 def get_page_soup(html_text):
 	"""
@@ -135,7 +135,7 @@ def player_df_to_db(df: pd.DataFrame, db_connection):
 		player_rows_not_in_db_df = remove_duplicate_rows(db_connection, df, ["first_name", "last_name", "birth_date", "position", "height", "weight"], "player")
 		if player_rows_not_in_db_df.empty:
 			return
-		ordered_player_df = player_rows_not_in_db_df[["first_name", "last_name", "birth_date", "position"]]
+		ordered_player_df = player_rows_not_in_db_df[["first_name", "last_name", "birth_date", "position", "height", "weight"]]
 		ordered_player_df.to_sql("player", db_connection.conn, if_exists="append", index=False)
 	except Exception as e:
 		logger.error(f"Error: {e}")
@@ -183,7 +183,7 @@ def player_main_by_season(db_connection, season, data_folder_path):
 		player_team_df['team_id'] = player_team_df['team_id'].apply(lambda x: x.replace('.html', ''))
 
 		player_df[["first_name", "last_name"]] = player_df[["first_name", "last_name"]].map(escape_single_quote)
-		deduplicated_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date", "height", "weight"], "player")
+		deduplicated_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date"], "player")
 		
 		if not deduplicated_df.empty:
 			deduplicated_df = deduplicated_df[["first_name", "last_name", "birth_date", "position", "height", "weight"]]

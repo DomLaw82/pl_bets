@@ -63,17 +63,19 @@ def clean_manager(html_content, connector):
 
 		df = df[['first_name', 'last_name', 'team_id', 'start_date', 'end_date']]
 
-		df = remove_duplicate_rows(connector, df, ["first_name", "last_name", "team_id", "start_date", "end_date"])
+		df = remove_duplicate_rows(connector, df, ["first_name", "last_name", "team_id", "start_date", "end_date"], "manager")
 
 		return df
 	except Exception as e:
 		raise f"Error cleaning manager data: {e}"
 	
-def save_to_database(df, engine):
+def save_to_database(df, connection) -> None:
 	# Save the data to a database
 	try:
-		df.to_sql('manager', con=engine, if_exists='append', index=False)
+		with connection.connect() as conn:
+			df.to_sql("manager", conn, if_exists="append", index=False)
 	except Exception as e:
+		logger.error(f"Error saving manager data: {e}")
 		raise f"Error saving manager data: {e}"
 	
 def manager_main(con):
@@ -83,7 +85,7 @@ def manager_main(con):
 
 		df = clean_manager(html_content, con)
 		
-		save_to_database(df, con.connect())
+		save_to_database(df, con)
 	except Exception as e:
 		logger.error(e)
 		raise e
