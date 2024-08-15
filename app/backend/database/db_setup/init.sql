@@ -18,7 +18,9 @@ CREATE TABLE player (
 	first_name VARCHAR,
 	last_name VARCHAR,
 	birth_date VARCHAR(10) NOT NULL,
-	position VARCHAR NOT NULL
+	position VARCHAR NOT NULL,
+	height FLOAT NOT NULL,
+	weight FLOAT NOT NULL,
 );
 
 CREATE TABLE team (
@@ -196,6 +198,15 @@ CREATE TABLE player_form (
 	red_cards NUMERIC NOT NULL
 );
 
+CREATE TABLE manager (
+	id VARCHAR(7) PRIMARY KEY,
+	first_name VARCHAR NOT NULL,
+	last_name VARCHAR NOT NULL,
+	team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
+	start_date VARCHAR(10) NOT NULL,
+	end_date VARCHAR(10) NOT NULL
+);
+
 ALTER TABLE team
 ADD CONSTRAINT team_id_format_check
 CHECK (id ~ '^t-\d{5}$');
@@ -220,12 +231,17 @@ ALTER TABLE referee
 ADD CONSTRAINT referee_id_format_check
 CHECK (id ~ '^r-\d{5}$');
 
+ALTER TABLE manager
+ADD CONSTRAINT manager_id_format_check
+CHECK (id ~ '^mn-\d{4}$');
+
 CREATE SEQUENCE team_id_seq START 1;
 CREATE SEQUENCE player_id_seq START 1;
 CREATE SEQUENCE match_id_seq START 1;
 CREATE SEQUENCE country_id_seq START 1;
 CREATE SEQUENCE competition_id_seq START 1;
 CREATE SEQUENCE referee_id_seq START 1;
+CREATE SEQUENCE manager_id_seq START 1;
 
 CREATE OR REPLACE FUNCTION validate_id()
 RETURNS TRIGGER AS $$
@@ -244,6 +260,8 @@ BEGIN
             NEW.id = 'r-' || LPAD(nextval('referee_id_seq')::TEXT, 5, '0');
         WHEN TG_TABLE_NAME = 'player' THEN
             NEW.id = 'p-' || LPAD(nextval('player_id_seq')::TEXT, 5, '0');
+        WHEN TG_TABLE_NAME = 'manager' THEN
+            NEW.id = 'mn-' || LPAD(nextval('manager_id_seq')::TEXT, 4, '0');
     END CASE;
     
     RETURN NEW;
@@ -273,4 +291,8 @@ FOR EACH ROW EXECUTE FUNCTION validate_id();
 
 CREATE TRIGGER before_insert_or_update_player
 BEFORE INSERT OR UPDATE ON player
+FOR EACH ROW EXECUTE FUNCTION validate_id();
+
+CREATE TRIGGER before_insert_or_update_manager
+BEFORE INSERT OR UPDATE ON manager
 FOR EACH ROW EXECUTE FUNCTION validate_id();

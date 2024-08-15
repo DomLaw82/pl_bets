@@ -83,19 +83,6 @@ export default function Upload() {
 						height: '100%'
 					}}
 				>
-					<Typography
-						variant="h1"
-						sx={{
-							display: 'flex',
-							flexDirection: { xs: 'column', md: 'row' },
-							alignSelf: 'center',
-							textAlign: 'center',
-							fontSize: 'clamp(3.5rem, 10vw, 4rem)',
-						}}
-					>
-						Upload
-					</Typography>
-					<Divider sx={{ width: '100%', height: 2 }} />
 					<Box sx={{ width: '100%'}}>
 						<Divider sx={{ height: 2 }} />
 						<Box component="div" sx={{ mt: 3 }}>

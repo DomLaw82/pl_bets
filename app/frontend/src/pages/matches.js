@@ -181,19 +181,6 @@ export default function Matches(props) {
 						alignItems: "center",
 					}}
 				>
-					<Typography
-						variant="h1"
-						sx={{
-							display: "flex",
-							flexDirection: { xs: "column", md: "row" },
-							alignSelf: "center",
-							textAlign: "center",
-							fontSize: "clamp(3.5rem, 10vw, 4rem)",
-						}}
-					>
-						Matches
-					</Typography>
-					<Divider sx={{ width: "100%", height: 2 }} />
 					<Box sx={{ width: "100%", overflow: "hidden", overflowY: "scroll" }}>
 						<Container sx={{ marginTop: 2, marginBottom: 2, textAlign: "center" }}>
 							<ButtonGroup size="large" aria-label="Large button group">
@@ -216,10 +203,10 @@ export default function Matches(props) {
 						<Divider sx={{ width: "100%", height: 2 }} />
 						{!isLoadingCurrentGameWeek && !isLoadingPredictions && (
 							<Box
-								sx={{ width: "100%", overflowY: "scroll", maxHeight: "60vh" }}
+								sx={{ width: "100%", overflowY: "scroll", maxHeight: "70vh" }}
 							>
 								{currentGameWeekMatches.length > 0 && (
-									<Accordion>
+									<Accordion defaultExpanded>
 										<AccordionSummary
 											expandIcon={<ExpandMoreIcon />}
 											aria-controls="panel1-content"
@@ -321,7 +308,7 @@ export default function Matches(props) {
 								)}
 								<Divider sx={{ width: "100%", height: 2 }} />
 								{pastMatches.length > 0 && (
-									<Accordion>
+									<Accordion defaultExpanded>
 										<AccordionSummary
 											expandIcon={<ExpandMoreIcon />}
 											aria-controls="panel3-content"

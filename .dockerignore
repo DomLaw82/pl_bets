@@ -1,0 +1,11 @@
+*/__pycache__
+*/.DS_Store
+*/.vscode
+# Ignore the node_modules directory
+*/node_modules
+
+# Ignore all .git directories and their contents
+.git
+
+# Ignore all log files
+*.log

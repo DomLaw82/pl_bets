@@ -8,22 +8,33 @@ import { TeamCards } from "../components/cards";
 import { useQuery } from "react-query";
 import { infinity } from "ldrs";
 import { TeamModal } from "../components/modals";
+import { PageLoading } from "../components/loaders";
 
 export default function Teams(props) {
-	const { teams, setTeams } = props;
-	const [teamId, setTeamId] = useState(null);
 
+	const [teamId, setTeamId] = useState(null);
 	const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
 
 	const [originX, setOriginX] = useState(0);
 	const [originY, setOriginY] = useState(0);
 
-	useEffect(() => {
-		fetch(`${process.env.REACT_APP_DATA_API_ROOT}/active-teams`)
-			.then((response) => response.json())
-			.then((data) => setTeams(data))
-			.catch((error) => console.log(error));
-	}, [setTeams]);
+	const fetchTeams = async () => {
+		const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/active-teams`);
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+		return response.json();
+	};
+
+	const {
+        data: teams,
+        isLoading,
+        isError,
+        error
+    } = useQuery('teams', fetchTeams, {
+        // Optional: Configure the query here, e.g., setting a refetch interval
+        refetchInterval: 60000, // Refetch the data every 60 seconds
+    });
 
 	async function handleOpenTeamModal(event, team_id) {
 		setOriginX(event.clientX);
@@ -54,10 +65,15 @@ export default function Teams(props) {
 			staleTime: infinity,
 		}
 	);
+	
+
+    if (isLoading) {
+        return <PageLoading/>
+    }
 
 	return (
 		<Fragment>
-			<Container sx={{ maxHeight: "80vh", overflow: "auto" }}>
+			<Container sx={{ maxHeight: "100vh", overflow: "auto" }}>
 				<CssBaseline />
 				<Box
 					sx={{
@@ -66,24 +82,11 @@ export default function Teams(props) {
 						alignItems: "center",
 					}}
 				>
-					<Typography
-						variant="h1"
-						sx={{
-							display: "flex",
-							flexDirection: { xs: "column", md: "row" },
-							alignSelf: "center",
-							textAlign: "center",
-							fontSize: "clamp(3.5rem, 10vw, 4rem)",
-						}}
-					>
-						Teams
-					</Typography>
-					<Divider sx={{ width: "100%", height: 2 }} />
 					<Box sx={{ width: "100%" }} key={"active-team-container"}>
 						<Divider sx={{ width: "100%", height: 2 }} />
 						<Box
 							id="active-teams"
-							sx={{ width: "100%", height: "65vh", overflowY: "scroll" }}
+							sx={{ width: "100%", height: "80vh", overflowY: "scroll" }}
 							key={"active-teams"}
 						>
 							{teams.map((team) => {

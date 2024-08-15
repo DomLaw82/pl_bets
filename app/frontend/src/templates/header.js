@@ -17,11 +17,17 @@ import { RefreshModal } from '../components/modals';
 
 const settings = Object.keys(settingsOptions);
 
+// Add dropdown menu for each of:
+//     Stats - Players, Teams, Managers, Matches
+//     Prediction - Upcoming Results, Match Facts
+//     FPL - Player search, Solver
+
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [isDataRefreshModalOpen, setIsDataRefreshModalOpen] = useState(false);
   const [isModelRefreshModalOpen, setIsModelRefreshModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(window.location.pathname);
 
   const [originX, setOriginX] = useState(0);
   const [originY, setOriginY] = useState(0);
@@ -137,8 +143,11 @@ function ResponsiveAppBar() {
                 return (
                   <Button
                     key={route}
-                    onClick={() => navigate(obj.path)}
-                    sx={{ my: 2, color: 'white', display: 'block' }}
+                    onClick={() => {
+                      navigate(obj.path)
+                      setCurrentPage(obj.path)
+                    }}
+                    sx={{ my: 2, color: 'white', display: 'block', border: currentPage === obj.path ? '2px solid' : 'none' }}
                   >
                     {route}
                   </Button>
