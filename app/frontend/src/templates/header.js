@@ -17,6 +17,11 @@ import { RefreshModal } from '../components/modals';
 
 const settings = Object.keys(settingsOptions);
 
+// Add dropdown menu for each of:
+//     Stats - Players, Teams, Managers, Matches
+//     Prediction - Upcoming Results, Match Facts
+//     FPL - Player search, Solver
+
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
