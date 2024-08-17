@@ -1,5 +1,5 @@
 import os, re
-import pandas as pd
+import pandas as pd, numpy as np
 from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 from data_intake.utilities.unique_id import *
 from data_intake.utilities.string_manipulation import escape_single_quote
@@ -15,16 +15,16 @@ SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SE
 TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, SEASON_END_YEAR, 1)]
 
 elo_name_conversion = {
-    "Manchester City": "Man City",
+    "Manchester City": "ManCity",
     "Arsenal": "Arsenal",
     "Liverpool": "Liverpool",
     "Chelsea": "Chelsea",
     "Newcastle United": "Newcastle",
     "Tottenham Hotspur": "Tottenham",
-    "Manchester United": "Man United",
-    "Aston Villa": "Aston Villa",
-    "Crystal Palace": "Crystal Palace",
-    "West Ham United": "West Ham",
+    "Manchester United": "ManUnited",
+    "Aston Villa": "AstonVilla",
+    "Crystal Palace": "CrystalPalace",
+    "West Ham United": "WestHam",
     "Fulham": "Fulham",
     "Brighton & Hove Albion": "Brighton",
     "Brentford": "Brentford",
@@ -39,8 +39,8 @@ elo_name_conversion = {
     "Leeds United": "Leeds",
     "Luton Town": "Luton",
     "Middlesbrough": "Middlesbrough",
-    "West Bromwich Albion": "West Brom",
-    "Sheffield United": "Sheffield United",
+    "West Bromwich Albion": "WestBrom",
+    "Sheffield United": "SheffieldUnited",
     "Norwich City": "Norwich",
     "Hull City": "Hull",
     "Coventry City": "Coventry",
@@ -48,7 +48,7 @@ elo_name_conversion = {
     "Bristol City": "Bristol City",
     "Swansea City": "Swansea",
     "Stoke City": "Stoke",
-    "Sheffield Wednesday": "Sheffield Weds",
+    "Sheffield Wednesday": "SheffieldWeds",
     "Blackburn Rovers": "Blackburn",
     "Millwall": "Millwall",
     "Sunderland": "Sunderland",
@@ -153,7 +153,7 @@ def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> 
         logger.error(f"Error: {e}")
         return df
     
-def get_elo_rating(team_name: str, date: str) -> int:
+def get_team_elo_rating(team_name: str) -> pd.DataFrame:
     """
     Get the ELO rating of a team on a specific date.
 
@@ -166,22 +166,25 @@ def get_elo_rating(team_name: str, date: str) -> int:
         int: The ELO rating of the team on the given date.
     """
     try:
-        team_name = elo_name_conversion.get(team_name, team_name)
-        response = requests.get(f"http://api.clubelo.com/{date}")
+        elo_team_name = elo_name_conversion.get(team_name, team_name)
+        url = f"http://api.clubelo.com/{elo_team_name}"
+        logger.info(f"Getting ELO rating for {elo_team_name}: {url}.")
+        response = requests.get(url)
 
         if response.status_code == 200:
             # Convert the CSV data into a pandas DataFrame
+
             csv_data = StringIO(response.text)
             df = pd.read_csv(csv_data)
 
-            team_row = df.loc[df['Club'].str.lower() == team_name.lower(), 'Elo']
-        
-        if not team_row.empty:
-            # Get the Elo value for the team
-            elo_value = float(team_row.iloc[0])  # Extract the first value from the series
-            return elo_value
+            df["Club"] = team_name
+            
+            return df
+        else:
+            logger.error(f"Error finding elo for {elo_team_name}: {response.status_code}")
+            return
     except Exception as e:
-        logger.error(f"Error finding elo for {team_name}: {e}")
+        logger.error(f"Error finding elo for {elo_team_name}: {e}")
         return None
 
 def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
@@ -229,24 +232,72 @@ def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
             ]
         ].copy()
         # Get team ELO ratings from http://api.clubelo.com/yyyy-MM-dd for each match
-        new_df["home_elo"] = new_df.apply(lambda x: get_elo_rating(x["home_team_id"], x["date"]), axis=1)
-        new_df["away_elo"] = new_df.apply(lambda x: get_elo_rating(x["away_team_id"], x["date"]), axis=1)
+        unique_team_names = new_df['home_team_id'].unique().tolist()
+        new_df["date"] = pd.to_datetime(new_df['date'], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
+        updated_df = new_df.copy()
+        updated_df["home_elo"] = np.nan
+        updated_df["away_elo"] = np.nan
 
+        for team_name in unique_team_names: 
+            try:
+
+                team_df = new_df[(new_df['home_team_id'] == team_name) | (new_df['away_team_id'] == team_name)]
+
+                elos = get_team_elo_rating(team_name)[["Club", "Elo", "From", "To"]]
+                elos['From'] = pd.to_datetime(elos['From'], format="%Y-%m-%d")
+                elos['To'] = pd.to_datetime(elos['To'], format="%Y-%m-%d")
+                team_df['date'] = pd.to_datetime(team_df['date'], format="%Y-%m-%d")
+
+                rows = []
+
+                for idx, row in elos.iterrows():
+                    dates = pd.date_range(start=row['From'], end=row['To'])
+                    rows.append(pd.DataFrame({
+                        'Date': dates,
+                        'Team': row['Club'],
+                        'home_elo': row['Elo'],
+                        'away_elo': row['Elo']
+                    }).explode('Date').reset_index(drop=True))
+
+                # Apply the function and concatenate the results
+                elos_expanded = pd.concat(rows, ignore_index=True)
+                print(elos_expanded[["Date", "Team", "home_elo"]].head(20))
+                team_df = team_df.merge(elos_expanded[["Date", "Team", "home_elo"]], left_on=['date', 'home_team_id'], right_on=['Date', 'Team'], how='left')
+                team_df = team_df.merge(elos_expanded[["Date", "Team", "away_elo"]], left_on=['date', 'away_team_id'], right_on=['Date', 'Team'], how='left')
+
+                # Clean up extra columns if necessary
+                if 'Date' in team_df.columns:
+                    team_df = team_df.drop(columns=['Date', 'Team'])
+                if 'Date_x' in team_df.columns:
+                    team_df = team_df.drop(columns=['Date_x', 'Team_x'])
+                if 'Date_y' in team_df.columns:
+                    team_df = team_df.drop(columns=['Date_y', 'Team_y'])
+
+                print(team_df.columns)
+                print(team_df[["date", "home_team_id", "away_team_id", "home_elo", "away_elo"]].head(20))
+                updated_df.update(team_df)
+                logger.info(f"Inserted ELO ratings for {team_name}.")
+                print(updated_df[(~updated_df["home_elo"].isna()) & (~updated_df["away_elo"].isna())][["date", "home_team_id", "away_team_id", "home_elo", "away_elo"]].head())
+            except Exception as e:
+                logger.error(f"Error inserting ELOs for {team_name}: {e}")
+                continue
+
+        new_df = updated_df.copy()
         # Get team IDs using vectorized operations
         new_df["home_team_id"] = new_df["home_team_id"].apply(lambda x: get_team_id(db_connection, x))
         new_df["away_team_id"] = new_df["away_team_id"].apply(lambda x: get_team_id(db_connection, x))
-
-        new_df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y").dt.strftime("%Y-%m-%d")
         
         # Get referee IDs using vectorized operations
         new_df["referee_id"] = new_df["referee_id"].apply(lambda x: get_referee_id(db_connection, x))
+        print(new_df.columns)
+        print(new_df.head())
 
         # Remove duplicate rows based on specific columns
         columns_to_compare = ["season", "competition_id", "home_team_id", "away_team_id"]
         final_df = remove_duplicate_rows(db_connection, new_df, columns_to_compare, "match")
         return final_df
     except Exception as e:
-        logger.error(f"Error: {e}")
+        logger.error(f"Error selecting match columns in {e.__context__} on line {str(e.__traceback__.tb_lineno)}: {e.__cause__} - {e}")
         return df
 
 def create_teams_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
@@ -337,6 +388,7 @@ def save_to_database(db_connection, table_name, df: pd.DataFrame) -> None:
     """
     try:
         if table_name == "match":
+            df["date"] = pd.to_datetime(df["date"], format="%Y-%m-%d").dt.strftime("%Y-%m-%d")
             df = df.sort_values(by=["date"]).reset_index(drop=True)
         with db_connection.connect() as conn:
             df.to_sql(table_name, conn, if_exists="append", index=False) if not df.empty else None
@@ -369,6 +421,8 @@ def team_ref_match_main(db_connection):
 
             for idx, table in enumerate(order):
                 df = pd.read_csv(path)
+                if "date" in df.columns:
+                    df["date"] = pd.to_datetime(df["date"]).dt.strftime("%Y-%m-%d")
                 df = clean_match_data(db_connection, table, full_season, df)
                 deduplicated_df = remove_duplicate_rows(db_connection, df, comparison_columns[idx], table)
                 
@@ -376,7 +430,7 @@ def team_ref_match_main(db_connection):
                     save_to_database(db_connection, table, deduplicated_df)
                     logger.info(f"Inserted into {table} table for {season}.")
     except Exception as e:
-        logger.error(f"Error: {e}")
-        return f"Error: {e}"
+        logger.error(f"Error in team_ref_match_main in {e.__context__} on line {str(e.__traceback__.tb_lineno)}: {e.__cause__} - {e}")
+        return f"Error in team_ref_match_main in {e.__context__} on line {str(e.__traceback__.tb_lineno)}: {e.__cause__} - {e}"
 
 # TODO - Add logging for more visibility of data_intake process
