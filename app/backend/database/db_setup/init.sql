@@ -58,6 +58,8 @@ CREATE TABLE match (
 	home_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
 	away_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
 	referee_id VARCHAR(7) REFERENCES referee(id) NOT NULL,
+	home_elo FLOAT NOT NULL,
+	away_elo FLOAT NOT NULL,
 	home_goals INTEGER NOT NULL,
 	away_goals INTEGER NOT NULL,
 	home_shots INTEGER NOT NULL,
@@ -167,35 +169,6 @@ CREATE TABLE historic_player_per_ninety (
 	penalties_missed FLOAT NOT NULL,
 	season VARCHAR NOT NULL,
 	PRIMARY KEY (player_id, team_id, season)
-);
-
-
-CREATE TABLE player_form (
-	player_id VARCHAR(7) REFERENCES player(id) PRIMARY KEY,
-	minutes_played NUMERIC NOT NULL,
-	goals NUMERIC NOT NULL,
-	x_goals NUMERIC NOT NULL,
-	assists NUMERIC NOT NULL,
-	x_assists NUMERIC NOT NULL,
-	shots NUMERIC NOT NULL,
-	shots_on_target NUMERIC NOT NULL,
-	passes_attempted NUMERIC NOT NULL,
-	passes_completed NUMERIC NOT NULL,
-	progressive_passes_completed NUMERIC NOT NULL,
-	take_ons_attempted NUMERIC NOT NULL,
-	take_ons_completed NUMERIC NOT NULL,
-	touches_def_third NUMERIC NOT NULL,
-	touches_middle_third NUMERIC NOT NULL,
-	touches_att_third NUMERIC NOT NULL,
-	carries NUMERIC NOT NULL,
-	total_carrying_distance NUMERIC NOT NULL,
-	tackles NUMERIC NOT NULL,
-	blocks NUMERIC NOT NULL,
-	interceptions NUMERIC NOT NULL,
-	clearances NUMERIC NOT NULL,
-	fouls NUMERIC NOT NULL,
-	yellow_cards NUMERIC NOT NULL,
-	red_cards NUMERIC NOT NULL
 );
 
 CREATE TABLE manager (
