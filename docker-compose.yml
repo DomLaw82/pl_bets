@@ -45,7 +45,7 @@ services:
       test: cat ./ingestion_status.txt
       interval: 30s
       timeout: 3s
-      retries: 20
+      retries: 50
     ports:
       - 8009:8009
 
