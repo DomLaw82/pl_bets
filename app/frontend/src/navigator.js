@@ -6,7 +6,9 @@ import Prediction from './pages/prediction';
 import Upload from './pages/upload';
 import Visualisations from './pages/visualisations';
 import Managers from './pages/managers';
-import FPL from './pages/fpl';
+import FPLSolver from './pages/fplSolver';
+import FPLPlayerSearch from './pages/fplPlayerSearch';
+import UpcomingMatches from './pages/upcomingMatches';
 
 export const routeOptions = {
 	"home": {
@@ -14,38 +16,41 @@ export const routeOptions = {
 		component: Home
 	},
 	"teams": {
-		path: '/teams',
+		path: '/stats/teams',
 		component: Teams
 	},
 	"players": {
-		path: '/players',
+		path: '/stats/players',
 		component: Players
 	},
 	"Matches": {
-		path: '/matches',
+		path: '/stats/matches',
 		component: Matches
 	},
 	"Prediction": {
-		path: '/prediction',
+		path: '/predict/match-facts',
 		component: Prediction
 	},
-	// "Upload": {
-	// 	path: '/upload',
-	// 	component: Upload
-	// },
+	"Upcoming Matches": {
+		path: '/predict/upcoming-matches',
+		component: UpcomingMatches
+	},
 	"Visualisations": {
 		path: '/visualisations',
 		component: Visualisations
 	},
 	"Managers": {
-		path: '/managers',
+		path: '/stats/managers',
 		component: Managers
 	},
-	"FPL": {
-		path: '/fpl',
-		component: FPL,
+	"Player Search": {
+		path: '/fpl/player-search',
+		component: FPLPlayerSearch,
+	},
+	"Solver": {
+		path: '/fpl/solver',
+		component: FPLSolver,
 	}
-
 };
 
 export const settingsOptions = {
@@ -65,4 +70,45 @@ export const settingsOptions = {
 			retune: `${process.env.REACT_APP_PREDICT_API_ROOT}/model/rebuild`,
 		}
 	},
+}
+
+export const menuOptions = {
+	"Stats": {
+		"players": {
+			path: '/stats/players',
+			component: Players
+		},
+		"teams": {
+			path: '/stats/teams',
+			component: Teams
+		},
+		"managers": {
+			path: '/stats/managers',
+			component: Managers
+		},
+		"matches": {
+			path: '/stats/matches',
+			component: Matches
+		},
+	},
+	"Prediction": {
+		"Upcoming Matches": {
+			path: '/predict/upcoming-matches',
+			component: Prediction
+		},
+		"Match Facts": {
+			path: '/predict/match-facts',
+			component: Prediction
+		},
+	},
+	"FPL": {
+		"Player search": {
+			path: '/fpl/player-search',
+			component: FPLPlayerSearch
+		},
+		"Solver": {
+			path: '/fpl/solver',
+			component: FPLSolver
+		}
+	}
 }
