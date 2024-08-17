@@ -5,12 +5,61 @@ from data_intake.utilities.unique_id import *
 from data_intake.utilities.string_manipulation import escape_single_quote
 from app_logger import FluentLogger
 import datetime
+import requests
+from io import StringIO
 
 logger = FluentLogger("intake-team_ref_match").get_logger()
 
 SEASON_END_YEAR = 2026
 SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SEASON_END_YEAR, 1)]
 TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, SEASON_END_YEAR, 1)]
+
+elo_name_conversion = {
+    "Manchester City": "Man City",
+    "Arsenal": "Arsenal",
+    "Liverpool": "Liverpool",
+    "Chelsea": "Chelsea",
+    "Newcastle United": "Newcastle",
+    "Tottenham Hotspur": "Tottenham",
+    "Manchester United": "Man United",
+    "Aston Villa": "Aston Villa",
+    "Crystal Palace": "Crystal Palace",
+    "West Ham United": "West Ham",
+    "Fulham": "Fulham",
+    "Brighton & Hove Albion": "Brighton",
+    "Brentford": "Brentford",
+    "Everton": "Everton",
+    "Bournemouth": "Bournemouth",
+    "Wolverhampton Wanderers": "Wolves",
+    "Nottingham Forest": "Forest",
+    "Leicester City": "Leicester",
+    "Southampton": "Southampton",
+    "Ipswich Town": "Ipswich",
+    "Burnley": "Burnley",
+    "Leeds United": "Leeds",
+    "Luton Town": "Luton",
+    "Middlesbrough": "Middlesbrough",
+    "West Bromwich Albion": "West Brom",
+    "Sheffield United": "Sheffield United",
+    "Norwich City": "Norwich",
+    "Hull City": "Hull",
+    "Coventry City": "Coventry",
+    "Watford": "Watford",
+    "Bristol City": "Bristol City",
+    "Swansea City": "Swansea",
+    "Stoke City": "Stoke",
+    "Sheffield Wednesday": "Sheffield Weds",
+    "Blackburn Rovers": "Blackburn",
+    "Millwall": "Millwall",
+    "Sunderland": "Sunderland",
+    "Queens Park Rangers": "QPR",
+    "Preston North End": "Preston",
+    "Plymouth Argyle": "Plymouth",
+    "Oxford United": "Oxford",
+    "Cardiff City": "Cardiff",
+    "Portsmouth": "Portsmouth",
+    "Derby County": "Derby",
+}
 
 def rename_team_name(team_name: str) -> str:
     """
@@ -103,6 +152,37 @@ def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> 
     except Exception as e:
         logger.error(f"Error: {e}")
         return df
+    
+def get_elo_rating(team_name: str, date: str) -> int:
+    """
+    Get the ELO rating of a team on a specific date.
+
+    Args:
+        team_name (str): The name of the team.
+        date (str): The date of the match.
+        db_connection: The database connection object.
+
+    Returns:
+        int: The ELO rating of the team on the given date.
+    """
+    try:
+        team_name = elo_name_conversion.get(team_name, team_name)
+        response = requests.get(f"http://api.clubelo.com/{date}")
+
+        if response.status_code == 200:
+            # Convert the CSV data into a pandas DataFrame
+            csv_data = StringIO(response.text)
+            df = pd.read_csv(csv_data)
+
+            team_row = df.loc[df['Club'].str.lower() == team_name.lower(), 'Elo']
+        
+        if not team_row.empty:
+            # Get the Elo value for the team
+            elo_value = float(team_row.iloc[0])  # Extract the first value from the series
+            return elo_value
+    except Exception as e:
+        logger.error(f"Error finding elo for {team_name}: {e}")
+        return None
 
 def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     """
@@ -148,6 +228,9 @@ def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
                 "closing_away_odds",
             ]
         ].copy()
+        # Get team ELO ratings from http://api.clubelo.com/yyyy-MM-dd for each match
+        new_df["home_elo"] = new_df.apply(lambda x: get_elo_rating(x["home_team_id"], x["date"]), axis=1)
+        new_df["away_elo"] = new_df.apply(lambda x: get_elo_rating(x["away_team_id"], x["date"]), axis=1)
 
         # Get team IDs using vectorized operations
         new_df["home_team_id"] = new_df["home_team_id"].apply(lambda x: get_team_id(db_connection, x))
