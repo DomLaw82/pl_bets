@@ -19,11 +19,11 @@ export default function UpcomingMatches() {
 	useEffect(() => {
 		const currentDate = new Date();
 
-		let currentMonth = currentDate.getMonth();
+		let currentMonth = currentDate.getMonth() + 1;
 		const currentYear = currentDate.getFullYear();
 		let currentDay = currentDate.getDate();
 
-		const season = currentMonth >= 7 ? `${currentYear}-${currentYear + 1}` : `${currentYear - 1}-${currentYear}`;
+		const season = currentMonth >= 8 ? `${currentYear}-${currentYear + 1}` : `${currentYear - 1}-${currentYear}`;
 
 		currentMonth = currentMonth < 10 ? "0" + currentMonth : currentMonth;
 		currentDay = currentDay < 10 ? "0" + currentDay : currentDay;
