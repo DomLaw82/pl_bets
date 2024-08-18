@@ -1011,6 +1011,42 @@ def get_stats_for_charts(table_name: str) -> list:
       print(e)
       logger.error(f"Error with endpoint /vis/{table_name}?{entity_ids}: {str(e)}")
       return jsonify({"error": f"Error with endpoint /vis/{table_name}?{entity_ids}: {str(e)}"}), 500
+   
+@registry.handles(
+   rule="/teams/league-table",
+   method="GET",
+)
+def get_league_table():
+   pass
+
+@registry.handles(
+   rule="/all-managers",
+   method="GET",
+)
+def get_all_managers():
+   try:
+      all_managers = db.get_dict("""
+         SELECT 
+            manager.id,
+            first_name,
+            last_name,
+            team_id,
+            team.name AS team_name,
+            start_date,
+            end_date,
+            end_date = 'current' AS current_job
+         FROM
+            manager
+         JOIN
+            team ON manager.team_id = team.id
+         ORDER BY
+            start_date ASC;
+      """)
+      logger.info("All managers retrieved")
+      return jsonify(all_managers)
+   except Exception as e:
+      logger.error(f"Error with endpoint /all-managers: {str(e)}")
+      return jsonify({"error": f"Error with endpoint /all-managers: {str(e)}"}), 500
 
 app = Flask(__name__)
 CORS(app, origins=["http://frontend:3000", "http://localhost:3000", "http://frontend:3001", "http://localhost:3001"],  supports_credentials=True)
