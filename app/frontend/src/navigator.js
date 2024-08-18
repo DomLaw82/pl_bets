@@ -3,7 +3,6 @@ import Teams from './pages/teams';
 import Players from './pages/players';
 import Matches from './pages/matches';
 import Prediction from './pages/prediction';
-import Upload from './pages/upload';
 import Visualisations from './pages/visualisations';
 import Managers from './pages/managers';
 import FPLSolver from './pages/fplSolver';
