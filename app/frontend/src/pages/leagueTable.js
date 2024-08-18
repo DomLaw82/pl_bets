@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 
 export function LeagueTable() {
-	const [selectedSeason, setSelectedSeason] = useState("2021-22");
+	const [selectedSeason, setSelectedSeason] = useState("2024-2025");
 
 	const fetchLeagueTable = async () => {
 		const response = await fetch(
@@ -33,7 +33,11 @@ export function LeagueTable() {
 		isLoading: isLoadingLeagueTable,
 		// error: managersError,
 		data: leagueTable = [],
-	} = useQuery("leagueTable", fetchLeagueTable, { staleTime: Infinity });
+	} = useQuery(
+		["leagueTable", selectedSeason],
+		() => fetchLeagueTable(setSelectedSeason),
+		{ staleTime: Infinity }
+	);
 
 	async function getSeasons() {
 		const response = await fetch(
@@ -91,14 +95,20 @@ export function LeagueTable() {
 						<Divider sx={{ width: "100%", height: 2 }} />
 						<Divider sx={{ width: "100%", height: 2 }} />
 						{!isLoadingLeagueTable ? (
-							<Box
-								sx={{ width: "100%", overflowY: "scroll", maxHeight: "70vh" }}
-							>
+							<Box sx={{ width: "100%", overflowY: "scroll", height: "70vh" }}>
 								<Divider sx={{ width: "100%", height: 2 }} />
 								{leagueTable.length > 0 ? (
 									<Box id="league-table">
 										<Table>
-											<TableHead>
+											<TableHead
+												sx={{
+													position: "sticky",
+													top: "0",
+													bgcolor: "background.paper",
+													zIndex: 1,
+													borderBottom: "2px solid white",
+												}}
+											>
 												<TableRow>
 													<TableCell>Position</TableCell>
 													<TableCell>Team</TableCell>
@@ -131,7 +141,16 @@ export function LeagueTable() {
 										</Table>
 									</Box>
 								) : (
-									<Typography variant="h3">
+									<Typography
+										variant="h3"
+										sx={{
+											width: "100%",
+											textAlign: "center",
+											height: "100%",
+											alignItems: "center",
+											alignContent: "center",
+										}}
+									>
 										No table available for this season
 									</Typography>
 								)}
