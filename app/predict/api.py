@@ -107,7 +107,7 @@ def next_gameweek_fixture_result_prediction():
 		logger.info(f"Predictions made for the next gameweek: {predictions}")
 		return jsonify(predictions)
 	except Exception as e:
-		logger.error(f"An error occurred while predicting the results for the next gameweek: {str(e)}")
+		logger.error(f"An error occurred while predicting the results for the next gameweek: line {e.__traceback__.tb_lineno} - {e.__cause__} {str(e)}")
 		return jsonify({'error': 'An error occurred while predicting the results for the next gameweek'})
 	pass
 

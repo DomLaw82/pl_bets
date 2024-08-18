@@ -177,7 +177,7 @@ def get_team_form(df: pd.DataFrame, team_id: str) -> pd.DataFrame:
 
         return df
     except Exception as e:
-        raise e
+        raise Exception(f"An error occurred during getting team form line {e.__traceback__.tb_lineno} : {str(e)}")
 
 def get_last_five_head_to_head_matches_rolling_goal_difference(data: pd.DataFrame) -> pd.DataFrame:
     """
@@ -195,7 +195,7 @@ def get_last_five_head_to_head_matches_rolling_goal_difference(data: pd.DataFram
         data["h2h_rolling_goal_difference"] = (data["home_goals"] - data["away_goals"]).rolling(rolling_window, min_periods=1).sum().shift(1).fillna(0)
         return data
     except Exception as e:
-        raise e
+        raise Exception(f"An error occurred during getting last five head to head matches line {e.__traceback__.tb_lineno} : {str(e)}")
     
 def add_historic_head_to_head_results(data: pd.DataFrame) -> pd.DataFrame:
     """
@@ -256,7 +256,7 @@ def get_days_since_last_league_game(data: pd.DataFrame, team_id: str) -> pd.Data
 
         return data
     except Exception as e:
-        raise e
+        Exception(Exception(f"An error occurred during getting days since last league game line {e.__traceback__.tb_lineno} : {str(e)}"))
 
 # Process form for all teams
 def run_data_prep(sql_connection: SQLConnection, features: list, fixtures: pd.DataFrame = pd.DataFrame()) -> pd.DataFrame:
@@ -272,26 +272,33 @@ def run_data_prep(sql_connection: SQLConnection, features: list, fixtures: pd.Da
         pd.DataFrame: The prepared dataset with added features.
 
     """
-    match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals", "home_shots_on_target", "away_shots_on_target", "closing_home_odds","closing_draw_odds","closing_away_odds"]
-    model_features = ["home_rolling_goal_difference", "away_rolling_goal_difference", "home_rolling_goal_difference_at_home","away_rolling_goal_difference_at_away",
-                    #   "home_rolling_shots_on_target", "away_rolling_shots_on_target"
-                    ]
-    
-    data = sql_connection.get_df(f"SELECT {', '.join(match_columns)} FROM match ORDER BY date ASC")
+    try:
+        match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals", "home_shots_on_target", "away_shots_on_target", "closing_home_odds","closing_draw_odds","closing_away_odds"]
+        model_features = ["home_rolling_goal_difference", "away_rolling_goal_difference", "home_rolling_goal_difference_at_home","away_rolling_goal_difference_at_away",
+                        #   "home_rolling_shots_on_target", "away_rolling_shots_on_target"
+                        ]
+        
+        data = sql_connection.get_df(f"SELECT {', '.join(match_columns)} FROM match ORDER BY date ASC")
+        schedule = sql_connection.get_df("SELECT season, home_team_id, away_team_id, home_elo, away_elo FROM schedule")
 
-    teams = data["home_team_id"].unique().tolist()
+        data = data.merge(schedule, on=["season", "home_team_id", "away_team_id"], how="left")
 
-    data[features] = np.nan
+        teams = data["home_team_id"].unique().tolist()
 
-    if not fixtures.empty:
-        data = pd.concat([data, fixtures], ignore_index=True)
+        features_without_elos = [feature for feature in features if feature not in ["home_elo", "away_elo"]]
+        data[features_without_elos] = np.nan
 
-    for team in teams:
-        df = data[(data["home_team_id"] == team)| (data["away_team_id"] == team)].copy()
-        df = get_team_form(df, team)
-        df = get_days_since_last_league_game(df, team)
-        data.update(df)
+        if not fixtures.empty:
+            data = pd.concat([data, fixtures], ignore_index=True)
 
-    data[model_features] = data[model_features].astype(int)
+        for team in teams:
+            df = data[(data["home_team_id"] == team)| (data["away_team_id"] == team)].copy()
+            df = get_team_form(df, team)
+            df = get_days_since_last_league_game(df, team)
+            data.update(df)
 
-    return data
+        data[model_features] = data[model_features].astype(int)
+
+        return data
+    except Exception as e:
+        raise Exception(e)
