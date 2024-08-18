@@ -14,53 +14,6 @@ SEASON_END_YEAR = 2026
 SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SEASON_END_YEAR, 1)]
 TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, SEASON_END_YEAR, 1)]
 
-elo_name_conversion = {
-    "Manchester City": "ManCity",
-    "Arsenal": "Arsenal",
-    "Liverpool": "Liverpool",
-    "Chelsea": "Chelsea",
-    "Newcastle United": "Newcastle",
-    "Tottenham Hotspur": "Tottenham",
-    "Manchester United": "ManUnited",
-    "Aston Villa": "AstonVilla",
-    "Crystal Palace": "CrystalPalace",
-    "West Ham United": "WestHam",
-    "Fulham": "Fulham",
-    "Brighton & Hove Albion": "Brighton",
-    "Brentford": "Brentford",
-    "Everton": "Everton",
-    "Bournemouth": "Bournemouth",
-    "Wolverhampton Wanderers": "Wolves",
-    "Nottingham Forest": "Forest",
-    "Leicester City": "Leicester",
-    "Southampton": "Southampton",
-    "Ipswich Town": "Ipswich",
-    "Burnley": "Burnley",
-    "Leeds United": "Leeds",
-    "Luton Town": "Luton",
-    "Middlesbrough": "Middlesbrough",
-    "West Bromwich Albion": "WestBrom",
-    "Sheffield United": "SheffieldUnited",
-    "Norwich City": "Norwich",
-    "Hull City": "Hull",
-    "Coventry City": "Coventry",
-    "Watford": "Watford",
-    "Bristol City": "Bristol City",
-    "Swansea City": "Swansea",
-    "Stoke City": "Stoke",
-    "Sheffield Wednesday": "SheffieldWeds",
-    "Blackburn Rovers": "Blackburn",
-    "Millwall": "Millwall",
-    "Sunderland": "Sunderland",
-    "Queens Park Rangers": "QPR",
-    "Preston North End": "Preston",
-    "Plymouth Argyle": "Plymouth",
-    "Oxford United": "Oxford",
-    "Cardiff City": "Cardiff",
-    "Portsmouth": "Portsmouth",
-    "Derby County": "Derby",
-}
-
 def rename_team_name(team_name: str) -> str:
     """
     Renames a team name based on a predefined mapping.
@@ -152,34 +105,6 @@ def rename_table_columns(df: pd.DataFrame, season: str, competition_id: str) -> 
     except Exception as e:
         logger.error(f"Error: {e}")
         return df
-    
-def get_team_elo_rating(team_name: str) -> pd.DataFrame:
-    """
-    Get the ELO rating of a team on a specific date.
-
-    Args:
-        team_name (str): The name of the team.
-
-    Returns:
-        pd.DataFrame: The ELO rating DataFrame of the team on the given date.
-    """
-    try:
-        elo_team_name = elo_name_conversion.get(team_name, team_name)
-        url = f"http://api.clubelo.com/{elo_team_name}"
-        logger.info(f"Getting ELO rating for {elo_team_name}: {url}.")
-        response = requests.get(url)
-
-        if response.status_code == 200:
-            csv_data = StringIO(response.text)
-            df = pd.read_csv(csv_data)
-            df["Club"] = team_name
-            return df
-        else:
-            logger.error(f"Error finding ELO for {elo_team_name}: {response.status_code}")
-            return pd.DataFrame()
-    except Exception as e:
-        logger.error(f"Error finding ELO for {elo_team_name}: {e}")
-        return pd.DataFrame()
 
 def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     """
@@ -221,64 +146,17 @@ def select_match_columns(df: pd.DataFrame, db_connection) -> pd.DataFrame:
             "closing_draw_odds",
             "closing_away_odds",
         ]].copy()
-
-        updated_df = new_df.copy()
-        updated_df["home_elo"] = np.nan
-        updated_df["away_elo"] = np.nan
-
-        unique_team_names = new_df['home_team_id'].unique().tolist()
-
-        elo_dict = {}
-
-        for team_name in unique_team_names:
-            try:
-                team_df = new_df[(new_df['home_team_id'] == team_name) | (new_df['away_team_id'] == team_name)]
-                index = team_df.index
-                elos = pd.DataFrame()
-                if team_name not in elo_dict:
-                    elos = get_team_elo_rating(team_name)[["Club", "Elo", "From", "To"]]
-                    elo_dict[team_name] = elos
-                else:
-                    elos = elo_dict[team_name]
-
-                if not elos.empty:
-                    elos['From'] = pd.to_datetime(elos['From'])
-                    elos['To'] = pd.to_datetime(elos['To'])
-                    team_df['date'] = pd.to_datetime(team_df['date'], format="%d/%m/%Y")
-
-                    elos_expanded = pd.DataFrame({
-                        'Date': pd.date_range(start=elos['From'].min(), end=elos['To'].max(), freq='D')
-                    })
-                    elos_expanded = elos_expanded.merge(elos, left_on='Date', right_on='From', how='left').ffill()
-
-                    team_df = team_df.merge(elos_expanded[["Date", "Club", "Elo"]], left_on=['date', 'home_team_id'], right_on=['Date', 'Club'], how='left')
-                    team_df.rename(columns={"Elo": "home_elo"}, inplace=True)
-
-                    team_df = team_df.merge(elos_expanded[["Date", "Club", "Elo"]], left_on=['date', 'away_team_id'], right_on=['Date', 'Club'], how='left')
-                    team_df.rename(columns={"Elo": "away_elo"}, inplace=True)
-
-                    if 'Date' in team_df.columns:
-                        team_df.drop(columns=['Date'], inplace=True)
-                    if 'Club_x' in team_df.columns:
-                        team_df.drop(columns=['Club_x', 'Club_y'], inplace=True)
-                    team_df.index = index
-
-                    updated_df.update(team_df)
-                    logger.info(f"Inserted ELO ratings for {team_name}.")
-            except Exception as e:
-                logger.error(f"Error inserting ELOs for {team_name} at line {e.__traceback__.tb_lineno}: {e}")
-                continue
-
+        
         # Convert team names to IDs
-        updated_df["home_team_id"] = updated_df["home_team_id"].apply(lambda x: get_team_id(db_connection, x))
-        updated_df["away_team_id"] = updated_df["away_team_id"].apply(lambda x: get_team_id(db_connection, x))
+        new_df["home_team_id"] = new_df["home_team_id"].apply(lambda x: get_team_id(db_connection, x))
+        new_df["away_team_id"] = new_df["away_team_id"].apply(lambda x: get_team_id(db_connection, x))
 
         # Convert referee names to IDs
-        updated_df["referee_id"] = updated_df["referee_id"].apply(lambda x: get_referee_id(db_connection, x))
+        new_df["referee_id"] = new_df["referee_id"].apply(lambda x: get_referee_id(db_connection, x))
 
         # Remove duplicate rows based on specific columns
         columns_to_compare = ["season", "competition_id", "home_team_id", "away_team_id"]
-        final_df = remove_duplicate_rows(db_connection, updated_df, columns_to_compare, "match")
+        final_df = remove_duplicate_rows(db_connection, new_df, columns_to_compare, "match")
 
         return final_df
     except Exception as e:
