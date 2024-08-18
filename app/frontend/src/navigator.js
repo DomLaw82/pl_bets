@@ -9,6 +9,7 @@ import Managers from './pages/managers';
 import FPLSolver from './pages/fplSolver';
 import FPLPlayerSearch from './pages/fplPlayerSearch';
 import UpcomingMatches from './pages/upcomingMatches';
+import { LeagueTable } from './pages/leagueTable';
 
 export const routeOptions = {
 	"home": {
@@ -50,7 +51,11 @@ export const routeOptions = {
 	"Solver": {
 		path: '/fpl/solver',
 		component: FPLSolver,
-	}
+	},
+	"League Table": {
+		path: '/league-table',
+		component: LeagueTable
+	},
 };
 
 export const settingsOptions = {
@@ -73,6 +78,10 @@ export const settingsOptions = {
 }
 
 export const menuOptions = {
+	"League Table": {
+		path: '/league-table',
+		component: LeagueTable
+	},
 	"Stats": {
 		"players": {
 			path: '/stats/players',

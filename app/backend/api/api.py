@@ -1013,11 +1013,100 @@ def get_stats_for_charts(table_name: str) -> list:
       return jsonify({"error": f"Error with endpoint /vis/{table_name}?{entity_ids}: {str(e)}"}), 500
    
 @registry.handles(
-   rule="/teams/league-table",
+   rule="/league-table/<season>",
    method="GET",
 )
-def get_league_table():
-   pass
+def get_league_table(season: str):
+   query = f"""
+   WITH league_table AS (
+      SELECT
+         team.id,
+         team.name,
+         COUNT(*) AS matches_played,
+         SUM(
+            CASE
+               WHEN home_team_id = team.id
+               AND SPLIT_PART(result, ' - ', 1) > SPLIT_PART(result, ' - ', 2) THEN 3
+               WHEN away_team_id = team.id
+               AND SPLIT_PART(result, ' - ', 2) > SPLIT_PART(result, ' - ', 1) THEN 3
+               WHEN SPLIT_PART(result, ' - ', 1) = SPLIT_PART(result, ' - ', 2) THEN 1
+               ELSE 0
+            END
+         ) AS total_points,
+         SUM(
+            CASE
+               WHEN home_team_id = team.id
+               AND SPLIT_PART(result, ' - ', 1) > SPLIT_PART(result, ' - ', 2) THEN 1
+               WHEN away_team_id = team.id
+               AND SPLIT_PART(result, ' - ', 2) > SPLIT_PART(result, ' - ', 1) THEN 1
+               ELSE 0
+            END
+         ) AS wins,
+         SUM(
+            CASE
+               WHEN SPLIT_PART(result, ' - ', 1) = SPLIT_PART(result, ' - ', 2) THEN 1
+               ELSE 0
+            END
+         ) AS draws,
+         SUM(
+            CASE
+               WHEN home_team_id = team.id
+               AND SPLIT_PART(result, ' - ', 1) < SPLIT_PART(result, ' - ', 2) THEN 1
+               WHEN away_team_id = team.id
+               AND SPLIT_PART(result, ' - ', 2) < SPLIT_PART(result, ' - ', 1) THEN 1
+               ELSE 0
+            END
+         ) AS losses,
+         SUM(
+            CASE
+               WHEN home_team_id = team.id THEN CAST(SPLIT_PART(result, ' - ', 1) AS INTEGER)
+               ELSE CAST(SPLIT_PART(result, ' - ', 2) AS INTEGER)
+            END
+         ) AS goals_for,
+         SUM(
+            CASE
+               WHEN home_team_id = team.id THEN CAST(SPLIT_PART(result, ' - ', 2) AS INTEGER)
+               ELSE CAST(SPLIT_PART(result, ' - ', 1) AS INTEGER)
+            END
+         ) AS goals_against,
+         SUM(
+            CASE
+               WHEN home_team_id = team.id THEN CAST(SPLIT_PART(result, ' - ', 1) AS INTEGER) - CAST(SPLIT_PART(result, ' - ', 2) AS INTEGER)
+               ELSE CAST(SPLIT_PART(result, ' - ', 2) AS INTEGER) - CAST(SPLIT_PART(result, ' - ', 1) AS INTEGER)
+            END
+         ) AS goal_difference
+      FROM
+         schedule
+      JOIN team ON team.id = home_team_id OR team.id = away_team_id
+      WHERE 
+         season = '{season}' AND result != '-'
+      GROUP BY 
+         team.id, team.name
+   )
+
+   SELECT
+      ROW_NUMBER() OVER(ORDER BY total_points DESC, goal_difference DESC, goals_for DESC) AS position,
+      id,
+      name,
+      matches_played,
+      wins,
+      draws,
+      losses,
+      goals_for,
+      goals_against,
+      goal_difference,
+      total_points
+   FROM
+      league_table
+   """
+
+   try:
+      league_table = db.get_dict(query)
+      logger.info(f"League table for {season} retrieved")
+      return jsonify(league_table)
+   except Exception as e:
+      logger.error(f"Error with endpoint /teams/league-table/{season}: {str(e)}")
+      return jsonify({"error": f"Error with endpoint /teams/league-table/{season}: {str(e)}"}), 500
 
 @registry.handles(
    rule="/all-managers",

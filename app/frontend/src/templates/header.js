@@ -31,8 +31,8 @@ function ResponsiveAppBar() {
 
 	const [originX, setOriginX] = useState(0);
 	const [originY, setOriginY] = useState(0);
-  const open = Boolean(anchorElNav);
-  const navigate = useNavigate();
+	const open = Boolean(anchorElNav);
+	const navigate = useNavigate();
 
 	const handleOpenUserMenu = (event) => {
 		setAnchorElUser(event.currentTarget);
@@ -49,22 +49,20 @@ function ResponsiveAppBar() {
 
 	const handleCloseUserMenu = () => {
 		setAnchorElUser(null);
-  };
-  
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [openMenu, setOpenMenu] = useState(null);
+	};
 
+	const [anchorEl, setAnchorEl] = useState(null);
+	const [openMenu, setOpenMenu] = useState(null);
 
-  const handleOpenNavMenu = (event, menu) => {
-    setAnchorEl(event.currentTarget);
-    setOpenMenu(menu);
-  };
+	const handleOpenNavMenu = (event, menu) => {
+		setAnchorEl(event.currentTarget);
+		setOpenMenu(menu);
+	};
 
-  const handleCloseNavMenu = (path) => {
-    setAnchorEl(null);
-    setOpenMenu(null);
-  };
-
+	const handleCloseNavMenu = (path) => {
+		setAnchorEl(null);
+		setOpenMenu(null);
+	};
 
 	return (
 		<AppBar position="static">
@@ -152,41 +150,52 @@ function ResponsiveAppBar() {
 						PL PREDICTION
 					</Typography>
 					<Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-						{Object.entries(menuOptions).map(([menu, options]) => (
-							<Box key={menu}>
+						{Object.entries(menuOptions).map(([menu, options]) =>
+							"path" in options ? (
 								<Button
-									onClick={(event) => handleOpenNavMenu(event, menu)}
-									sx={{ my: 2, color: "white", display: "block" }}
+									key={menu}
+									onClick={() => {
+										navigate(options.path)
+									}}
+									sx={{ my: 2, color: "white", display: "block"}}
 								>
 									{menu}
 								</Button>
-								<Menu
-									id={`menu-${menu}`}
-									anchorEl={anchorEl}
-									open={openMenu === menu}
-									onClose={handleCloseNavMenu}
-									MenuListProps={{
-										"aria-labelledby": `menu-button-${menu}`,
-									}}
-								>
-									{Object.entries(options).map(([title, { path }]) => (
-										<MenuItem
-											key={title}
-											onClick={() => {
-												if (path) {
-													navigate(path);
-												}
-												handleCloseNavMenu();
-											}}
-										>
-											{title}
-										</MenuItem>
-									))}
-								</Menu>
-							</Box>
-						))}
+							) : (
+								<Box key={menu}>
+									<Button
+										onClick={(event) => handleOpenNavMenu(event, menu)}
+										sx={{ my: 2, color: "white", display: "block" }}
+									>
+										{menu}
+									</Button>
+									<Menu
+										id={`menu-${menu}`}
+										anchorEl={anchorEl}
+										open={openMenu === menu}
+										onClose={handleCloseNavMenu}
+										MenuListProps={{
+											"aria-labelledby": `menu-button-${menu}`,
+										}}
+									>
+										{Object.entries(options).map(([title, { path }]) => (
+											<MenuItem
+												key={title}
+												onClick={() => {
+													if (path) {
+														navigate(path);
+													}
+													handleCloseNavMenu();
+												}}
+											>
+												{title}
+											</MenuItem>
+										))}
+									</Menu>
+								</Box>
+							)
+						)}
 					</Box>
-
 					<Box sx={{ flexGrow: 0 }}>
 						<Tooltip title="Open settings">
 							<IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
