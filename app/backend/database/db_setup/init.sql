@@ -39,6 +39,8 @@ CREATE TABLE schedule (
 	date VARCHAR(16) NOT NULL,
 	home_team_id VARCHAR(7) REFERENCES team(id),
 	away_team_id VARCHAR(7) REFERENCES team(id),
+	home_elo FLOAT,
+	away_elo FLOAT,
 	competition_id VARCHAR(7) REFERENCES competition(id),
 	result VARCHAR
 );
@@ -58,8 +60,6 @@ CREATE TABLE match (
 	home_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
 	away_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
 	referee_id VARCHAR(7) REFERENCES referee(id) NOT NULL,
-	home_elo FLOAT,
-	away_elo FLOAT,
 	home_goals INTEGER NOT NULL,
 	away_goals INTEGER NOT NULL,
 	home_shots INTEGER NOT NULL,
