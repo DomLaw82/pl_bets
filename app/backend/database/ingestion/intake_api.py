@@ -127,6 +127,8 @@ def refresh_squad_data():
         
         squad_data_download_root = os.environ.get("PLAYER_DOWNLOAD_ROOT")
         squad_data_save_root = os.environ.get("PLAYER_SAVE_PATH_ROOT")
+        if not os.path.exists(squad_data_download_root, squad_data_save_root):
+            os.makedirs(squad_data_download_root, squad_data_save_root)
         download_html_for_squad_player_data(current_season+"/", squad_data_download_root, squad_data_save_root)
         player_main_by_season(db, current_season, squad_data_save_root)
 
