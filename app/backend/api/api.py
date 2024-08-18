@@ -1040,7 +1040,7 @@ def get_all_managers():
          JOIN
             team ON manager.team_id = team.id
          ORDER BY
-            start_date ASC;
+            last_name ASC;
       """)
       logger.info("All managers retrieved")
       return jsonify(all_managers)
