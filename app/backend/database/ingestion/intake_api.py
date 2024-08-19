@@ -167,6 +167,8 @@ def refresh_schedule_data():
         if not df.empty:
             with db.connect() as conn:
                 logger.info(f"Inserting schedule data for season {current_season}")
+                print("Schedule_df\n")
+                print(df)
                 df.to_sql("schedule", conn, if_exists="append", index=False)
                 logger.info(f"Inserted into schedule table for {current_season}")
 
@@ -188,8 +190,10 @@ def refresh_match_logs():
     try:
         current_season = get_current_season()
         result = match_logs_main(current_season)
-        result.to_sql("match_logs", db.engine, if_exists="append", index=False)
-        return jsonify("Match logs updated successfully"), 200
+        if not result.empty:
+            with db.connect() as conn:
+                result.to_sql("match_logs", conn, if_exists="append", index=False)
+            return jsonify("Match logs updated successfully"), 200
     except Exception as e:
         logger.error(f"An error occurred while updating match logs: line {e.__traceback__.tb_lineno} : {str(e)}")
         return jsonify(f"An error occurred while updating match logs: line {e.__traceback__.tb_lineno} : {str(e)}"), 500
