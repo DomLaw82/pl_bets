@@ -214,7 +214,9 @@ export default function Managers() {
 									teamId={manager.team_id}
 								/>
 							))
-						) : searchTerm !== "" && filteredManagers.length === 0 ? (
+						) : searchTerm !== "" &&
+						  filteredManagers.length === 0 &&
+						  !isLoadingManagers ? (
 							<Typography
 								variant="h3"
 								sx={{
