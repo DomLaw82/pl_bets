@@ -97,11 +97,14 @@ to your settings.json to suppress errors about the utility modules
 
 ## TODO
 
+- Dashboard page, look at stat correlations over all data to make better betting decisions, compare team/player performance [x]
+- - Compare multiple players for each stat, one graph for each stat
+- Logistic Regression fix - win_prediction.py
+- Neural net fix - predict_match_outcome.py
+
 - Player data - match logs from fbref - CREATE A NEW TABLE TO SHOW INDIVIDUAL GAME PERFORMANCES FOR EACH PLAYER
 - API-FOOTBALL.COM  to get more data
-- Add club elo to neural network and regression prediction model, use in FPL calculations
 
-- Dashboard page, look at stat correlations over all data to make better betting decisions, compare team/player performance [x]
 
 - Manager page
 - Scrape manager data - [Wikipedia](https://en.wikipedia.org/wiki/List_of_Premier_League_managers) [x]
