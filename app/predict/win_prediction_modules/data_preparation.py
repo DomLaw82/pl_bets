@@ -169,11 +169,11 @@ def get_team_form(df: pd.DataFrame, team_id: str) -> pd.DataFrame:
                 data[["is_home", "home_goal_difference", "away_goal_difference"]], rolling_window
             )
         )
-        # df.update(
-        #     get_rolling_stat(
-        #         data[["is_home", "home_shots_on_target", "away_shots_on_target"]], "shots_on_target", rolling_window
-        #     )
-        # )
+        df.update(
+            get_rolling_stat(
+                data[["is_home", "home_shots_on_target", "away_shots_on_target"]], "shots_on_target", rolling_window
+            )
+        )
 
         return df
     except Exception as e:
@@ -274,9 +274,11 @@ def run_data_prep(sql_connection: SQLConnection, features: list, fixtures: pd.Da
     """
     try:
         match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals", "home_shots_on_target", "away_shots_on_target", "closing_home_odds","closing_draw_odds","closing_away_odds"]
-        model_features = ["home_rolling_goal_difference", "away_rolling_goal_difference", "home_rolling_goal_difference_at_home","away_rolling_goal_difference_at_away",
-                        #   "home_rolling_shots_on_target", "away_rolling_shots_on_target"
-                        ]
+        model_features = [
+            "home_rolling_goal_difference", "away_rolling_goal_difference", 
+            "home_rolling_goal_difference_at_home","away_rolling_goal_difference_at_away",
+            "home_rolling_shots_on_target", "away_rolling_shots_on_target"
+        ]
         
         data = sql_connection.get_df(f"SELECT {', '.join(match_columns)} FROM match ORDER BY date ASC")
         schedule = sql_connection.get_df("SELECT season, home_team_id, away_team_id, home_elo, away_elo FROM schedule")

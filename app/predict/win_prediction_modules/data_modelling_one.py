@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import t
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from win_prediction_modules.plotting_functions import plot_log_reg_coefficients, plot_probability_by_feature
 
 def model_training(model_type: str, training_data: pd.DataFrame, outcome_labels: list, feature_columns: list) -> dict:
@@ -16,7 +16,7 @@ def model_training(model_type: str, training_data: pd.DataFrame, outcome_labels:
             X = training_data[feature_columns]
             y = training_data[outcome]
 
-            model = LogisticRegression()
+            model = LogisticRegression(random_state=42, max_iter=1000, C=0.001, solver='lbfgs')
             model.fit(X, y)
             
             models[outcome] = model
@@ -25,7 +25,7 @@ def model_training(model_type: str, training_data: pd.DataFrame, outcome_labels:
         X = training_data[feature_columns]
         y = training_data[outcome_labels]
 
-        model = LogisticRegression(multi_class="auto")
+        model = LogisticRegression(multi_class="auto", random_state=42)
         model.fit(X, y)
         
         models["multi"] = model
@@ -111,12 +111,14 @@ def run_model_training(model_type: str, data: pd.DataFrame, features: list, clos
     
     outcome_labels = ['home_win', 'draw', 'away_win']
 
-    scaler = StandardScaler()
-    data[features] = scaler.fit_transform(data[features])
+    # scaler = StandardScaler()
+    # scaler = MinMaxScaler()
+    # data[features] = scaler.fit_transform(data[features])
+    # data[features] = scaler.fit_transform(data[features])
 
     # Separating the data into training and testing set
-    data_train = data.iloc[:-300]
-    data_test =  data.iloc[-300:]
+    data_train = data.iloc[:-300, :]
+    data_test =  data.iloc[-300:, :]
     
     # Model Training
     models = model_training(model_type, data_train, outcome_labels, features)
