@@ -105,7 +105,6 @@ to your settings.json to suppress errors about the utility modules
 - Player data - match logs from fbref - CREATE A NEW TABLE TO SHOW INDIVIDUAL GAME PERFORMANCES FOR EACH PLAYER
 - API-FOOTBALL.COM  to get more data
 
-
 - Manager page
 - Scrape manager data - [Wikipedia](https://en.wikipedia.org/wiki/List_of_Premier_League_managers) [x]
 - - Typical stats per position for each manager
