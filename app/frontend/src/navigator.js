@@ -36,7 +36,7 @@ export const routeOptions = {
 		component: UpcomingMatches
 	},
 	"Visualisations": {
-		path: '/visualisations',
+		path: '/stats/visualisations',
 		component: Visualisations
 	},
 	"Managers": {
@@ -97,6 +97,10 @@ export const menuOptions = {
 		"matches": {
 			path: '/stats/matches',
 			component: Matches
+		},
+		"visualisations": {
+			path: '/stats/visualisations',
+			component: Visualisations
 		},
 	},
 	"Prediction": {
