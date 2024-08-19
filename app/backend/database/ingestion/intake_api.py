@@ -11,6 +11,7 @@ from data_intake.player import player_main_by_season
 from data_intake.season_schedule import clean_schedule_data
 from db_connection import SQLConnection
 import datetime
+from refresh_match_logs import match_logs_main
 
 logger = FluentLogger("data_ingestion-api").get_logger()
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
@@ -178,6 +179,21 @@ def refresh_schedule_data():
     except Exception as e:
         logger.error(f"Error refreshing schedule data: {str(e)}")
         return jsonify(f"Error refreshing schedule data: {str(e)}"), 500
+
+@registry.handles(
+    rule="/refresh/match-logs",
+    method="GET",
+)
+def refresh_match_logs():
+    try:
+        current_season = get_current_season()
+        result = match_logs_main(current_season)
+        result.to_sql("match_logs", db.engine, if_exists="append", index=False)
+        return jsonify("Match logs updated successfully"), 200
+    except Exception as e:
+        logger.error(f"An error occurred while updating match logs: line {e.__traceback__.tb_lineno} : {str(e)}")
+        return jsonify(f"An error occurred while updating match logs: line {e.__traceback__.tb_lineno} : {str(e)}"), 500
+    
 
 app = Flask(__name__)
 CORS(app, origins=["http://api:8080", "http://localhost:8080", "http://localhost:3000", "http://frontend:3000", "http://localhost:3001", "http://frontend:3001"],  supports_credentials=True)
