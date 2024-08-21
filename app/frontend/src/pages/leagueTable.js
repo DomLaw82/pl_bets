@@ -98,46 +98,67 @@ export function LeagueTable() {
 							<Box sx={{ width: "100%", overflowY: "scroll", height: "70vh" }}>
 								<Divider sx={{ width: "100%", height: 2 }} />
 								{leagueTable.length > 0 ? (
-									<Box id="league-table">
-										<Table>
-											<TableHead
-												sx={{
-													position: "sticky",
-													top: "0",
-													bgcolor: "background.paper",
-													zIndex: 1,
-													borderBottom: "2px solid white",
-												}}
-											>
-												<TableRow>
-													<TableCell>Position</TableCell>
-													<TableCell>Team</TableCell>
-													<TableCell>Played</TableCell>
-													<TableCell>Wins</TableCell>
-													<TableCell>Draws</TableCell>
-													<TableCell>Losses</TableCell>
-													<TableCell>GF</TableCell>
-													<TableCell>GA</TableCell>
-													<TableCell>GD</TableCell>
-													<TableCell>Points</TableCell>
+									<Box key="league-table-container" id="league-table-container">
+										<Table key={"league-table"}>
+											<TableHead key={"league-table-header"}>
+												<TableRow
+													key={"league-table-header-row"}
+													sx={{
+														position: "sticky",
+														top: "0",
+														bgcolor: "background.paper",
+														zIndex: 1,
+														borderBottom: "2px solid white",
+													}}
+												>
+													<TableCell key={"position"}>Position</TableCell>
+													<TableCell key={"team"}>Team</TableCell>
+													<TableCell key={"played"}>Played</TableCell>
+													<TableCell key={"wins"}>Wins</TableCell>
+													<TableCell key={"draws"}>Draws</TableCell>
+													<TableCell key={"losses"}>Losses</TableCell>
+													<TableCell key={"goals-for"}>GF</TableCell>
+													<TableCell key={"goals-against"}>GA</TableCell>
+													<TableCell key={"goal-difference"}>GD</TableCell>
+													<TableCell key={"points"}>Points</TableCell>
 												</TableRow>
 											</TableHead>
-											{leagueTable.map((row) => (
-												<TableBody>
+											<TableBody>
+												{leagueTable.map((row) => (
 													<TableRow key={row.id}>
-														<TableCell>{row.position}</TableCell>
-														<TableCell>{row.name}</TableCell>
-														<TableCell>{row.matches_played}</TableCell>
-														<TableCell>{row.wins}</TableCell>
-														<TableCell>{row.draws}</TableCell>
-														<TableCell>{row.losses}</TableCell>
-														<TableCell>{row.goals_for}</TableCell>
-														<TableCell>{row.goals_against}</TableCell>
-														<TableCell>{row.goal_difference}</TableCell>
-														<TableCell>{row.total_points}</TableCell>
+														<TableCell key={`${row.id}-position`}>
+															{row.position}
+														</TableCell>
+														<TableCell key={`${row.id}-name`}>
+															{row.name}
+														</TableCell>
+														<TableCell key={`${row.id}-matches_played`}>
+															{row.matches_played}
+														</TableCell>
+														<TableCell key={`${row.id}-wins`}>
+															{row.wins}
+														</TableCell>
+														<TableCell key={`${row.id}-draws`}>
+															{row.draws}
+														</TableCell>
+														<TableCell key={`${row.id}-losses`}>
+															{row.losses}
+														</TableCell>
+														<TableCell key={`${row.id}-goals_for`}>
+															{row.goals_for}
+														</TableCell>
+														<TableCell key={`${row.id}-goals_against`}>
+															{row.goals_against}
+														</TableCell>
+														<TableCell key={`${row.id}-goal_difference`}>
+															{row.goal_difference}
+														</TableCell>
+														<TableCell key={`${row.id}-total_points`}>
+															{row.total_points}
+														</TableCell>
 													</TableRow>
-												</TableBody>
-											))}
+												))}
+											</TableBody>
 										</Table>
 									</Box>
 								) : (

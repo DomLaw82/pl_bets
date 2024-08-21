@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { useQuery } from "react-query";
 import { Box, Typography, Divider } from "@mui/material";
 import Container from "@mui/material/Container";
@@ -7,12 +7,23 @@ import { ColumnsSidebar, EntitySidebar } from "../components/visSideBar";
 import { MenuItem, Select } from "@mui/material";
 import { LineChart, XAxis, YAxis, Scatter, Tooltip } from "@mui/x-charts";
 import { PageLoading } from "../components/loaders";
+import { AppBar, Tab, Tabs } from "@mui/material";
+import { TabPanel, a11yProps } from "../components/tabs";
+import { animated, useTransition, useSpring } from "@react-spring/web";
 
 export default function Visualisations() {
 	const [selectedEntity, setSelectedEntity] = useState("");
-	const [stats, setStats] = useState([]);
+	const [stats, setStats] = useState({});
+	const [selectedStats, setSelectedStats] = useState([]);
 	const [entities, setEntities] = useState([]);
 	const [xAxis, setXAxis] = useState("season");
+	const [xValues, setXValues] = useState([]);
+	const [yValues, setYValues] = useState([]);
+	const [value, setValue] = useState(0);
+
+	const handleChange = (event, newValue) => {
+		setValue(newValue);
+	};
 
 	// fix max depth reached error
 	// stat per graph, can show comparison between multiple players, teams, mini app bar to cycle through stats
@@ -21,7 +32,7 @@ export default function Visualisations() {
 	// 		speed up page processing
 	// resort lists on sidebar when entity is selected, i.e. all selected entities are at the top
 
-	const { data: data_series = [[], []] } = useQuery(
+	const { data: data_series = [[], {}] } = useQuery(
 		["columns", stats, entities],
 		async () => {
 			const checked_stats = Object.keys(stats).filter(
@@ -43,6 +54,8 @@ export default function Visualisations() {
 			}
 
 			const data = await response.json();
+			setXValues(data[0]);
+			setYValues(data[1]);
 			return data;
 		},
 		{
@@ -56,7 +69,16 @@ export default function Visualisations() {
 		}
 	);
 
-	console.log(data_series);
+	useEffect(() => {
+		setSelectedStats(Object.keys(stats).filter((key) => stats[key] === true));
+	}, [stats]);
+
+	const transitions = useTransition(value, {
+		from: { opacity: 0, transform: "translate3d(100%,0,0)" },
+		enter: { opacity: 1, transform: "translate3d(0%,0,0)" },
+		leave: { opacity: 0, transform: "translate3d(100%,0,0)" },
+		keys: value,
+	});
 
 	return (
 		<Fragment>
@@ -76,8 +98,7 @@ export default function Visualisations() {
 							sx={{ width: "100%" }}
 							id="entity-select"
 						>
-							<MenuItem value="" key={"empty-entity"}>
-							</MenuItem>
+							<MenuItem value="" key={"empty-entity"}></MenuItem>
 							<MenuItem value="player" key={"player-entity"}>
 								Player
 							</MenuItem>
@@ -86,22 +107,40 @@ export default function Visualisations() {
 							</MenuItem>
 						</Select>
 					</Box>
-					<Typography variant="h4" sx={{ marginTop: 2 }}>
-						{Object.keys(stats)
-							.filter((key) => stats[key] === true)
-							.join(", ")}
-					</Typography>
-					{selectedEntity && stats && entities ?
-					<Box
-						sx={{
-							maxHeight: "65vh",
-							width: "100%",
-							display: "flex",
-							justifyContent: "space-between",
-							overflowY: "scroll",
-							paddingTop: 1,
-						}}
-					>
+					<AppBar position="static">
+						<Tabs
+							value={value}
+							onChange={handleChange}
+							indicatorColor="secondary"
+							textColor="inherit"
+							variant="fullWidth"
+							aria-label="full width tabs"
+						>
+							{selectedStats.map((tab, index) => (
+								<Tab
+									key={index}
+									label={tab}
+									sx={{
+										whiteSpace: "nowrap",
+										overflow: "hidden",
+										textOverflow: "hidden",
+									}}
+									{...a11yProps(index)}
+								/>
+							))}
+						</Tabs>
+					</AppBar>
+					{selectedEntity && stats && entities ? (
+						<Box
+							sx={{
+								maxHeight: "65vh",
+								width: "100%",
+								display: "flex",
+								justifyContent: "space-between",
+								overflowY: "scroll",
+								paddingTop: 1,
+							}}
+						>
 							<ColumnsSidebar
 								selectedEntity={selectedEntity}
 								checked={stats}
@@ -123,35 +162,43 @@ export default function Visualisations() {
 									zIndex: -10, // Ensure the chart is above other elements
 								}}
 							>
-								{data_series && (
-									<LineChart
-										width={1000}
-										height={500}
-										loading={data_series[0].length === 0}
-										xAxis={[{ data: data_series[0], scaleType: "band" }]}
-										series={data_series[1].map((data) => ({
-											...data,
-											curve: "linear",
-											valueFormatter: (value) =>
-												value == null ? "?" : value.toString(),
-										}))}
-										yAxis={[{ min: 0, scaleType: "linear" }]}
-									/>
-								)}
+								{selectedStats.length > 0 &&
+									xValues && Object.keys(yValues).length > 0 &&
+									selectedStats.map((stat, index) => (
+										<animated.div style={transitions}>
+											<TabPanel value={value} index={index} key={index}>
+												<LineChart
+													width={1000}
+													height={500}
+													loading={xValues.length === 0}
+													xAxis={[{ data: xValues, scaleType: "band" }]}
+													series={yValues[stat].map((data) => ({
+														...data,
+														curve: "linear",
+														valueFormatter: (value) =>
+															value == null ? "?" : value.toString(),
+													}))}
+													yAxis={[{ min: 0, scaleType: "linear" }]}
+												/>
+											</TabPanel>
+										</animated.div>
+									))
+								}
 							</Box>
 							<EntitySidebar
 								selectedEntity={selectedEntity}
 								checked={entities}
 								setChecked={setEntities}
 							/>
-						</Box> :
+						</Box>
+					) : (
 						<Box>
-							<Typography variant="h3" sx={{marginTop: "10%"}}>
+							<Typography variant="h3" sx={{ marginTop: "10%" }}>
 								Select an entity type to graph
 							</Typography>
 							<PageLoading />
 						</Box>
-					}
+					)}
 				</Box>
 			</Container>
 		</Fragment>
