@@ -1,15 +1,15 @@
 import { Fragment, useState, useEffect } from "react";
 import { useQuery } from "react-query";
-import { Box, Typography, Divider } from "@mui/material";
+import { Box, Typography} from "@mui/material";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ColumnsSidebar, EntitySidebar } from "../components/visSideBar";
 import { MenuItem, Select } from "@mui/material";
-import { LineChart, XAxis, YAxis, Scatter, Tooltip } from "@mui/x-charts";
+import { LineChart} from "@mui/x-charts";
 import { PageLoading } from "../components/loaders";
 import { AppBar, Tab, Tabs } from "@mui/material";
 import { TabPanel, a11yProps } from "../components/tabs";
-import { animated, useTransition, useSpring } from "@react-spring/web";
+import { animated, useTransition} from "@react-spring/web";
 
 export default function Visualisations() {
 	const [selectedEntity, setSelectedEntity] = useState("");
