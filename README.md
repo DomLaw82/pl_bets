@@ -97,9 +97,6 @@ to your settings.json to suppress errors about the utility modules
 
 ## TODO
 
-- Dashboard page, look at stat correlations over all data to make better betting decisions, compare team/player performance [x]
-- - Compare multiple players for each stat, one graph for each stat
-- Logistic Regression fix - win_prediction.py
 - Neural net fix - predict_match_outcome.py
 
 - Player data - match logs from fbref - CREATE A NEW TABLE TO SHOW INDIVIDUAL GAME PERFORMANCES FOR EACH PLAYER
@@ -131,3 +128,5 @@ to your settings.json to suppress errors about the utility modules
 - Caching
 - General code cleanup and re-factoring
 - Review "Separation of concerns"
+
+- prediction model edits
