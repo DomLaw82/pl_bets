@@ -899,7 +899,7 @@ def get_player_comp_columns() -> list:
          FROM information_schema.columns
          WHERE table_name = 'historic_player_per_ninety'
       """)
-      comp_cols = [col[0] for col in comp_cols if col not in ["id", "season", "player_id", "team_id"] and not any([op in col for op in ["plus", "minus", "divided"]])]
+      comp_cols = [col[0] for col in comp_cols if col[0] not in ["id", "season", "player_id", "team_id"] and not any(op in col[0] for op in ["plus", "minus", "divided"])]
       logger.info(f"Player comparison columns retrieved: {comp_cols}")
       return jsonify(sorted(comp_cols))
    except Exception as e:
@@ -917,13 +917,14 @@ def get_team_comp_columns() -> list:
          FROM information_schema.columns
          WHERE table_name = 'historic_player_per_ninety'
       """)
-      comp_cols = [col[0] for col in comp_cols if col not in ["id", "ninetys", "season", "player_id", "team_id"] and not any([op in col for op in ["plus", "minus", "divided"]])]
-      additional = ["league_finishes", "league_points", "league_goals_for", "league_goals_against", "league_goal_difference"]+comp_cols
-      logger.info(f"Player comparison columns retrieved: {comp_cols}")
-      return jsonify(sorted(additional))
+      comp_cols = [col[0] for col in comp_cols if col[0] not in ["id", "season", "ninetys", "player_id", "team_id"] and not any(op in col[0] for op in ["plus", "minus", "divided"])]
+
+      # all = ["league_finishes", "league_points", "league_goals_for", "league_goals_against", "league_goal_difference"]+comp_cols
+      logger.info(f"Team comparison columns retrieved: {comp_cols}")
+      return jsonify(sorted(comp_cols))
    except Exception as e:
-      logger.error(f"Error getting player comparison columns: {str(e)}")
-      raise Exception(f"Error getting player comparison columns: {str(e)}")
+      logger.error(f"Error getting team comparison columns: {str(e)}")
+      raise Exception(f"Error getting team comparison columns: {str(e)}")
 
 @registry.handles(
    rule='/visualisation/<table_name>',
@@ -941,6 +942,7 @@ def get_stats_for_charts(table_name: str) -> list:
       if len(entity_ids.split(",")) == 0 or len(stats.split(",")) == 0:
          raise Exception("No entity ids or stats provided")
       sum_stats = ",".join([(f'SUM({stat}) AS {stat}') for stat in stats.split(",")])
+
       player_query = f"""
          SELECT player_id, player.first_name || ' ' || player.last_name as name, season, 
          SUM(ninetys), {sum_stats}
@@ -949,18 +951,15 @@ def get_stats_for_charts(table_name: str) -> list:
          WHERE player_id IN ({entity_ids}) AND season >= {start_season} AND season <= {end_season}
          GROUP BY player_id, season, player.first_name, player.last_name
       """
+      team_query = f"""
+         SELECT team_id, season, team.name as name, {sum_stats}
+         FROM historic_player_per_ninety
+         LEFT JOIN team ON team.id = team_id
+         WHERE team_id IN ({entity_ids}) AND season >= {start_season} AND season <= {end_season}
+         GROUP BY team_id, season, team.name
+      """
 
-      # team_query = f"""
-      #    SELECT {table_name}_id, {'player.first_name || \' \' || player.last_name as name,' if table_name == 'player' else ''} season, 
-      #    {'team.name as name,' if table_name == 'team' else ''}, {'ninetys, ' if table_name == 'player' else ''}{stats}
-      #    FROM historic_player_per_ninety
-      #    {'LEFT JOIN player ON player.id = player_id' if table_name == 'player' else ''}
-      #    {'LEFT JOIN team ON team.id = team_id' if table_name == 'team' else ''}
-      #    WHERE {table_name}_id IN ({entity_ids}) AND season >= {start_season} AND season <= {end_season}
-      #    GROUP BY {table_name}_id, season, ninetys, {stats}
-      # """
-
-      query = player_query if table_name == "player" else ""
+      query = player_query if table_name == "player" else team_query
       print(query)
 
       logger.info(f"Query: {query}")
@@ -971,12 +970,13 @@ def get_stats_for_charts(table_name: str) -> list:
          df[stats] = df[stats].div(df["ninetys"], axis=0)
 
       x_axis_values = []
-      y_axis_values = []
+      y_axis_values = {}
 
       if x_axis == "season":
          x_axis_values = sorted(df["season"].unique().tolist())
 
       for stat in stats.split(","):
+         entity_stats = []
          for entity_id in entity_ids.replace("'", "").split(","):
             entity_data = df[df[f"{table_name}_id"] == entity_id]
             if len(entity_data) < len(x_axis_values):
@@ -993,10 +993,11 @@ def get_stats_for_charts(table_name: str) -> list:
             entity_data = entity_data.sort_values(by="season")
             entity_data["x"] = entity_data["season"]
             entity_data["y"] = entity_data[stat]
-            ent_id = entity_data["name"].to_list()[0] + " - " + stat
+            ent_id = entity_data["name"].to_list()[0]
 
             y_axis = entity_data["y"].to_list()
-            y_axis_values.append({"data": y_axis, "label": ent_id, })
+            entity_stats.append({"data": y_axis, "label": ent_id, })
+         y_axis_values[stat] = entity_stats
 
       if table_name == "team":
          pass
