@@ -83,16 +83,16 @@ CREATE TABLE match (
 );
 
 CREATE TABLE match_logs (
-	match_id VARCHAR(7) REFERENCES match(id),
-	competition_id VARCHAR(7) REFERENCES competition(id) NOT NULL,
-	team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
 	player_id VARCHAR(7) REFERENCES player(id),
 	fbref_id VARCHAR NOT NULL,
+	competition_id VARCHAR(7) REFERENCES competition(id) NOT NULL,
+	match_id VARCHAR(7) REFERENCES match(id),
 	season VARCHAR NOT NULL,
 	date VARCHAR NOT NULL,
 	location VARCHAR NOT NULL,
+	home_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
+	away_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
 	result VARCHAR NOT NULL,
-	opponent VARCHAR NOT NULL,
 	position VARCHAR NOT NULL,
 	started VARCHAR NOT NULL,
 	minutes INTEGER NOT NULL,
@@ -183,7 +183,8 @@ CREATE TABLE match_logs (
 	gk_passes_throws INTEGER NOT NULL,
 	gk_passes_length_avg FLOAT NOT NULL,
 	gk_goal_kicks INTEGER NOT NULL,
-	gk_goal_kicks_length_avg FLOAT NOT NULL
+	gk_goal_kicks_length_avg FLOAT NOT NULL,
+	PRIMARY KEY (player_id, match_id)
 );
 
 CREATE TABLE historic_player_per_ninety (

@@ -1,7 +1,8 @@
 from fuzzywuzzy import process
+import pandas as pd
 
-def find_most_similar(player, options):
-    result, score = process.extractOne(player, options)
+def find_most_similar(item: str, options: list) -> tuple:
+    result, score = process.extractOne(item, options)
     return result, score
 
 def get_team_id(connector, team_name: str) -> str:
@@ -45,6 +46,20 @@ def get_player_id(connector, row) -> str:
         return matched_player[0]  # Assuming the first column is id
     else:
         return None  # Handle the case where no result is found
+    
+def get_id_from_name(name: str, options: list) -> str:
+    try:
+        name = name.replace("'", " ")
+        best_match, score = find_most_similar(name, options)
+
+        if best_match and score >= 40:
+            return best_match  # Assuming the first column is id
+        elif best_match and score < 40:
+            raise f"Error finding suitable matching name {name}, closest match {best_match} scored {score}" 
+        else:
+            raise f"Error - Unable to find matching name {name}"  # Handle the case where no result is found
+    except Exception as e:
+        raise e
     
 def get_player_id_per_ninety(connector, row) -> str:
     try:

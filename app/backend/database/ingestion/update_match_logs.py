@@ -175,7 +175,7 @@ def get_match_log_data(name: str, fbref_id: str, url: str, season: str, **kwargs
 	print('SUCCESS')
 	return {"data": results}
 		
-def match_logs_main(current_season: str) -> pd.DataFrame:
+def update_match_logs_main(current_season: str) -> pd.DataFrame:
 	url = PLAYER_DATA_URL.replace('XXXX-XXXX', current_season)
 	season_players = get_fbref_data(url, current_season)
 

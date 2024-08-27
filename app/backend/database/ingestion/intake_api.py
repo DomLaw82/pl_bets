@@ -11,7 +11,7 @@ from data_intake.player import player_main_by_season
 from data_intake.season_schedule import clean_schedule_data
 from db_connection import SQLConnection
 import datetime
-from refresh_match_logs import match_logs_main
+from app.backend.database.ingestion.update_match_logs import update_match_logs_main
 
 logger = FluentLogger("data_ingestion-api").get_logger()
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
@@ -186,10 +186,10 @@ def refresh_schedule_data():
     rule="/refresh/match-logs",
     method="GET",
 )
-def refresh_match_logs():
+def update_match_logs():
     try:
         current_season = get_current_season()
-        result = match_logs_main(current_season)
+        result = update_match_logs_main(current_season)
         if not result.empty:
             with db.connect() as conn:
                 result.to_sql("match_logs", conn, if_exists="append", index=False)

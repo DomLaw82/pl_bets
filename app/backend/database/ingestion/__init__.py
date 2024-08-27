@@ -6,6 +6,7 @@ from data_intake.country_competition import country_competition_main
 from data_intake.per_90_stats import per_90_main
 from data_intake.download_latest_data import download_latest_data
 from data_intake.managers import manager_main
+from data_intake.match_logs import match_logs_main
 from intake_api import app
 import os
 from app_logger import FluentLogger
@@ -18,7 +19,7 @@ logger = FluentLogger("insert_latest_data").get_logger()
 
 def insert_latest_data():
 
-	try:		
+	try:
 		pl_stats_connector = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 
 		current_year = datetime.datetime.now().year
@@ -41,7 +42,7 @@ def insert_latest_data():
 		# format season schedule [schedule]
 		schedule_main(pl_stats_connector)
 		logger.info("\nData Intake: schedule COMPLETE")
-			
+
 		# format squad data [player, player_team]
 		player_main(pl_stats_connector)
 		logger.info("\nData Intake: player_team COMPLETE")
@@ -50,12 +51,16 @@ def insert_latest_data():
 		# format manager data [manager]
 		manager_main(pl_stats_connector)
 		logger.info("\nData Intake: manager COMPLETE")
-			
+
 		# [historic_player_per_ninety]
 		per_90_main(pl_stats_connector)
 		logger.info("\nData Intake: per_90 COMPLETE")
+
+		# [match_logs]
+		match_logs_main(pl_stats_connector)
+		logger.info("\nData Intake: match_logs COMPLETE")
 		logger.info("Data Intake: COMPLETE")
-	
+
 		with open("./ingestion_status.txt", "w") as file:
 			file.write("Data ingestion completed successfully")
 
