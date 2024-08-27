@@ -11,7 +11,7 @@ from data_intake.player import player_main_by_season
 from data_intake.season_schedule import clean_schedule_data
 from db_connection import SQLConnection
 import datetime
-from app.backend.database.ingestion.update_match_logs import update_match_logs_main
+from update_match_logs import update_match_logs_main
 
 logger = FluentLogger("data_ingestion-api").get_logger()
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
