@@ -1,9 +1,10 @@
 import logging
 from fluent import handler as fluent_handler
+import requests
 import os
 
 class FluentLogger:
-    def __init__(self, tag, host=os.getenv("FLUENT_APP_HOST_NAME"), port=24224, level=logging.INFO):
+    def __init__(self, tag, host=os.getenv("FLUENT_APP_HOST_NAME"), port=24224, level=logging.DEBUG):
         """
         Initialize the Fluent Logger.
 
@@ -47,3 +48,17 @@ class FluentLogger:
             logging.Logger: The configured logger object.
         """
         return self.logger
+    
+    def log_http_request(self, url, response: requests.Response):
+        """Helper function to log HTTP request and response details"""
+        self.logger.debug(f"Request to {url} executed - response code: {response.status_code}")
+        self.logger.debug(f"Response code: {response.status_code}")
+        self.logger.debug(f"Response reason: {response.reason}")
+
+    def log_sql_query_execution(self, query: str):
+        """Helper function to log SQL queries"""
+        self.logger.debug(f"Executing SQL query: {query}")
+
+    def log_error(self, error_message: Exception):
+        """Helper function to log error messages"""
+        self.logger.error(f"Error : line {error_message.__traceback__.tb_lineno} : {error_message}")
