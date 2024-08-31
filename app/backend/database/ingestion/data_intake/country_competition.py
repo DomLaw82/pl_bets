@@ -1,5 +1,6 @@
 import pandas as pd
 from data_intake.utilities.remove_duplicates import remove_duplicate_rows
+from data_intake.utilities.save_to_database import save_to_database
 from app_logger import FluentLogger
 
 logger = FluentLogger("intake-country_competition").get_logger()
@@ -21,25 +22,6 @@ def clean_country_competition_data() -> pd.DataFrame:
 			dfs.append(pd.read_csv(path))
 			
 		return dfs
-	except Exception as e:
-		logger.error(f"Error: {e}")
-		return f"Error: {e}"
-	
-def save_to_database(db_connection, df: pd.DataFrame, team_name: str) -> None:
-	"""
-	Saves the given DataFrame to the database.
-
-	Parameters:
-		db_connection (DBConnection): The connection to the database.
-		df (pd.DataFrame): The DataFrame to be saved.
-		team_name (str): The name of the team.
-
-	Returns:
-		None
-	"""
-	try:
-		with db_connection.connect() as conn:
-			df.to_sql(team_name, conn, if_exists="append", index=False)
 	except Exception as e:
 		logger.error(f"Error: {e}")
 		return f"Error: {e}"
