@@ -15,7 +15,7 @@ matplotlib
 seaborn
 scipy
 pyarrow
-fuzzywuzzy
+rapidfuzz
 python-Levenshtein
 fluent-logger
 python-dotenv

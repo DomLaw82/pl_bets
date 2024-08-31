@@ -2,7 +2,7 @@ pandas
 sqlalchemy
 psycopg2-binary
 beautifulsoup4
-fuzzywuzzy
+rapidfuzz
 python-Levenshtein
 requests
 flask

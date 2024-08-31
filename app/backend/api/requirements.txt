@@ -8,6 +8,6 @@ python-json-logger
 pandas
 sqlalchemy
 psycopg2-binary
-fuzzywuzzy
+rapidfuzz
 requests
 fluent-logger
