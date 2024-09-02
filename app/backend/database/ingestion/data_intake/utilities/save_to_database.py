@@ -19,6 +19,7 @@ def save_to_database(db_connection: SQLConnection, df: pd.DataFrame, table_name:
 	"""
 	try:
 		with db_connection.connect() as conn:
+			logger.debug(f"Inserting into table {table_name}, Dataframe shape: {df.shape}")
 			df.to_sql(table_name, conn, if_exists="append", index=False)
 	except Exception as e:
 		log_class.log_error(e)

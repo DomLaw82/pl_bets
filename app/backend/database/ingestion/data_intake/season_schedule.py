@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
 import os
-from data_intake.utilities.unique_id import get_team_id
+from data_intake.utilities.unique_id import get_id_from_name, get_name_from_database
 from data_intake.utilities.remove_duplicates import remove_duplicate_rows
-from data_intake.team_ref_match import rename_team_name
 from app_logger import FluentLogger
+from db_connection import SQLConnection
 import requests
 from io import StringIO
 
@@ -31,7 +31,7 @@ elo_name_conversion = {
 	"Bournemouth": "Bournemouth",
 	"Wolverhampton Wanderers": "Wolves",
 	"Nottingham Forest": "Forest",
-	"Nott'M Forest": "Forest",
+	"Nott'm Forest": "Forest",
 	"Leicester City": "Leicester",
 	"Southampton": "Southampton",
 	"Ipswich Town": "Ipswich",
@@ -90,14 +90,16 @@ def get_team_elo_rating(team_name: str) -> pd.DataFrame:
 		logger.error(f"Error finding ELO for {elo_team_name}: {e}")
 		return pd.DataFrame()
 
-def clean_schedule_data(db_connection, df: pd.DataFrame) -> pd.DataFrame:
+def clean_schedule_data(db_connection: SQLConnection, df: pd.DataFrame) -> pd.DataFrame:
 	# Rename columns to lowercase with underscores
 	try:
 		df.columns = df.columns.str.lower().str.replace(" ", "_")
 
 		# Rename team names in 'home_team' and 'away_team' columns
-		df["home_team"] = df["home_team"].str.title().apply(rename_team_name)
-		df["away_team"] = df["away_team"].str.title().apply(rename_team_name)
+		unique_teams = pd.Series(pd.concat([df["home_team"], df["away_team"]]).unique())
+		team_replacements = unique_teams.apply(lambda team: get_name_from_database(db_connection, team, "team"))
+		team_replacement_dict = dict(zip(unique_teams, team_replacements))
+		df[["home_team", "away_team"]] = df[["home_team", "away_team"]].replace(team_replacement_dict)
 
 		# Convert 'date' column to datetime format
 		df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y %H:%M").dt.strftime("%Y/%m/%d %H:%M")
@@ -109,21 +111,12 @@ def clean_schedule_data(db_connection, df: pd.DataFrame) -> pd.DataFrame:
 		updated_df["home_elo"] = 0
 		updated_df["away_elo"] = 0
 
-		unique_team_names = df['home_team'].unique().tolist()
-
-		elo_dict = {}
-
-		for team_name in unique_team_names:
+		for team_name in unique_teams:
 			try:
 				team_df = df[(df['home_team'] == team_name) | (df['away_team'] == team_name)]
-				team_df["date_no_time"] = pd.to_datetime(team_df["date"]).dt.strftime("%Y-%m-%d")
+				team_df.loc[:, "date_no_time"] = pd.to_datetime(team_df["date"]).dt.strftime("%Y-%m-%d")
 				index = team_df.index
-				elos = pd.DataFrame()
-				if team_name not in elo_dict:
-					elos = get_team_elo_rating(team_name)[["Club", "Elo", "From", "To"]]
-					elo_dict[team_name] = elos
-				else:
-					elos = elo_dict[team_name]
+				elos = get_team_elo_rating(team_name)[["Club", "Elo", "From", "To"]]
 
 				if not elos.empty:
 					elos['From'] = pd.to_datetime(elos['From'])
@@ -156,8 +149,8 @@ def clean_schedule_data(db_connection, df: pd.DataFrame) -> pd.DataFrame:
 		df = updated_df.copy()
 
 		# Retrieve team IDs from the database
-		df["home_team"] = df["home_team"].apply(lambda team: get_team_id(db_connection, team))
-		df["away_team"] = df["away_team"].apply(lambda team: get_team_id(db_connection, team))
+		df["home_team"] = df["home_team"].apply(lambda team: get_id_from_name(db_connection, team, "team"))
+		df["away_team"] = df["away_team"].apply(lambda team: get_id_from_name(db_connection, team, "team"))
 
 		# Replace null values in 'result' column with "-"
 		df["result"] = df["result"].fillna("-")
@@ -167,12 +160,13 @@ def clean_schedule_data(db_connection, df: pd.DataFrame) -> pd.DataFrame:
 
 		# Rename columns and add competition_id
 		df = df.rename(columns={"home_team": "home_team_id", "away_team": "away_team_id"})
-		df["competition_id"] = "x-00001"
+		df["competition_id"] = "English Premier League"
+		df["competition_id"] = get_id_from_name(db_connection, df["competition_id"].iloc[0], "competition")
 
 		deduplicated_df = remove_duplicate_rows(db_connection, df, ["round_number", "date", "home_team_id", "away_team_id"], "schedule")
 		return deduplicated_df
 	except Exception as e:
-		raise e
+		raise Exception(e)
 
 
 def save_to_database(db_connection, df: pd.DataFrame) -> None:
@@ -187,11 +181,10 @@ def save_to_database(db_connection, df: pd.DataFrame) -> None:
 		None
 	"""
 	try:
-		df = df.sort_values(by=["date"]).reset_index(drop=True)
 		with db_connection.connect() as conn:
 			df.to_sql("schedule", conn, if_exists="append", index=False)
 	except Exception as e:
-		raise e
+		raise Exception(e)
 
 def schedule_main(db_connection) -> None:
 	"""
@@ -205,15 +198,18 @@ def schedule_main(db_connection) -> None:
 	"""
 	season_schedule_folder_path = "./data/schedule_data"
 	try:
+		all_data = pd.DataFrame()
 		for season_schedule_file in os.scandir(season_schedule_folder_path):
 			if season_schedule_file.is_file() and season_schedule_file.name.endswith(".csv"):
 				file_path = os.path.join(season_schedule_folder_path, season_schedule_file.name)
 				df = pd.read_csv(file_path)
-				df = clean_schedule_data(db_connection, df)
-				
-				if not df.empty:
-					save_to_database(db_connection, df)
-					logger.info(f"Inserted into schedule table for {season_schedule_file.name}")
+				all_data = df if all_data.empty else pd.concat([all_data, df]).reset_index(drop=True)
+		df = clean_schedule_data(db_connection, all_data)
+		
+		if not df.empty:
+			df = df.sort_values(by=["date"]).reset_index(drop=True)
+			save_to_database(db_connection, df)
+			logger.info(f"Inserted into schedule table")
 	except Exception as e:
 		logger.error(f"Error: {e}")
 

@@ -8,7 +8,7 @@ def remove_duplicate_rows(connector, df:DataFrame, columns:list, table_name:str)
 			duplicate_rows = merge(df, all_data_df, on=columns, how='inner', indicator=True).loc[lambda x: x['_merge'] == 'both']
 			for index, row in duplicate_rows.iterrows():
 				update_query = f"UPDATE {table_name} SET result = {row['result']} WHERE " + ', '.join([f"{column} = {row[column]}" for column in columns])
-				connector.execute_query(update_query)
+				connector.execute(update_query)
 
 		unique_df = merge(df, all_data_df, on=columns, how='outer', indicator=True).loc[lambda x: x['_merge'] == 'left_only'].drop(columns=["_merge"])
 

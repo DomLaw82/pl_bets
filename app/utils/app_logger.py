@@ -51,7 +51,7 @@ class FluentLogger:
     
     def log_http_request(self, url, response: requests.Response):
         """Helper function to log HTTP request and response details"""
-        self.logger.debug(f"Request to {url} executed - response code: {response.status_code}")
+        self.logger.debug(f"Request to {url} executed")
         self.logger.debug(f"Response code: {response.status_code}")
         self.logger.debug(f"Response reason: {response.reason}")
 
@@ -61,4 +61,4 @@ class FluentLogger:
 
     def log_error(self, error_message: Exception):
         """Helper function to log error messages"""
-        self.logger.error(f"Error : line {error_message.__traceback__.tb_lineno} : {error_message}")
+        self.logger.error(f"Error : {error_message.__context__} : line {error_message.__traceback__.tb_lineno} : {error_message}")
