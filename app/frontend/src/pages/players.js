@@ -234,7 +234,7 @@ export default function Players(props) {
 												playerId={player.id}
 												firstName={player.first_name}
 												lastName={player.last_name}
-												birthDate={player.birth_date}
+												birthYear={player.birth_year}
 												position={player.position}
 												teamName={player.team_name}
 												badge={`/logos/${player.team_name}.png`}
@@ -253,7 +253,7 @@ export default function Players(props) {
 											playerId={player.id}
 											firstName={player.first_name}
 											lastName={player.last_name}
-											birthDate={player.birth_date}
+											birthYear={player.birth_year}
 											position={player.position}
 											teamName={player.team_name}
 											badge={`/logos/${player.team_name}.png`}

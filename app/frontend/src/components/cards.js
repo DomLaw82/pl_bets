@@ -21,7 +21,7 @@ export function PlayerCards(props) {
 		playerId,
 		firstName,
 		lastName,
-		birthDate,
+		birthYear,
 		position,
 		teamName,
 		badge,
@@ -60,7 +60,7 @@ export function PlayerCards(props) {
 								sx={{ alignItems: "center", textAlign: "center", width: "30%" }}
 							>
 								<Typography className={"player-dob"} variant="body1">
-									DOB: {birthDate}
+									DOB: {birthYear}
 								</Typography>
 							</Box>
 							<Box

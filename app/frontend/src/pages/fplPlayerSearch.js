@@ -4,7 +4,7 @@ export default function FPLPlayerSearch() {
 
 	return (
 		<div>
-			<h1>FPL Solver</h1>
+			<h1>FPL Player Search</h1>
 			<p>FPL page body content</p>
 		</div>
 	);
