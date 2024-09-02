@@ -68,7 +68,7 @@ def get_model(hidden_layer_one, dropout, learn_rate, n_h_layers) -> tf.keras.mod
 
 		return model
 	except Exception as e:
-		raise e
+		raise Exception(e)
 
 def x_y_split_df(df: pd.DataFrame, output_columns: list) -> tuple:
 	"""
@@ -86,7 +86,7 @@ def x_y_split_df(df: pd.DataFrame, output_columns: list) -> tuple:
 		y = df[output_columns]
 		return X, y
 	except Exception as e:
-		raise e
+		raise Exception(e)
 
 def perform_scaling(X_train: np.array, X_test: np.array, pred: bool = False) -> pd.DataFrame:
 	"""
@@ -119,7 +119,7 @@ def perform_scaling(X_train: np.array, X_test: np.array, pred: bool = False) -> 
 		
 		return X_train, X_test
 	except Exception as e:
-		raise e
+		raise Exception(e)
 
 def build_and_save_model(dataframe: pd.DataFrame) -> tf.keras.models.Sequential:
 	"""
@@ -157,4 +157,4 @@ def build_and_save_model(dataframe: pd.DataFrame) -> tf.keras.models.Sequential:
 
 		return model
 	except Exception as e:
-		raise e
+		raise Exception(e)

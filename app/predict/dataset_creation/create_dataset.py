@@ -64,7 +64,7 @@ def get_all_match_data(sql_connection) -> pd.DataFrame:
                 match m
         """)
     except Exception as e:
-        raise e
+        raise Exception(e)
 
 def get_player_stats(sql_connection, game_season: str, home_team_id: str, away_team_id: str, less_than_or_equal_to:str) -> pd.DataFrame:
     """
@@ -108,7 +108,7 @@ def get_player_stats(sql_connection, game_season: str, home_team_id: str, away_t
         df = df.drop(columns=["current_team_id"])
         return df
     except Exception as e:
-        raise e
+        raise Exception(e)
 
 def group_stats_by_player(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -142,7 +142,7 @@ def group_stats_by_player(df: pd.DataFrame) -> pd.DataFrame:
 
         return df
     except Exception as e:
-        raise e
+        raise Exception(e)
 
 def create_per_90_stats(df: pd.DataFrame, columns_to_evaluate: list = None) -> pd.DataFrame:
     """
@@ -163,7 +163,7 @@ def create_per_90_stats(df: pd.DataFrame, columns_to_evaluate: list = None) -> p
 
         return df
     except Exception as e:
-        raise e
+        raise Exception(e)
 
 def create_contribution_per_90_stats(df: pd.DataFrame, columns_to_evaluate: list = None) -> pd.DataFrame:
     """
@@ -188,7 +188,7 @@ def create_contribution_per_90_stats(df: pd.DataFrame, columns_to_evaluate: list
 
         return df
     except Exception as e:
-        raise e
+        raise Exception(e)
 
 def group_stats_by_team(df: pd.DataFrame, columns_to_evaluate: list = None) -> pd.DataFrame:
     """
@@ -207,7 +207,7 @@ def group_stats_by_team(df: pd.DataFrame, columns_to_evaluate: list = None) -> p
         df[columns_to_evaluate] = df[columns_to_evaluate].groupby("team_id").sum().reset_index()
         return df[df.index < df["team_id"].nunique()]
     except Exception as e:
-        raise e
+        raise Exception(e)
 
 def convert_team_rows_to_single_row(df: pd.DataFrame, home_team_id: str = None, away_team_id: str = None, columns_to_evaluate: list = None) -> pd.DataFrame:
     """
@@ -244,7 +244,7 @@ def convert_team_rows_to_single_row(df: pd.DataFrame, home_team_id: str = None, 
 
         return final_df
     except Exception as e:
-        raise e
+        raise Exception(e)
 
 def combine_form_and_career_stats(dfs: tuple, columns_to_evaluate: list = None) -> pd.DataFrame:
     """
@@ -281,7 +281,7 @@ def combine_form_and_career_stats(dfs: tuple, columns_to_evaluate: list = None) 
         return all_stats
 
     except Exception as e:
-        raise e
+        raise Exception(e)
 
 
 def get_current_season() -> str:
@@ -301,7 +301,7 @@ def get_current_season() -> str:
 
         return f"{current_year}-{current_year + 1}"
     except Exception as e:
-        raise e
+        raise Exception(e)
 
 def grouping_prediction_dataframe_rows(df: pd.DataFrame, home_team_id: str, away_team_id:str) -> pd.DataFrame:
 
@@ -323,7 +323,7 @@ def grouping_prediction_dataframe_rows(df: pd.DataFrame, home_team_id: str, away
 
         return df
     except Exception as e:
-        raise e
+        raise Exception(e)
 
 def create_training_dataset(sql_connection) -> pd.DataFrame:
     """
@@ -368,7 +368,7 @@ def create_training_dataset(sql_connection) -> pd.DataFrame:
         print(f"Dataset created successfully - {df.shape[0]} rows and {df.shape[1]} columns.")
         return df
     except Exception as e:
-        raise e
+        raise Exception(e)
     
 def create_prediction_dataset(sql_connection, home_team_id: str, away_team_id: str) -> pd.DataFrame:
     try:
@@ -381,7 +381,7 @@ def create_prediction_dataset(sql_connection, home_team_id: str, away_team_id: s
         form = grouping_prediction_dataframe_rows(form, home_team_id, away_team_id)
         
         if career.empty or form.empty:
-            raise ValueError(f"Not enough players in each team for season {season} available for prediction; Career dataframe players: {career.shape[0]}, Form dataframe players: {form.shape[0]}")
+            raise Exception(ValueError(f"Not enough players in each team for season {season} available for prediction; Career dataframe players: {career.shape[0]}, Form dataframe players: {form.shape[0]}"))
 
         career["match_id"] = "match_id"
         form["match_id"] = "match_id"
@@ -396,4 +396,4 @@ def create_prediction_dataset(sql_connection, home_team_id: str, away_team_id: s
 
         return df
     except Exception as e:
-        raise e
+        raise Exception(e)

@@ -106,8 +106,9 @@ def get_all_players() :
             DISTINCT(player.id) AS id,
             player.first_name,
             player.last_name,
-            player.birth_date,
+            player.birth_year,
             player.position,
+            player.nationality,
             team.name AS team_name,
             CASE WHEN pt2.season = current_season.season THEN 'True' ELSE 'False' END AS active
          FROM player
@@ -146,7 +147,7 @@ def get_all_active_players() -> list:
             player.id AS id,
             player.first_name AS first_name,
             player.last_name AS last_name,
-            player.birth_date AS birth_date,
+            player.birth_year AS birth_year,
             player.position AS position,
             team.name AS team_name
          FROM
@@ -181,7 +182,7 @@ def get_team_current_roster(team_id:str) -> list:
             player.id AS id,
             player.first_name AS first_name,
             player.last_name AS last_name,
-            player.birth_date AS birth_date,
+            player.birth_year AS birth_year,
             player.position AS position
          FROM
             player
@@ -652,7 +653,7 @@ def get_player_profile(player_id:str):
          SELECT
             player.first_name,
             player.last_name,
-            player.birth_date,
+            player.birth_year,
             player.position,
             historic_player_per_ninety.nationality,
             team.name AS team
