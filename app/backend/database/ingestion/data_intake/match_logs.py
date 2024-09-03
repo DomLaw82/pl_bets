@@ -136,7 +136,7 @@ def match_logs_main(connector: SQLConnection) -> None:
 
 		data = data[[
 			"player_id","fbref_id","competition_id","match_id","season","date","location",
-			"team_id","opponent_id","result","position","started","minutes","goals","assists",
+			"team_id","opponent_id","position","started","minutes","goals","assists",
 			"pens_made","pens_att","shots","shots_on_target","cards_yellow","cards_red","blocks","xg",
 			"npxg","passes_total_distance","passes_progressive_distance","passes_completed_short","passes_short",
 			"passes_completed_medium","passes_medium","passes_completed_long","passes_long","xg_assist","pass_xa",

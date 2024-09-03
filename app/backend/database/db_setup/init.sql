@@ -96,7 +96,6 @@ CREATE TABLE match_logs (
 	location VARCHAR NOT NULL,
 	team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
 	opponent_id VARCHAR(7) REFERENCES team(id) NOT NULL,
-	result VARCHAR NOT NULL,
 	position VARCHAR,
 	started VARCHAR NOT NULL,
 	minutes INTEGER NOT NULL,
