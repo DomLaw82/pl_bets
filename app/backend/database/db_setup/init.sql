@@ -17,10 +17,11 @@ CREATE TABLE player (
 	id VARCHAR(7) PRIMARY KEY,
 	first_name VARCHAR,
 	last_name VARCHAR,
-	birth_date VARCHAR(10) NOT NULL,
-	position VARCHAR NOT NULL,
-	height FLOAT NOT NULL,
-	weight FLOAT NOT NULL
+	birth_year VARCHAR NOT NULL,
+	position VARCHAR,
+	nationality VARCHAR,
+	fbref_match_logs_href VARCHAR,
+	fbref_id VARCHAR DEFAULT NULL
 );
 
 CREATE TABLE team (
@@ -34,22 +35,24 @@ CREATE TABLE referee (
 );
 
 CREATE TABLE schedule (
-	round_number INT NOT NULL,
 	season VARCHAR(9) NOT NULL,
+	round_number INT NOT NULL,
 	date VARCHAR(16) NOT NULL,
 	home_team_id VARCHAR(7) REFERENCES team(id),
 	away_team_id VARCHAR(7) REFERENCES team(id),
 	home_elo FLOAT,
 	away_elo FLOAT,
 	competition_id VARCHAR(7) REFERENCES competition(id),
-	result VARCHAR
+	result VARCHAR,
+	PRIMARY KEY (season, competition_id, round_number, home_team_id, away_team_id)
 );
 
 CREATE TABLE player_team (
 	player_id VARCHAR(7) REFERENCES player(id),
 	team_id VARCHAR(7) REFERENCES team(id),
 	season VARCHAR(9) NOT NULL,
-	number_team_in_season INT DEFAULT 1
+	number_team_in_season INT DEFAULT 1,
+	PRIMARY KEY (player_id, team_id, season)
 );
 
 CREATE TABLE match (
@@ -90,10 +93,10 @@ CREATE TABLE match_logs (
 	season VARCHAR NOT NULL,
 	date VARCHAR NOT NULL,
 	location VARCHAR NOT NULL,
-	home_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
-	away_team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
+	team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
+	opponent_id VARCHAR(7) REFERENCES team(id) NOT NULL,
 	result VARCHAR NOT NULL,
-	position VARCHAR NOT NULL,
+	position VARCHAR,
 	started VARCHAR NOT NULL,
 	minutes INTEGER NOT NULL,
 	goals INTEGER NOT NULL,
@@ -348,29 +351,29 @@ $$ LANGUAGE plpgsql;
 
 
 CREATE TRIGGER before_insert_or_update_team
-BEFORE INSERT OR UPDATE ON team
+BEFORE INSERT ON team
 FOR EACH ROW EXECUTE FUNCTION validate_id();
 
 CREATE TRIGGER before_insert_or_update_country
-BEFORE INSERT OR UPDATE ON country
+BEFORE INSERT ON country
 FOR EACH ROW EXECUTE FUNCTION validate_id();
 
 CREATE TRIGGER before_insert_or_update_competition
-BEFORE INSERT OR UPDATE ON competition
+BEFORE INSERT ON competition
 FOR EACH ROW EXECUTE FUNCTION validate_id();
 
 CREATE TRIGGER before_insert_or_update_match
-BEFORE INSERT OR UPDATE ON match
+BEFORE INSERT ON match
 FOR EACH ROW EXECUTE FUNCTION validate_id();
 
 CREATE TRIGGER before_insert_or_update_referee
-BEFORE INSERT OR UPDATE ON referee
+BEFORE INSERT ON referee
 FOR EACH ROW EXECUTE FUNCTION validate_id();
 
 CREATE TRIGGER before_insert_or_update_player
-BEFORE INSERT OR UPDATE ON player
+BEFORE INSERT ON player
 FOR EACH ROW EXECUTE FUNCTION validate_id();
 
 CREATE TRIGGER before_insert_or_update_manager
-BEFORE INSERT OR UPDATE ON manager
+BEFORE INSERT ON manager
 FOR EACH ROW EXECUTE FUNCTION validate_id();

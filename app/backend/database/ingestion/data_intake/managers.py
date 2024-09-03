@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import csv, os
 import pandas as pd
 import numpy as np
-from data_intake.utilities.unique_id import get_team_id
+from data_intake.utilities.unique_id import get_id_from_name
 from app_logger import FluentLogger
 from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 
@@ -58,7 +58,7 @@ def clean_manager(html_content, connector):
 
 		df["end_date"] = df["end_date"].replace(np.nan, "current")
 
-		df["team_id"] = df["team"].apply(lambda team_name: get_team_id(connector, team_name))
+		df["team_id"] = df["team"].apply(lambda team_name: get_id_from_name(connector, team_name, "team"))
 		df = df.drop(columns=["team"])
 
 		df = df[['first_name', 'last_name', 'team_id', 'start_date', 'end_date']]
@@ -67,7 +67,7 @@ def clean_manager(html_content, connector):
 
 		return df
 	except Exception as e:
-		raise f"Error cleaning manager data: {e}"
+		raise Exception(f"Error cleaning manager data: {e}")
 	
 def save_to_database(df, connection) -> None:
 	# Save the data to a database
@@ -76,7 +76,7 @@ def save_to_database(df, connection) -> None:
 			df.to_sql("manager", conn, if_exists="append", index=False)
 	except Exception as e:
 		logger.error(f"Error saving manager data: {e}")
-		raise f"Error saving manager data: {e}"
+		raise Exception(f"Error saving manager data: {e}")
 	
 def manager_main(con):
 	try:
@@ -88,4 +88,4 @@ def manager_main(con):
 		save_to_database(df, con)
 	except Exception as e:
 		logger.error(e)
-		raise e
+		raise Exception(e)

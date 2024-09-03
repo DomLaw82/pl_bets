@@ -1,235 +1,207 @@
-from bs4 import BeautifulSoup
+import bs4
+import time
+import requests
 from datetime import datetime
 import pandas as pd
-import os
 from data_intake.utilities.remove_duplicates import remove_duplicate_rows
-from data_intake.utilities.unique_id import get_team_id, get_player_id
-from data_intake.utilities.string_manipulation import escape_single_quote
+from data_intake.utilities.unique_id import get_id_from_name
+from data_intake.utilities.save_to_database import save_to_database
 from app_logger import FluentLogger
+from db_connection import SQLConnection
 
-logger = FluentLogger("intake-player").get_logger()
+PLAYER_DATA_SAVE_PATH = "./data/player_data/player_data.csv"
+CURRENT_SEASON_END_YEAR = datetime.now().year + 2 if datetime.now().month > 8 else datetime.now().year + 1
+PLAYER_DATA_DOWNLOAD_SEASONS = list(range(2017, CURRENT_SEASON_END_YEAR))
 
-def not_blank_entry(player: list) -> bool:
-	"""
-	Checks if all elements in the player list are not blank.
+log_class = FluentLogger("intake-player")
+logger = log_class.get_logger()
 
-	Args:
-		player (list): A list containing player information.
+def get_player_fbref_data(url: str, season: str) -> list|None:
+	"""Get player data from FBRef for a specific season"""
 
-	Returns:
-		bool: True if all elements in the player list are not blank, False otherwise.
-	"""
-	try:
-		return all(element.strip("\r\n-").strip() for element in player)
-	except Exception as e:
-		logger.error(f"Error: {e}")
-		return False
+	response = requests.get(url)
+	log_class.log_http_request(url, response)
+	results = []
 
-def format_player_entries(player: list[str]) -> list[str]:
-	"""
-	Formats the player entries by removing leading and trailing whitespaces and hyphens,
-	splitting the first name and last name if necessary, and reformatting the date of birth.
+	# Check if the request was successful
+	if response.status_code == 200:
+		# Parse the HTML content
+		soup = bs4.BeautifulSoup(response.text, 'html.parser')
+		table_data = None
+		comments = soup.find_all(string=lambda text: isinstance(text, bs4.Comment))
+		logger.debug(f'Found {len(comments)} comments in the HTML content.')
 
-	Args:
-		player (list[str]): The player information in the format [first_name, last_name, position, dob].
-
-	Returns:
-		list[str]: The formatted player information in the format [first_name, last_name, position, dob].
-	"""
-	try:
-		formatted_name = [name.strip("\r\n-").strip() for name in player[0].split(maxsplit=1)]
-		formatted_name += [""] * (2 - len(formatted_name))
+		# Look for the specific div in the comments
+		for comment in comments:
+			comment_soup = bs4.BeautifulSoup(comment, 'html.parser')
+			div_standard_stats = comment_soup.find('div', id='div_stats_standard')
+			if not div_standard_stats:
+				continue
+			table_data = div_standard_stats.find('table')
+			logger.debug('Found the div with the class "all-stats-standard".')
+			break
 		
-		split_dob = [portion.strip("\r\n").strip() for portion in player[2].split("-")]
-		formatted_dob_year = "19" + split_dob[-1] if int(str(datetime.now().year)[-2:]) < int(split_dob[-1]) else "20" + split_dob[-1]
-		new_dob = [f"{formatted_dob_year}-{split_dob[1]}-{split_dob[0]}"]
+		# Find the div with the class 'all-stats-standard'
+		div = table_data
+		
+		# Find the table within the div
+		if div:
+			# Find the rows in the table
+			name_col = div.find_all('td', {'data-stat': 'player'})
+			match_logs_col = div.find_all('td', {'data-stat': 'matches'})
+			position_col = div.find_all('td', {'data-stat': 'position'})
+			birth_year_col = div.find_all('td', {'data-stat': 'birth_year'})
+			nationality_col = div.find_all('td', {'data-stat': 'nationality'})
+			team_col = div.find_all('td', {'data-stat': 'team'})
 
-		return formatted_name + [player[1].strip("\r\n-").strip()] + new_dob + [player[3].strip("\r\n-").strip(), player[4].strip("\r\n-").strip(), player[5].strip("\r\n-").strip()]
-	except Exception as e:
-		logger.error(f"Error: {e}")
-		return ["", "", "", "", "", "", ""]
+			player_name = ""
+			player_href = ""
+			id = ""
+			match_logs_href = ""
 
-def get_page_soup(html_text):
-	"""
-	Parses the given HTML text and returns a BeautifulSoup object.
+			if len(name_col) < 1:
+				logger.error(f'Failed to find the player column for season {season}.')
+				return None
+			logger.debug(f'Found {len(name_col)} players for season {season}.')
 
-	Parameters:
-		html_text (str): The HTML text to be parsed.
+			for idx in range(len(name_col)):
+				try:
+					try:
+						player_name = name_col[idx].find('a').get_text()
+					except Exception:
+						player_name = ""
 
-	Returns:
-		BeautifulSoup: A BeautifulSoup object representing the parsed HTML.
-	"""
-	try:
-		return BeautifulSoup(html_text, "html.parser")
-	except Exception as e:
-		logger.error(f"An error occurred while parsing the HTML text: {str(e)}")
+					try:
+						id = name_col[idx].get('data-append-csv')
+					except Exception:
+						id = ""
+
+					try:
+						position = position_col[idx].get_text()
+					except Exception:
+						position = ""
+
+					try:
+						match_logs_href = match_logs_col[idx].find('a')['href']
+					except Exception:
+						match_logs_href = ""
+
+					try:
+						year_of_birth = birth_year_col[idx].get_text()
+					except Exception:
+						year_of_birth = ""
+
+					try:
+						nationality = nationality_col[idx].find('a').find('span').get_text()
+					except Exception:
+						nationality = ""
+
+					try:
+						team = team_col[idx].find('a').get_text()
+					except Exception:
+						team = ""
+				except Exception as e:
+					logger.error(f"Failed to extract player data for season {season} - player {name_col[idx].find('a').get_text()}")
+					continue
+
+				# print({
+				# 	'season': season,
+				# 	'player_name': player_name,
+				# 	'position': position,
+				# 	'team': team,
+				# 	"nationality": nationality,
+				# 	'birth_year': year_of_birth,
+				# 	'fbref_match_logs_href': "https://fbref.com" + match_logs_href,
+				# 	'fbref_id': id
+				# })
+				results.append({
+					'season': season,
+					'player_name': player_name,
+					'position': position,
+					'team': team,
+					"nationality": nationality,
+					'birth_year': year_of_birth,
+					'fbref_match_logs_href': "https://fbref.com" + match_logs_href,
+					'fbref_id': id
+				})
+
+			return results
+		else:
+			logger.error(f'Failed to find the div for season {season}.')
+			return None
+	else:
+		logger.error(f'Failed to retrieve the HTML content for season {season}.')
 		return None
+	
+def download_player_data() -> None:
+	"""Download player data from FBRef and save it to a CSV file"""
+	all_results = []
 
-def get_all_teams_for_season(soup) -> list:
-	"""
-	Retrieves all the teams for a given season from the provided BeautifulSoup object.
+	# Iterate through the seasons from 2000-2001 to 2024-2025
+	for year in PLAYER_DATA_DOWNLOAD_SEASONS:
+		time.sleep(5)
+		try:
+			season = f"{year}-{str(year + 1)}"
+			url = f'https://fbref.com/en/comps/9/{season}/stats/{season}-Premier-League-Stats'
+			logger.debug(f'Processing player data for season {season} at URL: {url}')
+			
+			season_results = get_player_fbref_data(url, season)
+			# Check if the request was successful
+			if season_results is None:
+				continue
+			all_results.extend(season_results)
 
-	Parameters:
-	soup (BeautifulSoup): The BeautifulSoup object containing the HTML data.
+		except Exception as e:
+			logger.error(f'An error occurred while processing season {season}: line {e.__traceback__.tb_lineno} : {e}')
 
-	Returns:
-	list: A list of tuples, where each tuple contains the team name and its corresponding href.
-	"""
-	try:
-		team_elements = soup.find_all("h5")
-		teams = [(ele.text, ele.a.get("href")) for ele in team_elements]
-		return teams
-	except Exception as e:
-		logger.error(f"An error occurred while extracting team names and hrefs: {str(e)}")
-		return []
+	# Convert the results to a DataFrame
+	df = pd.DataFrame(all_results)
+	df = df.drop_duplicates(subset=['fbref_id', 'season'], keep='first')
+	df = df[['fbref_id', 'player_name', 'team', 'position', 'birth_year', 'nationality', 'fbref_match_logs_href', 'season']]
 
-def get_team_squad(html_content: str) -> list[list[str]]:
-	"""
-	Extracts the squad information from the HTML content.
+	# Save the results to a CSV file
+	df.to_csv(PLAYER_DATA_SAVE_PATH, index=False)
+	logger.debug(F'Player data saved to CSV file at {PLAYER_DATA_SAVE_PATH}')
 
-	Args:
-		html_content (str): The HTML content of the page.
-
-	Returns:
-		list: A list of lists containing the player's name, position, and date of birth.
-	"""
-	try:
-		soup = get_page_soup(html_content)
-		rows = soup.find_all("tr")[1:]
-		
-		all_columns = soup.find_all("tr")[0]
-		all_column_names = [elem.text.strip("\n") for elem in all_columns.find_all("td")]
-
-		required_cols = [all_column_names.index("Name"), all_column_names.index("Pos"), all_column_names.index("Date of Birth"), all_column_names.index("Height"), all_column_names.index("Weight")]
-
-		squad = []
-		for idx, row in enumerate(rows):
-			if "Players no longer at this club" in row.text:
-				rows = rows[:idx] + rows[idx+2:-1]
-				break
-
-			row_data = [row_data.text for row_data in row.find_all("td")]
-			if all(col_index < len(row_data) for col_index in required_cols):
-				squad.append([row_data[col_index] for col_index in required_cols])
-
-		return squad
-	except Exception as e:
-		logger.error(f"An error occurred while extracting the squad information: {str(e)}")
-		return []
-
-def player_df_to_db(df: pd.DataFrame, db_connection):
-	"""
-	Inserts player data from a DataFrame into the database.
+def player_to_db_main(db_connection: SQLConnection):
+	"""Ingest local player data and save player data to database
 
 	Args:
-		df (pd.DataFrame): The DataFrame containing player data.
-		db_connection: The connection to the database.
+		db_connection (SQLConnection): Postgres database connection object
 
-	Returns:
-		None
+	Raises:
+		e: Exception
 	"""
 	try:
-		df = df[["first_name", "last_name", "birth_date", "position", "height", "weight"]]
-		df["first_name"] = df["first_name"].apply(escape_single_quote)
-		df["last_name"] = df["last_name"].apply(escape_single_quote)
-		player_rows_not_in_db_df = remove_duplicate_rows(db_connection, df, ["first_name", "last_name", "birth_date", "position", "height", "weight"], "player")
-		if player_rows_not_in_db_df.empty:
-			return
-		ordered_player_df = player_rows_not_in_db_df[["first_name", "last_name", "birth_date", "position", "height", "weight"]]
-		ordered_player_df.to_sql("player", db_connection.conn, if_exists="append", index=False)
-	except Exception as e:
-		logger.error(f"Error: {e}")
+		data = pd.read_csv(PLAYER_DATA_SAVE_PATH)
+		data = data.sort_values(by=["season"], ascending=True)
 
-def player_team_df_to_db(df: pd.DataFrame, season: str, db_connection):
-	"""
-	Inserts player-team data from a DataFrame into the database.
+		# Player Table
+		player_df = data[["fbref_id", "player_name", "birth_year", "position", "nationality", "fbref_match_logs_href"]]
+		player_df[['first_name', 'last_name']] = player_df['player_name'].str.split(' ', n=1, expand=True)
+		player_df['last_name'] = player_df['last_name'].fillna('')
+		player_df[["first_name", "last_name"]] = player_df[["first_name", "last_name"]].replace("'", "`")
+		player_df = player_df.drop_duplicates(subset=["fbref_id"], keep="last")
+		player_df = player_df.drop("player_name", axis=1)
+		logger.debug(f"Player data shape: {player_df.shape}")
+		save_to_database(db_connection, player_df, "player")
 
-	Args:
-		df (pd.DataFrame): The DataFrame containing the player-team data.
-		season (str): The season for which the data is being inserted.
-		db_connection: The database connection object.
-
-	Returns:
-		None
-	"""
-	try:
-		df["player_id"] = df.apply(lambda row: get_player_id(db_connection, row), axis=1)
-		df["team_id"] = df["team_id"].apply(lambda team_id: get_team_id(db_connection, team_id))
-		df["season"] = season
-		player_team_df = df[["player_id", "team_id", "season"]]
-		player_team_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
-		player_team_df.to_sql("player_team", db_connection.conn, if_exists="append", index=False)
-	except Exception as e:
-		logger.error(f"Error: {e}")
-
-def player_main_by_season(db_connection, season, data_folder_path):
-
-	season_folder = os.path.join(data_folder_path, season)
-	teams = sorted(os.listdir(season_folder))
-
-	for team in teams:
-		with open(os.path.join(season_folder, team), "r") as file:
-			html_content = file.read()
-
-		squad = get_team_squad(html_content)
-		squad_no_blanks = [player for player in squad if not_blank_entry(player)]
-		squad_with_team = [player + [team] for player in squad_no_blanks]
-		complete_squad = [format_player_entries(player) for player in squad_with_team]
-
-		player_df = pd.DataFrame(data=complete_squad, columns=["first_name", "last_name", "position", "birth_date", "height", "weight", "team_id"])
-		player_df["birth_date"] = pd.to_datetime(player_df["birth_date"], format="%Y-%m-%d").dt.strftime("%Y-%m-%d")
-
-		player_team_df = player_df.copy()
-		player_team_df['team_id'] = player_team_df['team_id'].apply(lambda x: x.replace('.html', ''))
-
-		player_df[["first_name", "last_name"]] = player_df[["first_name", "last_name"]].map(escape_single_quote)
-		deduplicated_df = remove_duplicate_rows(db_connection, player_df, ["first_name", "last_name", "birth_date"], "player")
-		
-		if not deduplicated_df.empty:
-			deduplicated_df = deduplicated_df[["first_name", "last_name", "birth_date", "position", "height", "weight"]]
-			save_to_database(db_connection, deduplicated_df, "player")
-			logger.info(f"Inserted into player table for {team} for {season}")
-
-		player_team_df["player_id"] = player_team_df.apply(lambda row: get_player_id(db_connection, row), axis=1)
-		player_team_df["team_id"] = player_team_df["team_id"].apply(lambda x: get_team_id(db_connection, x))
-		player_team_df["season"] = season
-
-		player_team_df = player_team_df[["player_id", "team_id", "season"]]
-		
-		deduplicated_df = remove_duplicate_rows(db_connection, player_team_df, ["player_id", "team_id", "season"], "player_team")
-		if not deduplicated_df.empty:
-			save_to_database(db_connection, deduplicated_df, "player_team")
-			logger.info(f"Inserted into player_team table for {team} for {season}")
-
-def player_main(db_connection):
-	data_folder_path = "./data/squad_data"
-	seasons = sorted(os.listdir(data_folder_path))
-
-	try:
-		for season in seasons:
-			player_main_by_season(db_connection, season, data_folder_path)
+		# Player Team Table
+		player_team_df = data[["player_name", "team", "season"]]
+		player_team_df.rename(columns={"team": "team_id"}, inplace=True)
+		# Get the team id from the team name
+		for team in player_team_df["team_id"].unique():
+			team_id = get_id_from_name(db_connection, team, "team")
+			player_team_df.loc[player_team_df["team_id"] == team, "team_id"] = team_id
+		# Get the player id from the player name
+		player_team_df.rename(columns={"player_name": "player_id"}, inplace=True)
+		for name in player_team_df["player_id"].unique():
+			player_id = get_id_from_name(db_connection, name, "player")
+			player_team_df.loc[player_team_df["player_id"] == name, "player_id"] = player_id
+		print(player_team_df[(player_team_df["team_id"].isnull())|(player_team_df["player_id"].isnull())])
+		player_team_df.dropna(inplace=True)
+		save_to_database(db_connection, player_team_df, "player_team")
 
 	except Exception as e:
-		logger.error(f"Error: {e}")
-		return f"Error: {e}"
-		
-def save_to_database(db_connection, df: pd.DataFrame, table_name: str) -> None:
-	"""
-	Saves a DataFrame to a database table.
-
-	Args:
-		db_connection: The database connection object.
-		df: The DataFrame to be saved.
-		table_name: The name of the table to save the DataFrame to.
-
-	Returns:
-		None
-	"""
-	try:
-		with db_connection.connect() as conn:
-			df.to_sql(table_name, conn, if_exists="append", index=False)
-	except Exception as e:
-		logger.error(f"Error: {e}")
-		return f"Error: {e}"
-
-# TODO - Add logging for more visibility of data_intake process
+		log_class.log_error(e)
+		raise e

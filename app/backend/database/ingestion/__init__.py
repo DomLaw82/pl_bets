@@ -1,12 +1,13 @@
 from db_connection import SQLConnection
 from data_intake.season_schedule import schedule_main
-from data_intake.team_ref_match import team_ref_match_main
-from data_intake.player import player_main
+from data_intake.ref_match import ref_match_main
+from data_intake.player import player_to_db_main
 from data_intake.country_competition import country_competition_main
 from data_intake.per_90_stats import per_90_main
 from data_intake.download_latest_data import download_latest_data
 from data_intake.managers import manager_main
 from data_intake.match_logs import match_logs_main
+from data_intake.team import team_main
 from intake_api import app
 import os
 from app_logger import FluentLogger
@@ -33,8 +34,17 @@ def insert_latest_data():
 		logger.info("\nData Intake: country COMPLETE")
 		logger.info("Data Intake: competition COMPLETE")
 
+		# [team]
+		team_main(pl_stats_connector)
+		logger.info("\nData Intake: team COMPLETE")
+
+		# format squad data [player, player_team]
+		player_to_db_main(pl_stats_connector)
+		logger.info("\nData Intake: player_team COMPLETE")
+		logger.info("Data Intake: player COMPLETE")
+
 		# format game data [team, match, referee]
-		team_ref_match_main(pl_stats_connector)
+		ref_match_main(pl_stats_connector)
 		logger.info("\nData Intake: team COMPLETE")
 		logger.info("Data Intake: match COMPLETE")
 		logger.info("Data Intake: referee COMPLETE")
@@ -42,11 +52,6 @@ def insert_latest_data():
 		# format season schedule [schedule]
 		schedule_main(pl_stats_connector)
 		logger.info("\nData Intake: schedule COMPLETE")
-
-		# format squad data [player, player_team]
-		player_main(pl_stats_connector)
-		logger.info("\nData Intake: player_team COMPLETE")
-		logger.info("Data Intake: player COMPLETE")
 
 		# format manager data [manager]
 		manager_main(pl_stats_connector)

@@ -5,13 +5,14 @@ import pandas as pd
 import os
 from app_logger import FluentLogger
 from data_intake.per_90_stats import per_90_update
-from data_intake.download_latest_data import download_csv_for_all_fixtures_in_a_season, download_csv_for_all_games_in_a_season, download_html_for_squad_player_data
-from data_intake.team_ref_match import clean_match_data
-from data_intake.player import player_main_by_season
+from data_intake.download_latest_data import download_csv_for_all_fixtures_in_a_season, download_csv_for_all_games_in_a_season
+from data_intake.ref_match import clean_ref_match_data
+from data_intake.player import get_player_fbref_data, player_to_db_main
 from data_intake.season_schedule import clean_schedule_data
 from db_connection import SQLConnection
 import datetime
 from update_match_logs import update_match_logs_main
+from data_intake.utilities.save_to_database import save_to_database
 
 logger = FluentLogger("data_ingestion-api").get_logger()
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
@@ -100,13 +101,11 @@ def refresh_game_data():
         save_path = os.path.join(game_data_save_root, f"E0 - {two_digit_season}.csv")
         game_data_df = pd.read_csv(save_path)
 
-        clean_match_data_df = clean_match_data(db, "match", current_season, game_data_df)
-        clean_team_data_df = clean_match_data(db, "team", current_season, game_data_df)
-        clean_referee_data_df = clean_match_data(db, "referee", current_season, game_data_df)
+        clean_match_data_df = clean_ref_match_data(db, "match", current_season, game_data_df)
+        clean_referee_data_df = clean_ref_match_data(db, "referee", current_season, game_data_df)
         
         with db.connect() as conn:
             clean_match_data_df.to_sql("match", conn, if_exists="append", index=False) if not clean_match_data_df.empty else None
-            clean_team_data_df.to_sql("team", conn, if_exists="append", index=False) if not clean_team_data_df.empty else None
             clean_referee_data_df.to_sql("referee", conn, if_exists="append", index=False) if not clean_referee_data_df.empty else None
 
             logger.info(f"Game data for season {current_season} updated and inserted successfully")
@@ -124,14 +123,20 @@ def refresh_game_data():
 )
 def refresh_squad_data():
     try:
+        logs_location = "./data/fbref_data/player_data.csv"
         current_season = get_current_season()
-        
-        squad_data_download_root = os.environ.get("PLAYER_DOWNLOAD_ROOT")
-        squad_data_save_root = os.environ.get("PLAYER_SAVE_PATH_ROOT")
-        if not os.path.exists(squad_data_download_root, squad_data_save_root):
-            os.makedirs(squad_data_download_root, squad_data_save_root)
-        download_html_for_squad_player_data(current_season+"/", squad_data_download_root, squad_data_save_root)
-        player_main_by_season(db, current_season, squad_data_save_root)
+        url = f'https://fbref.com/en/comps/9/{current_season}/stats/{current_season}-Premier-League-Stats'
+
+        newest_entries = get_player_fbref_data(url, current_season)
+        if newest_entries is None:
+            logger.error(f"Error fetching player data for season {current_season}")
+            return jsonify(f"Error fetching player data for season {current_season}"), 500
+        current_entries_df = pd.read_csv(logs_location)
+        newest_entries_df = pd.DataFrame(newest_entries)[current_entries_df.columns]
+        updated_df = pd.concat([current_entries_df, newest_entries_df], ignore_index=True)
+        updated_df.drop_duplicates(subset=["fbref_id", "season"], keep="last", inplace=True)
+        updated_df.to_csv(logs_location, index=False)
+        player_to_db_main(db)
 
         logger.info(f"Squad data for season {current_season} updated and inserted successfully")
         return jsonify(f"Game data for season {current_season} updated and inserted successfully"), 200
@@ -191,8 +196,7 @@ def update_match_logs():
         current_season = get_current_season()
         result = update_match_logs_main(current_season)
         if not result.empty:
-            with db.connect() as conn:
-                result.to_sql("match_logs", conn, if_exists="append", index=False)
+            save_to_database(db, result, "match_logs")
             return jsonify("Match logs updated successfully"), 200
     except Exception as e:
         logger.error(f"An error occurred while updating match logs: line {e.__traceback__.tb_lineno} : {str(e)}")

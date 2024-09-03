@@ -89,6 +89,8 @@ def run_win_prediction() -> list:
 
 		data = add_historic_head_to_head_results(data)
 
+		print(data[data.isnull().any(axis=1)])
+
 		data.to_csv('./files/match_and_form_data.csv', index=False)
 
 		training_data = data[data['date'] < get_current_date()]

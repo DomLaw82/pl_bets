@@ -1,34 +1,21 @@
-from fuzzywuzzy import process
+from rapidfuzz import process, fuzz, utils
+from db_connection import SQLConnection
 import pandas as pd
+from app_logger import FluentLogger
 
-def find_most_similar(item: str, options: list) -> tuple:
-    result, score = process.extractOne(item, options)
-    return result, score
+log_class = FluentLogger("unique-id")
+logger = log_class.get_logger()
 
-def get_team_id(connector, team_name: str) -> str:
-    try:
-        team_name = team_name.replace("'", " ")
-
-        # Fetch data from the database for comparison
-        database_data = connector.get_list(f"SELECT id, name FROM team")
-
-        team_names = [pair[1] for pair in database_data]
-        best_match = find_most_similar(team_name, team_names)
-    except Exception as e:
-        raise RuntimeError(f"Error: {e}")
-        return None
-
-    if best_match:
-        return [pair[0] for pair in database_data if pair[1] == best_match[0]][0]  # Assuming the first column is id
-    else:
-        return None  # Handle the case where no result is found
+def find_most_similar(item: str, options: list) -> tuple[str, float, int]:
+    result, score, index = process.extractOne(item, options, processor=utils.default_process) or (None, 0)
+    return result, score, index
 
 def get_player_id(connector, row) -> str:
     row.first_name = row.first_name.replace("'", " ")
     row.last_name = row.last_name.replace("'", " ")
 
     # Fetch data from the database for comparison
-    database_data = connector.get_list(f"SELECT id, first_name, last_name, birth_date FROM player WHERE birth_date = '{row.birth_date}'")
+    database_data = connector.get_list(f"SELECT id, first_name, last_name, birth_year FROM player WHERE birth_year = '{row.birth_year}'")
 
     # Apply fuzzy matching to find the most similar player in the database
     matched_player = None
@@ -47,57 +34,119 @@ def get_player_id(connector, row) -> str:
     else:
         return None  # Handle the case where no result is found
     
-def get_id_from_name(name: str, options: list) -> str:
+def get_id_from_name(db_connector: SQLConnection, name: str, table: str) -> str:
+    """Function to get the id of a name from the database."""
     try:
         name = name.replace("'", " ")
-        best_match, score = find_most_similar(name, options)
+        query_options = {
+            "team": "SELECT id, name FROM team",
+            "competition": "SELECT id, name FROM competition",
+            "player": "SELECT id, first_name || ' ' || last_name as name FROM player",
+            "referee": "SELECT id, name FROM referee"
+        }
+        name_dict = {
+            "team": {
+                "Wolves": "Wolverhampton Wanderers",
+                "Spurs": "Tottenham Hotspur",
+                "Man City": "Manchester City",
+            },
+            "competition": {},
+            "player": {
+                # "Danny Williams": "Daniel Williams",
+                # "Bruno": "Bruno Saltor",
+                # "Tom Ince": "Thomas Ince",
+                # "Matty James": "Matthew James",
+                # "Allan Nyom": "Allan-Roméo Nyom",
+                # "Jazz Richards": "Ashley Richards",
+                # "Jon Rowe": "Jonathan Rowe",
+                # "Andrew Moran": "Andy Moran",
+                # "Joshua Acheampong": "Josh-Kofi Acheampong",
+            },
+            "referee": {}
+        }
+        query = query_options.get(table)
+        if not query:
+            logger.error(f"Invalid table name '{table}' when looking for ids")
+            raise Exception(f"Invalid table name '{table}' when looking for ids")
+        
+        edited_name = name_dict.get(table).get(name)
+        if edited_name:
+            name = edited_name
+        
+        database_data = db_connector.get_df(query)
+        best_match, score, index = find_most_similar(name, database_data["name"].tolist())
 
-        if best_match and score >= 40:
-            return best_match  # Assuming the first column is id
-        elif best_match and score < 40:
-            raise f"Error finding suitable matching name {name}, closest match {best_match} scored {score}" 
+        if best_match and score >= 70:
+            if score < 95:
+                logger.debug(f"Found matching name {name} with {best_match} scoring {score}")
+            return database_data[database_data["name"] == best_match]["id"].values[0]
+        elif best_match and score < 70:
+            logger.error(f"""
+                Error finding suitable matching name {name}, closest match {best_match} scored {score}\n
+                Other possible matches: {process.extract(name, database_data['name'].tolist(), limit=5)}
+            """)
         else:
-            raise f"Error - Unable to find matching name {name}"  # Handle the case where no result is found
-    except Exception as e:
-        raise e
-    
-def get_player_id_per_ninety(connector, row) -> str:
-    try:
-        row.first_name = row.first_name.replace("'", " ")
-        row.last_name = row.last_name.replace("'", " ")
-        database_data = connector.get_list("SELECT id, first_name, last_name FROM player")
-
-        # Apply fuzzy matching to find the most similar player in the database
-        matched_player = None
-        score = 0
-        for db_player in database_data:
-            db_full_name = f"{db_player[1]} {db_player[2]}"
-            current_match = find_most_similar(f"{row.first_name} {row.last_name}", [db_full_name])
-            if not current_match:
-                continue
-            if current_match[1] and current_match[1] > score:
-                matched_player = db_player
-                score = current_match[1]
-    
-        if matched_player and score >= 40:
-            return matched_player[0]  # Assuming the first column is id
-        elif matched_player and score < 40:
-            raise f"Error finding suitable matching name for player {row.first_name} {row.last_name}, closest match {matched_player} scored {score}" 
-        else:
-            raise f"Error - Unable to find matching name for player {row.first_name} {row.last_name}"  # Handle the case where no result is found
-    except Exception as e:
-        raise RuntimeError(f"Error: {e}")
+            # Handle the case where no result is found
+            logger.error(f"Unable to find matching name for {name}")
+            raise Exception(f"Unable to find matching name for {name}") 
         return None
-    
+    except Exception as e:
+        logger.error(f"Error - {e}")
+        raise Exception(e)
 
-
-def get_referee_id(connector, referee_name: str) -> str:
-    referee_name = referee_name.replace("'", " ")
-    query = f"SELECT id FROM referee WHERE name = '{referee_name}'"
-    result = connector.get_list(query)
-    
-    if result:
-        return result[0][0]  # Assuming the first column is id
-    else:
-        print(query)
-        return None  # Handle the case where no result is found
+def get_name_from_database(db_connector: SQLConnection, name: str, table: str) -> str:
+    """Function to match a name to one from the database"""
+    try:
+        query_options = {
+            "team": "SELECT id, name FROM team",
+            "competition": "SELECT id, name FROM competition",
+            "player": "SELECT id, first_name || ' ' || last_name as name FROM player",
+            "referee": "SELECT id, name FROM referee"
+        }
+        query = query_options.get(table)
+        if not query:
+            raise Exception(f"Invalid table name '{table}' when looking for names")
+        
+        name_dict = {
+            "team": {
+                "Wolves": "Wolverhampton Wanderers",
+                "Spurs": "Tottenham Hotspur",
+                "Man City": "Manchester City",
+            },
+            "competition": {},
+            "player": {
+                # "Danny Williams": "Daniel Williams",
+                # "Bruno": "Bruno Saltor",
+                # "Tom Ince": "Thomas Ince",
+                # "Matty James": "Matthew James",
+                # "Allan Nyom": "Allan-Roméo Nyom",
+                # "Jazz Richards": "Ashley Richards",
+                # "Jon Rowe": "Jonathan Rowe",
+                # "Andrew Moran": "Andy Moran",
+                # "Joshua Acheampong": "Josh-Kofi Acheampong",
+            },
+            "referee": {}
+        }
+        edited_name = name_dict.get(table).get(name)
+        if edited_name:
+            name = edited_name
+        
+        database_data = db_connector.get_df(query)
+        best_match, score, index = find_most_similar(name, database_data["name"].tolist())
+        if best_match and score >= 70:
+            if score < 95:
+                logger.debug(f"Found matching name {name} with {best_match} scoring {score}")
+            return best_match
+        elif best_match and score < 70:
+            logger.warning(f"""
+                Issue finding suitable matching name {name}, closest match {best_match} scored {score}\n
+                Possible matches: {process.extract(name, database_data['name'].tolist(), limit=5)}
+            """)
+            return best_match
+        else:
+            # Handle the case where no result is found
+            logger.error(f"Unable to find matching name for {name}")
+            raise Exception(f"Unable to find matching name for {name}") 
+    except Exception as e:
+        logger.error(f"Error - {e}")
+        raise e

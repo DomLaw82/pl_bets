@@ -299,6 +299,7 @@ def run_data_prep(sql_connection: SQLConnection, features: list, fixtures: pd.Da
             df = get_days_since_last_league_game(df, team)
             data.update(df)
 
+        print(data[data[model_features].isnull().any(axis=1)])
         data[model_features] = data[model_features].astype(int)
 
         return data

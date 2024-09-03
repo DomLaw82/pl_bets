@@ -2,8 +2,10 @@ import requests
 import bs4
 import datetime, time
 import pandas as pd
+from app_logger import FluentLogger
 
 PLAYER_DATA_URL = f'https://fbref.com/en/comps/9/XXXX-XXXX/stats/XXXX-XXXX-Premier-League-Stats'
+logger = FluentLogger("update-match-logs").get_logger()
 
 def get_fbref_data(url: str, season: str) -> list|None:
 
@@ -185,11 +187,11 @@ def update_match_logs_main(current_season: str) -> pd.DataFrame:
 		all_season_players = pd.read_csv('./data/fbref_data/player_data.csv')
 
 		all_season_players = pd.concat([all_season_players, season_players_df], ignore_index=True)
-		all_season_players.drop_duplicates(subset=['fbref_id', 'season'], keep='first', inplace=True)
+		all_season_players.drop_duplicates(subset=['fbref_id', 'season'], keep='last', inplace=True)
 		all_season_players = all_season_players[['fbref_id', 'player_name', 'position', 'match_logs_href', 'season']]
 		all_season_players.to_csv('./data/fbref_data/player_data.csv', index=False)
 
-		print(f"Successfully saved the player data for season {current_season}.")
+		logger.info(f"Successfully saved the player data for season {current_season}.")
 
 	# Get the match logs for each player
 	enhanced_match_logs_results = []
@@ -221,7 +223,7 @@ def update_match_logs_main(current_season: str) -> pd.DataFrame:
 
 		enhanced_stats = []
 		for url in urls:
-			print(f'({idx}) Processing player {name} logs for season {season} at URL: {url}', end=' ... ')
+			logger.info(f'({idx}) Processing player {name} logs for season {season} at URL: {url}')
 			try:
 				result = get_match_log_data(name, fbref_id, url, season, retries=retries, stat_type=url.split("/")[-2], goalkeeper=position == "GK")
 				if "data" in result:
@@ -233,7 +235,7 @@ def update_match_logs_main(current_season: str) -> pd.DataFrame:
 				elif "missing_data" in result:
 					missing_enhanced_data.extend(result["missing_data"])
 			except Exception as e:
-				print(f'FAILED - {e.__cause__}: {str(e)}')
+				logger.info(f'FAILED - {e.__cause__}: {str(e)}')
 				missing_enhanced_data.append({
 					'fbref_id': fbref_id,
 					'player_name': name,
@@ -254,7 +256,7 @@ def update_match_logs_main(current_season: str) -> pd.DataFrame:
 	combined.drop_duplicates(subset=['fbref_id', 'season', 'date'], keep='first', inplace=True)
 	
 	combined.to_csv("./data/fbref_data/enhanced_player_match_logs.csv", index=False)
-	print(f"Successfully saved the enhanced player match logs for season {current_season}.")
+	logger.info(f"Successfully saved the enhanced player match logs for season {current_season}.")
 
 	# Filter duplicates based on what's in the database
 	add_to_db_df = add_to_db_df[~add_to_db_df[['fbref_id', 'season', 'date']].isin(all_matches[['fbref_id', 'season', 'date']])]

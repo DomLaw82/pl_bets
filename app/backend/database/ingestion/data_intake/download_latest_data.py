@@ -2,6 +2,7 @@ import requests, os, time
 from bs4 import BeautifulSoup
 import datetime
 from app_logger import FluentLogger
+from data_intake.player import download_player_data
 
 logger = FluentLogger("download_latest_data").get_logger()
 
@@ -15,7 +16,7 @@ MANAGER_DOWNLOAD_URL = "https://en.wikipedia.org/wiki/List_of_Premier_League_man
 
 SEASON_END_YEAR = 2026
 FIXTURE_SEASON_ARRAY = [str(year) for year in range(2017, SEASON_END_YEAR, 1)]
-SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2017, SEASON_END_YEAR)]
+SEASONS_ARRAY = [f"{str(year-1)}-{str(year)}/" for year in range(2018, SEASON_END_YEAR)]
 MATCH_SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SEASON_END_YEAR)]
 
 def download_csv_for_all_games_in_a_season(season: str, url: str, save_path_root: str):
@@ -114,7 +115,7 @@ def get_team_squad(endpoint: str, SEASON: str, site_root: str):
 		return squad
 	except Exception as e:
 		logger.error(f"An error occurred while extracting the squad data: {str(e)}")
-		return []
+		return []	
 
 def download_html_for_squad_player_data(season: str, url_root: str, save_path_root: str):
 	"""
@@ -243,15 +244,6 @@ def download_latest_data():
 	# This code is used to initially download the data from the web, but also to update the data on the fly from the frontend
 	GAME_SAVE_PATH_ROOT = "data/game_data/"
 	SCHEDULE_SAVE_PATH_ROOT = "data/schedule_data/"
-	PLAYER_SAVE_PATH_ROOT = "data/squad_data/"
-	try:
-		# Create directories if they don't exist
-		for path_root in [GAME_SAVE_PATH_ROOT, SCHEDULE_SAVE_PATH_ROOT, PLAYER_SAVE_PATH_ROOT]:
-			if not os.path.exists(path_root):
-				os.makedirs(path_root)
-	except Exception as e:
-		logger.error(f"Error creating directories: {e}")
-		# return f"Error creating directories: {e}"
 		
 		# game data download
 	try:
@@ -259,7 +251,7 @@ def download_latest_data():
 			time.sleep(0.2)
 			download_csv_for_all_games_in_a_season(season, GAME_DATA_DOWNLOAD_ROOT, GAME_SAVE_PATH_ROOT)
 	except Exception as e:
-		logger.error(f"Error downloading the latest match data: {e}")
+		logger.error(f"Error downloading the latest match data : line {e.__traceback__.tb_lineno} : {e}")
 		# return f"Error downloading the latest match data: {e}"
 		
 		# fixture data download
@@ -268,16 +260,14 @@ def download_latest_data():
 			time.sleep(0.2)
 			download_csv_for_all_fixtures_in_a_season(season, DOWNLOAD_FIXTURE_URL_ROOT, SCHEDULE_SAVE_PATH_ROOT)
 	except Exception as e:
-		logger.error(f"Error downloading the latest schedule data: {e}")
+		logger.error(f"Error downloading the latest schedule data : line {e.__traceback__.tb_lineno} : {e}")
 		# return f"Error downloading the latest schedule data: {e}"
 		
-		# player data download
+	# player data download
 	try:
-		for season in SEASONS_ARRAY:
-			time.sleep(0.2)
-			download_html_for_squad_player_data(season, PLAYER_DOWNLOAD_ROOT, PLAYER_SAVE_PATH_ROOT)
+		download_player_data()
 	except Exception as e:
-		logger.error(f"Error downloading the latest player data: {e}")
+		logger.error(f"Error downloading the latest player data : line {e.__traceback__.tb_lineno} : {e}")
 		# return f"Error downloading the latest player data: {e}"
 
 	try:

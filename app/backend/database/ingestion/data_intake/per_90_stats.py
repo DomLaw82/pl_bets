@@ -1,5 +1,5 @@
 import os, pandas as pd
-from data_intake.utilities.unique_id import get_player_id_per_ninety, get_team_id
+from data_intake.utilities.unique_id import get_id_from_name
 from app_logger import FluentLogger
 
 logger = FluentLogger("intake-per_90").get_logger()
@@ -63,13 +63,12 @@ def clean_historic_stats_df(db_connection, df: pd.DataFrame, season: str) -> pd.
 	try:
 		goalkeeping_columns = ["goals_against", "shots_on_target_against", "saves", "wins", "draws", "losses", "clean_sheets", "penalties_faced", "penalties_allowed", "penalties_saved", "penalties_missed"]
 
-		df["team"] = df.apply(lambda row: get_team_id(db_connection, row.team), axis=1)
+		df["team"] = df["team"].apply(lambda team_name: get_id_from_name(db_connection, team_name, "team"))
 
 		df = df.rename(columns={"team": "team_id"})
 		df[goalkeeping_columns] = df[goalkeeping_columns].fillna(0)
 
-		df[["first_name", "last_name"]] = df["player"].str.extract(r'(\w+)\s*(.*)')
-		df.loc[:, "player"] = df.apply(lambda row: get_player_id_per_ninety(db_connection, row), axis=1)
+		df["player"] = df["player"].apply(lambda player_name: get_id_from_name(db_connection, player_name, "player"))
 
 		df = df.rename(columns={"player": "player_id"})
 		df.columns = [x.replace("+", "_plus_").replace("/", "_divided_by_").replace("-", "_minus_") for x in df.columns.tolist()]
@@ -79,13 +78,15 @@ def clean_historic_stats_df(db_connection, df: pd.DataFrame, season: str) -> pd.
 		df["nation"] = df["nation"].str.split(" ").str[1]
 		df = df.rename(columns={"nation": "nationality"})
 
-		df = df.fillna(0)
+		exclude_columns = ['team_id', 'player_id']
+		columns_to_fill = df.columns.difference(exclude_columns)
+		df[columns_to_fill] = df[columns_to_fill].fillna(0)
 
-		df = df.drop(columns=["position", "first_name", "last_name", "wins", "draws", "losses"])
+		df = df.drop(columns=["position", "wins", "draws", "losses"])
 		# 	TODO - More granular method to impute nulls
 		# 	TODO - Null and multiple player ids
 	except Exception as e:
-		raise e
+		raise Exception(e)
 
 	return df
 
@@ -104,7 +105,7 @@ def save_to_database(db_connection, df: pd.DataFrame) -> None:
 		with db_connection.connect() as conn:
 			df.to_sql("historic_player_per_ninety", conn, if_exists="append", index=False)
 	except Exception as e:
-		raise e
+		raise Exception(e)
 	
 def check_existing_player_for_team(db_connection, player_id: str, team_id: str, season: str) -> bool:
 	"""
@@ -132,7 +133,7 @@ def check_existing_player_for_team(db_connection, player_id: str, team_id: str, 
 		
 		return True
 	except Exception as e:
-		raise e
+		raise Exception(e)
 
 def update_database(db_connection, data: list[dict]):
 	"""
@@ -174,7 +175,7 @@ def update_database(db_connection, data: list[dict]):
 				df_row = pd.DataFrame([row])
 				save_to_database(db_connection, df_row)
 	except Exception as e:
-		raise e
+		raise Exception(e)
 
 def per_90_main(db_connection):
 	"""
@@ -196,16 +197,20 @@ def per_90_main(db_connection):
 			if season == ".DS_Store":
 				continue
 			df = combining_datasets(season)
-			print("combine")
 			df = clean_historic_stats_df(db_connection, df, season)
-			print("clean")
 			df = df.drop_duplicates()
-			print("drop")
+			duplicates = df[df.duplicated(subset=["player_id", "team_id", "season"], keep=False)]
+			if not duplicates.empty:
+				logger.info("Duplicates found:")
+				logger.info(duplicates)
+				print(duplicates)
+			else:
+				logger.info("No duplicates found.")
 			save_to_database(db_connection, df)
 			logger.info(f"Inserted into historic_player_per_ninety table for {season}.")
 	except Exception as e:
 		logger.error(f"Error with per 90 stats: {e}")
-		raise e
+		raise Exception(e)
 
 def per_90_update(db_connection, season: str) -> None:
 	"""
@@ -225,4 +230,4 @@ def per_90_update(db_connection, season: str) -> None:
 		logger.info(f"Inserted into historic_player_per_ninety table for {season}.")
 	except Exception as e:
 		logger.error(f"Error with per 90 stats: {e}")
-		raise e
+		raise Exception(e)

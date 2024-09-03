@@ -45,7 +45,7 @@ export default function Managers() {
 	};
 	const {
 		isLoading: isLoadingManagers,
-		// error: managersError,
+		error: managersError,
 		data: managers = [],
 	} = useQuery("managers", fetchManagers, { staleTime: Infinity });
 
@@ -232,6 +232,22 @@ export default function Managers() {
 						) : (
 							<PageLoading />
 						)}
+						{
+							managersError && (
+								<Typography
+									variant="h3"
+									sx={{
+										width: "100%",
+										textAlign: "center",
+										height: "100%",
+										alignItems: "center",
+										alignContent: "center",
+									}}
+								>
+									{managersError.message}
+								</Typography>
+							)
+						}
 					</Box>
 					<Box sx={{ width: "100%" }}>
 						<Divider sx={{ width: "100%" }} />
