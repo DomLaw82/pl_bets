@@ -2,7 +2,7 @@ import pandas as pd, numpy as np
 import os
 from app_logger import FluentLogger
 from db_connection import SQLConnection
-from data_intake.utilities.unique_id import get_id_from_name
+from data_intake.utilities.unique_id import get_id_from_name, get_name_from_database
 
 logger = FluentLogger("intake-match_logs").get_logger()
 
@@ -13,12 +13,17 @@ def match_logs_main(connector: SQLConnection) -> None:
 		data = pd.read_csv("data/fbref_data/enhanced_player_match_logs.csv")
 		logger.info("Data loaded successfully")
 
-		##### Only EPL data is being used as of now, other matches not captured in match table
-		##### This is a temporary solution, need to update the match table to include all matches
-		##### i.e. matches from other leagues/competitions
+		##### --------------------------------------------------------------------------------------------#####
+		##### Only EPL data is being used as of now, other matches not captured in match table            #####
+		##### This is a temporary solution, need to update the match table to include all matches         #####
+		##### i.e. matches from other leagues/competitions                                                #####
+		##### Currently all teams stored in the database are from the English Premier League              #####
 		data = data[data["competition"] == "Premier League"]
+		data["team"] = data["team"].apply(lambda x: get_name_from_database(connector, x, "team"))
+		data["opponent"] = data["opponent"].apply(lambda x: get_name_from_database(connector, x, "team"))
+		data = data[(data["team"].notnull()) & (data["opponent"].notnull())]
 		logger.info("Data filtered for Premier League matches")
-		##### ------------------------------------------
+		##### --------------------------------------------------------------------------------------------#####
 
 		for player in data["player_name"].unique():
 			logger.info(f"Fetching player ID for {player}")
