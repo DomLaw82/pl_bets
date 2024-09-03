@@ -97,9 +97,12 @@ to your settings.json to suppress errors about the utility modules
 
 ## TODO
 
-- Neural net fix - predict_match_outcome.py
+- Rearrange file structure for easier deployment with Terraform
+  - Use volumes to mount common files/directories to containers
+  - Use GitHub Actions to copy common files/directories into build context before running the build step
+- Set up CI/CD pipeline for deployment to AWS
+- Deploy to AWS with CDK/Terraform  
 
-- Player data - match logs from fbref - CREATE A NEW TABLE TO SHOW INDIVIDUAL GAME PERFORMANCES FOR EACH PLAYER
 - API-FOOTBALL.COM  to get more data
 
 - Manager page
@@ -122,11 +125,11 @@ to your settings.json to suppress errors about the utility modules
 
 - Provide choice stats for each game, comparing the two teams and tactics
 
-- Set up CI/CD pipeline for deployment to AWS
-- Deploy to AWS with CDK/Terraform  
-
 - Caching
 - General code cleanup and re-factoring
 - Review "Separation of concerns"
 
 - prediction model edits
+
+- Visualisation Page
+  - Add Managers to entities that can be visualised
