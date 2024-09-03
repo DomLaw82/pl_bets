@@ -42,7 +42,8 @@ def get_id_from_name(db_connector: SQLConnection, name: str, table: str) -> str:
             "team": "SELECT id, name FROM team",
             "competition": "SELECT id, name FROM competition",
             "player": "SELECT id, first_name || ' ' || last_name as name FROM player",
-            "referee": "SELECT id, name FROM referee"
+            "referee": "SELECT id, name FROM referee",
+            "country": "SELECT id, name FROM country"
         }
         name_dict = {
             "team": {
@@ -80,7 +81,7 @@ def get_id_from_name(db_connector: SQLConnection, name: str, table: str) -> str:
             if score < 95:
                 logger.debug(f"Found matching name {name} with {best_match} scoring {score}")
             return database_data[database_data["name"] == best_match]["id"].values[0]
-        elif best_match and score < 70:
+        elif best_match and 50 < score < 70:
             logger.error(f"""
                 Error finding suitable matching name {name}, closest match {best_match} scored {score}\n
                 Other possible matches: {process.extract(name, database_data['name'].tolist(), limit=5)}
@@ -101,7 +102,8 @@ def get_name_from_database(db_connector: SQLConnection, name: str, table: str) -
             "team": "SELECT id, name FROM team",
             "competition": "SELECT id, name FROM competition",
             "player": "SELECT id, first_name || ' ' || last_name as name FROM player",
-            "referee": "SELECT id, name FROM referee"
+            "referee": "SELECT id, name FROM referee",
+            "country": "SELECT id, name FROM country"
         }
         query = query_options.get(table)
         if not query:
@@ -137,7 +139,7 @@ def get_name_from_database(db_connector: SQLConnection, name: str, table: str) -
             if score < 95:
                 logger.debug(f"Found matching name {name} with {best_match} scoring {score}")
             return best_match
-        elif best_match and score < 70:
+        elif best_match and 50 < score < 70:
             logger.warning(f"""
                 Issue finding suitable matching name {name}, closest match {best_match} scored {score}\n
                 Possible matches: {process.extract(name, database_data['name'].tolist(), limit=5)}
@@ -146,7 +148,7 @@ def get_name_from_database(db_connector: SQLConnection, name: str, table: str) -
         else:
             # Handle the case where no result is found
             logger.error(f"Unable to find matching name for {name}")
-            raise Exception(f"Unable to find matching name for {name}") 
+            return None 
     except Exception as e:
         logger.error(f"Error - {e}")
         raise e
