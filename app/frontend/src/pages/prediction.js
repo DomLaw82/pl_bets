@@ -79,7 +79,7 @@ export default function Prediction(props) {
 			const response = await fetch(
 				`${
 					process.env.REACT_APP_DATA_API_ROOT
-				}/prediction/team-id?team_name=${encodeURIComponent(teamName)}`
+				}/teams/team-id?team_name=${encodeURIComponent(teamName)}`
 			);
 			const data = await response.json();
 			return data.id;

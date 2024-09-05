@@ -94,7 +94,7 @@ def get_teams():
       raise
 
 @registry.handles(
-   rule="/prediction/team-id",
+   rule="/teams/team-id",
    method="GET",
 )
 def get_team_id():
@@ -104,7 +104,7 @@ def get_team_id():
       logger.info(f"Team id for {team_name} retrieved")
       return jsonify(team_id)
    except Exception as e:
-      logger.error(f"Error with endpoint /prediction/team-id: {str(e)}")
+      logger.error(f"Error with endpoint /teams/team-id: {str(e)}")
       raise
 
 @registry.handles(
