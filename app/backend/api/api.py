@@ -14,9 +14,6 @@ logger = FluentLogger("api").get_logger()
 
 rebar = Rebar()
 registry = rebar.create_handler_registry()
-app = Flask(__name__)
-CORS(app, origins=["http://frontend:3000", "http://localhost:3000", "http://frontend:3001", "http://localhost:3001"],  supports_credentials=True)
-rebar.init_app(app)
 
 ### Helper functions ###
 def get_top_n_all_time(df:pd.DataFrame, n:int, stat:str) -> list:
@@ -47,8 +44,10 @@ def decompose_season(season: str) -> tuple:
 )
 def health():
    try:
+      # logger.debug("Health check")
       return jsonify({"status": "healthy"})
    except Exception as e:
+      print(e)
       logger.error(f"Error with endpoint /health: {str(e)}")
       raise
 
@@ -58,7 +57,7 @@ def health():
    method='GET',
 )
 def index():
-    logger.info("Index page")
+   #  logger.info("Index page")
     return jsonify({"title": "Welcome to PL Bets"})
 
 # /teams
@@ -1066,6 +1065,10 @@ def get_all_managers():
    except Exception as e:
       logger.error(f"Error with endpoint /managers: {str(e)}")
       raise
+
+app = Flask(__name__)
+CORS(app, origins=["http://frontend:3000", "http://localhost:3000", "http://frontend:3001", "http://localhost:3001"],  supports_credentials=True)
+rebar.init_app(app)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port="8080")

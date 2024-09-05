@@ -26,8 +26,8 @@ CREATE TABLE player (
 
 CREATE TABLE team (
 	id VARCHAR(7) PRIMARY KEY,
-	name VARCHAR UNIQUE NOT NULL
-	country_id VARCHAR(7) REFERENCES country(id) NOT NULL,
+	name VARCHAR UNIQUE NOT NULL,
+	country_id VARCHAR(7) REFERENCES country(id) NOT NULL
 );
 
 CREATE TABLE referee (

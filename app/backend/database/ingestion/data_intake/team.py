@@ -63,5 +63,6 @@ teams_since_2000 = ["Arsenal"
 def team_main(db_connection: SQLConnection) -> None:
 	teams = pd.DataFrame(teams_since_2000, columns=["name"])
 	teams["name"] = teams["name"].apply(lambda name: name.replace("'", "`"))
-	teams["country_id"] = teams["country_id"].apply(lambda x: get_id_from_name(db_connection, x, "England"))
+	# teams["country_id"] = teams["name"].apply(lambda x: get_id_from_name(db_connection, x, "country"))
+	teams["country_id"] = "c-00001"
 	save_to_database(db_connection, teams, "team")
