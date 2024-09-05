@@ -36,7 +36,7 @@ export default function Managers() {
 
 	const fetchManagers = async () => {
 		const response = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/all-managers`
+			`${process.env.REACT_APP_DATA_API_ROOT}/managers`
 		);
 		if (!response.ok) {
 			throw new Error("Network response was not ok");

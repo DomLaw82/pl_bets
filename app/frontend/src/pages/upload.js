@@ -28,7 +28,7 @@ export default function Upload() {
 
 	useEffect(() => {
 		const getSeasons = async () => {
-			const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/matches/all-seasons`,
+			const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/seasons`,
 				{
 					headers: {
 						'Access-Control-Allow-Origin': '*'

@@ -19,7 +19,7 @@ export default function Teams(props) {
 	const [originY, setOriginY] = useState(0);
 
 	const fetchTeams = async () => {
-		const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/active-teams`);
+		const response = await fetch(`${process.env.REACT_APP_DATA_API_ROOT}/teams?active=true`);
 		if (!response.ok) {
 			throw new Error('Network response was not ok');
 		}
@@ -46,13 +46,13 @@ export default function Teams(props) {
 
 	async function fetchTeamInformation(teamId) {
 		const teamInfo = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/teams/profile/${teamId}`
+			`${process.env.REACT_APP_DATA_API_ROOT}/teams/profile?team_id=${teamId}`
 		)
 			.then((response) => response.json())
 			.catch((error) => console.log(error));
 
 		const teamAllTimeStats = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/teams/all-time-stats/${teamId}`
+			`${process.env.REACT_APP_DATA_API_ROOT}/teams/all-time-stats?team_id=${teamId}`
 		)
 			.then((response) => response.json())
 			.catch((error) => console.log(error));

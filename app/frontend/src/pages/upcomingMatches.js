@@ -35,7 +35,7 @@ export default function UpcomingMatches() {
 
 	async function getCurrentGameWeek() {
 		const response = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/matches/current-gameweek`,
+			`${process.env.REACT_APP_DATA_API_ROOT}/schedule?get_current_gameweek=true`,
 			{
 				headers: {
 					"Access-Control-Allow-Origin": "*",
@@ -53,7 +53,7 @@ export default function UpcomingMatches() {
 
 	async function getMatches(season) {
 		const response = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/matches/season/${season}`,
+			`${process.env.REACT_APP_DATA_API_ROOT}/schedule?season=${season}`,
 			{
 				headers: {
 					"Access-Control-Allow-Origin": "*",

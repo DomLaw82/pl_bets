@@ -34,7 +34,7 @@ export const ColumnsSidebar = (props) => {
             if (!selectedEntity) return;  // Do nothing if selectedEntity is not set
 
             try {
-                const url = `${process.env.REACT_APP_DATA_API_ROOT}/vis/${
+                const url = `${process.env.REACT_APP_DATA_API_ROOT}/visualisation/${
                     selectedEntity === "player" ? "player-columns" :
                     selectedEntity === "team" ? "team-columns" : ""
                 }`;

@@ -45,7 +45,7 @@ export default function Visualisations() {
 			console.log(checked_entities);
 
 			const response = await fetch(
-				`http://localhost:8080/visualisation/${selectedEntity}?stats=${checked_stats.join(
+				`http://localhost:8080/visualisation?table_name=${selectedEntity}&stats=${checked_stats.join(
 					","
 				)}&entities=${checked_entities.join(",")}&per_ninety=0&x_axis=${xAxis}`
 			);

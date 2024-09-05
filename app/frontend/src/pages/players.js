@@ -28,7 +28,7 @@ export default function Players(props) {
 
 	const fetchPlayers = async () => {
 		const response = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/all-active-players`
+			`${process.env.REACT_APP_DATA_API_ROOT}/players?active=true`
 		);
 		if (!response.ok) {
 			throw new Error("Network response was not ok");
@@ -59,7 +59,7 @@ export default function Players(props) {
 	// Function to fetch player stats
 	const fetchPlayerData = async (playerId) => {
 		const response = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/players/historic-stats/${playerId}`
+			`${process.env.REACT_APP_DATA_API_ROOT}/players/historic-stats?player_id=${playerId}`
 		);
 		if (!response.ok) {
 			throw new Error("Network response was not ok");
@@ -69,7 +69,7 @@ export default function Players(props) {
 
 	const fetchPlayerProfile = async (playerId) => {
 		const response = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/players/player-profile/${playerId}`
+			`${process.env.REACT_APP_DATA_API_ROOT}/players/player-profile?player_id=${playerId}`
 		);
 		if (!response.ok) {
 			throw new Error("Network response was not ok");

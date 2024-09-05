@@ -22,7 +22,7 @@ export function LeagueTable() {
 
 	const fetchLeagueTable = async () => {
 		const response = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/league-table/${selectedSeason}`
+			`${process.env.REACT_APP_DATA_API_ROOT}/league-table?season=${selectedSeason}`
 		);
 		if (!response.ok) {
 			throw new Error("Network response was not ok");
@@ -41,7 +41,7 @@ export function LeagueTable() {
 
 	async function getSeasons() {
 		const response = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/matches/all-seasons`,
+			`${process.env.REACT_APP_DATA_API_ROOT}/seasons`,
 			{
 				headers: {
 					"Access-Control-Allow-Origin": "*",
