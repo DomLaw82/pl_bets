@@ -4,8 +4,7 @@ from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 from data_intake.utilities.unique_id import get_id_from_name, get_name_from_database
 from data_intake.utilities.string_manipulation import escape_single_quote
 from app_logger import FluentLogger
-import datetime
-import requests
+import time
 from io import StringIO
 
 logger = FluentLogger("intake-team_ref_match").get_logger()
@@ -13,6 +12,38 @@ logger = FluentLogger("intake-team_ref_match").get_logger()
 SEASON_END_YEAR = 2026
 SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SEASON_END_YEAR, 1)]
 TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, SEASON_END_YEAR, 1)]
+
+MATCH_SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SEASON_END_YEAR)]
+MATCH_LEAGUES = ["E0", "E1"]
+GAME_DATA_DOWNLOAD_ROOT = "https://www.football-data.co.uk/mmz4281/"
+GAME_SAVE_PATH_ROOT = "data/game_data/"
+
+competition_name_conversion = {
+    "E0": "English Premier League",
+    "E1" : "EFL Championship"
+}
+
+def download_all_game_data():
+    """
+    Downloads match facts for every game for the specified season data as a single csv
+
+    Arguments:
+        season (str): last 2 digits of each year the season encompasses, e.g. "16/17"
+    """
+    for season in MATCH_SITE_SEASONS:
+        time.sleep(0.2)
+        for league in MATCH_LEAGUES:
+            try:
+                # MATCH_SITE_SEASONS
+                save_path = os.path.join(GAME_SAVE_PATH_ROOT, f"{league} - {season}.csv")
+                url = os.path.join(GAME_DATA_DOWNLOAD_ROOT, season, f'{league}.csv')
+                match_data = pd.read_csv(url)
+                match_data.to_csv(save_path)
+                logger.info(f'Game csv file for league {league} in {season} downloaded and saved to {save_path}')
+                return True
+            except Exception as e:
+                logger.error(f'An error occurred while downloading games for league {league} in {season}:', str(e))
+                return False
 
 def rename_table_columns(df: pd.DataFrame, season: str) -> pd.DataFrame:
     """
@@ -28,6 +59,7 @@ def rename_table_columns(df: pd.DataFrame, season: str) -> pd.DataFrame:
     """
     try:
         column_mapping = {
+            "Div": "competition_id",
             "HomeTeam": "home_team_id",
             "FTHG": "home_goals",
             "HS": "home_shots",
@@ -156,7 +188,7 @@ def clean_ref_match_data(db_connection, table_name:str, season:str, df: pd.DataF
         df = rename_table_columns(df, season)
 
         df["season"] = season
-        df["competition_id"] = get_id_from_name(db_connection, "English Premier League", "competition")
+        df["competition_id"] = get_id_from_name(db_connection, competition_name_conversion[df["competition_id"]], "competition")
 
         df = df.drop(columns=["B365H","B365D","B365A","BWH","BWD","BWA","IWH","IWD","IWA","PSH","PSD","PSA","WHH","WHD","WHA","VCH","VCD","VCA","Bb1X2","BbMxH","BbAvH","BbMxD","BbAvD","BbMxA","BbAvA","BbOU","BbMx>2.5","BbAv>2.5","BbMx<2.5","BbAv<2.5","BbAH","BbAHh","BbMxAHH","BbAvAHH","BbMxAHA","BbAvAHA","PSCH","PSCD","PSCA"], errors="ignore")
 

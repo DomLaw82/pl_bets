@@ -5,10 +5,41 @@ import numpy as np
 from data_intake.utilities.unique_id import get_id_from_name
 from app_logger import FluentLogger
 from data_intake.utilities.remove_duplicates import remove_duplicate_rows
+import requests
 
 logger = FluentLogger("intake-manager").get_logger()
 
+MANAGER_URL = "https://en.wikipedia.org/wiki/List_of_Premier_League_managers"
+MANAGER_SAVE_PATH_ROOT = "data/manager_data/"
+MANAGER_FILE_NAME = "managers.html"
+MANAGER_FILE_PATH = os.path.join(MANAGER_SAVE_PATH_ROOT, MANAGER_FILE_NAME)
+
 pd.set_option('display.max_rows', None)
+
+def download_manager_html_data():
+	"""
+	Downloads the HTML content of the given URL and saves it to the specified path.
+
+	Parameters:
+	url (str): The URL from which the HTML content is to be downloaded.
+	save_path (str): The path where the downloaded HTML content is to be saved.
+
+	Returns:
+	bool: True if the HTML content is downloaded and saved successfully, False otherwise.
+	"""
+	try:
+		response = requests.get(MANAGER_URL)
+		if response.status_code != 200:
+			logger.error(f"Failed to download the HTML content. Status code: {response.status_code}")
+			return False
+
+		with open(MANAGER_FILE_PATH, "w") as file:
+			file.write(response.text)
+		logger.info(f"HTML content downloaded and saved to {MANAGER_FILE_PATH}")
+		return True
+	except Exception as e:
+		logger.error(f"An error occurred while downloading the HTML content: {str(e)}")
+		return False
 
 def clean_manager(html_content, connector):
 	try:

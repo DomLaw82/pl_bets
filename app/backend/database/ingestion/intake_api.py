@@ -5,7 +5,7 @@ import pandas as pd
 import os
 from app_logger import FluentLogger
 from data_intake.per_90_stats import per_90_update
-from data_intake.download_latest_data import download_csv_for_all_fixtures_in_a_season, download_csv_for_all_games_in_a_season
+from data_intake.download_latest_data import download_all_fixture_data, download_all_game_data
 from data_intake.ref_match import clean_ref_match_data
 from data_intake.player import get_player_fbref_data, player_to_db_main
 from data_intake.season_schedule import clean_schedule_data
@@ -96,7 +96,7 @@ def refresh_game_data():
         game_data_save_root = os.environ.get("GAME_DATA_SAVE_ROOT")
         
         two_digit_season = "".join([str(year)[-2:] for year in current_season.split("-")])
-        download_csv_for_all_games_in_a_season(two_digit_season, game_data_download_root, game_data_save_root)
+        download_all_game_data(two_digit_season, game_data_download_root, game_data_save_root)
         
         save_path = os.path.join(game_data_save_root, f"E0 - {two_digit_season}.csv")
         game_data_df = pd.read_csv(save_path)
@@ -159,7 +159,7 @@ def refresh_schedule_data():
         schedule_data_save_root = os.environ.get("SCHEDULE_SAVE_PATH_ROOT")
         logger.info(f"Downloading schedule data for season {current_season}")
         
-        download_csv_for_all_fixtures_in_a_season(str(current_season.split("-")[0]), schedule_data_download_root, schedule_data_save_root)
+        download_all_fixture_data(str(current_season.split("-")[0]), schedule_data_download_root, schedule_data_save_root)
         season_schedule_file_path = os.path.join(schedule_data_save_root, f"epl_{str(current_season.split('-')[0])}-{str(current_season.split('-')[1][-2:])}.csv")
         
         df = pd.read_csv(season_schedule_file_path)

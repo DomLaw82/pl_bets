@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import os
+import os, time
 from data_intake.utilities.unique_id import get_id_from_name, get_name_from_database
 from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 from app_logger import FluentLogger
@@ -9,6 +9,11 @@ import requests
 from io import StringIO
 
 logger = FluentLogger("intake-season_schedule").get_logger()
+
+DOWNLOAD_FIXTURE_URL_ROOT = "https://fixturedownload.com/download/epl-" # add on the year the season starts in, i.e. 2024
+SCHEDULE_SAVE_PATH_ROOT = "data/schedule_data/"
+SEASON_END_YEAR = 2026
+FIXTURE_SEASON_ARRAY = [str(year) for year in range(2017, SEASON_END_YEAR, 1)]
 
 elo_name_conversion = {
 	"Manchester City": "ManCity",
@@ -61,6 +66,37 @@ elo_name_conversion = {
 	"Portsmouth": "Portsmouth",
 	"Derby County": "Derby",
 }
+
+def download_all_fixture_data():
+	"""
+	Downloads match facts for every game for the specified season data as a single csv
+
+	Arguments:
+		season (str): last 2 digits of each year the season encompasses, e.g. "16/17"
+	"""
+	for season in FIXTURE_SEASON_ARRAY:
+		time.sleep(0.2)
+		try:
+			GMT_URL = os.path.join(DOWNLOAD_FIXTURE_URL_ROOT,f"{season}-GMTStandardTime.csv")
+			UTC_URL = os.path.join(DOWNLOAD_FIXTURE_URL_ROOT,f"{season}-UTC.csv")
+
+			data = pd.read_csv(GMT_URL)
+			logger.info(f'Attempted to download GMT fixture CSV file for season {season}')
+
+			if data.empty or not data:
+				data = pd.read_csv(UTC_URL)
+				logger.info(f'Attempted to download UTC fixture CSV file for season {season}')
+			if data.empty or not data:
+				raise Exception(f"Error downloading fixture CSV file")
+
+			save_path = os.path.join(SCHEDULE_SAVE_PATH_ROOT, f"epl_{season}-{str(int(season) + 1)[-2:]}.csv")
+			data.to_csv(save_path)
+			logger.info(f'Fixture CSV file for season {season} downloaded and saved to {save_path}')
+			return True
+
+		except Exception as e:
+			logger.error(f'An error occurred while downloading fixtures for season {season}:', str(e))
+			return False
 
 def get_team_elo_rating(team_name: str) -> pd.DataFrame:
 	"""
