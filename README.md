@@ -133,3 +133,7 @@ to your settings.json to suppress errors about the utility modules
 
 - Visualisation Page
   - Add Managers to entities that can be visualised
+
+## Considerations
+
+- To increase the number of leagues considered, teams, match_logs, managers, players data downloads will need to be significantly modified

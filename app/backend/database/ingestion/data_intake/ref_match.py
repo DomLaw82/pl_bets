@@ -14,7 +14,7 @@ SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SE
 TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, SEASON_END_YEAR, 1)]
 
 MATCH_SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SEASON_END_YEAR)]
-MATCH_LEAGUES = ["E0", "E1"]
+MATCH_LEAGUES = ["E0"] # Add leagues as needed
 GAME_DATA_DOWNLOAD_ROOT = "https://www.football-data.co.uk/mmz4281/"
 GAME_SAVE_PATH_ROOT = "data/game_data/"
 
