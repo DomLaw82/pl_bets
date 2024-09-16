@@ -154,7 +154,7 @@ def match_logs_main(connector: SQLConnection) -> None:
 			"gk_passes","gk_passes_throws","gk_passes_length_avg","gk_goal_kicks","gk_goal_kicks_length_avg",
 		]]
 		data_duplicates = data[data.duplicated(subset=["player_id", "match_id"], keep=False)]
-		logger.info(f"Duplicate records found:\n{data_duplicates}")
+		logger.info(f"{data_duplicates.groupby(['player_id', 'match_id'])} duplicate records found:\n{data_duplicates}")
 		print(data_duplicates)
 		data = data.drop_duplicates(subset=["player_id","match_id"], keep="last")
 

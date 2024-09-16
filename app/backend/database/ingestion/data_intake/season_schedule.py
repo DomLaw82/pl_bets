@@ -7,12 +7,13 @@ from app_logger import FluentLogger
 from db_connection import SQLConnection
 import requests
 from io import StringIO
+from datetime import datetime
 
 logger = FluentLogger("intake-season_schedule").get_logger()
 
 DOWNLOAD_FIXTURE_URL_ROOT = "https://fixturedownload.com/download/epl-" # add on the year the season starts in, i.e. 2024
 SCHEDULE_SAVE_PATH_ROOT = "data/schedule_data/"
-SEASON_END_YEAR = 2026
+SEASON_END_YEAR = datetime.now().year + 2 if datetime.now().month > 8 else datetime.now().year + 1
 FIXTURE_SEASON_ARRAY = [str(year) for year in range(2017, SEASON_END_YEAR, 1)]
 
 elo_name_conversion = {
@@ -79,6 +80,7 @@ def download_all_fixture_data():
 		try:
 			GMT_URL = os.path.join(DOWNLOAD_FIXTURE_URL_ROOT,f"{season}-GMTStandardTime.csv")
 			UTC_URL = os.path.join(DOWNLOAD_FIXTURE_URL_ROOT,f"{season}-UTC.csv")
+			logger.debug(f"Downloading fixture CSV file for season {season}")
 
 			data = pd.read_csv(GMT_URL)
 			logger.info(f'Attempted to download GMT fixture CSV file for season {season}')

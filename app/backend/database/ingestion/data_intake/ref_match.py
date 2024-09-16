@@ -5,11 +5,12 @@ from data_intake.utilities.unique_id import get_id_from_name, get_name_from_data
 from data_intake.utilities.string_manipulation import escape_single_quote
 from app_logger import FluentLogger
 import time
+from datetime import datetime
 from io import StringIO
 
 logger = FluentLogger("intake-team_ref_match").get_logger()
 
-SEASON_END_YEAR = 2026
+SEASON_END_YEAR = datetime.now().year + 2 if datetime.now().month > 8 else datetime.now().year + 1
 SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SEASON_END_YEAR, 1)]
 TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, SEASON_END_YEAR, 1)]
 
@@ -39,11 +40,11 @@ def download_all_game_data():
                 url = os.path.join(GAME_DATA_DOWNLOAD_ROOT, season, f'{league}.csv')
                 match_data = pd.read_csv(url)
                 match_data.to_csv(save_path)
-                logger.info(f'Game csv file for league {league} in {season} downloaded and saved to {save_path}')
-                return True
+                logger.debug(f'Game csv file for league {league} in {season} downloaded and saved to {save_path}')
             except Exception as e:
                 logger.error(f'An error occurred while downloading games for league {league} in {season}:', str(e))
                 return False
+    return True
 
 def rename_table_columns(df: pd.DataFrame, season: str) -> pd.DataFrame:
     """
@@ -165,9 +166,10 @@ def create_referee_table(df: pd.DataFrame, db_connection) -> pd.DataFrame:
     try:
         referee_df = df.drop_duplicates(subset="referee_id")[["referee_id"]]
         referee_df = referee_df.rename(columns={"referee_id": "name"})
+        referee_df = referee_df[["name"]].copy()
         return referee_df
     except Exception as e:
-        logger.error(f"Error: {e}")
+        logger.error(f"Error selecting referee columns at line {e.__traceback__.tb_lineno}: {e}")
         return df
 
 def clean_ref_match_data(db_connection, table_name:str, season:str, df: pd.DataFrame) -> pd.DataFrame:
@@ -188,7 +190,7 @@ def clean_ref_match_data(db_connection, table_name:str, season:str, df: pd.DataF
         df = rename_table_columns(df, season)
 
         df["season"] = season
-        df["competition_id"] = get_id_from_name(db_connection, competition_name_conversion[df["competition_id"]], "competition")
+        df["competition_id"] = df["competition_id"].apply(lambda x: get_id_from_name(db_connection, competition_name_conversion[x], "competition"))
 
         df = df.drop(columns=["B365H","B365D","B365A","BWH","BWD","BWA","IWH","IWD","IWA","PSH","PSD","PSA","WHH","WHD","WHA","VCH","VCD","VCA","Bb1X2","BbMxH","BbAvH","BbMxD","BbAvD","BbMxA","BbAvA","BbOU","BbMx>2.5","BbAv>2.5","BbMx<2.5","BbAv<2.5","BbAH","BbAHh","BbMxAHH","BbAvAHH","BbMxAHA","BbAvAHA","PSCH","PSCD","PSCA"], errors="ignore")
 
@@ -206,7 +208,7 @@ def clean_ref_match_data(db_connection, table_name:str, season:str, df: pd.DataF
             
         return df
     except Exception as e:
-        logger.error(f"Error: {e}")
+        logger.error(f"Error cleaning ref_match data at line {e.__traceback__.tb_lineno}: {e}")
         return df
 
 def save_to_database(db_connection, table_name, df: pd.DataFrame) -> None:
@@ -263,7 +265,7 @@ def ref_match_main(db_connection):
                 
                 if not deduplicated_df.empty:
                     save_to_database(db_connection, table, deduplicated_df)
-                    logger.info(f"Inserted into {table} table for {season}.")
+                    logger.debug(f"Inserted into {table} table for {season}.")
     except Exception as e:
         logger.error(f"Error in ref_match_main in {e.__context__} on line {str(e.__traceback__.tb_lineno)}: {e.__cause__} - {e}")
         return f"Error in ref_match_main in {e.__context__} on line {str(e.__traceback__.tb_lineno)}: {e.__cause__} - {e}"
