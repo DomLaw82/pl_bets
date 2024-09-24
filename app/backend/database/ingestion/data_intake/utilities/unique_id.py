@@ -50,6 +50,7 @@ def get_id_from_name(db_connector: SQLConnection, name: str, table: str) -> str:
                 "Wolves": "Wolverhampton Wanderers",
                 "Spurs": "Tottenham Hotspur",
                 "Man City": "Manchester City",
+                "Man United": "Manchester United",
             },
             "competition": {},
             "player": {
@@ -114,6 +115,7 @@ def get_name_from_database(db_connector: SQLConnection, name: str, table: str) -
                 "Wolves": "Wolverhampton Wanderers",
                 "Spurs": "Tottenham Hotspur",
                 "Man City": "Manchester City",
+                "Man United": "Manchester United",
             },
             "competition": {},
             "player": {

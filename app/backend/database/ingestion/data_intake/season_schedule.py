@@ -10,14 +10,14 @@ from io import StringIO
 from datetime import datetime
 
 logger = FluentLogger("intake-season_schedule").get_logger()
-
-DOWNLOAD_FIXTURE_URL_ROOT = "https://fixturedownload.com/download/epl-" # add on the year the season starts in, i.e. 2024
 SCHEDULE_SAVE_PATH_ROOT = "data/schedule_data/"
 SEASON_END_YEAR = datetime.now().year + 2 if datetime.now().month > 8 else datetime.now().year + 1
 FIXTURE_SEASON_ARRAY = [str(year) for year in range(2017, SEASON_END_YEAR, 1)]
+LEAGUES = ["epl", "championship"]
 
 elo_name_conversion = {
 	"Manchester City": "ManCity",
+	"Man City": "ManCity",
 	"Arsenal": "Arsenal",
 	"Liverpool": "Liverpool",
 	"Chelsea": "Chelsea",
@@ -30,6 +30,7 @@ elo_name_conversion = {
 	"Aston Villa": "AstonVilla",
 	"Crystal Palace": "CrystalPalace",
 	"West Ham United": "WestHam",
+	"West Ham": "WestHam",
 	"Fulham": "Fulham",
 	"Brighton & Hove Albion": "Brighton",
 	"Brentford": "Brentford",
@@ -46,6 +47,7 @@ elo_name_conversion = {
 	"Luton Town": "Luton",
 	"Middlesbrough": "Middlesbrough",
 	"West Bromwich Albion": "WestBrom",
+	"West Brom": "WestBrom",
 	"Sheffield United": "SheffieldUnited",
 	"Sheffield Utd": "SheffieldUnited",
 	"Norwich City": "Norwich",
@@ -66,6 +68,17 @@ elo_name_conversion = {
 	"Cardiff City": "Cardiff",
 	"Portsmouth": "Portsmouth",
 	"Derby County": "Derby",
+	"Bristol City": "Bristol",
+	"Wigan Athletic": "Wigan",
+	"Birmingham City": "Birmingham",
+	"Charlton Athletic": "Charlton",
+	"Rotherham United": "Rotherham",
+	"Wycombe Wanderers": "Wycombe",
+	"Peterborough United": "Peterborough",
+}
+competition_name_conversion = {
+    "epl": "English Premier League",
+    "championship" : "EFL Championship"
 }
 
 def download_all_fixture_data():
@@ -75,30 +88,32 @@ def download_all_fixture_data():
 	Arguments:
 		season (str): last 2 digits of each year the season encompasses, e.g. "16/17"
 	"""
+
 	for season in FIXTURE_SEASON_ARRAY:
 		time.sleep(0.2)
-		try:
-			GMT_URL = os.path.join(DOWNLOAD_FIXTURE_URL_ROOT,f"{season}-GMTStandardTime.csv")
-			UTC_URL = os.path.join(DOWNLOAD_FIXTURE_URL_ROOT,f"{season}-UTC.csv")
-			logger.debug(f"Downloading fixture CSV file for season {season}")
+		for league in LEAGUES:
+			time.sleep(0.2)
+			DOWNLOAD_FIXTURE_URL_ROOT = f"https://fixturedownload.com/download/{league}-" # add on the year the season starts in, i.e. 2024
+			try:
+				GMT_URL = f"{DOWNLOAD_FIXTURE_URL_ROOT}{season}-GMTStandardTime.csv"
+				UTC_URL = f"{DOWNLOAD_FIXTURE_URL_ROOT}{season}-UTC.csv"
+				logger.debug(f"Downloading {league} fixture CSV file for season {season}")
 
-			data = pd.read_csv(GMT_URL)
-			logger.info(f'Attempted to download GMT fixture CSV file for season {season}')
+				data = pd.read_csv(GMT_URL)
+				logger.info(f'Attempted to download GMT {league} fixture CSV file for season {season}: {GMT_URL}')
 
-			if data.empty or not data:
-				data = pd.read_csv(UTC_URL)
-				logger.info(f'Attempted to download UTC fixture CSV file for season {season}')
-			if data.empty or not data:
-				raise Exception(f"Error downloading fixture CSV file")
+				if data.empty:
+					data = pd.read_csv(UTC_URL)
+					logger.info(f'Attempted to download UTC {league} fixture CSV file for season {season}: {UTC_URL}')
+				
+				file_name = f"{league}_{season}-{str(int(season) + 1)[-2:]}.csv"
+				save_path = os.path.join(SCHEDULE_SAVE_PATH_ROOT, file_name)
+				data.to_csv(save_path)
+				logger.info(f'Fixture CSV file for season {season} downloaded and saved to {save_path}')
 
-			save_path = os.path.join(SCHEDULE_SAVE_PATH_ROOT, f"epl_{season}-{str(int(season) + 1)[-2:]}.csv")
-			data.to_csv(save_path)
-			logger.info(f'Fixture CSV file for season {season} downloaded and saved to {save_path}')
-			return True
-
-		except Exception as e:
-			logger.error(f'An error occurred while downloading fixtures for season {season}:', str(e))
-			return False
+			except Exception as e:
+				logger.error(f'An error occurred while downloading {league} fixtures for season {season}: {str(e)}')
+				continue
 
 def get_team_elo_rating(team_name: str) -> pd.DataFrame:
 	"""
@@ -135,6 +150,7 @@ def clean_schedule_data(db_connection: SQLConnection, df: pd.DataFrame) -> pd.Da
 
 		# Rename team names in 'home_team' and 'away_team' columns
 		unique_teams = pd.Series(pd.concat([df["home_team"], df["away_team"]]).unique())
+		print(unique_teams)
 		team_replacements = unique_teams.apply(lambda team: get_name_from_database(db_connection, team, "team"))
 		team_replacement_dict = dict(zip(unique_teams, team_replacements))
 		df[["home_team", "away_team"]] = df[["home_team", "away_team"]].replace(team_replacement_dict)
@@ -198,7 +214,8 @@ def clean_schedule_data(db_connection: SQLConnection, df: pd.DataFrame) -> pd.Da
 
 		# Rename columns and add competition_id
 		df = df.rename(columns={"home_team": "home_team_id", "away_team": "away_team_id"})
-		df["competition_id"] = "English Premier League"
+		df["competition_id"] = df["league"].apply(lambda x: competition_name_conversion[x])
+		df = df.drop(columns=["league"])
 		df["competition_id"] = get_id_from_name(db_connection, df["competition_id"].iloc[0], "competition")
 
 		deduplicated_df = remove_duplicate_rows(db_connection, df, ["round_number", "date", "home_team_id", "away_team_id"], "schedule")
@@ -241,8 +258,22 @@ def schedule_main(db_connection) -> None:
 			if season_schedule_file.is_file() and season_schedule_file.name.endswith(".csv"):
 				file_path = os.path.join(season_schedule_folder_path, season_schedule_file.name)
 				df = pd.read_csv(file_path)
+				league = season_schedule_file.name.split("_")[0]
+				df["league"] = league
 				all_data = df if all_data.empty else pd.concat([all_data, df]).reset_index(drop=True)
 		df = clean_schedule_data(db_connection, all_data)
+
+		df = df [[
+			"competition_id",
+			"round_number",
+			"date",
+			"home_team_id",
+			"away_team_id",
+			"result",
+			"home_elo",
+			"away_elo",
+			"season"
+		]]
 		
 		if not df.empty:
 			df = df.sort_values(by=["date"]).reset_index(drop=True)

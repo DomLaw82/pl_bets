@@ -9,10 +9,8 @@ import requests
 
 logger = FluentLogger("intake-manager").get_logger()
 
-MANAGER_URL = "https://en.wikipedia.org/wiki/List_of_Premier_League_managers"
-MANAGER_SAVE_PATH_ROOT = "data/manager_data/"
-MANAGER_FILE_NAME = "managers.html"
-MANAGER_FILE_PATH = os.path.join(MANAGER_SAVE_PATH_ROOT, MANAGER_FILE_NAME)
+LEAGUES = ["Premier_League", "EFL_Championship"]
+
 
 pd.set_option('display.max_rows', None)
 
@@ -27,32 +25,44 @@ def download_manager_html_data():
 	Returns:
 	bool: True if the HTML content is downloaded and saved successfully, False otherwise.
 	"""
-	try:
-		response = requests.get(MANAGER_URL)
-		if response.status_code != 200:
-			logger.error(f"Failed to download the HTML content. Status code: {response.status_code}")
+
+	for league in LEAGUES:
+		MANAGER_URL = f"https://en.wikipedia.org/wiki/List_of_{league}_managers"
+		MANAGER_SAVE_PATH_ROOT = "data/manager_data/"
+		MANAGER_FILE_NAME = f"{league.lower()}_managers.html"
+		MANAGER_FILE_PATH = os.path.join(MANAGER_SAVE_PATH_ROOT, MANAGER_FILE_NAME)
+		try:
+			response = requests.get(MANAGER_URL)
+			if response.status_code != 200:
+				logger.error(f"Failed to download the HTML content. Status code: {response.status_code}")
+				return False
+
+			with open(MANAGER_FILE_PATH, "w") as file:
+				file.write(response.text)
+			logger.info(f"HTML content downloaded and saved to {MANAGER_FILE_PATH}")
+		except Exception as e:
+			logger.error(f"An error occurred while downloading the HTML content: {str(e)}")
 			return False
 
-		with open(MANAGER_FILE_PATH, "w") as file:
-			file.write(response.text)
-		logger.info(f"HTML content downloaded and saved to {MANAGER_FILE_PATH}")
-		return True
-	except Exception as e:
-		logger.error(f"An error occurred while downloading the HTML content: {str(e)}")
-		return False
-
-def clean_manager(html_content, connector):
+def clean_manager(html_content: str, connector, league: str) -> pd.DataFrame:
 	try:
 		# Parse the HTML content using BeautifulSoup
 		soup = BeautifulSoup(html_content, 'html.parser')
 
+		classes_by_league = {
+			"Premier_League": "wikitable sortable plainrowheaders",
+			"EFL_Championship": "wikitable sortable"
+		}
+		headers_by_league = {
+			"Premier_League": ["name", "nationality", "team", "start_date", "end_date", "duration", "years", "ref"],
+			"EFL_Championship": ["name", "nationality", "team", "start_date", "end_date", "years", "ref"]
+		}
+		
 		# Find the table in the HTML
-		table = soup.find('table', {'class': 'wikitable sortable plainrowheaders'})
+		table = soup.find('table', {'class': classes_by_league[league]})
 
 		# Extract table headers
-		headers = []
-		for th in table.find_all('th'):
-			headers.append(th.get_text(strip=True).lower())
+		headers = headers_by_league[league]
 
 		# Extract table rows
 		rows = []
@@ -63,18 +73,17 @@ def clean_manager(html_content, connector):
 				rows.append(row)
 
 		# Write the data to a CSV file
-		with open('./data/manager_data/managers.csv', 'w', newline='', encoding='utf-8') as f:
+		with open(f'./data/manager_data/{league.lower()}_managers.csv', 'w', newline='', encoding='utf-8') as f:
 			writer = csv.writer(f)
 			writer.writerow(headers)  # Write the header row
 			writer.writerows(rows)    # Write the data rows
 
 		print("CSV file has been created successfully.")
 
-		df = pd.read_csv('./data/manager_data/managers.csv')
+		df = pd.read_csv(f'./data/manager_data/{league.lower()}_managers.csv')
 		df = df.iloc[1:]  # Drop the first row
 
-		df = df[["name", "club", "nat.", "from", "until"]]
-		df = df.rename(columns={"nat.": "nationality", "from": "start_date", "until": "end_date", "club": "team"})
+		df = df[["name", "team", "nationality", "start_date", "end_date"]]
 
 		df[["first_name", "last_name"]] = df["name"].str.split(" ", n=1, expand=True)
 		df["first_name"] = df["first_name"].str.replace('[^a-zA-Z]', '', regex=True)
@@ -83,9 +92,17 @@ def clean_manager(html_content, connector):
 
 		df["start_date"] = df["start_date"].str.replace(r'\[\w\]', '', regex=True)
 		df["end_date"] = df["end_date"].str.replace(r'\[\w\]', '', regex=True).replace("present*", np.nan)
-
-		df["start_date"] = pd.to_datetime(df["start_date"], format="%d %B %Y").dt.strftime("%Y-%m-%d")
-		df["end_date"] = pd.to_datetime(df["end_date"], format="%d %B %Y").dt.strftime("%Y-%m-%d")
+		
+		try:
+			df["start_date"] = pd.to_datetime(df["start_date"], format="%d %B %Y").dt.strftime("%Y-%m-%d")
+		except Exception as e:
+			logger.error(f"Error converting start date: {e}")
+			df["start_date"] = pd.to_datetime(df["start_date"], format="mixed").dt.strftime("%Y-%m-%d")
+		try:
+			df["end_date"] = pd.to_datetime(df["end_date"], format="%d %B %Y").dt.strftime("%Y-%m-%d")
+		except Exception as e:
+			logger.error(f"Error converting end date: {e}")
+			df["end_date"] = pd.to_datetime(df["end_date"], format="mixed").dt.strftime("%Y-%m-%d")
 
 		df["end_date"] = df["end_date"].replace(np.nan, "current")
 
@@ -93,6 +110,7 @@ def clean_manager(html_content, connector):
 		df = df.drop(columns=["team"])
 
 		df = df[['first_name', 'last_name', 'team_id', 'start_date', 'end_date']]
+		print(df)
 
 		df = remove_duplicate_rows(connector, df, ["first_name", "last_name", "team_id", "start_date", "end_date"], "manager")
 
@@ -110,13 +128,15 @@ def save_to_database(df, connection) -> None:
 		raise Exception(f"Error saving manager data: {e}")
 	
 def manager_main(con):
+	managers = pd.DataFrame()
 	try:
-		with open('./data/manager_data/managers.html', 'r', encoding='utf-8') as file:
-			html_content = file.read()
-
-		df = clean_manager(html_content, con)
+		for league in LEAGUES:
+			with open(f'./data/manager_data/{league.lower()}_managers.html', 'r', encoding='utf-8') as file:
+				html_content = file.read()
+				df = clean_manager(html_content, con, league)
+				managers = pd.concat([managers, df], ignore_index=True)
 		
-		save_to_database(df, con)
+		save_to_database(managers, con)
 	except Exception as e:
 		logger.error(e)
 		raise Exception(e)
