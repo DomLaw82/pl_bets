@@ -4,8 +4,6 @@ import { Fragment } from "react";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
 import Divider from "@mui/material/Divider";
 import { PageLoading } from "../components/loaders";
 import {
@@ -16,13 +14,15 @@ import {
 	TableCell,
 	TableRow,
 } from "@mui/material";
+import { SeasonLeagueSelector } from "../components/seasonLeagueSelector";
 
 export function LeagueTable() {
 	const [selectedSeason, setSelectedSeason] = useState("2024-2025");
+	const [selectedCompetition, setSelectedCompetition] = useState("x-00005");
 
 	const fetchLeagueTable = async () => {
 		const response = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/league-table?season=${selectedSeason}`
+			`${process.env.REACT_APP_DATA_API_ROOT}/league-table?season=${selectedSeason}&competition=${selectedCompetition}`,
 		);
 		if (!response.ok) {
 			throw new Error("Network response was not ok");
@@ -34,32 +34,10 @@ export function LeagueTable() {
 		// error: managersError,
 		data: leagueTable = [],
 	} = useQuery(
-		["leagueTable", selectedSeason],
-		() => fetchLeagueTable(setSelectedSeason),
+		["leagueTable", selectedSeason, selectedCompetition],
+		() => fetchLeagueTable(),
 		{ staleTime: Infinity }
 	);
-
-	async function getSeasons() {
-		const response = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/seasons`,
-			{
-				headers: {
-					"Access-Control-Allow-Origin": "*",
-				},
-			}
-		);
-		const seasons = await response.json();
-		return seasons;
-	}
-	const {
-		data: seasons = [],
-		isLoading: isLoadingSeasons,
-		// error: errorSeasons,
-	} = useQuery("seasons", getSeasons, { staleTime: Infinity });
-
-	if (isLoadingSeasons) {
-		return <PageLoading />;
-	}
 
 	return (
 		<Fragment>
@@ -73,25 +51,7 @@ export function LeagueTable() {
 					}}
 				>
 					<Box sx={{ width: "100%", overflow: "hidden", overflowY: "scroll" }}>
-						<Container
-							sx={{ marginTop: 2, marginBottom: 2, textAlign: "center" }}
-						>
-							<ButtonGroup size="large" aria-label="Large button group">
-								{seasons.map((season) => {
-									return (
-										<Button
-											key={season}
-											onClick={() => setSelectedSeason(season)}
-											variant={
-												selectedSeason === season ? "contained" : "outlined"
-											}
-										>
-											{season}
-										</Button>
-									);
-								})}
-							</ButtonGroup>
-						</Container>
+						<SeasonLeagueSelector setSelectedCompetition={setSelectedCompetition} setSelectedSeason={setSelectedSeason}  selectedCompetition={selectedCompetition} selectedSeason={selectedSeason} />
 						<Divider sx={{ width: "100%", height: 2 }} />
 						<Divider sx={{ width: "100%", height: 2 }} />
 						{!isLoadingLeagueTable ? (

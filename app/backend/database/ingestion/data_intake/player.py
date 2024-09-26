@@ -13,10 +13,12 @@ PLAYER_DATA_SAVE_PATH = "./data/player_data/player_data.csv"
 CURRENT_SEASON_END_YEAR = datetime.now().year + 2 if datetime.now().month > 8 else datetime.now().year + 1
 PLAYER_DATA_DOWNLOAD_SEASONS = list(range(2017, CURRENT_SEASON_END_YEAR))
 
+LEAGUES = ["Premier-League", "Championship"]
+
 log_class = FluentLogger("intake-player")
 logger = log_class.get_logger()
 
-def get_player_fbref_data(url: str, season: str) -> list|None:
+def get_player_fbref_data(url: str, season: str, league: str) -> list|None:
 	"""Get player data from FBRef for a specific season"""
 
 	response = requests.get(url)
@@ -60,9 +62,9 @@ def get_player_fbref_data(url: str, season: str) -> list|None:
 			match_logs_href = ""
 
 			if len(name_col) < 1:
-				logger.error(f'Failed to find the player column for season {season}.')
+				logger.error(f'Failed to find the player column in {league} for season {season}.')
 				return None
-			logger.debug(f'Found {len(name_col)} players for season {season}.')
+			logger.debug(f'Found {len(name_col)} players in {league} for season {season}.')
 
 			for idx in range(len(name_col)):
 				try:
@@ -97,11 +99,12 @@ def get_player_fbref_data(url: str, season: str) -> list|None:
 						nationality = ""
 
 					try:
-						team = team_col[idx].find('a').get_text()
+						team = team_col[idx].find('a')["href"].split("/")[-1]
+						team = team.removesuffix("-Stats").replace("-", " ")
 					except Exception:
 						team = ""
 				except Exception as e:
-					logger.error(f"Failed to extract player data for season {season} - player {name_col[idx].find('a').get_text()}")
+					logger.error(f"Failed to extract player data in {league} for season {season} - player {name_col[idx].find('a').get_text()}")
 					continue
 
 				# print({
@@ -127,10 +130,10 @@ def get_player_fbref_data(url: str, season: str) -> list|None:
 
 			return results
 		else:
-			logger.error(f'Failed to find the div for season {season}.')
+			logger.error(f'Failed to find the div in {league} for season {season}.')
 			return None
 	else:
-		logger.error(f'Failed to retrieve the HTML content for season {season}.')
+		logger.error(f'Failed to retrieve the HTML content in {league} for season {season}.')
 		return None
 	
 def download_player_data() -> None:
@@ -138,21 +141,27 @@ def download_player_data() -> None:
 	all_results = []
 
 	# Iterate through the seasons from 2000-2001 to 2024-2025
+	url_number = {
+		"Premier-League": "9",
+		"Championship": "10"
+	}
 	for year in PLAYER_DATA_DOWNLOAD_SEASONS:
 		time.sleep(5)
-		try:
-			season = f"{year}-{str(year + 1)}"
-			url = f'https://fbref.com/en/comps/9/{season}/stats/{season}-Premier-League-Stats'
-			logger.debug(f'Processing player data for season {season} at URL: {url}')
-			
-			season_results = get_player_fbref_data(url, season)
-			# Check if the request was successful
-			if season_results is None:
-				continue
-			all_results.extend(season_results)
+		for league in LEAGUES:
+			time.sleep(5)
+			try:
+				season = f"{year}-{str(year + 1)}"
+				url = f'https://fbref.com/en/comps/{url_number[league]}/{season}/stats/{season}-{league}-Stats'
+				logger.debug(f'Processing player data in {league} for season {season} at URL: {url}')
+				
+				season_results = get_player_fbref_data(url, season, league)
+				# Check if the request was successful
+				if season_results is None:
+					continue
+				all_results.extend(season_results)
 
-		except Exception as e:
-			logger.error(f'An error occurred while processing season {season}: line {e.__traceback__.tb_lineno} : {e}')
+			except Exception as e:
+				logger.error(f'An error occurred while processing {league} for season {season}: line {e.__traceback__.tb_lineno} : {e}')
 
 	# Convert the results to a DataFrame
 	df = pd.DataFrame(all_results)
@@ -183,6 +192,8 @@ def player_to_db_main(db_connection: SQLConnection):
 		player_df[["first_name", "last_name"]] = player_df[["first_name", "last_name"]].replace("'", "`")
 		player_df = player_df.drop_duplicates(subset=["fbref_id"], keep="last")
 		player_df = player_df.drop("player_name", axis=1)
+		logger.debug(f"Players with nulls: {player_df[player_df.isnull().any(axis=1)]}")
+		player_df = player_df.fillna("")
 		logger.debug(f"Player data shape: {player_df.shape}")
 		save_to_database(db_connection, player_df, "player")
 

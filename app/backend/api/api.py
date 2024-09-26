@@ -117,6 +117,7 @@ def get_team_profile():
       team_profile = db.get_dict(f"""
          SELECT 
             season,
+            c.name AS competition,
             '{team_id}' AS team_id,
             t.name AS team_name,
             COUNT(*) AS matches_played,
@@ -174,12 +175,14 @@ def get_team_profile():
             ) AS goal_difference
          FROM schedule
             JOIN team t ON t.id = '{team_id}'
+            JOIN competition c on c.id = competition_id
          WHERE (
                home_team_id = '{team_id}'
                OR away_team_id = '{team_id}'
             )
             AND result != '-'
          GROUP BY season,
+            c.name,
             t.name
          ORDER BY season DESC;
       """)
@@ -527,6 +530,22 @@ def get_all_seasons() -> list:
       logger.error(f"Error with endpoint /seasons: {str(e)}")
       raise
 
+# /leagues
+@registry.handles(
+   rule='/leagues',
+   method='GET',
+)
+def get_competitions() -> list:
+   try:
+      competitions = db.get_dict(f"""
+         SELECT id, country_id, name FROM competition WHERE type = 'league';
+      """)
+      logger.info("Leagues retrieved")
+      return jsonify(competitions)
+   except Exception as e:
+      logger.error(f"Error with endpoint /leagues: {str(e)}")
+      raise
+
 # /schedule
 @registry.handles(
    rule='/schedule',
@@ -535,6 +554,7 @@ def get_all_seasons() -> list:
 def get_schedule_by_season() -> list:
    try:
       season = request.args.get('season')
+      competition = request.args.get('competition')
       current_gameweek = request.args.get('get_current_gameweek')
       if current_gameweek:
          current_date = datetime.date.today().strftime("%Y-%m-%d")
@@ -548,7 +568,29 @@ def get_schedule_by_season() -> list:
          """)
          logger.info(f"Current gameweek retrieved: {schedule[0][0]}")
          return jsonify(schedule[0][0])
+      
       season_start, season_end = decompose_season(season)
+
+      if competition:
+         schedule = db.get_dict(f"""
+            SELECT 
+               CAST(s.date AS VARCHAR) AS date,
+               CAST(s.round_number AS VARCHAR) AS game_week,
+               CAST(home_team.name AS VARCHAR) AS home_team,
+               CAST(away_team.name AS VARCHAR) AS away_team,
+               home_team.id AS home_team_id,
+               away_team.id AS away_team_id,
+               CAST(s.result AS VARCHAR) AS result,
+               s.competition_id AS competition_id
+            FROM schedule s
+            JOIN team home_team ON s.home_team_id = home_team.id
+            JOIN team away_team ON s.away_team_id = away_team.id
+            WHERE DATE(s.date) > '{season_start}' AND DATE(s.date) < '{season_end}' AND s.competition_id = '{competition}'
+            ORDER BY s.date ASC;
+         """)
+         logger.info(f"Schedule for season {season} retrieved and competition {competition}")
+         return jsonify(schedule)
+
       schedule = db.get_dict(f"""
          SELECT 
             CAST(s.date AS VARCHAR) AS date,
@@ -945,7 +987,8 @@ def get_team_comp_columns() -> list:
 )
 def get_league_table():
    try:
-      season = request.args.get('season') 
+      season = request.args.get('season')
+      competition = request.args.get('competition')
       query = f"""
       WITH league_table AS (
          SELECT
@@ -1008,7 +1051,7 @@ def get_league_table():
             schedule
          JOIN team ON team.id = home_team_id OR team.id = away_team_id
          WHERE 
-            season = '{season}' AND result != '-'
+            season = '{season}' AND competition_id = '{competition}' AND result != '-'
          GROUP BY 
             team.id, team.name
       )
@@ -1033,7 +1076,7 @@ def get_league_table():
       logger.info(f"League table for {season} retrieved")
       return jsonify(league_table)
    except Exception as e:
-      logger.error(f"Error with endpoint /league-table?season={season}: {str(e)}")
+      logger.error(f"Error with endpoint /league-table?season={season}&competition_id={competition}: {str(e)}")
       raise
 
 # /managers

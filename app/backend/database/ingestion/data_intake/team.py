@@ -6,63 +6,45 @@ from data_intake.utilities.save_to_database import save_to_database
 from data_intake.utilities.unique_id import get_id_from_name
 
 logger = FluentLogger("intake-team").get_logger()
+PLAYER_DATA_SAVE_PATH = "./data/player_data/player_data.csv"
 
-teams_since_2000 = ["Arsenal"
-	,"Aston Villa"
-	,"Barnsley"
-	,"Birmingham City"
-	,"Blackburn Rovers"
-	,"Blackpool"
-	,"Bolton Wanderers"
-	,"Bournemouth"
-	,"Bradford City"
-	,"Brentford"
-	,"Brighton & Hove Albion"
-	,"Burnley"
-	,"Cardiff City"
-	,"Charlton Athletic"
-	,"Chelsea"
-	,"Coventry City"
-	,"Crystal Palace"
-	,"Derby County"
-	,"Everton"
-	,"Fulham"
-	,"Huddersfield Town"
-	,"Hull City"
-	,"Ipswich Town"
-	,"Leeds United"
-	,"Leicester City"
-	,"Liverpool"
-	,"Luton Town"
-	,"Manchester City"
-	,"Manchester United"
-	,"Middlesbrough"
-	,"Newcastle United"
-	,"Norwich City"
-	,"Nottingham Forest"
-	,"Oldham Athletic"
-	,"Portsmouth"
-	,"Queens Park Rangers"
-	,"Reading"
-	,"Sheffield United"
-	,"Sheffield Wednesday"
-	,"Southampton"
-	,"Stoke City"
-	,"Sunderland"
-	,"Swansea City"
-	,"Swindon Town"
-	,"Tottenham Hotspur"
-	,"Watford"
-	,"West Bromwich Albion"
-	,"West Ham United"
-	,"Wigan Athletic"
-	,"Wimbledon"
-	,"Wolverhampton Wanderers"
-]
+# Find a way to get the country_id from team name
 
 def team_main(db_connection: SQLConnection) -> None:
-	teams = pd.DataFrame(teams_since_2000, columns=["name"])
-	teams["name"] = teams["name"].apply(lambda name: name.replace("'", "`"))
+	"""Ingest team data into the database"""
+	all_data = pd.read_csv(PLAYER_DATA_SAVE_PATH)
+	teams = all_data[["team"]]
+	unique_teams = teams.drop_duplicates()
+	non_null_teams = unique_teams[unique_teams["team"].notnull()]
+	non_null_teams = non_null_teams.rename(columns={"team": "name"})
+	non_null_teams["name"] = non_null_teams["name"].apply(lambda name: name.replace("'", "`"))
 	# teams["country_id"] = teams["name"].apply(lambda x: get_id_from_name(db_connection, x, "country"))
-	teams["country_id"] = "c-00001"
-	save_to_database(db_connection, teams, "team")
+	# set country_id to c-00001 (England) for now
+	non_null_teams["country_id"] = "c-00001"
+
+	# Add some extra Championship teams
+	add_teams = [
+		{"name": "Colchester United", "country_id": "c-00001"},
+		{"name": "Crewe Alexandra", "country_id": "c-00001"},
+		{"name": "Doncaster Rovers", "country_id": "c-00001"},
+		{"name": "Gillingham", "country_id": "c-00001"},
+		{"name": "Milton Keynes Dons", "country_id": "c-00001"},
+		{"name": "Scunthorpe United", "country_id": "c-00001"},
+		{"name": "Southend United", "country_id": "c-00001"},
+		{"name": "Yeovil Town", "country_id": "c-00001"},
+		{"name": "AFC Wimbledon", "country_id": "c-00001"},
+		{"name": "Bradford City", "country_id": "c-00001"},
+		{"name": "Oldham Athletic", "country_id": "c-00001"},
+		{"name": "Port Vale", "country_id": "c-00001"},
+		{"name": "Salford City", "country_id": "c-00001"},
+		{"name": "Stevenage", "country_id": "c-00001"},
+		{"name": "Tranmere Rovers", "country_id": "c-00001"},
+		{"name": "Walsall", "country_id": "c-00001"},
+		{"name": "Swindon Town", "country_id": "c-00001"},
+	]
+	additional_teams = pd.DataFrame(add_teams, index=list(range(0, len(add_teams))))
+	teams = pd.concat([non_null_teams, additional_teams], ignore_index=True)
+	teams = teams.drop_duplicates(subset=["name"], keep="last")
+	all_teams = teams.sort_values(by=["name"], ascending=True)
+	print(all_teams)
+	save_to_database(db_connection, all_teams, "team")

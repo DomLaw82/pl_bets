@@ -273,7 +273,7 @@ def run_data_prep(sql_connection: SQLConnection, features: list, fixtures: pd.Da
 
     """
     try:
-        match_columns = ["season","date","home_team_id","away_team_id","home_goals","away_goals", "home_shots_on_target", "away_shots_on_target", "closing_home_odds","closing_draw_odds","closing_away_odds"]
+        match_columns = ["season", "competition_id", "date","home_team_id","away_team_id","home_goals","away_goals", "home_shots_on_target", "away_shots_on_target", "closing_home_odds","closing_draw_odds","closing_away_odds"]
         model_features = [
             "home_rolling_goal_difference", "away_rolling_goal_difference", 
             "home_rolling_goal_difference_at_home","away_rolling_goal_difference_at_away",
@@ -281,9 +281,9 @@ def run_data_prep(sql_connection: SQLConnection, features: list, fixtures: pd.Da
         ]
         
         data = sql_connection.get_df(f"SELECT {', '.join(match_columns)} FROM match ORDER BY date ASC")
-        schedule = sql_connection.get_df("SELECT season, home_team_id, away_team_id, home_elo, away_elo FROM schedule")
+        schedule = sql_connection.get_df("SELECT season, home_team_id, away_team_id, home_elo, away_elo, competition_id FROM schedule")
 
-        data = data.merge(schedule, on=["season", "home_team_id", "away_team_id"], how="left")
+        data = data.merge(schedule, on=["season", "home_team_id", "away_team_id", "competition_id"], how="left")
 
         teams = data["home_team_id"].unique().tolist()
 

@@ -11,10 +11,12 @@ import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { LeagueSelector } from "../components/seasonLeagueSelector";
 
 export default function UpcomingMatches() {
 	const [selectedSeason, setSelectedSeason] = useState("2024-2025");
 	const [formattedDate, setCurrentDate] = useState("");
+	const [selectedCompetition, setSelectedCompetition] = useState("x-00005");
 
 	useEffect(() => {
 		const currentDate = new Date();
@@ -115,6 +117,7 @@ export default function UpcomingMatches() {
 						alignItems: "center",
 					}}
 				>
+					<LeagueSelector setSelectedCompetition={setSelectedCompetition} selectedCompetition={selectedCompetition} />
 					<Box sx={{ width: "100%", overflow: "hidden", overflowY: "scroll" }}>
 						<Divider sx={{ width: "100%", height: 2 }} />
 						<Divider sx={{ width: "100%", height: 2 }} />
@@ -144,12 +147,14 @@ export default function UpcomingMatches() {
 										</AccordionSummary>
 										<AccordionDetails>
 											<Box id="current-game-week">
-												{currentGameWeekMatches.map((match) => {
+												{currentGameWeekMatches.filter((match) => {
+													return match.competition_id === selectedCompetition;
+												}).map((match) => {
 													const prediction =
 														currentGameWeekMatchesPrediction.find(
 															(pred) =>
 																pred.home_team_id === match.home_team_id &&
-																pred.away_team_id === match.away_team_id
+																pred.away_team_id === match.away_team_id 
 														);
 													return (
 														<MatchCards
@@ -202,7 +207,9 @@ export default function UpcomingMatches() {
 										</AccordionSummary>
 										<AccordionDetails>
 											<Box id="upcoming-matches">
-												{nextGameWeekMatches.map((match) => (
+												{nextGameWeekMatches.filter((match) => (
+													match.competition_id === selectedCompetition)
+												).map((match) => (
 													<MatchCards
 														key={`${match.home_team}-${match.away_team}-${match.date}`}
 														gameWeek={match.game_week}

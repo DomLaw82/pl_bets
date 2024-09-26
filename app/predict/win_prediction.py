@@ -53,24 +53,34 @@ def run_win_prediction() -> list:
 		output_columns = ["home_team_id", "away_team_id", "home_win_prob", "draw_prob", "away_win_prob"]
 		current_date = get_current_date()
 
-		upcoming_fixtures = db.get_list(f"""
+		league_schedules_present = [league[0] for league in db.get_list(f"""
 			SELECT 
-				date, home_team_id, away_team_id, home_elo, away_elo
-			FROM schedule 
-			WHERE date >= '{current_date}' 
-				AND round_number = (
-					SELECT 
-						MIN(round_number) 
-					FROM schedule
-					WHERE date >= '{current_date}'
-				)
-			ORDER BY date ASC
-		""")
+				DISTINCT competition_id
+			FROM schedule
+		""")]
+
+		upcoming_fixtures = []
+		for league in league_schedules_present:
+			fixtures = db.get_list(f"""
+				SELECT 
+					date, home_team_id, away_team_id, home_elo, away_elo, competition_id
+				FROM schedule 
+				WHERE date >= '{current_date}' 
+					AND round_number = (
+						SELECT 
+							MIN(round_number) 
+						FROM schedule
+						WHERE date >= '{current_date}'
+					)
+					AND competition_id = '{league}'
+				ORDER BY date ASC
+			""")
+			upcoming_fixtures.extend(fixtures) if fixtures else None
 
 		upcoming_fixtures_df = pd.DataFrame()
 
 		if upcoming_fixtures:
-			upcoming_fixtures_df = pd.DataFrame(upcoming_fixtures, columns=["date", "home_team_id", "away_team_id", "home_elo", "away_elo"])
+			upcoming_fixtures_df = pd.DataFrame(upcoming_fixtures, columns=["date", "home_team_id", "away_team_id", "home_elo", "away_elo", "competition_id"])
 			upcoming_fixtures_df["date"] = pd.to_datetime(upcoming_fixtures_df["date"]).dt.strftime('%Y-%m-%d')
 			upcoming_fixtures_df["season"] = get_current_season()
 
@@ -103,14 +113,14 @@ def run_win_prediction() -> list:
 
 		output = []
 
-		for date, home_team_id, away_team_id, home_elo, away_elo in upcoming_fixtures:
+		for date, home_team_id, away_team_id, home_elo, away_elo, competition_id in upcoming_fixtures:
 			latest_row = prediction_data[(prediction_data["home_team_id"] == home_team_id) & (prediction_data["away_team_id"] == away_team_id)].tail(1)
 			home_win_prob = latest_row["home_win_prob"].values[0]
 			draw_prob = latest_row["draw_prob"].values[0]
 			away_win_prob = latest_row["away_win_prob"].values[0]
 			prediction = latest_row["prediction"].values[0]
 
-			output.append(dict(home_team_id=home_team_id, away_team_id=away_team_id, home_win_prob=home_win_prob, draw_prob=draw_prob, away_win_prob=away_win_prob, prediction=prediction))
+			output.append(dict(home_team_id=home_team_id, away_team_id=away_team_id, home_win_prob=home_win_prob, draw_prob=draw_prob, away_win_prob=away_win_prob, prediction=prediction, competition_id=competition_id))
 		print(output)
 		return output
 	except Exception as e:
