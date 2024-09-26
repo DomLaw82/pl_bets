@@ -15,7 +15,6 @@ SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SE
 TABLE_SEASONS = [f"{str(year-1)}-{str(year)}" for year in range(2018, SEASON_END_YEAR, 1)]
 
 MATCH_SITE_SEASONS = [f"{str(year-1)[-2:]}{str(year)[-2:]}" for year in range(2018, SEASON_END_YEAR)]
-MATCH_LEAGUES = ["E0", "E1"] # Add leagues as needed
 GAME_DATA_DOWNLOAD_ROOT = "https://www.football-data.co.uk/mmz4281/"
 GAME_SAVE_PATH_ROOT = "data/game_data/"
 
@@ -33,7 +32,7 @@ def download_all_game_data():
     """
     for season in MATCH_SITE_SEASONS:
         time.sleep(0.2)
-        for league in MATCH_LEAGUES:
+        for league in competition_name_conversion.keys():
             try:
                 # MATCH_SITE_SEASONS
                 save_path = os.path.join(GAME_SAVE_PATH_ROOT, f"{league} - {season}.csv")
