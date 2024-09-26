@@ -1,8 +1,7 @@
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
-import Typography from "@mui/material/Typography";
 import { Divider } from "@mui/material";
 import { TeamCards } from "../components/cards";
 import { useQuery } from "react-query";
@@ -29,8 +28,6 @@ export default function Teams(props) {
 	const {
         data: teams,
         isLoading,
-        isError,
-        error
     } = useQuery('teams', fetchTeams, {
         // Optional: Configure the query here, e.g., setting a refetch interval
         refetchInterval: 60000, // Refetch the data every 60 seconds

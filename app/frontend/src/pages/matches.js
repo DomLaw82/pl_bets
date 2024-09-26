@@ -5,14 +5,14 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Typography from "@mui/material/Typography";
 import { Divider } from "@mui/material";
 import { MatchCards } from "../components/cards";
-import Button from "@mui/material/Button";
-import ButtonGroup from "@mui/material/ButtonGroup";
 import { MatchModal } from "../components/modals";
 import { useQuery } from "react-query";
 import { PageLoading, ModalDataLoading } from "../components/loaders";
+import { SeasonLeagueSelector } from "../components/seasonLeagueSelector";
 
 export default function Matches() {
 	const [selectedSeason, setSelectedSeason] = useState("2024-2025");
+	const [selectedCompetition, setSelectedCompetition] = useState("x-00005");
 	const [matchFacts, setMatchFacts] = useState([]);
 	const [originX, setOriginX] = useState(0);
 	const [originY, setOriginY] = useState(0);
@@ -54,9 +54,9 @@ export default function Matches() {
 		setIsMatchFactsModalOpen(false);
 	}, []);
 
-	async function getMatches(season) {
+	async function getMatches() {
 		const response = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/schedule?season=${season}`,
+			`${process.env.REACT_APP_DATA_API_ROOT}/schedule?season=${selectedSeason}&competition=${selectedCompetition}`,
 			{
 				headers: {
 					"Access-Control-Allow-Origin": "*",
@@ -70,27 +70,11 @@ export default function Matches() {
 		data: matches = [],
 		isLoading: isLoadingMatches,
 		// error: errorMatches,
-	} = useQuery(["matches", selectedSeason], () => getMatches(selectedSeason), {
+	} = useQuery(["matches", selectedSeason, selectedCompetition], getMatches, {
 		staleTime: Infinity,
 	});
 
-	async function getSeasons() {
-		const response = await fetch(
-			`${process.env.REACT_APP_DATA_API_ROOT}/seasons`,
-			{
-				headers: {
-					"Access-Control-Allow-Origin": "*",
-				},
-			}
-		);
-		const seasons = await response.json();
-		return seasons;
-	}
-	const {
-		data: seasons = [],
-		isLoading: isLoadingSeasons,
-		// error: errorSeasons,
-	} = useQuery("seasons", getSeasons, { staleTime: Infinity });
+
 
 	useEffect(() => {
 		let currentDate = new Date();
@@ -112,10 +96,6 @@ export default function Matches() {
 		return matches.filter(match => match.date < formattedDate);
 	}, [matches, formattedDate]);
 
-	if (isLoadingSeasons) {
-		return <PageLoading />;
-	}
-
 	return (
 		<Fragment>
 			<Container component="main">
@@ -128,23 +108,7 @@ export default function Matches() {
 					}}
 				>
 					<Box sx={{ width: "100%", overflow: "hidden", overflowY: "scroll" }}>
-						<Container sx={{ marginTop: 2, marginBottom: 2, textAlign: "center" }}>
-							<ButtonGroup size="large" aria-label="Large button group">
-								{seasons.map((season) => {
-									return (
-										<Button
-											key={season}
-											onClick={() => setSelectedSeason(season)}
-											variant={
-												selectedSeason === season ? "contained" : "outlined"
-											}
-										>
-											{season}
-										</Button>
-									);
-								})}
-							</ButtonGroup>
-						</Container>
+						<SeasonLeagueSelector setSelectedCompetition={setSelectedCompetition} setSelectedSeason={setSelectedSeason} selectedCompetition={selectedCompetition} selectedSeason={selectedSeason} />
 						<Divider sx={{ width: "100%", height: 2 }} />
 						<Divider sx={{ width: "100%", height: 2 }} />
 						{!isLoadingMatches ? (

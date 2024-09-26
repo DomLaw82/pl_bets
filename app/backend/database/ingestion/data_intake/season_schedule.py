@@ -216,7 +216,8 @@ def clean_schedule_data(db_connection: SQLConnection, df: pd.DataFrame) -> pd.Da
 		df = df.rename(columns={"home_team": "home_team_id", "away_team": "away_team_id"})
 		df["competition_id"] = df["league"].apply(lambda x: competition_name_conversion[x])
 		df = df.drop(columns=["league"])
-		df["competition_id"] = get_id_from_name(db_connection, df["competition_id"].iloc[0], "competition")
+		for comp in df["competition_id"].unique():
+			df.loc[df["competition_id"] == comp, "competition_id"] = get_id_from_name(db_connection, comp, "competition")
 
 		deduplicated_df = remove_duplicate_rows(db_connection, df, ["round_number", "date", "home_team_id", "away_team_id"], "schedule")
 		return deduplicated_df

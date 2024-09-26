@@ -713,6 +713,7 @@ export function TeamModal(props) {
 	const tabColumns = {
 		Performance: [
 			"season",
+			"competition",
 			"matches_played",
 			"total_points",
 			"wins",

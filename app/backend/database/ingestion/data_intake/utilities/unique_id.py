@@ -7,7 +7,7 @@ log_class = FluentLogger("unique-id")
 logger = log_class.get_logger()
 
 def find_most_similar(item: str, options: list) -> tuple[str, float, int]:
-    result, score, index = process.extractOne(item, options, processor=utils.default_process) or (None, 0)
+    result, score, index = process.extractOne(item, options, processor=utils.default_process) or (None, 0, 0)
     return result, score, index
 
 def get_player_id(connector, row) -> str:
@@ -71,9 +71,7 @@ def get_id_from_name(db_connector: SQLConnection, name: str, table: str) -> str:
             logger.error(f"Invalid table name '{table}' when looking for ids")
             raise Exception(f"Invalid table name '{table}' when looking for ids")
         
-        edited_name = name_dict.get(table).get(name)
-        if edited_name:
-            name = edited_name
+        name = name_dict.get(table).get(name) or name
         
         database_data = db_connector.get_df(query)
         best_match, score, index = find_most_similar(name, database_data["name"].tolist())
@@ -93,7 +91,7 @@ def get_id_from_name(db_connector: SQLConnection, name: str, table: str) -> str:
             raise Exception(f"Unable to find matching name for {name}") 
         return None
     except Exception as e:
-        logger.error(f"Error - {e}")
+        logger.error(f"Error getting id from name - line {e.__traceback__.tb_lineno} - {e}")
         raise Exception(e)
 
 def get_name_from_database(db_connector: SQLConnection, name: str, table: str) -> str:
@@ -152,5 +150,5 @@ def get_name_from_database(db_connector: SQLConnection, name: str, table: str) -
             logger.error(f"Unable to find matching name for {name}")
             return None 
     except Exception as e:
-        logger.error(f"Error - {e}")
+        logger.error(f"Error getting name from database - line {e.__traceback__.tb_lineno} - {e}")
         raise e

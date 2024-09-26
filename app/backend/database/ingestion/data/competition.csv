@@ -1,68 +1,68 @@
-country_id,name
-c-00001,English Premier League
-c-00001,EFL Championship
-c-00001,EFL League One
-c-00001,EFL League Two
-c-00001,National League
-c-00001,FA Cup
-c-00001,EFL Cup
-c-00001,PL2
-c-00001,PL2 — Div. 1
-c-00001,PL2 — Div. 2
-c-00001,FA Community Shield
-c-00002,Scottish Premiership
-c-00003,DFL-Supercup
-c-00003,DFB-Pokal
-c-00003,Bundesliga
-c-00003,2. Bundesliga
-c-00004,La Liga
-c-00004,La Liga 2
-c-00004,Supercopa de España
-c-00004,Copa del Rey
-c-00005,Ligue 1
-c-00005,Ligue 2
-c-00005,Coupe de la Ligue
-c-00005,Coupe de France
-c-00005,Trophée des Champions
-c-00006,Serie A
-c-00006,Supercoppa
-c-00006,Coppa Italia
-c-00011,Super League Greece
-c-00012,Czech First League
-c-00013,Chinese Super League
-c-00021,World Cup Qualifiers
-c-00021,World Cup
-c-00021,Friendlies
-c-00021,WCQ Play-offs
-c-00021,UEFA Nations League
-c-00022,UEFA Europa Conference League
-c-00022,UEFA Champions League
-c-00022,Gold Cup
-c-00022,UEFA Europa League
-c-00022,UEFA Super Cup
-c-00022,FIFA Confederations Cup
-c-00022,Africa Cup of Nations qualification
-c-00022,Africa Cup of Nations
-c-00022,Asian Cup
-c-00022,UEFA European Championship
-c-00022,UEFA European Championship Qualifying
-c-00022,Copa América
-c-00023,Major League Soccer
-c-00008,Jupiler Pro League
-c-00010,Süper Lig
-c-00007,Eredivisie
-c-00022,CONMEBOL Sudamericana
-c-00009,Primeira Liga
-c-00018,Danish Superliga
-c-00019,HNL
-c-00014,Swiss Super League
-c-00022,CONMEBOL Libertadores
-c-00015,Copa de la Liga Profesional
-c-00015,Liga Argentina
-c-00016,Saudi Pro League
-c-00017,Ekstraklasa
-c-00024,Eliteserien
-c-00025,Allsvenskan
-c-00026,Primera División
-c-00027,Russian Premier League
-c-00028,Ukrainian Premier League
+country_id,name,type
+c-00001,English Premier League,league
+c-00001,EFL Championship,league
+c-00001,EFL League One,league
+c-00001,EFL League Two,league
+c-00001,National League,league
+c-00001,FA Cup,cup
+c-00001,EFL Cup,cup
+c-00001,PL2,league
+c-00001,PL2 — Div. 1,league
+c-00001,PL2 — Div. 2,league
+c-00001,FA Community Shield,cup
+c-00002,Scottish Premiership,league
+c-00003,DFL-Supercup,cup
+c-00003,DFB-Pokal,cup
+c-00003,Bundesliga,league
+c-00003,2. Bundesliga,league
+c-00004,La Liga,league
+c-00004,La Liga 2,league
+c-00004,Supercopa de España,cup
+c-00004,Copa del Rey,cup
+c-00005,Ligue 1,league
+c-00005,Ligue 2,league
+c-00005,Coupe de la Ligue,cup
+c-00005,Coupe de France,cup
+c-00005,Trophée des Champions,cup
+c-00006,Serie A,league
+c-00006,Supercoppa,cup
+c-00006,Coppa Italia,cup
+c-00011,Super League Greece,league
+c-00012,Czech First League,league
+c-00013,Chinese Super League,league
+c-00021,World Cup Qualifiers,international
+c-00021,World Cup,international
+c-00021,Friendlies,international
+c-00021,WCQ Play-offs,international
+c-00021,UEFA Nations League,international
+c-00022,UEFA Europa Conference League,international
+c-00022,UEFA Champions League,international
+c-00022,Gold Cup,international
+c-00022,UEFA Europa League,international
+c-00022,UEFA Super Cup,international
+c-00022,FIFA Confederations Cup,international
+c-00022,Africa Cup of Nations qualification,international
+c-00022,Africa Cup of Nations,international
+c-00022,Asian Cup,international
+c-00022,UEFA European Championship,international
+c-00022,UEFA European Championship Qualifying,international
+c-00022,Copa América,international
+c-00023,Major League Soccer,league
+c-00008,Jupiler Pro League,league
+c-00010,Süper Lig,league
+c-00007,Eredivisie,league
+c-00022,CONMEBOL Sudamericana,international
+c-00009,Primeira Liga,league
+c-00018,Danish Superliga,league
+c-00019,HNL,league
+c-00014,Swiss Super League,league
+c-00022,CONMEBOL Libertadores,international
+c-00015,Copa de la Liga Profesional,cup
+c-00015,Liga Argentina,league
+c-00016,Saudi Pro League,league
+c-00017,Ekstraklasa,league
+c-00024,Eliteserien,league
+c-00025,Allsvenskan,league
+c-00026,Primera División,league
+c-00027,Russian Premier League,league
+c-00028,Ukrainian Premier League,league

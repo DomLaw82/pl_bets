@@ -81,7 +81,7 @@ export default function PlayerProfileTab(props) {
 								</Typography>
 							</Box>
 							<Box>
-								<Typography variant="h5">{player.birth_year}</Typography>
+								<Typography variant="h5">{parseInt(player.birth_year, 10)}</Typography>
 							</Box>
 							<Box>
 								<Typography variant="h5">{player.nationality}</Typography>

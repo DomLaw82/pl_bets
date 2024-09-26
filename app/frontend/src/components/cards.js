@@ -60,7 +60,7 @@ export function PlayerCards(props) {
 								sx={{ alignItems: "center", textAlign: "center", width: "30%" }}
 							>
 								<Typography className={"player-dob"} variant="body1">
-									DOB: {birthYear}
+									Birth Year: {parseInt(birthYear)}
 								</Typography>
 							</Box>
 							<Box
