@@ -10,17 +10,16 @@ N = 15
 # TODO: Identify and handle outliers in your data, as they can significantly impact model performance.
 # TODO: Test decreasing the number of neurons in the hidden layer to see if the model performs better.
 
-def get_model(input_length: int, output_length: int, hidden_layer_one: int, dropout: float, learn_rate: float, n_h_layers: int) -> tf.keras.models.Sequential:
+def get_model(input_length: int, output_length: int, hidden_layers: list, dropout: float, learn_rate: float) -> tf.keras.models.Sequential:
 	"""
 	Creates a neural network model with the specified parameters.
 
 	Parameters:
 	input_length (int): Number of input features.
 	output_length (int): Number of output features.
-	hidden_layer_one (int): Number of units in the first hidden layer.
+	hidden_layers (list[int]): Number of units in each hidden layer.
 	dropout (float): Dropout rate, a fraction of the input units to drop.
 	learn_rate (float): Learning rate for the optimizer.
-	n_h_layers (int): Number of additional hidden layers to add.
 
 	Returns:
 	tf.keras.models.Sequential: The compiled neural network model.
@@ -29,8 +28,8 @@ def get_model(input_length: int, output_length: int, hidden_layer_one: int, drop
 		model = tf.keras.models.Sequential()
 		model.add(tf.keras.layers.Dense(input_length, activation="relu", input_dim=input_length))
 
-		for i in range(n_h_layers):
-			model.add(tf.keras.layers.Dense(hidden_layer_one, activation="relu"))
+		for i in hidden_layers:
+			model.add(tf.keras.layers.Dense(i, activation="relu"))
 
 		model.add(tf.keras.layers.Dropout(dropout))
 		model.add(tf.keras.layers.Dense(output_length, activation="relu"))
@@ -56,16 +55,15 @@ def build_model(X: np.ndarray, y: np.ndarray) -> tf.keras.models.Sequential:
 	"""
 	try:
 		# Get model parameters from environment variables
-		hidden_layer_one = int(os.environ.get('hidden_layer_one'))
+		hidden_layers = [int(i) for i in os.environ.get('hidden_layers').replace('[', '').replace(']', '').split(",")]
 		learn_rate = float(os.environ.get('learn_rate'))
 		dropout = float(os.environ.get('dropout'))
 		batch_size = int(os.environ.get('batch_size'))
 		epochs = int(os.environ.get('epochs'))
-		n_h_layers = int(os.environ.get('n_h_layers'))
-		print(f"Building model with parameters: hidden_layer_one={hidden_layer_one}, learn_rate={learn_rate}, dropout={dropout}, batch_size={batch_size}, epochs={epochs}, n_h_layers={n_h_layers}")
+		print(f"Building model with parameters: hidden_layers={hidden_layers}, learn_rate={learn_rate}, dropout={dropout}, batch_size={batch_size}, epochs={epochs}")
 
 		# Define fit, and save the model
-		model = get_model(X.shape[1], y.shape[1], hidden_layer_one, dropout, learn_rate, n_h_layers)
+		model = get_model(X.shape[1], y.shape[1], hidden_layers, dropout, learn_rate)
 
 		model.fit(X, y, epochs=epochs, batch_size=batch_size, verbose=1)
 

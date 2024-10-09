@@ -1,96 +1,10 @@
 import pandas as pd
 import numpy as np
-from sklearn.decomposition import PCA
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from scikeras.wrappers import KerasRegressor
-import tensorflow as tf
 from sklearn.model_selection import GridSearchCV
+import tensorflow as tf
 import os
-
-output_columns = [
-	"home_goals", "away_goals", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target",
-	"home_corners", "away_corners", "home_fouls", "away_fouls", "home_yellow_cards", "away_yellow_cards",
-	"home_red_cards", "away_red_cards"
-]
-match_columns = [
-	"match_id", "competition_id", "home_team_id", "away_team_id", "referee_id",
-	"home_goals", "away_goals", "home_shots", "away_shots", "home_shots_on_target", "away_shots_on_target",
-	"home_corners", "away_corners", "home_fouls", "away_fouls", "home_yellow_cards", "away_yellow_cards",
-	"home_red_cards", "away_red_cards"
-]
-stats_columns = [
-	"goals","assists","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
-	"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","total_passing_distance",
-	"total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed",
-	"medium_passes_attempted","long_passes_completed","long_passes_attempted","expected_assists","key_passes",
-	"passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target",
-	"average_shot_distance","shots_from_free_kicks","touches_in_defensive_penalty_area","touches_in_defensive_third",
-	"touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches",
-	"take_ons_attempted","take_ons_succeeded","carries","total_carrying_distance","progressive_carrying_distance",
-	"carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received",
-	"progressive_passes_received","tackles_won","defensive_third_tackles","middle_third_tackles","attacking_third_tackles",
-	"dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances",
-	"errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced",
-	"penalties_allowed","penalties_saved","penalties_missed"
-]
-player_stats_columns = ["player_id", "minutes_played","ninetys"] + stats_columns
-pure_stats_columns = ["minutes_played"] + stats_columns
-team_stats_columns = ["team_id"] + stats_columns
-
-def get_mlp_model(hidden_layer_one=13, dropout=0.2, learn_rate=0.01, n_h_layers=1):
-	"""
-	Create a multi-layer perceptron (MLP) model with the specified parameters.
-
-	Parameters:
-	- hidden_layer_one (int): Number of neurons in the first hidden layer. Default is 13.
-	- dropout (float): Dropout rate to remove redundant nodes. Default is 0.2.
-	- learn_rate (float): Learning rate for the optimizer. Default is 0.01.
-	- n_h_layers (int): Number of hidden layers. Default is 1.
-
-	Returns:
-	- model (tf.keras.models.Sequential): The created MLP model.
-	"""
-	model = tf.keras.models.Sequential()
-
-	# input
-	model.add(tf.keras.layers.Dense(15, activation="relu", input_dim=15))
-
-	for i in range(n_h_layers):
-		model.add(tf.keras.layers.Dense(hidden_layer_one, activation="relu"))
-
-	# dropout layer to remove redundant nodes
-	model.add(tf.keras.layers.Dropout(dropout))
-
-	# output
-	model.add(tf.keras.layers.Dense(14, activation="relu"))
-
-	model.compile(
-		optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=learn_rate),
-		loss="mse",
-		metrics=["accuracy"])
-
-	return model
-
-model = KerasRegressor(model=get_mlp_model, verbose=0, hidden_layer_one=10, learn_rate=0.01, dropout=0.05, n_h_layers=1);
-
-# define a grid of the hyperparameter search space
-hidden_layer_one = [10, 12, 15]
-learn_rate = [1e-3, 1e-4, 1e-5]
-dropout = [0.2, 0.3, 0.4]
-batch_size = [32, 64, 128]
-epochs = [12, 15, 17]
-n_h_layers = [1, 2, 3, 4]
-
-# create a dictionary from the hyperparameter grid
-grid = dict(
-	hidden_layer_one=hidden_layer_one,
-	learn_rate=learn_rate,
-	dropout=dropout,
-	batch_size=batch_size,
-	epochs=epochs,
-	n_h_layers=n_h_layers
-)
+from typing import Callable
 
 def scoring(estimator, test_x: np.ndarray, test_y: pd.DataFrame) -> float:
 	"""
@@ -139,43 +53,50 @@ def scoring(estimator, test_x: np.ndarray, test_y: pd.DataFrame) -> float:
 	
 	return average_under_rate
 
-def tune_model_params(dataframe: pd.DataFrame) -> tuple:
+def tune_model_params(get_model_fn: Callable[[int,int,int,float,float,int],tf.keras.models.Sequential], X_train: np.ndarray, y_train: np.ndarray) -> tuple:
 	"""
 	Tune the parameters of a model using grid search and return the best score and parameters.
 
 	Parameters:
-		dataframe (pd.DataFrame): The input dataframe containing the data.
+	get_model_fn (Callable): The function that returns the model.
+	X_train (np.ndarray): The input features for training.
+	y_train (np.ndarray): The actual output values for training.
+
 
 	Returns:
 		tuple: A tuple containing the best score and best parameters found during grid search.
 	"""
-	combined = dataframe
 
-	X = combined[stats_columns]
-	y = combined[output_columns]
+	model = KerasRegressor(model=get_model_fn, verbose=0, input_length=X_train.shape[1], output_length=y_train.shape[1], hidden_layers=[100, 75, 50, 25], learn_rate=0.01, dropout=0.05);
+	
+	hidden_layers = [
+		[84, 70, 56, 42],
+		[100, 70, 50, 30],
+		[100, 100, 100, 100],
+		[84, 84, 84, 84], 
+		[70, 70, 70, 70],
+		[56, 56, 56, 56]
+	]
+	learn_rate = [1e-5]
+	dropout = [0.4]
+	batch_size = [32, 64, 128]
+	epochs = [17]
 
-	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=543)
+	grid = dict(
+		hidden_layers=hidden_layers,
+		learn_rate=learn_rate,
+		dropout=dropout,
+		batch_size=batch_size,
+		epochs=epochs,
+	)
 
-	X_scaler = StandardScaler(copy=True).fit(X_train)
-
-	X_train = X_scaler.transform(X_train)
-	X_test = X_scaler.transform(X_test)
-
-	n=15
-
-	pca = PCA(n_components = n, random_state=576)
-	pca.fit(X_train)
-
-	X_train = pca.transform(X_train)
-	X_test = pca.transform(X_test)
-
-	searcher = GridSearchCV(estimator=model, n_jobs=-2, 
-							param_grid=grid, scoring=scoring, verbose=4, cv=3)
+	searcher = GridSearchCV(estimator=model, n_jobs=-2, param_grid=grid, scoring=scoring, verbose=4, cv=3)
 
 	searchResults = searcher.fit(X_train, y_train)
 
 	best_score = searchResults.best_score_
 	best_params = searchResults.best_params_
+
 	print("[INFO] best score is {:.5f} using {}".format(best_score,best_params))
 
 	for key, value in best_params.items():
