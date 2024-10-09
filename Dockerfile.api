@@ -1,11 +1,12 @@
 FROM python:3.11.7-bookworm
 
+ENV ENVIRONMENT=production
+
 WORKDIR /app
 
 COPY ./app/backend/api/requirements.txt .
 
-COPY ./app/utils/db_connection.py .
-COPY ./app/utils/app_logger.py .
+COPY ./app/utils/* .
 
 RUN pip install --no-cache-dir -r ./requirements.txt
 
