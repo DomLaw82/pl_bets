@@ -12,9 +12,9 @@ from intake_api import app
 import os
 from app_logger import FluentLogger
 import datetime
-from dotenv import load_dotenv
+from define_environment import load_correct_environment_variables
 
-load_dotenv()
+load_correct_environment_variables()
 
 logger = FluentLogger("insert_latest_data").get_logger()
 
