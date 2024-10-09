@@ -1,6 +1,9 @@
 import os, pandas as pd
 from data_intake.utilities.unique_id import get_id_from_name
 from app_logger import FluentLogger
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 logger = FluentLogger("intake-per_90").get_logger()
 

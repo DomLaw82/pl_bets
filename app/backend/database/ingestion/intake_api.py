@@ -4,6 +4,7 @@ from flask_cors import CORS
 import pandas as pd
 import os
 from app_logger import FluentLogger
+from date_functions import get_current_season
 from data_intake.per_90_stats import per_90_update
 from data_intake.download_latest_data import download_all_fixture_data, download_all_game_data
 from data_intake.ref_match import clean_ref_match_data
@@ -13,6 +14,9 @@ from db_connection import SQLConnection
 import datetime
 from update_match_logs import update_match_logs_main
 from data_intake.utilities.save_to_database import save_to_database
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 logger = FluentLogger("data_ingestion-api").get_logger()
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
@@ -70,18 +74,6 @@ def upload_historic_player_data():
     except Exception as e:
         logger.error(f"Error uploading files: {str(e)}")
         return jsonify(f"Error uploading files: {str(e)}"), 500
-
-
-def get_current_season():
-    current_date = datetime.date.today()
-    current_year = current_date.year
-    current_month = current_date.month
-
-    if current_month >= 8:  # Season starts in August
-        return f"{str(current_year)}-{str(current_year + 1)}"
-    else:
-        return f"{str(current_year - 1)}-{str(current_year)}"
-
 
 # /refresh/game-data
 @registry.handles(

@@ -6,7 +6,9 @@ from data_intake.utilities.string_manipulation import escape_single_quote
 from app_logger import FluentLogger
 import time
 from datetime import datetime
-from io import StringIO
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 logger = FluentLogger("intake-team_ref_match").get_logger()
 

@@ -2,6 +2,9 @@ import pandas as pd
 from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 from data_intake.utilities.save_to_database import save_to_database
 from app_logger import FluentLogger
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 logger = FluentLogger("intake-country_competition").get_logger()
 

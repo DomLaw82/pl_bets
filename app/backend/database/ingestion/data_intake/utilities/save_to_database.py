@@ -1,6 +1,9 @@
 import pandas as pd
 from app_logger import FluentLogger
 from db_connection import SQLConnection
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 log_class = FluentLogger("intake-save_to_database")
 logger = log_class.get_logger()

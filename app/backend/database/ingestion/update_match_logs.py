@@ -3,9 +3,13 @@ import bs4
 import datetime, time
 import pandas as pd
 from app_logger import FluentLogger
+from define_environment import load_correct_environment_variables
+from date_functions import get_current_season
+
+load_correct_environment_variables()
 
 PLAYER_DATA_URL = f'https://fbref.com/en/comps/9/XXXX-XXXX/stats/XXXX-XXXX-Premier-League-Stats'
-logger = FluentLogger("update-match-logs").get_logger()
+logger = FluentLogger("update-match-logs", "localhost").get_logger()
 
 def get_fbref_data(url: str, season: str) -> list|None:
 
@@ -180,6 +184,7 @@ def get_match_log_data(name: str, fbref_id: str, url: str, season: str, **kwargs
 def update_match_logs_main(current_season: str) -> pd.DataFrame:
 	url = PLAYER_DATA_URL.replace('XXXX-XXXX', current_season)
 	season_players = get_fbref_data(url, current_season)
+	season_players = pd.read_csv('./data/fbref_data/player_data.csv').to_dict('records')
 
 	all_season_players = pd.DataFrame()
 	if season_players:
@@ -235,6 +240,7 @@ def update_match_logs_main(current_season: str) -> pd.DataFrame:
 				elif "missing_data" in result:
 					missing_enhanced_data.extend(result["missing_data"])
 			except Exception as e:
+				print("error: "+e)
 				logger.info(f'FAILED - {e.__cause__}: {str(e)}')
 				missing_enhanced_data.append({
 					'fbref_id': fbref_id,
@@ -261,3 +267,9 @@ def update_match_logs_main(current_season: str) -> pd.DataFrame:
 	# Filter duplicates based on what's in the database
 	add_to_db_df = add_to_db_df[~add_to_db_df[['fbref_id', 'season', 'date']].isin(all_matches[['fbref_id', 'season', 'date']])]
 	return add_to_db_df
+
+if __name__ == "__main__":
+	load_correct_environment_variables()
+	current_season = get_current_season()
+	print(f"Current season: {current_season}")
+	update_match_logs_main(current_season)

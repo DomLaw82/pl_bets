@@ -4,6 +4,9 @@ from app_logger import FluentLogger
 from db_connection import SQLConnection
 from data_intake.utilities.save_to_database import save_to_database
 from data_intake.utilities.unique_id import get_id_from_name
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 logger = FluentLogger("intake-team").get_logger()
 PLAYER_DATA_SAVE_PATH = "./data/player_data/player_data.csv"
