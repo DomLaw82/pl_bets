@@ -56,8 +56,6 @@ export default function Prediction(props) {
 		useState(false);
 	const [isPredictionHistoryModalOpen, setIsPredictionHistoryModalOpen] =
 		useState(false);
-	const [fetchPrediction, setFetchPrediction] = useState(false);
-
 	const [predictionHistory, setPredictionHistory] = useState([]);
 
 	// const [originX, setOriginX] = useState(0);
@@ -386,8 +384,6 @@ export default function Prediction(props) {
 													awayTeam={awayTeam}
 													predictionOutput={predictionOutput}
 													isOpen={isPredictionOutputModalOpen}
-													setFetchPrediction={setFetchPrediction}
-													fetchPrediction={fetchPrediction}
 													setIsOpen={setIsPredictionOutputModalOpen}
 													originX={originX}
 													originY={originY}

@@ -127,14 +127,23 @@ export function MatchCards(props) {
 		gameWeek,
 		date,
 		homeTeam,
+		homeTeamId,
+		setHomeTeamId,
 		awayTeam,
+		awayTeamId,
+		setAwayTeamId,
 		result,
-		handleOpenMatchFactsModal,
 		homeWinProb,
 		awayWinProb,
 		drawProb,
 		prediction,
+		setOriginX,
+		setOriginY,
+		setHomeTeam,
+		setAwayTeam,
+		setIsPredictionModalOpen,
 		futureMatch,
+		handleOpenMatchFactsModal,
 	} = props;
 
 	return (
@@ -144,6 +153,14 @@ export function MatchCards(props) {
 					onClick={(event) => {
 						if (!futureMatch) {
 							handleOpenMatchFactsModal(event, date, homeTeam, awayTeam);
+						} else {
+							setHomeTeamId(homeTeamId);
+							setAwayTeamId(awayTeamId);
+							setOriginX(event.clientX);
+							setOriginY(event.clientY);
+							setHomeTeam(homeTeam);
+							setAwayTeam(awayTeam);
+							setIsPredictionModalOpen(true);
 						}
 					}}
 				>
