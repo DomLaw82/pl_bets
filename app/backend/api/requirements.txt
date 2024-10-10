@@ -11,3 +11,4 @@ psycopg2-binary
 rapidfuzz
 requests
 fluent-logger
+python-dotenv
