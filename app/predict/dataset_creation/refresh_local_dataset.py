@@ -4,8 +4,9 @@ from create_dataset import create_training_dataset
 import os
 from dotenv import load_dotenv
 from app_logger import FluentLogger
+from define_environment import load_correct_environment_variables
 
-load_dotenv()
+load_correct_environment_variables()
 
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 logger = FluentLogger("predict-refresh_local_dataset").get_logger()
@@ -19,6 +20,3 @@ def recreate_local_dataset():
 	except Exception as e:
 		logger.error(f"Error recreating local dataset: {e}")
 		return {"message": f"Error: {e}", "code": 500}
-
-if __name__ == "__main__":
-	recreate_local_dataset()

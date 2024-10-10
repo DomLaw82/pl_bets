@@ -5,6 +5,12 @@ from sklearn.model_selection import GridSearchCV
 import tensorflow as tf
 import os
 from typing import Callable
+from app_logger import FluentLogger
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
+
+logger = FluentLogger("tune_model_params").get_logger()
 
 def scoring(estimator, test_x: np.ndarray, test_y: pd.DataFrame) -> float:
 	"""
@@ -70,17 +76,14 @@ def tune_model_params(get_model_fn: Callable[[int,int,int,float,float,int],tf.ke
 	model = KerasRegressor(model=get_model_fn, verbose=0, input_length=X_train.shape[1], output_length=y_train.shape[1], hidden_layers=[100, 75, 50, 25], learn_rate=0.01, dropout=0.05);
 	
 	hidden_layers = [
-		[84, 70, 56, 42],
-		[100, 70, 50, 30],
-		[100, 100, 100, 100],
-		[84, 84, 84, 84], 
-		[70, 70, 70, 70],
-		[56, 56, 56, 56]
+		# [84, 70, 56, 42],
+		# [100, 70, 50, 30], # loss: 51.1779 - accuracy: 0.3213 loss: 40.1592 - accuracy: 0.2843
+		[84, 84, 84, 84], # loss: 43.8117 - accuracy: 0.2729 loss: 42.6110 - accuracy: 0.2470 loss: 49.9276 - accuracy: 0.2377 loss: 41.6125 - accuracy: 0.3479
 	]
 	learn_rate = [1e-5]
 	dropout = [0.4]
-	batch_size = [32, 64, 128]
-	epochs = [17]
+	batch_size = [64]
+	epochs = [20]
 
 	grid = dict(
 		hidden_layers=hidden_layers,
@@ -97,7 +100,7 @@ def tune_model_params(get_model_fn: Callable[[int,int,int,float,float,int],tf.ke
 	best_score = searchResults.best_score_
 	best_params = searchResults.best_params_
 
-	print("[INFO] best score is {:.5f} using {}".format(best_score,best_params))
+	logger.info("[INFO] best score is {:.5f} using {}".format(best_score,best_params))
 
 	for key, value in best_params.items():
 		os.environ[key] = str(value)
