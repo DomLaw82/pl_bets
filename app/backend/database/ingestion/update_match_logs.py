@@ -9,7 +9,7 @@ from date_functions import get_current_season
 load_correct_environment_variables()
 
 PLAYER_DATA_URL = f'https://fbref.com/en/comps/9/XXXX-XXXX/stats/XXXX-XXXX-Premier-League-Stats'
-logger = FluentLogger("update-match-logs", "localhost").get_logger()
+logger = FluentLogger("update-match-logs").get_logger()
 
 def get_fbref_data(url: str, season: str) -> list|None:
 
