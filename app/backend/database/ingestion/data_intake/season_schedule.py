@@ -84,7 +84,7 @@ def clean_schedule_data(db_connection: SQLConnection, df: pd.DataFrame) -> pd.Da
 				team_df = df[(df['home_team'] == team_name) | (df['away_team'] == team_name)]
 				team_df.loc[:, "date_no_time"] = pd.to_datetime(team_df["date"]).dt.strftime("%Y-%m-%d")
 				index = team_df.index
-				elos = get_team_elo_rating(team_name)[["Club", "Elo", "From", "To"]]
+				elos = get_team_elo_rating(team_name)[["Date", "Club", "Elo", "From", "To"]]
 
 				if not elos.empty:
 
