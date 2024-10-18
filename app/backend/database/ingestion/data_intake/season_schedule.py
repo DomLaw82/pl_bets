@@ -5,9 +5,11 @@ from data_intake.utilities.unique_id import get_id_from_name, get_name_from_data
 from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 from app_logger import FluentLogger
 from db_connection import SQLConnection
-import requests
-from io import StringIO
 from datetime import datetime
+from elo_ratings import get_team_elo_rating
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 logger = FluentLogger("intake-season_schedule").get_logger()
 SCHEDULE_SAVE_PATH_ROOT = "data/schedule_data/"
@@ -15,67 +17,7 @@ SEASON_END_YEAR = datetime.now().year + 2 if datetime.now().month > 8 else datet
 FIXTURE_SEASON_ARRAY = [str(year) for year in range(2017, SEASON_END_YEAR, 1)]
 LEAGUES = ["epl", "championship"]
 
-elo_name_conversion = {
-	"Manchester City": "ManCity",
-	"Man City": "ManCity",
-	"Arsenal": "Arsenal",
-	"Liverpool": "Liverpool",
-	"Chelsea": "Chelsea",
-	"Newcastle United": "Newcastle",
-	"Tottenham Hotspur": "Tottenham",
-	"Spurs": "Tottenham",
-	"Manchester United": "ManUnited",
-	"Man Utd": "ManUnited",
-	"Huddersfield Town": "Huddersfield",
-	"Aston Villa": "AstonVilla",
-	"Crystal Palace": "CrystalPalace",
-	"West Ham United": "WestHam",
-	"West Ham": "WestHam",
-	"Fulham": "Fulham",
-	"Brighton & Hove Albion": "Brighton",
-	"Brentford": "Brentford",
-	"Everton": "Everton",
-	"Bournemouth": "Bournemouth",
-	"Wolverhampton Wanderers": "Wolves",
-	"Nottingham Forest": "Forest",
-	"Nott'm Forest": "Forest",
-	"Leicester City": "Leicester",
-	"Southampton": "Southampton",
-	"Ipswich Town": "Ipswich",
-	"Burnley": "Burnley",
-	"Leeds United": "Leeds",
-	"Luton Town": "Luton",
-	"Middlesbrough": "Middlesbrough",
-	"West Bromwich Albion": "WestBrom",
-	"West Brom": "WestBrom",
-	"Sheffield United": "SheffieldUnited",
-	"Sheffield Utd": "SheffieldUnited",
-	"Norwich City": "Norwich",
-	"Hull City": "Hull",
-	"Coventry City": "Coventry",
-	"Watford": "Watford",
-	"Bristol City": "Bristol City",
-	"Swansea City": "Swansea",
-	"Stoke City": "Stoke",
-	"Sheffield Wednesday": "SheffieldWeds",
-	"Blackburn Rovers": "Blackburn",
-	"Millwall": "Millwall",
-	"Sunderland": "Sunderland",
-	"Queens Park Rangers": "QPR",
-	"Preston North End": "Preston",
-	"Plymouth Argyle": "Plymouth",
-	"Oxford United": "Oxford",
-	"Cardiff City": "Cardiff",
-	"Portsmouth": "Portsmouth",
-	"Derby County": "Derby",
-	"Bristol City": "Bristol",
-	"Wigan Athletic": "Wigan",
-	"Birmingham City": "Birmingham",
-	"Charlton Athletic": "Charlton",
-	"Rotherham United": "Rotherham",
-	"Wycombe Wanderers": "Wycombe",
-	"Peterborough United": "Peterborough",
-}
+
 competition_name_conversion = {
     "epl": "English Premier League",
     "championship" : "EFL Championship"
@@ -115,34 +57,6 @@ def download_all_fixture_data():
 				logger.error(f'An error occurred while downloading {league} fixtures for season {season}: {str(e)}')
 				continue
 
-def get_team_elo_rating(team_name: str) -> pd.DataFrame:
-	"""
-	Get the ELO rating of a team on a specific date.
-
-	Args:
-		team_name (str): The name of the team.
-
-	Returns:
-		pd.DataFrame: The ELO rating DataFrame of the team on the given date.
-	"""
-	try:
-		elo_team_name = elo_name_conversion.get(team_name, team_name)
-		url = f"http://api.clubelo.com/{elo_team_name}"
-		logger.info(f"Getting ELO rating for {elo_team_name}: {url}.")
-		response = requests.get(url)
-
-		if response.status_code == 200:
-			csv_data = StringIO(response.text)
-			df = pd.read_csv(csv_data)
-			df["Club"] = team_name
-			return df
-		else:
-			logger.error(f"Error finding ELO for {elo_team_name}: {response.status_code}")
-			return pd.DataFrame()
-	except Exception as e:
-		logger.error(f"Error finding ELO for {elo_team_name}: {e}")
-		return pd.DataFrame()
-
 def clean_schedule_data(db_connection: SQLConnection, df: pd.DataFrame) -> pd.DataFrame:
 	# Rename columns to lowercase with underscores
 	try:
@@ -170,22 +84,14 @@ def clean_schedule_data(db_connection: SQLConnection, df: pd.DataFrame) -> pd.Da
 				team_df = df[(df['home_team'] == team_name) | (df['away_team'] == team_name)]
 				team_df.loc[:, "date_no_time"] = pd.to_datetime(team_df["date"]).dt.strftime("%Y-%m-%d")
 				index = team_df.index
-				elos = get_team_elo_rating(team_name)[["Club", "Elo", "From", "To"]]
+				elos = get_team_elo_rating(team_name)[["Date", "Club", "Elo", "From", "To"]]
 
 				if not elos.empty:
-					elos['From'] = pd.to_datetime(elos['From'])
-					elos['To'] = pd.to_datetime(elos['To'])
 
-					elos_expanded = pd.DataFrame({
-						'Date': pd.date_range(start=elos['From'].min(), end=elos['To'].max(), freq='D')
-					})
-					elos_expanded = elos_expanded.merge(elos, left_on='Date', right_on='From', how='left').ffill()
-					elos_expanded["Date"] = pd.to_datetime(elos_expanded["Date"]).dt.strftime("%Y-%m-%d")
-
-					team_df = team_df.merge(elos_expanded[["Date", "Club", "Elo"]], left_on=['date_no_time', 'home_team'], right_on=['Date', 'Club'], how='left')
+					team_df = team_df.merge(elos[["Date", "Club", "Elo"]], left_on=['date_no_time', 'home_team'], right_on=['Date', 'Club'], how='left')
 					team_df.rename(columns={"Elo": "home_elo"}, inplace=True)
 
-					team_df = team_df.merge(elos_expanded[["Date", "Club", "Elo"]], left_on=['date_no_time', 'away_team'], right_on=['Date', 'Club'], how='left')
+					team_df = team_df.merge(elos[["Date", "Club", "Elo"]], left_on=['date_no_time', 'away_team'], right_on=['Date', 'Club'], how='left')
 					team_df.rename(columns={"Elo": "away_elo"}, inplace=True)
 
 					if 'Date' in team_df.columns:

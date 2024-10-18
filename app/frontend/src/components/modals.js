@@ -500,6 +500,7 @@ export function PredictionOutputModal(props) {
 		setIsOpen,
 		originX,
 		originY,
+		isLoadingData,
 	} = props;
 
 	const modalAnimation = useSpring({
@@ -548,7 +549,7 @@ export function PredictionOutputModal(props) {
 						...modalAnimation,
 					}}
 				>
-					{predictionOutput ? (
+					{predictionOutput && !isLoadingData ? (
 						<PredictionOutputCard
 							homeTeam={homeTeam}
 							awayTeam={awayTeam}

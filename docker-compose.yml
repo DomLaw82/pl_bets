@@ -20,7 +20,7 @@ services:
       dockerfile: ./Dockerfile.database
     image: pl-postgres
     env_file:
-      - ./app/backend/database/db_setup/.env
+      - ./app/backend/database/db_setup/.env.development
     ports:
       - 5432:5432
     healthcheck:
@@ -36,7 +36,7 @@ services:
       dockerfile: ./Dockerfile.ingestion
     image: local-data-ingestion
     env_file:
-      - ./app/backend/database/ingestion/.env
+      - ./app/backend/database/ingestion/.env.development
     depends_on:
       database:
         condition: service_healthy
@@ -56,7 +56,7 @@ services:
       dockerfile: ./Dockerfile.api
     image: api
     env_file:
-      - ./app/backend/api/.env
+      - ./app/backend/api/.env.development
     depends_on:
       local-data-ingestion:
         condition: service_healthy
@@ -75,7 +75,7 @@ services:
       dockerfile: ./Dockerfile.predict
     image: pl-predictor
     env_file:
-      - ./app/predict/.env
+      - ./app/predict/.env.development
     depends_on:
       api:
         condition: service_healthy
@@ -94,7 +94,7 @@ services:
       dockerfile: ./Dockerfile.frontend
     image: frontend
     env_file:
-      - ./app/frontend/.env
+      - ./app/frontend/.env.development
     depends_on:
       predict:
         condition: service_healthy

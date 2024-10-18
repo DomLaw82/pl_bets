@@ -7,6 +7,9 @@ from data_intake.ref_match import download_all_game_data
 from data_intake.season_schedule import download_all_fixture_data
 from data_intake.managers import download_manager_html_data
 import pandas as pd
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 logger = FluentLogger("download_latest_data").get_logger()
 

@@ -2,6 +2,9 @@ from rapidfuzz import process, fuzz, utils
 from db_connection import SQLConnection
 import pandas as pd
 from app_logger import FluentLogger
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 log_class = FluentLogger("unique-id")
 logger = log_class.get_logger()

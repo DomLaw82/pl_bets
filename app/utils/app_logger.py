@@ -2,6 +2,10 @@ import logging
 from fluent import handler as fluent_handler
 import requests
 import os
+import re
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 class FluentLogger:
     def __init__(self, tag, host=os.getenv("FLUENT_APP_HOST_NAME"), port=24224, level=logging.DEBUG):
@@ -57,7 +61,7 @@ class FluentLogger:
 
     def log_sql_query_execution(self, query: str):
         """Helper function to log SQL queries"""
-        self.logger.debug(f"Executing SQL query: {query}")
+        self.logger.debug("Executing SQL query: {}".format(re.sub(r'\s+', ' ', query.replace('\n', '').replace('\t', '')).strip()))
 
     def log_error(self, error_message: Exception):
         """Helper function to log error messages"""

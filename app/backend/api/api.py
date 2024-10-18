@@ -7,6 +7,9 @@ from app_logger import FluentLogger
 from datetime import datetime
 import os, datetime
 import numpy as np
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 logger = FluentLogger("api").get_logger()

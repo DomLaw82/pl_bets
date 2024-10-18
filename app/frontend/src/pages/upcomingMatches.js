@@ -12,11 +12,19 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { LeagueSelector } from "../components/seasonLeagueSelector";
+import { PredictionOutputModal } from "../components/modals";
 
 export default function UpcomingMatches() {
 	const [selectedSeason, setSelectedSeason] = useState("2024-2025");
 	const [formattedDate, setCurrentDate] = useState("");
 	const [selectedCompetition, setSelectedCompetition] = useState("x-00005");
+	const [homeTeamId, setHomeTeamId] = useState("");
+	const [homeTeam, setHomeTeam] = useState("");
+	const [awayTeam, setAwayTeam] = useState("");
+	const [awayTeamId, setAwayTeamId] = useState("");
+	const [isPredictionModalOpen, setIsPredictionModalOpen] = useState(false);
+	const [originX, setOriginX] = useState(0);
+	const [originY, setOriginY] = useState(0);
 
 	useEffect(() => {
 		const currentDate = new Date();
@@ -102,6 +110,34 @@ export default function UpcomingMatches() {
 		return matches.filter(match => match.game_week === (parseInt(currentGameWeek) + 1).toString() && match.date > formattedDate);
 	}, [matches, formattedDate, currentGameWeek]);
 
+	async function getMatchFactsPrediction(homeTeamId, awayTeamId) {
+		if (!homeTeamId || !awayTeamId) {
+			return;
+		}
+		const response = await fetch(
+			`${process.env.REACT_APP_PREDICT_API_ROOT}/predict`,
+			{
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					homeTeamId: homeTeamId,
+					awayTeamId: awayTeamId,
+					homePlayers: [],
+					awayPlayers: [],
+				}),
+			}
+		);
+		return response.json();
+	}
+	const {
+		data: matchFactsPrediction = [],
+		isLoading: isLoadingMatchFactsPrediction,
+		// error: errorCompetitions,
+	} = useQuery(["matchFactsPrediction", homeTeamId, awayTeamId], () => getMatchFactsPrediction(homeTeamId, awayTeamId), { staleTime: Infinity });
+
 	if (isLoadingMatches) {
 		return <PageLoading />;
 	}
@@ -177,6 +213,15 @@ export default function UpcomingMatches() {
 																prediction ? prediction.prediction : null
 															}
 															futureMatch={formattedDate < match.date ? true : false}
+															homeTeamId={match.home_team_id}
+															setHomeTeamId={setHomeTeamId}
+															awayTeamId={match.away_team_id}
+															setAwayTeamId={setAwayTeamId}
+															setOriginX={setOriginX}
+															setOriginY={setOriginY}
+															setHomeTeam={setHomeTeam}
+															setAwayTeam={setAwayTeam}
+															setIsPredictionModalOpen={setIsPredictionModalOpen}
 														/>
 													);
 												})}
@@ -228,6 +273,20 @@ export default function UpcomingMatches() {
 						) : <PageLoading />}
 					</Box>
 				</Box>
+				{ matchFactsPrediction ?
+					<PredictionOutputModal
+						homeTeam={homeTeam}
+						awayTeam={awayTeam}
+						predictionOutput={matchFactsPrediction}
+						isOpen={isPredictionModalOpen}
+						setIsOpen={setIsPredictionModalOpen}
+						originX={originX}
+						originY={originY}
+						isLoadingData={isLoadingMatchFactsPrediction}
+					/>
+					:
+					<ModalDataLoading />
+				}
 			</Container>
 		</Fragment>
 	);

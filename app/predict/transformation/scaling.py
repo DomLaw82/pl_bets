@@ -1,29 +1,34 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-from joblib import dump
+from joblib import dump, load
 import numpy as np
 
 
-pure_stats_columns_no_minutes = [
-	"goals","assists","direct_goal_contributions","non_penalty_goals","penalties_scored","penalties_attempted","yellow_cards","red_cards","expected_goals",
-	"non_penalty_expected_goals","expected_assisted_goals","progressive_carries","progressive_passes","total_passing_distance","total_progressive_passing_distance","short_passes_completed","short_passes_attempted","medium_passes_completed","medium_passes_attempted",
-	"long_passes_completed","long_passes_attempted","expected_assists","key_passes","passes_into_final_third","passes_into_penalty_area","crosses_into_penalty_area","shots","shots_on_target","average_shot_distance","shots_from_free_kicks",
-	"penalties_made","touches","touches_in_defensive_penalty_area","touches_in_defensive_third","touches_in_middle_third","touches_in_attacking_third","touches_in_attacking_penalty_area","live_ball_touches","take_ons_attempted","take_ons_succeeded","times_tackled_during_take_on",
-	"carries","total_carrying_distance","progressive_carrying_distance","carries_into_final_third","carries_into_penalty_area","miscontrols","dispossessed","passes_received","progressive_passes_received","tackles","tackles_won","defensive_third_tackles",
-	"middle_third_tackles","attacking_third_tackles","dribblers_tackled","dribbler_tackles_attempted","shots_blocked","passes_blocked","interceptions","clearances","errors_leading_to_shot","goals_against","shots_on_target_against","saves","clean_sheets","penalties_faced","penalties_allowed","penalties_saved","penalties_missed"
-]
+def recreate_scaler(X: np.ndarray) -> None:
 
-def recreate_scaler() -> np.array:
-	df = pd.read_csv("../files/final_combined_dataframe.csv")
+    scaler = StandardScaler(copy=True).fit(X)    
 
-	scaler = StandardScaler(copy=True).fit(df[pure_stats_columns_no_minutes])
+    dump(scaler, './files/prediction_scaler.bin', compress=True)
 
-	dump(scaler, '../files/prediction_scaler.bin', compress=True)
+def perform_scaling(X_train: np.ndarray, X_test: np.ndarray = np.array([]), no_train: bool = False) -> tuple[np.ndarray, np.ndarray]:
+	"""
+	Perform scaling on the input data.
 
-	X_scaled = scaler.transform(df[pure_stats_columns_no_minutes])
-	
-	return X_scaled
+	Parameters:
+	X_train (list): The training data.
+	X_test (list): The testing data.
 
-if __name__ == "__main__":
-	recreate_scaler()
-	
+	Returns:
+    	(X_train - np.ndarray, X_test - np.ndarray): The transformed training and testing data after scaling
+	"""
+	try:
+		scaler: StandardScaler = load('files/prediction_scaler.bin')
+
+		if not no_train:
+			X_test = scaler.transform(X_test)
+
+		X_train = scaler.transform(X_train)
+		
+		return X_train, X_test
+	except Exception as e:
+		raise Exception(e)

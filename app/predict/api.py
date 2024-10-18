@@ -5,10 +5,12 @@ from flask_cors import CORS
 import pandas as pd
 import sys
 from predict_match_outcome import predict_match_outcome
-from rebuild_model import rebuild_model
-from retune_and_build_model import retune_and_build_model
+from retune_and_build_model import rebuild_model
 from app_logger import FluentLogger
 from win_prediction import run_win_prediction
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 #TODO: Move SQLConnection HERE
 rebar = Rebar()
 registry = rebar.create_handler_registry()
@@ -84,7 +86,7 @@ def rebuild():
 )
 def retune():
 	try:
-		output = retune_and_build_model()
+		output = rebuild_model(retune=True)
 		
 		score = output["score"]
 		params = output["params"]

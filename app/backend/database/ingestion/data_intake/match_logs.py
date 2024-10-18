@@ -3,6 +3,9 @@ import os
 from app_logger import FluentLogger
 from db_connection import SQLConnection
 from data_intake.utilities.unique_id import get_id_from_name, get_name_from_database
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 logger = FluentLogger("intake-match_logs").get_logger()
 

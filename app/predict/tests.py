@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 import numpy as np
-# from dataset_creation.create_dataset import group_stats_by_player_for_home_and_away_teams, create_per_90_stats, create_contribution_per_90_stats, group_stats_by_team, convert_team_rows_to_single_row, combine_form_and_career_stats
+# from dataset_creation.create_dataset import group_stats_by_player_for_home_and_away_teams, create_player_stat_per_minute, create_contribution_per_90_stats, group_stats_by_team, convert_team_rows_to_single_row, combine_form_and_career_stats
 from win_prediction_modules.data_preparation import get_team_form, get_last_five_head_to_head_matches_rolling_goal_difference, add_historic_head_to_head_results
 
 pd.set_option('display.max_columns', None)
@@ -104,7 +104,7 @@ pd.set_option('display.max_rows', None)
 #         # Assert that the actual DataFrame with grouped player statistics matches the expected values
 #         self.assertTrue(grouped_df.equals(expected_grouped_df), "Grouped player statistics are incorrect")
 
-#     def test_create_per_90_stats(self):
+#     def test_create_player_stat_per_minute(self):
 #         # Create a sample DataFrame with statistics
 #         df = pd.DataFrame({
 #             'Goals': [76, 64, 52],
@@ -113,7 +113,7 @@ pd.set_option('display.max_rows', None)
 #         })
 
 #         # Call the function to create per 90 minutes statistics
-#         df_per_90 = create_per_90_stats(df, ["Goals", "Assists", "Shots"])
+#         df_per_90 = create_player_stat_per_minute(df, ["Goals", "Assists", "Shots"])
 
 #         # Define the expected per 90 minutes statistics
 #         expected_df_per_90 = pd.DataFrame({
@@ -202,7 +202,7 @@ pd.set_option('display.max_rows', None)
 #         })
 
 #         # Call the function to combine the career and form statistics
-#         combined_df_one = combine_form_and_career_stats((career_df, form_df), pred=True, columns_to_evaluate=['goals', 'assists', "minutes_played"])
+#         combined_df_one = combine_form_and_career_stats((career_df, form_df), no_train=True, columns_to_evaluate=['goals', 'assists', "minutes_played"])
 
 #         # Define the expected combined DataFrame
 #         expected_combined_df_one = pd.DataFrame({

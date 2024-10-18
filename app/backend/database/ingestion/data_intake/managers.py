@@ -6,6 +6,9 @@ from data_intake.utilities.unique_id import get_id_from_name
 from app_logger import FluentLogger
 from data_intake.utilities.remove_duplicates import remove_duplicate_rows
 import requests
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 logger = FluentLogger("intake-manager").get_logger()
 

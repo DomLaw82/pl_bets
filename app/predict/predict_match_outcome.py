@@ -1,14 +1,14 @@
 from dataset_creation.create_dataset import create_prediction_dataset
-from neural_net.build_and_save_model import perform_scaling
+from transformation.scaling import perform_scaling
 import tensorflow as tf
 import pandas as pd
 import numpy as np
 import os
 from db_connection import SQLConnection
 from app_logger import FluentLogger
-from dotenv import load_dotenv
+from define_environment import load_correct_environment_variables
 
-load_dotenv()
+load_correct_environment_variables()
 
 logger = FluentLogger("predict").get_logger()
 
@@ -25,7 +25,7 @@ db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PAS
 # Use the model to predict the match stats for the game
 # Return these stats to the user
 
-def predict_match_outcome(home_team_id: str, away_team_id: str) -> dict:
+def predict_match_outcome(home_team_id: str, away_team_id: str, **kwargs) -> dict:
 	"""
 	Predicts the outcome of a match between two teams based on the given home team, home players, away team, and away players.
 
@@ -37,27 +37,20 @@ def predict_match_outcome(home_team_id: str, away_team_id: str) -> dict:
 	dict: A dictionary containing the predicted match facts.
 	"""
 	try:
+		home_squad_ids = kwargs.get("home_squad_ids", [])
+		away_squad_ids = kwargs.get("away_squad_ids", [])
 		# Neural network prediction
 		pd.set_option('display.max_columns', 10)
 		df = create_prediction_dataset(db, home_team_id, away_team_id)
-		
+		print(f"Prediction dataset:\n\n{df}")
 		if df.empty:
 			return None
 
-		X, _ = perform_scaling(df, np.array([]), pred=True)
+		X, _ = perform_scaling(df, np.array([]), no_train=True)
 		
-		model = tf.keras.models.load_model("files/stats_regression_model.h5")
+		model: tf.keras.models.Sequential = tf.keras.models.load_model("files/stats_regression_model.h5")
 		prediction = model.predict(X)
 		return prediction
 	except Exception as e:
 		logger.error(f"An error occurred while predicting the match outcome: {str(e)}")
 		return None
-
-	# Logistic regression prediction
-	# try:
-	# 	odds = run_win_prediction(home_team_id, away_team_id)
-	# except Exception as e:
-	# 	print(e)
-	# 	odds = None
-
-	# return prediction, odds
