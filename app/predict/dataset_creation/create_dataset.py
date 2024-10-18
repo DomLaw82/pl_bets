@@ -129,7 +129,7 @@ def get_all_match_data(sql_connection: SQLConnection, **kwargs) -> pd.DataFrame:
     """
     return sql_connection.get_df(query)
 
-def get_player_stats(sql_connection: SQLConnection, game_season: str, date: str, home_team_id: str, away_team_id: str, head_to_head: bool = False) -> pd.DataFrame:
+def get_player_stats_for_game(sql_connection: SQLConnection, game_season: str, date: str, home_team_id: str, away_team_id: str, head_to_head: bool = False) -> pd.DataFrame:
     """
     Retrieves player statistics up to a certain date for specified teams.
     """
@@ -231,7 +231,7 @@ def create_player_stat_per_minute(df: pd.DataFrame, columns_to_evaluate: list = 
         return df
     except Exception as e:
         raise Exception(e)
-
+    
 def create_contribution_per_90_stats(df: pd.DataFrame, columns_to_evaluate: list = None) -> pd.DataFrame:
     """
     Creates contribution per 90 minutes statistics for the given DataFrame.
@@ -342,30 +342,6 @@ def grouping_prediction_dataframe_rows(df: pd.DataFrame, home_team_id: str, away
     except Exception as e:
         print(e)
         raise Exception(e)
-    
-def combine_career_and_h2h_stats(df: pd.DataFrame, h2h_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Combines the career and head-to-head statistics DataFrames.
-
-    Args:
-        df (pd.DataFrame): The DataFrame containing career statistics.
-        h2h_df (pd.DataFrame): The DataFrame containing head-to-head statistics.
-
-    Returns:
-        pd.DataFrame: The combined DataFrame containing career and head-to-head statistics.
-    """
-    try:
-        career_to_h2h_ratio = 0.3
-        df = df.multiply(1 - career_to_h2h_ratio)
-        h2h_df = h2h_df.multiply(career_to_h2h_ratio)
-        df = pd.concat([df, h2h_df], axis=0)
-        df = df.sum(axis=0).to_frame().T
-        return df
-    except Exception as e:
-        raise Exception(e)
-
-def add_elo_ratings(df: pd.DataFrame) -> pd.DataFrame:
-    pass
 
 def create_training_dataset(sql_connection) -> pd.DataFrame:
     """
@@ -385,20 +361,16 @@ def create_training_dataset(sql_connection) -> pd.DataFrame:
             away_team_id = match.away_team_id
 
             # Get player stats
-            career_stats = get_player_stats(sql_connection, season, date, home_team_id, away_team_id)
-            h2h_stats = get_player_stats(sql_connection, season, date, home_team_id, away_team_id, True)
-
+            career_stats = get_player_stats_for_game(sql_connection, season, date, home_team_id, away_team_id)
             career_stats = grouping_prediction_dataframe_rows(career_stats, home_team_id, away_team_id)
-            h2h_stats = grouping_prediction_dataframe_rows(h2h_stats, home_team_id, away_team_id)
 
-            if career_stats.empty and h2h_stats.empty:
+            if career_stats.empty:
                 logger.info(f"Insufficient data for match {match_id}")
                 continue
 
-            combined_stats = combine_career_and_h2h_stats(career_stats, h2h_stats)
-            combined_stats["match_id"] = match_id
+            career_stats["match_id"] = match_id
 
-            complete_stats_df = pd.concat([complete_stats_df, combined_stats], ignore_index=True)
+            complete_stats_df = pd.concat([complete_stats_df, career_stats], ignore_index=True)
         
         # Merge with match outcomes
         dataset = pd.merge(complete_stats_df, all_matches, on="match_id")
@@ -423,22 +395,14 @@ def create_prediction_dataset(sql_connection, home_team_id: str, away_team_id: s
         date = get_current_date()
         print(f"Creating prediction dataset for {home_team_id} vs {away_team_id} on {date}...")
 
-        career_stats = get_player_stats(sql_connection, season, date, home_team_id, away_team_id)
-        h2h_stats = get_player_stats(sql_connection, season, date, home_team_id, away_team_id, True)
-
+        career_stats = get_player_stats_for_game(sql_connection, season, date, home_team_id, away_team_id)
         career_stats = grouping_prediction_dataframe_rows(career_stats, home_team_id, away_team_id)
-        h2h_stats = grouping_prediction_dataframe_rows(h2h_stats, home_team_id, away_team_id)
 
-        if career_stats.empty and h2h_stats.empty:
-            raise ValueError(f"Not enough players in each team for season {season} available for prediction.")
-
-        combined_stats = combine_career_and_h2h_stats(career_stats, h2h_stats)
-
-        if combined_stats.empty:
+        if career_stats.empty:
             raise ValueError(f"Not enough players in each team for season {season} available for prediction.")
 
         logger.info(f"Prediction dataset created successfully for {home_team_id} vs {away_team_id}.")
-        return combined_stats
+        return career_stats
     except Exception as e:
         logger.error(f"Error creating prediction dataset: line {e.__traceback__.tb_lineno} : {e}")
         raise e
