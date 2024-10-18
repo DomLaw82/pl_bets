@@ -7,6 +7,9 @@ import os
 from db_connection import SQLConnection
 import pandas as pd
 import numpy as np
+from define_environment import load_correct_environment_variables
+
+load_correct_environment_variables()
 
 db = SQLConnection(os.environ.get("POSTGRES_USER"), os.environ.get("POSTGRES_PASSWORD"), os.environ.get("POSTGRES_CONTAINER"), os.environ.get("POSTGRES_PORT"), os.environ.get("POSTGRES_DB"))
 X_columns = [
@@ -143,3 +146,6 @@ def rebuild_model(retune: bool = False) -> dict:
 	except Exception as e:
 		print(e)
 		return {'error': str(e)}
+
+if __name__ == "__main__":
+	rebuild_model(retune=True)
