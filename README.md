@@ -97,6 +97,10 @@ to your settings.json to suppress errors about the utility modules
 
 ## TODO
 
+- Add manager head to head stats to Win Prediction and Neural network
+  - Match stats for win prediction for manager head to head
+  - Average player stats under the manager - player performance shows the tactics of the managers
+  
 - Rearrange file structure for easier deployment with Terraform
   - Use volumes to mount common files/directories to containers
   - Use GitHub Actions to copy common files/directories into build context before running the build step
