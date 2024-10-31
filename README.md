@@ -97,6 +97,10 @@ to your settings.json to suppress errors about the utility modules
 
 ## TODO
 
+- Use Exec/Eval (dynamic code execution) to allow analysis of data in the frontend
+
+- Decorators for re-used functions
+
 - Rearrange file structure for easier deployment with Terraform
   - Use volumes to mount common files/directories to containers
   - Use GitHub Actions to copy common files/directories into build context before running the build step
