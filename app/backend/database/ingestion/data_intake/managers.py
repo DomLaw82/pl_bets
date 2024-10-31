@@ -89,8 +89,8 @@ def clean_manager(html_content: str, connector, league: str) -> pd.DataFrame:
 		df = df[["name", "team", "nationality", "start_date", "end_date"]]
 
 		df[["first_name", "last_name"]] = df["name"].str.split(" ", n=1, expand=True)
-		df["first_name"] = df["first_name"].str.replace('[^a-zA-Z]', '', regex=True)
-		df["last_name"] = df["last_name"].str.replace('[^a-zA-Z]', '', regex=True)
+		df["first_name"] = df["first_name"].str.replace('[^a-zA-Z]', '', regex=True).str.title().str.strip()
+		df["last_name"] = df["last_name"].str.replace('[^a-zA-Z]', '', regex=True).str.title().str.strip()
 		df = df.drop(columns=["name", "nationality"])
 
 		df["start_date"] = df["start_date"].str.replace(r'\[\w\]', '', regex=True)
@@ -115,31 +115,43 @@ def clean_manager(html_content: str, connector, league: str) -> pd.DataFrame:
 		df = df[['first_name', 'last_name', 'team_id', 'start_date', 'end_date']]
 		print(df)
 
-		df = remove_duplicate_rows(connector, df, ["first_name", "last_name", "team_id", "start_date", "end_date"], "manager")
+		manager_df = remove_duplicate_rows(connector, df.copy(), ["first_name", "last_name"], "manager")
+		team_manager_df = remove_duplicate_rows(connector, df.copy(), ["team_id", "start_date", "end_date"], "team_manager")
 
-		return df
+		return manager_df[['first_name', 'last_name']], team_manager_df[['first_name', 'last_name', 'team_id', 'start_date', 'end_date']]
 	except Exception as e:
 		raise Exception(f"Error cleaning manager data: {e}")
 	
-def save_to_database(df, connection) -> None:
+def save_to_database(df: pd.DataFrame, connection, table: str) -> None:
 	# Save the data to a database
 	try:
 		with connection.connect() as conn:
-			df.to_sql("manager", conn, if_exists="append", index=False)
+			df.to_sql(table, conn, if_exists="append", index=False)
 	except Exception as e:
 		logger.error(f"Error saving manager data: {e}")
 		raise Exception(f"Error saving manager data: {e}")
 	
 def manager_main(con):
-	managers = pd.DataFrame()
+	managers_final_df = pd.DataFrame()
+	team_managers_final_df = pd.DataFrame()
 	try:
 		for league in LEAGUES:
 			with open(f'./data/manager_data/{league.lower()}_managers.html', 'r', encoding='utf-8') as file:
 				html_content = file.read()
-				df = clean_manager(html_content, con, league)
-				managers = pd.concat([managers, df], ignore_index=True)
+				managers_df, team_managers_df = clean_manager(html_content, con, league)
+				managers_final_df = pd.concat([managers_final_df, managers_df], ignore_index=True)
+				team_managers_final_df = pd.concat([team_managers_final_df, team_managers_df], ignore_index=True)
 		
-		save_to_database(managers, con)
+		managers_final_df = managers_final_df.drop_duplicates(subset=["first_name", "last_name"])
+		save_to_database(managers_final_df, con, "manager")
+		managers_in_db = con.get_df("SELECT * FROM manager")
+		team_managers_final_df = team_managers_final_df.merge(managers_in_db[["id", "first_name", "last_name"]], on=["first_name", "last_name"], suffixes=(None, "_r"), how="inner")
+		team_managers_final_df = team_managers_final_df[['id', 'team_id', 'start_date', 'end_date']]
+		team_managers_final_df = team_managers_final_df.rename(columns={"id": "manager_id"})
+		team_managers_final_df = team_managers_final_df.drop_duplicates(subset=["manager_id", "team_id", "start_date", "end_date"], keep="first")
+		save_to_database(team_managers_final_df, con, "team_manager")
+
+
 	except Exception as e:
 		logger.error(e)
 		raise Exception(e)
