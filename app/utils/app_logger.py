@@ -61,7 +61,7 @@ class FluentLogger:
 
     def log_sql_query_execution(self, query: str):
         """Helper function to log SQL queries"""
-        self.logger.debug("Executing SQL query: {}".format(re.sub(r'\s+', ' ', query.replace('\n', '').replace('\t', '')).strip()))
+        self.logger.debug("Executing SQL query: {}".format(re.sub(r'\s+', ' ', query.replace('\n', ' ').replace('\t', ' ')).strip()))
 
     def log_error(self, error_message: Exception):
         """Helper function to log error messages"""
