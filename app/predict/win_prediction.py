@@ -3,7 +3,8 @@ import numpy as np
 from db_connection import SQLConnection
 import os
 from dotenv import load_dotenv
-from win_prediction_modules.data_modelling_one import run_model_training, model_testing
+from win_prediction_modules.data_modelling_one import run_model_training, model_testing, calculate_percentage_success_rates
+from win_prediction_modules.managers import get_manager_head_to_head
 # from win_prediction_modules.data_modelling_two import run_data_modelling_part_two
 # from win_prediction_modules.weekly_outcome_prediction import predict_fixture_outcome_odds
 import pandas as pd
@@ -88,6 +89,8 @@ def run_win_prediction() -> list:
 
 		data = add_historic_head_to_head_results(data)
 
+		data = get_manager_head_to_head(db, data)
+
 		print(data[data.isnull().any(axis=1)])
 
 		data.to_csv('./files/match_and_form_data.csv', index=False)
@@ -99,6 +102,8 @@ def run_win_prediction() -> list:
 
 		outcomes = ["home_win", "draw", "away_win"]
 		prediction_data = model_testing(models, "logistic_regression", prediction_data, outcomes, features)
+
+		calculate_percentage_success_rates(prediction_data)
 
 		output = []
 

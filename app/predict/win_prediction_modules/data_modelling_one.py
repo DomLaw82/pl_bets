@@ -102,6 +102,164 @@ def value_bets_analysis(df: pd.DataFrame) -> dict:
 
     return df
 
+def calculate_percentage_success_rates(df: pd.DataFrame) -> dict:
+    """Calculates the percentage success rates of prediction for ranges:
+        0 - 30%
+        30 - 40%
+        40 - 50%
+        50 - 60%
+        60 - 70%
+        70 - 80%
+        80 - 90%
+        90 - 100%
+    """
+    col_conversion = {
+        "H": "home_win_prob",
+        "D": "draw_prob",
+        "A": "away_win_prob"
+    }
+    success_rates = {
+        "H": {
+            "0.0-0.3": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.3-0.4": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.4-0.5": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.5-0.6": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.6-0.7": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.7-0.8": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.8-0.9": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.9-1.0": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            }
+        },
+        "D": {
+            "0.0-0.3": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.3-0.4": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.4-0.5": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.5-0.6": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.6-0.7": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.7-0.8": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.8-0.9": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.9-1.0": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            }
+        },
+        "A": {
+            "0.0-0.3": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.3-0.4": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.4-0.5": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.5-0.6": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.6-0.7": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.7-0.8": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.8-0.9": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            },
+            "0.9-1.0": {
+                "count": 0,
+                "correct": 0,
+                "success_rate": 0
+            }
+        }
+    }
+    
+    for idx, row in df.iterrows():
+        for lb in np.arange(0.3, 1, 0.1):
+            if row[col_conversion[row["prediction"]]] > lb:
+                continue
+            success_rates[row["prediction"]][f"{lb:.1f}-{lb+0.1:.1f}"]["count"] += 1
+            if row["prediction"] == row["full_time_result"]:
+                success_rates[row["prediction"]][f"{lb:.1f}-{lb+0.1:.1f}"]["correct"] += 1
+            success_rates[row["prediction"]][f"{lb:.1f}-{lb+0.1:.1f}"]["success_rate"] = success_rates[row["prediction"]][f"{lb:.1f}-{lb+0.1:.1f}"]["correct"] / success_rates[row["prediction"]][f"{lb:.1f}-{lb+0.1:.1f}"]["count"]    
+        
+    print(success_rates)
+
+    return success_rates
+
 
 # Predicts higher win_prob, and look at fair odds and value calculations
 def run_model_training(model_type: str, data: pd.DataFrame, features: list, closing_odds_column_prefix: str = "closing_") -> dict: 
@@ -131,6 +289,8 @@ def run_model_training(model_type: str, data: pd.DataFrame, features: list, clos
     
     # Calculate value of each bet
     value_bets_data = value_bets_analysis(fair_odds_data) 
+
+    calculate_percentage_success_rates(data_tested)
 
     #Value bets
     filtered_data = value_bets_data[(value_bets_data['odds_prediction'] > 2) & (value_bets_data['odds_prediction'] < 4) & (value_bets_data['value'] < 0.05)]
