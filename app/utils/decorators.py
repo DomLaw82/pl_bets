@@ -1,6 +1,8 @@
 from datetime import datetime
 from app_logger import FluentLogger
 
+
+
 def time_this_function(func):
 
 	def wrapper(*args, **kwargs):
@@ -16,9 +18,10 @@ def handle_exceptions(func):
 
 	def wrapper(*args, **kwargs):
 		try:
+			logger = FluentLogger(func.__module__).get_logger()
 			result = func(*args, **kwargs)
 			return result
 		except Exception as e:
-			print(f"An error occurred: {e}")
+			print(f"An error occurred in '{func.__name__}' on line {e.__traceback__.tb_lineno}: {e}")
 	
 	return wrapper
