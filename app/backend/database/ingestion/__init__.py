@@ -38,6 +38,10 @@ def insert_latest_data():
 		team_main(pl_stats_connector)
 		logger.debug("\nData Intake: team COMPLETE")
 
+		# format manager data [manager]
+		manager_main(pl_stats_connector)
+		logger.debug("\nData Intake: manager COMPLETE")
+
 		# format squad data [player, player_team]
 		player_to_db_main(pl_stats_connector)
 		logger.debug("\nData Intake: player_team COMPLETE")
@@ -52,10 +56,6 @@ def insert_latest_data():
 		# format season schedule [schedule]
 		schedule_main(pl_stats_connector)
 		logger.debug("\nData Intake: schedule COMPLETE")
-
-		# format manager data [manager]
-		manager_main(pl_stats_connector)
-		logger.debug("\nData Intake: manager COMPLETE")
 
 		# [historic_player_per_ninety]
 		per_90_main(pl_stats_connector)

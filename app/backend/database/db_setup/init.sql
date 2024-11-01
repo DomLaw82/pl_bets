@@ -283,10 +283,15 @@ CREATE TABLE historic_player_per_ninety (
 CREATE TABLE manager (
 	id VARCHAR(7) PRIMARY KEY,
 	first_name VARCHAR NOT NULL,
-	last_name VARCHAR NOT NULL,
+	last_name VARCHAR NOT NULL
+);
+
+CREATE TABLE team_manager (
 	team_id VARCHAR(7) REFERENCES team(id) NOT NULL,
+	manager_id VARCHAR(7) REFERENCES manager(id),
 	start_date VARCHAR(10) NOT NULL,
-	end_date VARCHAR(10) NOT NULL
+	end_date VARCHAR(10) NOT NULL,
+	PRIMARY KEY (team_id, manager_id, start_date, end_date)
 );
 
 ALTER TABLE team

@@ -57,6 +57,51 @@ def download_all_fixture_data():
 				logger.error(f'An error occurred while downloading {league} fixtures for season {season}: {str(e)}')
 				continue
 
+def add_elo_to_df(base_df: pd.DataFrame, df: pd.DataFrame, team_name: str) -> pd.DataFrame:
+	try:
+		home_team_df = df[df['home_team'] == team_name]
+		away_team_df = df[df['away_team'] == team_name]
+
+		home_team_df["date_no_time"] = pd.to_datetime(home_team_df["date"]).dt.strftime("%Y-%m-%d")
+		away_team_df["date_no_time"] = pd.to_datetime(away_team_df["date"]).dt.strftime("%Y-%m-%d")
+
+		elos = get_team_elo_rating(team_name)[["Date", "Club", "Elo", "From", "To"]]
+
+		if not elos.empty:
+			print(f"All home game dates in elos for {team_name}: " + str(all(home_team_df["date_no_time"].isin(elos["Date"].unique()).values)))
+			print(f"All away game dates in elos for {team_name}: " + str(all(away_team_df["date_no_time"].isin(elos["Date"].unique()).values)))
+
+			home_team_df_index = home_team_df.index
+			home_team_df = home_team_df.merge(elos[["Date", "Club", "Elo"]], left_on=['date_no_time', 'home_team'], right_on=['Date', 'Club'], how='left', validate="1:1", suffixes=(None, '_elos_home'))
+			home_team_df = home_team_df.rename(columns={"Elo": "home_elo"})
+			home_team_df["away_elo"] = np.nan
+			home_team_df = home_team_df.set_index(home_team_df_index, drop=True)
+
+			away_team_df_index = away_team_df.index
+			away_team_df = away_team_df.merge(elos[["Date", "Club", "Elo"]], left_on=['date_no_time', 'away_team'], right_on=['Date', 'Club'], how='left', validate="1:1", suffixes=(None, '_elos_away'))
+			away_team_df = away_team_df.rename(columns={"Elo": "away_elo"})
+			away_team_df["home_elo"] = np.nan
+			away_team_df = away_team_df.set_index(away_team_df_index, drop=True)
+
+			team_df = pd.concat([home_team_df[base_df.columns], away_team_df[base_df.columns]]).sort_values(by=["date"])
+			pd.set_option('display.max_columns', None)
+
+			print(team_df.head())
+
+			# team_df["home_elo"] = team_df["home_elo"].fillna(team_df["home_elo"].rolling(window=3, min_periods=1).mean())
+			# team_df["away_elo"] = team_df["away_elo"].fillna(team_df["away_elo"].rolling(window=3, min_periods=1).mean())
+			
+			print(f"Team df for {team_name}:")
+
+			base_df.update(team_df[base_df.columns])
+			logger.info(f"Inserted ELO ratings for {team_name}.")
+		return base_df
+	except Exception as e:
+		logger.error(f"Error adding ELOs to df for {team_name} at line {e.__traceback__.tb_lineno}: {e}")
+		print(f"Error adding ELOs to df for {team_name} at line {e.__traceback__.tb_lineno}: {e}")
+		raise Exception(f"Error adding ELOs to df for {team_name} at line {e.__traceback__.tb_lineno}: {e}")
+
+
 def clean_schedule_data(db_connection: SQLConnection, df: pd.DataFrame) -> pd.DataFrame:
 	# Rename columns to lowercase with underscores
 	try:
@@ -64,10 +109,14 @@ def clean_schedule_data(db_connection: SQLConnection, df: pd.DataFrame) -> pd.Da
 
 		# Rename team names in 'home_team' and 'away_team' columns
 		unique_teams = pd.Series(pd.concat([df["home_team"], df["away_team"]]).unique())
-		print(unique_teams)
+		
 		team_replacements = unique_teams.apply(lambda team: get_name_from_database(db_connection, team, "team"))
 		team_replacement_dict = dict(zip(unique_teams, team_replacements))
-		df[["home_team", "away_team"]] = df[["home_team", "away_team"]].replace(team_replacement_dict)
+		df["home_team"] = df["home_team"].replace(team_replacement_dict)
+		df["away_team"] = df["away_team"].replace(team_replacement_dict)
+
+		# Update unique_teams after renaming
+		unique_teams = pd.Series(pd.concat([df["home_team"], df["away_team"]]).unique())
 
 		# Convert 'date' column to datetime format
 		df["date"] = pd.to_datetime(df["date"], format="%d/%m/%Y %H:%M").dt.strftime("%Y/%m/%d %H:%M")
@@ -76,34 +125,15 @@ def clean_schedule_data(db_connection: SQLConnection, df: pd.DataFrame) -> pd.Da
 		df["season"] = pd.to_datetime(df["date"]).apply(lambda x: f"{x.year}-{x.year+1}" if x.month >= 8 else f"{x.year-1}-{x.year}")
 
 		updated_df = df.copy()
-		updated_df["home_elo"] = 0
-		updated_df["away_elo"] = 0
+		updated_df["home_elo"] = np.nan
+		updated_df["away_elo"] = np.nan
 
 		for team_name in unique_teams:
 			try:
-				team_df = df[(df['home_team'] == team_name) | (df['away_team'] == team_name)]
-				team_df.loc[:, "date_no_time"] = pd.to_datetime(team_df["date"]).dt.strftime("%Y-%m-%d")
-				index = team_df.index
-				elos = get_team_elo_rating(team_name)[["Date", "Club", "Elo", "From", "To"]]
-
-				if not elos.empty:
-
-					team_df = team_df.merge(elos[["Date", "Club", "Elo"]], left_on=['date_no_time', 'home_team'], right_on=['Date', 'Club'], how='left')
-					team_df.rename(columns={"Elo": "home_elo"}, inplace=True)
-
-					team_df = team_df.merge(elos[["Date", "Club", "Elo"]], left_on=['date_no_time', 'away_team'], right_on=['Date', 'Club'], how='left')
-					team_df.rename(columns={"Elo": "away_elo"}, inplace=True)
-
-					if 'Date' in team_df.columns:
-						team_df.drop(columns=['Date'], inplace=True)
-					if 'Club_x' in team_df.columns:
-						team_df.drop(columns=['Club_x', 'Club_y'], inplace=True)
-					team_df.index = index
-
-					updated_df.update(team_df)
-					logger.info(f"Inserted ELO ratings for {team_name}.")
+				updated_df = add_elo_to_df(updated_df, df, team_name)
 			except Exception as e:
 				logger.error(f"Error inserting ELOs for {team_name} at line {e.__traceback__.tb_lineno}: {e}")
+				print(f"Error inserting ELOs for {team_name} at line {e.__traceback__.tb_lineno}: {e}")
 				continue
 		
 		df = updated_df.copy()
