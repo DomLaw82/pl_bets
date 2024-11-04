@@ -1091,18 +1091,20 @@ def get_all_managers():
    try:
       all_managers = db.get_dict("""
          SELECT 
-            manager.id,
-            first_name,
-            last_name,
-            team_id,
-            team.name AS team_name,
-            start_date,
-            end_date,
-            end_date = 'current' AS current_job
+            m.id,
+            m.first_name,
+            m.last_name,
+            tm.team_id,
+            t.name AS team_name,
+            tm.start_date,
+            tm.end_date,
+            tm.end_date = 'current' AS current_job
          FROM
-            manager
+            manager m
+         JOIN 
+            team_manager tm ON manager.id = team_manager.manager_id
          JOIN
-            team ON manager.team_id = team.id
+            team t ON manager.team_id = team.id
          ORDER BY
             last_name ASC;
       """)

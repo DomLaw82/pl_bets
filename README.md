@@ -97,6 +97,10 @@ to your settings.json to suppress errors about the utility modules
 
 ## TODO
 
+- Use Exec/Eval (dynamic code execution) to allow analysis of data in the frontend
+
+- Decorators for re-used functions
+
 - Add manager head to head stats to Win Prediction and Neural network
   - Match stats for win prediction for manager head to head
   - Average player stats under the manager - player performance shows the tactics of the managers
